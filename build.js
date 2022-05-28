@@ -5,16 +5,21 @@ import now from "performance-now";
 import chalk from 'chalk';
 import * as fs from "fs";
 
+const REMOTE_ADDRESS = 'josephcoppin@josephcoppin.com';
+const REMOTE_PATH = '/public_html/school/house-points';
+const LOCAL_PATH = './dist/'
+
 async function uploadFrontend () {
-    const paths = fs.readdirSync('./dist/');
+    const paths = fs.readdirSync(LOCAL_PATH);
 
     for (const path of paths) {
         console.log('Uploading path ' + path);
-        if (fs.statSync('./dist/' + path).isDirectory()) {
-            await $`sshpass -f './sshPass.txt' scp -r ./dist/${path} josephcoppin@josephcoppin.com:~/public_html/quiz`;
+        if (fs.statSync(LOCAL_PATH + path).isDirectory()) {
+            await $`sshpass -f './sshPass.txt' scp -r ${LOCAL_PATH}${path} ${REMOTE_ADDRESS}:~${REMOTE_PATH}`;
             continue;
         }
-        await $`sshpass -f './sshPass.txt' scp ./dist/${path} josephcoppin@josephcoppin.com:~/public_html/quiz`;
+        await $`sshpass -f './sshPass.txt' scp ${LOCAL_PATH}${path} ${REMOTE_ADDRESS}:~${REMOTE_PATH}`;
+
     }
 }
 

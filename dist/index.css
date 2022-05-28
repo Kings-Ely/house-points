@@ -1,0 +1,29 @@
+:root {
+    --text: #1c1c1c;
+    --text-light: #575757;
+    --bg: white;
+    --bg-accent: #c9c9c9;
+    --accent: #0e600e;
+}
+
+* {
+    color: var(--text);
+}
+
+input {
+    border: none;
+    background: none;
+    font-size: 25px;
+}
+
+input[type=text] {
+    border-bottom: 2px solid var(--text-light);
+}
+
+input[type=text]:hover {
+    border-bottom: 2px solid var(--text);
+}
+
+input[type=text]:active {
+    background: var(--bg-accent);
+}
