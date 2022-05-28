@@ -1,29 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@200&display=swap');
+
 :root {
     --text: #1c1c1c;
     --text-light: #575757;
-    --bg: white;
-    --bg-accent: #c9c9c9;
+    --bg: #e8e8e8;
+    --bg-accent: white;
     --accent: #0e600e;
+    --text-warning: red;
 }
 
 * {
     color: var(--text);
+    font-family: 'Raleway', sans-serif;
+    transition: 200ms;
 }
 
-input {
+body {
+    background: var(--bg);
+    height: 100vh;
+}
+
+input, button {
     border: none;
     background: none;
     font-size: 25px;
+    outline: none;
 }
 
 input[type=text] {
     border-bottom: 2px solid var(--text-light);
+    border-radius: 10px 10px 0 0;
+    padding: 6px;
 }
 
 input[type=text]:hover {
-    border-bottom: 2px solid var(--text);
+    border-bottom: 2px solid black;
 }
 
-input[type=text]:active {
+input[type=text]:focus {
     background: var(--bg-accent);
+}
+
+.icon:hover > svg {
+
+}
+
+.center {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center
 }

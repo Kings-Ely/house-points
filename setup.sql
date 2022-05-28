@@ -21,3 +21,4 @@ CREATE TABLE
     ENGINE = InnoDB;
 
 ALTER TABLE `students` ADD UNIQUE `student-code` (`code`);
+ALTER TABLE `housepoints` ADD `accepted` TIMESTAMP NULL DEFAULT NULL AFTER `timestamp`;
