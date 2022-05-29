@@ -16,8 +16,12 @@
             text-align: center;
         }
 
-        #hps {
-
+        #hp-reason {
+            border-radius: 0;
+            border-bottom-width: 1px;
+            background: none;
+            width: 50%;
+            font-size: 20px
         }
     </style>
 </head>
@@ -25,7 +29,12 @@
 <main style="display: inline">
     <div id="name"></div>
     <div>
-
+        <label>
+            <input type="text" id="hp-reason" placeholder="Why did you get a House Point?">
+        </label>
+        <button id="submit-hp" class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M22.5 38V25.5H10V22.5H22.5V10H25.5V22.5H38V25.5H25.5V38Z"/></svg>
+        </button>
     </div>
     <div id="hps"></div>
 </main>
@@ -36,9 +45,10 @@
 <script defer>
     const nameDiv = document.getElementById('name');
     const hpsDiv = document.getElementById('hps');
+    const hpReason = document.getElementById('hp-reason');
 
     function title (info, hps) {
-        const numHps = hps.filter(c => c['accepted']).length;
+        const numHps = hps.filter(c => c['accepted'] && !c['rejectMessage']).length;
         if (numHps < 1) {
             nameDiv.innerHTML = `
             <p style="font-size: 50px">
@@ -54,20 +64,13 @@
         }
     }
 
-    async function main () {
-        const info = await (await fetch(`../backend/student-info.php?code=${localStorage.hpCode}`)).json();
-        // house points
-        const hps = info['hps'];
-
-        title(info, hps);
-
+    function housePoints (hps) {
         hpsDiv.innerHTML = '';
 
         function showHp (i) {
             const hp = hps[i];
             let acceptedHTML;
             let icon = '';
-
 
             if (hp['rejectMessage']) {
                 acceptedHTML = `
@@ -119,6 +122,12 @@
         }, 0);
     }
 
+    async function main () {
+        const info = await (await fetch(`../backend/student-info.php?code=${localStorage.hpCode}`)).json();
+        title(info, info['hps']);
+        housePoints(info['hps']);
+    }
+
     (async () => {
         const validCode = await (await fetch(`../backend/valid-code.php?code=${localStorage.hpCode}`)).text();
 
@@ -129,5 +138,11 @@
 
         await main();
     })();
+
+    document.getElementById('submit-hp').onclick = async () => {
+        await fetch(`../backend/submit-hp.php?reason=${hpReason.value}&code=${localStorage.hpCode}`);
+
+        window.location.reload();
+    };
 
 </script>
