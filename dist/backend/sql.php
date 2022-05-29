@@ -21,14 +21,19 @@ function queries ($cb) {
         die("Connection to database failed: " . $con->connect_error);
     }
 
-    $cb(function ($query, $d_types, &...$parameters) use ($con) {
+    $cb(function ($query, $d_types=null, &...$parameters) use ($con) {
+
         $stmt = $con->prepare($query);
         if (!$stmt) {
             die('Failed to execute statement');
         }
-        if (!$stmt->bind_param($d_types, ...$parameters)) {
-            die('failed to bind parameters');
+
+        if ($d_types) {
+            if (!$stmt->bind_param($d_types, ...$parameters)) {
+                die('failed to bind parameters');
+            }
         }
+
         if (!$stmt->execute()) {
             die('failed to execute sql query');
         }
