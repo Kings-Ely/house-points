@@ -1,7 +1,5 @@
 <?php
 require('./env.php');
-// load .env file
-(new DotEnv(__DIR__ . '/.env'))->load();
 
 //* shows errors
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);

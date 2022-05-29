@@ -7,6 +7,7 @@
     --bg-accent: white;
     --accent: #0e600e;
     --text-warning: red;
+    --border: #c5c5c5;
 }
 
 * {
@@ -17,7 +18,17 @@
 
 body {
     background: var(--bg);
+}
+
+main {
     height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center
+}
+
+footer {
+
 }
 
 input, button {
@@ -28,7 +39,7 @@ input, button {
 }
 
 input[type=text] {
-    border-bottom: 2px solid var(--text-light);
+    border-bottom: 2px solid var(--border);
     border-radius: 10px 10px 0 0;
     padding: 6px;
 }
@@ -41,13 +52,24 @@ input[type=text]:focus {
     background: var(--bg-accent);
 }
 
-.icon:hover > svg {
+.icon {
+    background: none;
+    border: none;
+    text-decoration: none;
+}
 
+.icon > svg {
+    height: 40px;
+    width: 40px;
+    fill: var(--text-light);
+    border: none;
+}
+
+.icon:hover > svg {
+    cursor: pointer;
+    transform: scale(1.1);
 }
 
 .center {
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center
+
 }

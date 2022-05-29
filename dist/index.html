@@ -4,19 +4,21 @@
     <meta charset="UTF-8">
     <title>Osmond House Points</title>
     <link href="index.css" rel="stylesheet">
+    <script src="index.js"></script>
 </head>
 <body>
-<main class="center">
+<main>
     <p style="margin-right: 30px; font-size: 50px">Code</p>
     <label>
-        <input type="text" id="code" autocomplete="false" autofocus>
+        <input type="text" id="code" autocomplete="false" autofocus name="jdjdh">
     </label>
     <button id="go" class="icon">
-        <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M15.2 43.9 12.4 41.05 29.55 23.9 12.4 6.75 15.2 3.9 35.2 23.9Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg"><path d="M15.2 43.9 12.4 41.05 29.55 23.9 12.4 6.75 15.2 3.9 35.2 23.9Z"/></svg>
     </button>
 
     <div id="error" style="color: var(--text-warning)"></div>
 </main>
+<footer></footer>
 </body>
 </html>
 
@@ -31,6 +33,10 @@
         if (valid === '1') {
             localStorage.hpCode = myCode;
             document.location.assign('./student-dashboard');
+            return;
+        } else if (valid === '2') {
+            localStorage.hpCode = myCode;
+            document.location.assign('./admin-dashboard');
             return;
         }
         error.innerText = 'Looks like that is an invalid code, sorry!';

@@ -22,3 +22,4 @@ CREATE TABLE
 
 ALTER TABLE `students` ADD UNIQUE `student-code` (`code`);
 ALTER TABLE `housepoints` ADD `accepted` TIMESTAMP NULL DEFAULT NULL AFTER `timestamp`;
+ALTER TABLE `housepoints` ADD `rejectMessage` TEXT NULL DEFAULT NULL AFTER `accepted`;

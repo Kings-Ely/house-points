@@ -4,15 +4,130 @@
     <meta charset="UTF-8">
     <title>Osmond House Points</title>
     <link href="../index.css" rel="stylesheet">
+    <script src="../index.js"></script>
+
+    <style>
+        .house-point {
+            border-bottom: 1px solid var(--border);
+            padding: 4px 20px;
+        }
+
+        #name {
+            text-align: center;
+        }
+
+        #hps {
+
+        }
+    </style>
 </head>
 <body>
-<main class="center">
+<main style="display: inline">
+    <div id="name"></div>
+    <div>
 
+    </div>
+    <div id="hps"></div>
 </main>
+<footer></footer>
 </body>
 </html>
 
 <script defer>
-    const go = document.getElementById('go');
+    const nameDiv = document.getElementById('name');
+    const hpsDiv = document.getElementById('hps');
+
+    function title (info, hps) {
+        const numHps = hps.filter(c => c['accepted']).length;
+        if (numHps < 1) {
+            nameDiv.innerHTML = `
+            <p style="font-size: 50px">
+                ${info['name']} has No House Points
+            </p>
+        `;
+        } else {
+            nameDiv.innerHTML = `
+            <p style="font-size: 50px">
+                ${info['name']} has ${numHps} House Point${numHps < 2 ? '' :'s'}
+            </p>
+        `;
+        }
+    }
+
+    async function main () {
+        const info = await (await fetch(`../backend/student-info.php?code=${localStorage.hpCode}`)).json();
+        // house points
+        const hps = info['hps'];
+
+        title(info, hps);
+
+        hpsDiv.innerHTML = '';
+
+        function showHp (i) {
+            const hp = hps[i];
+            let acceptedHTML;
+            let icon = '';
+
+
+            if (hp['rejectMessage']) {
+                acceptedHTML = `
+                    Rejected ${getRelativeTime(hp['accepted'] * 1000)}: ${hp['rejectMessage']}
+                `;
+                icon = `
+                    <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" style="fill: red">
+                        <path d="M12.45 37.65 10.35 35.55 21.9 24 10.35 12.45 12.45 10.35 24 21.9 35.55 10.35 37.65 12.45 26.1 24 37.65 35.55 35.55 37.65 24 26.1Z"/>
+                    </svg>
+                `;
+            } else if (hp['accepted']) {
+                acceptedHTML = `
+                    Accepted ${getRelativeTime(hp['accepted'] * 1000)}
+                `;
+                icon = `
+                    <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" style="fill: var(--accent)">
+                        <path d="M18.9 35.7 7.7 24.5 9.85 22.35 18.9 31.4 38.1 12.2 40.25 14.35Z"/>
+                    </svg>
+                `;
+            } else {
+                acceptedHTML = 'Not Yet Accepted';
+            }
+
+            const submittedTime = hp['timestamp'] * 1000;
+
+            hpsDiv.innerHTML += `
+                <div class="house-point">
+                    <div style="min-width: 50%; display: inline-block">
+                        ${hp['description']}
+                    </div>
+                    <div style="min-width: calc(40% - 60px); display: inline-block">
+                        ${new Date(submittedTime).toDateString()}
+                        (${getRelativeTime(submittedTime)})
+                        <br>
+                        ${acceptedHTML}
+                    </div>
+                    <div style="min-width: 50px; display: inline-block">
+                        ${icon}
+                    </div>
+                </div>
+            `;
+            return new Promise(r => setTimeout(r, 0));
+        }
+
+        setTimeout(async () => {
+            for (let i = 0; i < hps.length; i++) {
+                await showHp(i);
+            }
+        }, 0);
+    }
+
+    (async () => {
+        const validCode = await (await fetch(`../backend/valid-code.php?code=${localStorage.hpCode}`)).text();
+
+        if (validCode !== '1') {
+            window.location.assign('../');
+            return;
+        }
+
+        await main();
+    })();
 
 </script>

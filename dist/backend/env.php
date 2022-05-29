@@ -42,3 +42,6 @@ class DotEnv {
         }
     }
 }
+
+// load from local .env file
+(new DotEnv(__DIR__ . '/.env'))->load();
