@@ -140,9 +140,9 @@
     })();
 
     document.getElementById('submit-hp').onclick = async () => {
-        await fetch(`../backend/submit-hp.php?reason=${hpReason.value}&code=${localStorage.hpCode}`);
+        await fetch(`../backend/submit-hp.php?description=${hpReason.value}&student=${localStorage.hpCode}`);
 
-        window.location.reload();
+        //window.location.reload();
     };
 
 </script>
