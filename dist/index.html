@@ -6,18 +6,36 @@
     <link href="index.css" rel="stylesheet">
     <script src="index.js" defer></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <style>
+        #error {
+            color: var(--text-warning);
+            text-align: center;
+            width: 100%;
+            min-height: 1em;
+            transition: 500ms;
+        }
+
+        #code {
+            height: 1.2em;
+        }
+    </style>
 </head>
 <body>
 <main>
-    <p style="margin-right: 30px; font-size: 50px">Code</p>
-    <label>
-        <input type="text" id="code" autocomplete="false" autofocus name="jdjdh">
-    </label>
-    <button id="go" class="icon">
-        <svg xmlns="http://www.w3.org/2000/svg"><path d="M15.2 43.9 12.4 41.05 29.55 23.9 12.4 6.75 15.2 3.9 35.2 23.9Z"/></svg>
-    </button>
-
-    <div id="error" style="color: var(--text-warning)"></div>
+    <div>
+        <div style="display: flex; justify-content: center">
+            <p style="margin-right: 30px; font-size: 50px">Code</p>
+            <div style="display: flex; justify-content: center; align-items: center">
+                <label for="code"></label>
+                <input type="text" id="code" autocomplete="false" autofocus name="jdjdh">
+            </div>
+            <button id="go" class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg"><path d="M15.2 43.9 12.4 41.05 29.55 23.9 12.4 6.75 15.2 3.9 35.2 23.9Z"/></svg>
+            </button>
+        </div>
+        <div id="error"></div>
+    </div>
 </main>
 <footer></footer>
 </body>
@@ -29,7 +47,7 @@
     const error = document.getElementById('error');
 
     go.onclick = async () => {
-        const myCode = code.value;
+        const myCode = code.value.toLowerCase();
         const valid = await (await fetch(`./backend/valid-code.php?code=${myCode}`)).text();
         if (valid === '1') {
             localStorage.hpCode = myCode;
@@ -45,15 +63,17 @@
 
     const keys = 'abcdefghijklmnopqrstuvwxyz';
     code.onkeydown = (evt) => {
-        if (keys.includes(evt.key) || evt.key === 'Backspace') {
-            return;
-        }
-
-        if (evt.key === 'Enter') {
-            go.onclick();
-            return;
-        }
         evt.preventDefault();
+
+        if (keys.includes(evt.key)) {
+            code.value += evt.key.toUpperCase();
+
+        } else if (evt.key === 'Enter') {
+            go.onclick();
+
+        } else if (evt.key === 'Backspace') {
+            code.value = code.value.substring(0, code.value.length-2);
+        }
     }
 
     $("footer").load(`footer.html`);

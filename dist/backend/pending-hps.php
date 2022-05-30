@@ -7,12 +7,12 @@ queries(function ($query) {
             SELECT 
                 housepoints.id as hpID, 
                 housepoints.description,
-                UNIX_TIMESTAMP(housepoints.timestamp) as timestamp, 
+                UNIX_TIMESTAMP(housepoints.created) as timestamp, 
                 students.name as studentName,
                 students.code as studentCode
             FROM housepoints, students
             WHERE 
-                housepoints.accepted IS NULL AND
+                housepoints.status = "Pending" AND
                 housepoints.student = students.id
             ORDER BY timestamp DESC
 SQL

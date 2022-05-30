@@ -2,9 +2,27 @@
 function showStudent (student, div) {
     div.innerHTML += `
         <div class="student">
-            <div>${student['year']}</div>
-            <div>${student['name']}</div>
-            <div>${student['hps']}</div>
+            <div>
+                ${student['year']}
+            </div>
+            
+            <div>
+                <button 
+                    onclick="window.signInAs('${student['code']}', '${student['name']}')" 
+                    class="student-link"
+                >
+                    ${student['name']}
+                </button>
+            </div>
+            
+            <div style="font-family: 'Space Mono', monospace">
+                ${student['code'].toUpperCase()}
+            </div>
+
+            <div>
+                ${student['accepted']}
+            </div>
+            
             <div>
                 <button onclick="window.delete(${student['id']}, '${student['name']}')" class="icon">
                     <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48">
@@ -19,16 +37,17 @@ function showStudent (student, div) {
 async function main () {
     const div = document.getElementById('students');
 
-    const students = await (await fetch('../../backend/all-student-info.php')).json();
-
     div.innerHTML = `
         <div class="student" style="border-bottom-width: 2px">
             <div><b>Year</b></div>
             <div><b>Name</b></div>
+            <div><b>Code</b></div>
             <div><b>House Points</b></div>
             <div></div>
         </div>
     `;
+
+    const students = await (await fetch('../../backend/all-student-info.php')).json();
 
     for (let student of students) {
         showStudent(student, div);
@@ -79,4 +98,12 @@ window.delete = async (id, name) => {
     await fetch(`../../backend/delete-student.php?id=${id}`);
 
     main();
-}
+};
+
+window.signInAs = async (code, name) => {
+    if (!confirm(`Sign in as ${name}?`)) {
+        return;
+    }
+    localStorage.hpCode = code;
+    window.location.assign('../../student-dashboard');
+};

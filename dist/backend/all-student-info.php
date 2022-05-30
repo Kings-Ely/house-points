@@ -3,28 +3,38 @@ require('sql.php');
 
 queries(function ($query) {
     $res = $query(<<<'SQL'
-        SELECT 
-            students.id, students.name, students.year, students.code,
-            count(housepoints.accepted) as hps
-        FROM students, housepoints
-        WHERE
-            housepoints.student = students.id
-            AND housepoints.accepted IS NOT NULL
-            AND housepoints.rejectMessage IS NULL
-        GROUP BY students.id, students.name, students.year
-        
-        UNION
-        
-        SELECT id, name, year, code, 0 as hps
-        FROM students
-        
-        ORDER BY year ASC, name ASC
+        SELECT students.id, students.name, students.year, students.code,
+               SUM(CASE WHEN housepoints.status="Pending" THEN 1 ELSE 0 END) AS pending,
+               SUM(CASE WHEN housepoints.status="Accepted" THEN 1 ELSE 0 END) AS accepted,
+               SUM(CASE WHEN housepoints.status="Rejected" THEN 1 ELSE 0 END) AS rejected
+           FROM students LEFT JOIN housepoints
+           ON housepoints.student = students.id
+           GROUP BY students.id, students.name, students.year, students.code
+           ORDER BY year ASC, name ASC;
 SQL
     );
+
+   
 
     $students = array();
 
     while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
+        $students[] = $row;
+    }
+
+    $res = $query(<<<'SQL'
+        SELECT id, name, year, code, 0 as hps
+        FROM students
+SQL
+    );
+
+    while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
+
+        if (count(array_filter($students, function ($a) use ($row) {
+            return $a['id'] == $row['id'];
+        }))) {
+            continue;
+        }
         $students[] = $row;
     }
 

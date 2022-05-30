@@ -8,7 +8,16 @@ queries(function ($query) use ($code) {
     $info = $res->fetch_array(MYSQLI_ASSOC);
 
     $info['hps'] = array();
-    $res = $query('SELECT id, description, UNIX_TIMESTAMP(timestamp) as timestamp, UNIX_TIMESTAMP(accepted) as accepted, rejectMessage FROM housepoints WHERE student=? ORDER BY timestamp DESC', 'i', $info['id']);
+    $res = $query(<<<'SQL'
+        SELECT id, description, status,
+           UNIX_TIMESTAMP(created) as timestamp,
+           UNIX_TIMESTAMP(completed) as accepted,
+           rejectMessage 
+        FROM housepoints
+        WHERE student=?
+        ORDER BY timestamp DESC
+SQL
+        , 'i', $info['id']);
     while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
         $info['hps'][] = $row;
     }

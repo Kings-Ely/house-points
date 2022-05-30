@@ -127,4 +127,13 @@ window.delete = async (id, desc) => {
     await main();
 };
 
+window.signout = () => {
+    if (!confirm(`Are you sure you want to sign out?`)) {
+        return;
+    }
+
+    localStorage.removeItem('hpCode');
+    window.location.assign('../');
+};
+
 $("footer").load(`../footer.html`);
