@@ -4,7 +4,7 @@ require('sql.php');
 queries(function ($query) {
     $res = $query(<<<'SQL'
         SELECT 
-            students.id, students.name, students.year,
+            students.id, students.name, students.year, students.code,
             count(housepoints.accepted) as hps
         FROM students, housepoints
         WHERE
@@ -15,12 +15,10 @@ queries(function ($query) {
         
         UNION
         
-        SELECT
-            students.id, students.name, students.year,
-            0 as hps
+        SELECT id, name, year, code, 0 as hps
         FROM students
-
-        ORDER BY hps
+        
+        ORDER BY year ASC, name ASC
 SQL
     );
 
