@@ -3,7 +3,6 @@ CREATE TABLE
 (
     `id` INT NOT NULL AUTO_INCREMENT,
     `name` TEXT NOT NULL,
-    `active` BOOLEAN NOT NULL DEFAULT TRUE,
     `code` VARCHAR(16) NOT NULL,
     PRIMARY KEY (`id`)
 )
@@ -23,3 +22,4 @@ CREATE TABLE
 ALTER TABLE `students` ADD UNIQUE `student-code` (`code`);
 ALTER TABLE `housepoints` ADD `accepted` TIMESTAMP NULL DEFAULT NULL AFTER `timestamp`;
 ALTER TABLE `housepoints` ADD `rejectMessage` TEXT NULL DEFAULT NULL AFTER `accepted`;
+ALTER TABLE `students` ADD `year` INT(16) NOT NULL DEFAULT '9' AFTER `code`;

@@ -14,6 +14,7 @@ queries(function ($query) {
             WHERE 
                 housepoints.accepted IS NULL AND
                 housepoints.student = students.id
+            ORDER BY timestamp DESC
 SQL
     );
 

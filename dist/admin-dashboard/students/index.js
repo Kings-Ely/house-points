@@ -30,34 +30,11 @@ function housepoint (hp, div) {
 }
 
 async function main () {
-    const div = document.getElementById('pending');
+    const div = document.getElementById('students');
 
-    const pending = await (await fetch('../backend/pending-hps.php')).json();
+    const students = await (await fetch('../backend/')).json();
 
-    // clear after async request
-    div.innerHTML = '';
 
-    let i = 0;
-    for (let hp of pending) {
-        await housepoint(hp, div);
-        if (i === 4) {
-            div.innerHTML += `
-                <div style="text-align: center; padding: 20px">
-                    And ${pending.length-5} more...
-                </div>
-            `;
-            break;
-        }
-        i++;
-    }
-
-    if (i === 0) {
-        div.innerHTML = `
-            <p style="text-align: center">
-                No Pending House Points!
-            </p>
-        `;
-    }
 }
 
 (async () => {
@@ -71,48 +48,7 @@ async function main () {
     await main();
 })();
 
-window.rejectAccept = async (id, reject) => {
-    console.log(id, reject);
-    if (reject) {
-        await fetch(`../backend/accept-hp.php?id=${id}&reject=${reject}`);
-    } else {
-        await fetch(`../backend/accept-hp.php?id=${id}`);
-    }
-    await main();
-};
-
 $("footer").load(`../footer.html`);
-
-document.getElementById('add-hp-submit').onclick = async () => {
-    const code = document.getElementById('add-hp-code');
-    const reason = document.getElementById('add-hp-reason');
-    const error = document.getElementById('add-hp-error');
-    error.innerHTML = '';
-
-    if (!reason.value) {
-        error.innerHTML = 'Reason required';
-        return;
-    }
-
-    if (!code.value) {
-        error.innerHTML = 'Code required';
-        return;
-    }
-
-    const valid = await (await fetch(`../backend/valid-code.php?code=${code.value}`)).text();
-
-    if (valid !== '1') {
-        error.innerHTML = 'Invalid Code';
-        return;
-    }
-
-    await fetch(`../backend/submit-hp.php?student=${code.value}&description=${reason.value}`);
-
-    code.value = '';
-    reason.value = '';
-
-    main();
-};
 
 document.getElementById('add-student-submit').onclick = async () => {
     const name = document.getElementById('add-student-name');

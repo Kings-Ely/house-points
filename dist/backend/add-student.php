@@ -1,8 +1,18 @@
 <?php
 
 require('sql.php');
+require('random.php');
 
-queries(function ($query) {
-    $code = 'AAA';
-    $query('INSERT INTO students (name, code) VALUES (?, ?)', 'ss', $_GET['name'], $code);
+$customAlphabet = 'abcdefghijklmnopqrstuvwxyz';
+$tokenLength = 6;
+
+queries(function ($query) use ($tokenLength, $customAlphabet) {
+
+    $generator = new RandomStringGenerator($customAlphabet);
+    $generator->setAlphabet($customAlphabet);
+    $code = $generator->generate($tokenLength);
+
+    $query('INSERT INTO students (name, code, year) VALUES (?, ?, ?)', 'ssi', $_GET['name'], $code, $_GET['year']);
+
+    echo $code;
 });

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Osmond House Points</title>
+    <link href="../../index.css" rel="stylesheet">
+    <script src="../../index.js" defer></script>
+    <script src="index.js" defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <style>
+        .student {
+
+        }
+    </style>
+</head>
+<body>
+<main style="display: block">
+    <h1>Admin Dashboard - Manage Students</h1>
+
+    <h2>Add Student</h2>
+    <div>
+        <label>
+            <input type="text" id="add-student-name" placeholder="Name">
+        </label>
+        <label>
+            <input type="text" id="add-student-year" placeholder="Year">
+        </label>
+        <button id="add-student-submit" class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M22.5 38V25.5H10V22.5H22.5V10H25.5V22.5H38V25.5H25.5V38Z"/></svg>
+        </button>
+        <div id="add-student-error"></div>
+    </div>
+
+    <div id="students"></div>
+</main>
+<footer></footer>
+</body>
+</html>

@@ -16,4 +16,6 @@ queries(function ($query) {
         'INSERT INTO housepoints (student, description) VALUES (?, ?)',
         'is', $studentID, $_GET['description']
     );
+
+    echo 1;
 });

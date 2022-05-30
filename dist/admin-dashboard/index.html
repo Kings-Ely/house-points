@@ -4,14 +4,11 @@
     <meta charset="UTF-8">
     <title>Admin - Osmond House Points</title>
     <link href="../index.css" rel="stylesheet">
-    <script src="../index.js"></script>
-    <script src="index.js"></script>
+    <script src="../index.js" defer></script>
+    <script src="index.js" defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <style>
-        #pending {
-            margin-top: 8vh;
-        }
-
         .house-point {
             border-bottom: 1px solid var(--border);
             padding: 4px 20px;
@@ -19,10 +16,59 @@
             justify-content: space-between;
             align-items: center;
         }
+
+        #add-hp-code, #add-hp-reason {
+            background: none;
+        }
+
+        #add-hp-code {
+            width: 100px;
+        }
+        #add-hp-reason {
+            width: calc(100% - 200px);
+        }
+
+        #add-hp-error, #add-student-error {
+            text-align: center;
+            color: var(--text-warning);
+        }
     </style>
 </head>
 <body>
+<main style="display: block">
     <h1>Admin Dashboard</h1>
+
+    <h2>Pending House Points</h2>
     <div id="pending"></div>
+
+    <h2>Add House Point</h2>
+    <div>
+        <label>
+            <input type="text" id="add-hp-code" placeholder="Code">
+        </label>
+        <label>
+            <input type="text" id="add-hp-reason" placeholder="Why did they get the House Point?">
+        </label>
+        <button id="add-hp-submit" class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M22.5 38V25.5H10V22.5H22.5V10H25.5V22.5H38V25.5H25.5V38Z"/></svg>
+        </button>
+        <div id="add-hp-error"></div>
+    </div>
+
+    <h2>Add Student</h2>
+    <div>
+        <label>
+            <input type="text" id="add-student-name" placeholder="Name">
+        </label>
+        <label>
+            <input type="text" id="add-student-year" placeholder="Year">
+        </label>
+        <button id="add-student-submit" class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M22.5 38V25.5H10V22.5H22.5V10H25.5V22.5H38V25.5H25.5V38Z"/></svg>
+        </button>
+        <div id="add-student-error"></div>
+    </div>
+</main>
+<footer></footer>
 </body>
 </html>

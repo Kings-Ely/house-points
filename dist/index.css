@@ -16,19 +16,31 @@
     transition: 200ms;
 }
 
+html, body {
+    padding: 0;
+    margin: 0;
+}
+
 body {
     background: var(--bg);
 }
 
 main {
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center
+    align-items: center;
+    padding: 10px;
 }
 
 footer {
-
+    height: 200px;
+    background: var(--bg-accent);
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center
 }
 
 input, button {
@@ -71,6 +83,12 @@ input[type=text]:focus {
 }
 
 h1 {
-    font-size: 20px;
+    font-size: 30px;
     text-align: center;
+}
+h2 {
+    margin: 20px;
+    padding-top: 50px;
+    font-size: 25px;
+    color: var(--text-light);
 }
