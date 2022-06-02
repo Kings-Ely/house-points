@@ -1,25 +1,36 @@
-CREATE TABLE
-    `josephcoppin_house_points`.`students`
-(
-    `id` INT NOT NULL AUTO_INCREMENT,
-    `name` TEXT NOT NULL,
-    `code` VARCHAR(16) NOT NULL,
-    PRIMARY KEY (`id`)
-)
-    ENGINE = InnoDB;
+-- Table structure for table `housepoints`
+CREATE TABLE `housepoints` (
+   `id` int(11) NOT NULL,
+   `student` int(11) NOT NULL,
+   `description` text NOT NULL,
+   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   `completed` timestamp NULL DEFAULT NULL,
+   `status` enum('Pending','Accepted','Rejected') NOT NULL DEFAULT 'Pending',
+   `rejectMessage` text
+) ENGINE=InnoDB DEFAULT CHARSET = latin1;
 
-CREATE TABLE
-    `josephcoppin_house_points`.`housepoints`
-(
-    `id` INT NOT NULL AUTO_INCREMENT ,
-    `student` INT NOT NULL ,
-    `description` TEXT NOT NULL ,
-    `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-    PRIMARY KEY (`id`)
-)
-    ENGINE = InnoDB;
+-- Table structure for table `students`
+CREATE TABLE `students` (
+    `id` int(11) NOT NULL,
+    `name` text NOT NULL,
+    `code` varchar(16) NOT NULL,
+    `year` int(16) NOT NULL DEFAULT '9'
+) ENGINE=InnoDB DEFAULT CHARSET = latin1;
 
-ALTER TABLE `students` ADD UNIQUE `student-code` (`code`);
-ALTER TABLE `housepoints` ADD `accepted` TIMESTAMP NULL DEFAULT NULL AFTER `timestamp`;
-ALTER TABLE `housepoints` ADD `rejectMessage` TEXT NULL DEFAULT NULL AFTER `accepted`;
-ALTER TABLE `students` ADD `year` INT(16) NOT NULL DEFAULT '9' AFTER `code`;
+-- Indexes for table `housepoints`
+ALTER TABLE `housepoints`
+    ADD PRIMARY KEY (`id`);
+
+-- Indexes for table `students`
+ALTER TABLE `students`
+    ADD PRIMARY KEY (`id`),
+    ADD UNIQUE KEY `student-code` (`code`);
+
+
+-- AUTO_INCREMENT for table `housepoints`
+ALTER TABLE `housepoints`
+    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT = 34;
+
+-- AUTO_INCREMENT for table `students`
+ALTER TABLE `students`
+    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT = 10;
