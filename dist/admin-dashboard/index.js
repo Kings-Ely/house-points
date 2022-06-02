@@ -32,7 +32,7 @@ function housepoint (hp, div) {
 async function main () {
     const div = document.getElementById('pending');
 
-    const pending = await (await fetch('../backend/pending-hps.php')).json();
+    const pending = await (await fetch('../api/pending-hps.php')).json();
 
     // clear after async request
     div.innerHTML = '';
@@ -61,7 +61,7 @@ async function main () {
 }
 
 (async () => {
-    const validCode = await (await fetch(`../backend/valid-code.php?code=${localStorage.hpCode}`)).text();
+    const validCode = await (await fetch(`../api/valid-code.php?code=${localStorage.hpCode}`)).text();
 
     if (validCode !== '2') {
         window.location.assign('../');
@@ -72,13 +72,13 @@ async function main () {
 })();
 
 window.accept = async (id) => {
-    await fetch(`../backend/accept-hp.php?id=${id}`);
+    await fetch(`../api/accept-hp.php?id=${id}`);
     await main();
 };
 
 window.reject = async (id, reject) => {
     if (!reject) return;
-    await fetch(`../backend/accept-hp.php?id=${id}&reject=${reject}`);
+    await fetch(`../api/accept-hp.php?id=${id}&reject=${reject}`);
     await main();
 };
 
@@ -100,14 +100,14 @@ document.getElementById('add-hp-submit').onclick = async () => {
         return;
     }
 
-    const valid = await (await fetch(`../backend/valid-code.php?code=${code.value}`)).text();
+    const valid = await (await fetch(`../api/valid-code.php?code=${code.value}`)).text();
 
     if (valid !== '1') {
         error.innerHTML = 'Invalid Code';
         return;
     }
 
-    await fetch(`../backend/add-hp.php?student=${code.value}&description=${reason.value}&id=${localStorage.hpCode}`);
+    await fetch(`../api/add-hp.php?student=${code.value}&description=${reason.value}&id=${localStorage.hpCode}`);
 
     code.value = '';
     reason.value = '';
@@ -131,7 +131,7 @@ document.getElementById('add-student-submit').onclick = async () => {
         year.value = '9';
     }
 
-    await fetch(`../backend/add-student.php?name=${name.value}&year=${year.value}`);
+    await fetch(`../api/add-student.php?name=${name.value}&year=${year.value}`);
 
     name.value = '';
 

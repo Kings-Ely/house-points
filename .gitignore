@@ -5,4 +5,4 @@ package-lock.json
 
 sshPass.txt
 
-/dist/backend/.env
+/dist/api/private/.env

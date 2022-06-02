@@ -61,7 +61,7 @@ async function main (reload=true) {
     `;
 
     if (reload) {
-        students = await (await fetch('../../backend/all-student-info.php')).json();
+        students = await (await fetch('../../api/all-student-info.php')).json();
     }
 
     for (let student of students) {
@@ -70,7 +70,7 @@ async function main (reload=true) {
 }
 
 (async () => {
-    const validCode = await (await fetch(`../../backend/valid-code.php?code=${localStorage.hpCode}`)).text();
+    const validCode = await (await fetch(`../../api/valid-code.php?code=${localStorage.hpCode}`)).text();
 
     if (validCode !== '2') {
         window.location.assign('../');
@@ -98,7 +98,7 @@ document.getElementById('add-student-submit').onclick = async () => {
         year.value = '9';
     }
 
-    await fetch(`../../backend/add-student.php?name=${name.value}&year=${year.value}`);
+    await fetch(`../../api/add-student.php?name=${name.value}&year=${year.value}`);
 
     name.value = '';
 
@@ -110,7 +110,7 @@ window.delete = async (id, name) => {
         return;
     }
 
-    await fetch(`../../backend/delete-student.php?id=${id}`);
+    await fetch(`../../api/delete-student.php?id=${id}`);
 
     main();
 };
@@ -121,7 +121,7 @@ window.deleteSelected = async () => {
     }
 
     for (let id of selected) {
-        await fetch(`../../backend/delete-student.php?id=${id}`);
+        await fetch(`../../api/delete-student.php?id=${id}`);
     }
 
     main();
@@ -159,7 +159,7 @@ window.ageSelected = async (amount) => {
     }
 
     for (let id of selected) {
-        await fetch(`../../backend/age-student.php?id=${id}&amount=${amount}`);
+        await fetch(`../../api/age-student.php?id=${id}&amount=${amount}`);
     }
 
     main();
@@ -181,7 +181,7 @@ window.giveHPToSelected = async () => {
     const reason = window.prompt(`Please enter the reason to give ${selected.length} a house point`);
 
     for (let id of selected) {
-        await fetch(`../../backend/add-hp.php?id=${localStorage.hpCode}&description=${reason}&studentid=${id}`);
+        await fetch(`../../api/add-hp.php?id=${localStorage.hpCode}&description=${reason}&studentid=${id}`);
     }
 
     main();

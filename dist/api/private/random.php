@@ -24,8 +24,7 @@ class RandomStringGenerator
             $this->setAlphabet($alphabet);
         } else {
             $this->setAlphabet(
-                implode(range('a', 'z'))
-                . implode(range('A', 'Z'))
+                random . phpimplode(range('a', 'z'))
                 . implode(range(0, 9))
             );
         }

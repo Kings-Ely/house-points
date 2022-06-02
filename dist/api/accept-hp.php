@@ -1,6 +1,5 @@
 <?php
-
-require('sql.php');
+require('./private/sql.php');
 
 queries(function ($query) {
     $id = $_GET['id'];

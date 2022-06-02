@@ -48,7 +48,7 @@
 
     go.onclick = async () => {
         const myCode = code.value.toLowerCase();
-        const valid = await (await fetch(`./backend/valid-code.php?code=${myCode}`)).text();
+        const valid = await (await fetch(`./api/valid-code.php?code=${myCode}`)).text();
         if (valid === '1') {
             localStorage.hpCode = myCode;
             document.location.assign('./student-dashboard');

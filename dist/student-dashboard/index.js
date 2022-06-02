@@ -97,13 +97,13 @@ function housePoints (hps) {
 }
 
 async function main () {
-    const info = await (await fetch(`../backend/student-info.php?code=${localStorage.hpCode}`)).json();
+    const info = await (await fetch(`../api/student-info.php?code=${localStorage.hpCode}`)).json();
     title(info, info['hps']);
     housePoints(info['hps']);
 }
 
 (async () => {
-    const validCode = await (await fetch(`../backend/valid-code.php?code=${localStorage.hpCode}`)).text();
+    const validCode = await (await fetch(`../api/valid-code.php?code=${localStorage.hpCode}`)).text();
 
     if (validCode !== '1') {
         window.location.assign('../');
@@ -115,7 +115,7 @@ async function main () {
 
 document.getElementById('submit-hp').onclick = async () => {
     if (!hpReason.value) return;
-    await fetch(`../backend/submit-hp.php?description=${hpReason.value}&student=${localStorage.hpCode}`);
+    await fetch(`../api/submit-hp.php?description=${hpReason.value}&student=${localStorage.hpCode}`);
     await main();
     hpReason.value = '';
 };
@@ -124,7 +124,7 @@ window.delete = async (id, desc) => {
     if (!confirm(`Are you sure you want to delete the house point you got for '${desc}'?`)) {
         return;
     }
-    await fetch(`../backend/delete-hp.php?id=${id}`);
+    await fetch(`../api/delete-hp.php?id=${id}`);
     await main();
 };
 

@@ -1,13 +1,11 @@
 <?php
-
-require('sql.php');
+require('./private/sql.php');
 
 if ($_GET['id'] != $_ENV['ADMIN_PASS']) {
     die('0');
 }
 
 queries(function ($query) {
-    $studentID = 0;
     if (array_key_exists('studentid', $_GET)) {
         $studentID = $_GET['studentid'];
 

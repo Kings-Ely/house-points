@@ -1,5 +1,5 @@
 <?php
-require('sql.php');
+require('./private/sql.php');
 
 queries(function ($query) {
     $res = $query(

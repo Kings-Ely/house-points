@@ -1,6 +1,5 @@
 <?php
-
-require('sql.php');
+require('./private/sql.php');
 
 queries(function ($query) {
     $query('DELETE FROM housepoints WHERE id=?', 'i', $_GET['id']);
