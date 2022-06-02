@@ -107,7 +107,7 @@ document.getElementById('add-hp-submit').onclick = async () => {
         return;
     }
 
-    await fetch(`../backend/submit-hp.php?student=${code.value}&description=${reason.value}`);
+    await fetch(`../backend/add-hp.php?student=${code.value}&description=${reason.value}&id=${localStorage.hpCode}`);
 
     code.value = '';
     reason.value = '';

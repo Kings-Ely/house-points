@@ -14,27 +14,9 @@ queries(function ($query) {
 SQL
     );
 
-   
-
     $students = array();
 
     while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
-        $students[] = $row;
-    }
-
-    $res = $query(<<<'SQL'
-        SELECT id, name, year, code, 0 as hps
-        FROM students
-SQL
-    );
-
-    while ($row = $res->fetch_array(MYSQLI_ASSOC)) {
-
-        if (count(array_filter($students, function ($a) use ($row) {
-            return $a['id'] == $row['id'];
-        }))) {
-            continue;
-        }
         $students[] = $row;
     }
 

@@ -82,6 +82,12 @@ input[type=text]:focus {
     transform: scale(1.1);
 }
 
+.icon.no-scale:hover > svg {
+    cursor: pointer;
+    fill: var(--text);
+    transform: scale(1);
+}
+
 h1 {
     font-size: 30px;
     text-align: center;
