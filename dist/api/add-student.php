@@ -1,6 +1,8 @@
 <?php
-require('./private/sql.php');
+require('./private/util.php');
 require('./private/random.php');
+
+require_admin();
 
 $customAlphabet = 'abcdefghijklmnopqrstuvwxyz';
 $tokenLength = 6;

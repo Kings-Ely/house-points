@@ -19,3 +19,7 @@ const getRelativeTime = (d1, d2 = new Date()) => {
         }
     }
 }
+
+window.copyToClipboard = async (text) => {
+    await navigator.clipboard.writeText(text);
+}

@@ -1,10 +1,10 @@
 <?php
-require('./private/sql.php');
+require('./private/util.php');
 
 $code = $_GET['code'];
 
 queries(function ($query) use ($code) {
-    $res = $query('SELECT id, name FROM students WHERE code=?', 's', $code);
+    $res = $query('SELECT id, name FROM students WHERE code = ?', 's', $code);
     $info = $res->fetch_array(MYSQLI_ASSOC);
 
     $info['hps'] = array();

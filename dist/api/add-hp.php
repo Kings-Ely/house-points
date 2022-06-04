@@ -1,9 +1,7 @@
 <?php
-require('./private/sql.php');
+require('./private/util.php');
 
-if ($_GET['id'] != $_ENV['ADMIN_PASS']) {
-    die('0');
-}
+require_admin();
 
 queries(function ($query) {
     if (array_key_exists('studentid', $_GET)) {
@@ -11,7 +9,7 @@ queries(function ($query) {
 
     } else {
         $studentID = $query(
-            'SELECT id FROM students WHERE code=?',
+            'SELECT id FROM students WHERE code = ?',
             's',
             $_GET['student']
         ) -> fetch_array(MYSQLI_ASSOC) ['id'];

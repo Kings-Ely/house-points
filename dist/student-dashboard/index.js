@@ -24,24 +24,28 @@ function showHp (hp) {
     let acceptedHTML;
     let icon = '';
 
-    if (hp['rejectMessage']) {
+    if (hp['status'] === 'Rejected') {
         acceptedHTML = `
-                    Rejected ${getRelativeTime(hp['accepted'] * 1000)}: ${hp['rejectMessage']}
-                `;
+            Rejected ${getRelativeTime(hp['accepted'] * 1000)}
+            <br>
+            <b>"${hp['rejectMessage']}"</b>
+        `;
         icon = `
-                    <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" style="fill: red">
-                        <path d="M12.45 37.65 10.35 35.55 21.9 24 10.35 12.45 12.45 10.35 24 21.9 35.55 10.35 37.65 12.45 26.1 24 37.65 35.55 35.55 37.65 24 26.1Z"/>
-                    </svg>
-                `;
-    } else if (hp['accepted']) {
+            <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" style="fill: red">
+                <path d="M12.45 37.65 10.35 35.55 21.9 24 10.35 12.45 12.45 10.35 24 21.9 35.55 10.35 37.65 12.45 26.1 24 37.65 35.55 35.55 37.65 24 26.1Z"/>
+            </svg>
+        `;
+
+    } else if (hp['status'] === 'Accepted') {
         acceptedHTML = `
-                    Accepted ${getRelativeTime(hp['accepted'] * 1000)}
-                `;
+            Accepted ${getRelativeTime(hp['accepted'] * 1000)}
+        `;
         icon = `
-                    <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" style="fill: var(--accent)">
-                        <path d="M18.9 35.7 7.7 24.5 9.85 22.35 18.9 31.4 38.1 12.2 40.25 14.35Z"/>
-                    </svg>
-                `;
+            <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" style="fill: var(--accent)">
+                <path d="M18.9 35.7 7.7 24.5 9.85 22.35 18.9 31.4 38.1 12.2 40.25 14.35Z"/>
+            </svg>
+        `;
+
     } else {
         acceptedHTML = 'Not Yet Accepted';
     }

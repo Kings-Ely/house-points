@@ -32,7 +32,7 @@ function housepoint (hp, div) {
 async function main () {
     const div = document.getElementById('pending');
 
-    const pending = await (await fetch('../api/pending-hps.php')).json();
+    const pending = await (await fetch(`../api/pending-hps.php?adminID=${localStorage.hpCode}`)).json();
 
     // clear after async request
     div.innerHTML = '';
@@ -72,13 +72,13 @@ async function main () {
 })();
 
 window.accept = async (id) => {
-    await fetch(`../api/accept-hp.php?id=${id}`);
+    await fetch(`../api/accept-hp.php?id=${id}&adminID=${localStorage.hpCode}`);
     await main();
 };
 
 window.reject = async (id, reject) => {
     if (!reject) return;
-    await fetch(`../api/accept-hp.php?id=${id}&reject=${reject}`);
+    await fetch(`../api/accept-hp.php?id=${id}&reject=${reject}&adminID=${localStorage.hpCode}`);
     await main();
 };
 
@@ -107,7 +107,7 @@ document.getElementById('add-hp-submit').onclick = async () => {
         return;
     }
 
-    await fetch(`../api/add-hp.php?student=${code.value}&description=${reason.value}&id=${localStorage.hpCode}`);
+    await fetch(`../api/add-hp.php?student=${code.value}&description=${reason.value}&adminID=${localStorage.hpCode}`);
 
     code.value = '';
     reason.value = '';
@@ -131,7 +131,7 @@ document.getElementById('add-student-submit').onclick = async () => {
         year.value = '9';
     }
 
-    await fetch(`../api/add-student.php?name=${name.value}&year=${year.value}`);
+    await fetch(`../api/add-student.php?name=${name.value}&year=${year.value}&adminID=${localStorage.hpCode}`);
 
     name.value = '';
 

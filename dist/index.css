@@ -8,6 +8,7 @@
     --accent: #108c10;
     --text-warning: red;
     --border: #c5c5c5;
+    --border-light: #e8e8e8;
 }
 
 * {
@@ -86,6 +87,22 @@ input[type=text]:focus {
     cursor: pointer;
     fill: var(--text);
     transform: scale(1);
+}
+
+.label {
+    transform: scale(0);
+    position: absolute;
+    display: inline-block;
+    transition: 100ms;
+    font-size: 15px;
+}
+
+:hover > .label {
+    transform: scale(1) translate(-70%, 50px);
+    background: var(--bg-accent);
+    border-radius: 5px;
+    padding: 6px;
+    z-index: 1000;
 }
 
 h1 {

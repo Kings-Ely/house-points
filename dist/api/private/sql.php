@@ -1,5 +1,6 @@
 <?php
-require('./env.php');
+// imports relative to file being used, so this file can only be used in api/*.php files
+require('./private/env.php');
 
 //* shows errors
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);

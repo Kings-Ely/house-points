@@ -1,5 +1,7 @@
 <?php
-require('./private/sql.php');
+require('./private/util.php');
+
+require_admin();
 
 queries(function ($query) {
     $res = $query(

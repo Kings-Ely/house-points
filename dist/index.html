@@ -19,6 +19,22 @@
         #code {
             height: 1.2em;
         }
+
+        .label {
+            transform: scale(0);
+            position: absolute;
+            display: inline-block;
+            transition: 100ms;
+            font-size: 15px;
+        }
+
+        :hover > .label {
+            transform: scale(1) translate(-90%, 50px);
+            background: var(--bg-accent);
+            border-radius: 5px;
+            padding: 6px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -30,8 +46,13 @@
                 <label for="code"></label>
                 <input type="text" id="code" autocomplete="false" autofocus name="jdjdh">
             </div>
+            <button onclick="window.paste()" class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M24 9Q24.85 9 25.425 8.425Q26 7.85 26 7Q26 6.15 25.425 5.575Q24.85 5 24 5Q23.15 5 22.575 5.575Q22 6.15 22 7Q22 7.85 22.575 8.425Q23.15 9 24 9ZM9 42Q7.7 42 6.85 41.15Q6 40.3 6 39V9Q6 7.7 6.85 6.85Q7.7 6 9 6H19.1Q19.45 4.25 20.825 3.125Q22.2 2 24 2Q25.8 2 27.175 3.125Q28.55 4.25 28.9 6H39Q40.3 6 41.15 6.85Q42 7.7 42 9V39Q42 40.3 41.15 41.15Q40.3 42 39 42ZM9 39H39Q39 39 39 39Q39 39 39 39V9Q39 9 39 9Q39 9 39 9H36V13.5H12V9H9Q9 9 9 9Q9 9 9 9V39Q9 39 9 39Q9 39 9 39Z"/></svg>
+                <span class="label">Paste</span>
+            </button>
             <button id="go" class="icon">
                 <svg xmlns="http://www.w3.org/2000/svg"><path d="M15.2 43.9 12.4 41.05 29.55 23.9 12.4 6.75 15.2 3.9 35.2 23.9Z"/></svg>
+                <span class="label">Go!</span>
             </button>
         </div>
         <div id="error"></div>
@@ -77,4 +98,13 @@
     }
 
     $("footer").load(`footer.html`);
+
+    window.paste = async () => {
+        code.value =
+            (await navigator.clipboard.readText())
+                .split('')
+                .filter(c => keys.indexOf(c.toLowerCase()) !== -1)
+                .join('')
+                .toUpperCase();
+    };
 </script>
