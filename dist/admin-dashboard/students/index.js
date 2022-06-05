@@ -1,5 +1,7 @@
 const selected = [];
 
+const searchFilterInput = document.getElementById('search');
+
 function showStudent (student, div, selected) {
     div.innerHTML += `
         <div class="student">
@@ -73,7 +75,12 @@ async function main (reload=true) {
         students = await (await fetch(`../../api/all-student-info.php?adminID=${localStorage.hpCode}`)).json();
     }
 
+    const searchValue = searchFilterInput.value;
+
     for (let student of students) {
+        if (searchValue && !student['name'].toLowerCase().includes(searchValue.toLowerCase())) {
+            continue;
+        }
         showStudent(student, div, selected.indexOf(student['id']) !== -1);
     }
 }
@@ -82,7 +89,7 @@ async function main (reload=true) {
     const validCode = await (await fetch(`../../api/valid-code.php?code=${localStorage.hpCode}`)).text();
 
     if (validCode !== '2') {
-        window.location.assign('../');
+        window.location.assign('../../');
         return;
     }
 

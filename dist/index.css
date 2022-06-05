@@ -20,9 +20,6 @@
 html, body {
     padding: 0;
     margin: 0;
-}
-
-body {
     background: var(--bg);
 }
 
@@ -43,6 +40,9 @@ footer {
     justify-content: center;
     align-items: center
 }
+
+
+/* INPUTS */
 
 input, button {
     border: none;
@@ -93,7 +93,7 @@ input[type=text]:focus {
     transform: scale(0);
     position: absolute;
     display: inline-block;
-    transition: 100ms;
+    transition: 0ms;
     font-size: 15px;
 }
 
@@ -104,6 +104,9 @@ input[type=text]:focus {
     padding: 6px;
     z-index: 1000;
 }
+
+
+/* TEXT */
 
 h1 {
     font-size: 30px;

@@ -1,3 +1,5 @@
+// Utility script imported by all pages
+
 const units = {
     year  : 24 * 60 * 60 * 1000 * 365,
     month : 24 * 60 * 60 * 1000 * 365/12,
@@ -5,12 +7,14 @@ const units = {
     hour  : 60 * 60 * 1000,
     minute: 60 * 1000,
     second: 1000
-}
+};
 
-const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
+const rtf = new Intl.RelativeTimeFormat('en', {
+    numeric: 'auto',
+});
 
 const getRelativeTime = (d1, d2 = new Date()) => {
-    const elapsed = d1 - d2
+    const elapsed = d1 - d2;
 
     // "Math.abs" accounts for both "past" & "future" scenarios
     for (const u in units) {
@@ -18,8 +22,8 @@ const getRelativeTime = (d1, d2 = new Date()) => {
             return rtf.format(Math.round(elapsed/units[u]), u);
         }
     }
-}
+};
 
 window.copyToClipboard = async (text) => {
     await navigator.clipboard.writeText(text);
-}
+};

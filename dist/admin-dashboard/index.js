@@ -115,29 +115,6 @@ document.getElementById('add-hp-submit').onclick = async () => {
     main();
 };
 
-document.getElementById('add-student-submit').onclick = async () => {
-    const name = document.getElementById('add-student-name');
-    const year = document.getElementById('add-student-year');
-
-    const error = document.getElementById('add-student-error');
-    error.innerHTML = '';
-
-    if (!name.value) {
-        error.innerHTML = 'Name Required';
-        return;
-    }
-
-    if (!year.value) {
-        year.value = '9';
-    }
-
-    await fetch(`../api/add-student.php?name=${name.value}&year=${year.value}&adminID=${localStorage.hpCode}`);
-
-    name.value = '';
-
-    main();
-};
-
 window.signout = () => {
     if (!confirm(`Are you sure you want to sign out?`)) {
         return;

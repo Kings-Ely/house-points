@@ -35,6 +35,10 @@
             padding: 6px;
             z-index: 1000;
         }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -67,6 +71,9 @@
     const code = document.getElementById('code');
     const error = document.getElementById('error');
 
+    // characters allowed in code
+    const keys = 'abcdefghijklmnopqrstuvwxyz';
+
     go.onclick = async () => {
         const myCode = code.value.toLowerCase();
         const valid = await (await fetch(`./api/valid-code.php?code=${myCode}`)).text();
@@ -82,7 +89,6 @@
         error.innerText = 'Looks like that is an invalid code, sorry!';
     };
 
-    const keys = 'abcdefghijklmnopqrstuvwxyz';
     code.onkeydown = (evt) => {
         evt.preventDefault();
 
@@ -95,9 +101,9 @@
         } else if (evt.key === 'Backspace') {
             code.value = code.value.substring(0, code.value.length-2);
         }
-    }
+    };
 
-    $("footer").load(`footer.html`);
+    $(`footer`).load(`footer.html`);
 
     window.paste = async () => {
         code.value =

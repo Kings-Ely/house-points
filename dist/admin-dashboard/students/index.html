@@ -34,6 +34,12 @@
 
         #with-all-students-menu {
             padding: 100px 20px 20px 20px;
+            display: flex; justify-content: space-between;
+            align-items: center;
+        }
+
+        #search {
+            background: none;
         }
     </style>
 </head>
@@ -58,7 +64,8 @@
     </div>
 
     <div id="with-all-students-menu">
-        <span style="border: 1px solid var(--border); border-radius: 10px; display: inline-block; margin: 10px; padding: 5px;">
+        <div>
+            <span style="border: 1px solid var(--border); border-radius: 10px; display: inline-block; margin: 10px; padding: 5px;">
             <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M24 30 14 20.05H34Z"/></svg>
             <button onclick="window.selectAll()" class="icon">
                 <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M9 42Q7.8 42 6.9 41.1Q6 40.2 6 39V9Q6 7.8 6.9 6.9Q7.8 6 9 6H39Q40.2 6 41.1 6.9Q42 7.8 42 9V39Q42 40.2 41.1 41.1Q40.2 42 39 42ZM9 39H39Q39 39 39 39Q39 39 39 39V9Q39 9 39 9Q39 9 39 9H9Q9 9 9 9Q9 9 9 9V39Q9 39 9 39Q9 39 9 39Z"/></svg>
@@ -70,33 +77,38 @@
                 <span class="label">Unselect All</span>
             </button>
         </span>
+        </div>
+        <div>
+            With All Selected:
 
-        With All Selected:
+            <button onclick="window.deleteSelected()" class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48">
+                    <path d="M13.05 42Q11.85 42 10.95 41.1Q10.05 40.2 10.05 39V10.5H8V7.5H17.4V6H30.6V7.5H40V10.5H37.95V39Q37.95 40.2 37.05 41.1Q36.15 42 34.95 42ZM34.95 10.5H13.05V39Q13.05 39 13.05 39Q13.05 39 13.05 39H34.95Q34.95 39 34.95 39Q34.95 39 34.95 39ZM18.35 34.7H21.35V14.75H18.35ZM26.65 34.7H29.65V14.75H26.65ZM13.05 10.5V39Q13.05 39 13.05 39Q13.05 39 13.05 39Q13.05 39 13.05 39Q13.05 39 13.05 39Z"/>
+                </svg>
+                <span class="label">Delete</span>
+            </button>
 
-        <button onclick="window.deleteSelected()" class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48">
-                <path d="M13.05 42Q11.85 42 10.95 41.1Q10.05 40.2 10.05 39V10.5H8V7.5H17.4V6H30.6V7.5H40V10.5H37.95V39Q37.95 40.2 37.05 41.1Q36.15 42 34.95 42ZM34.95 10.5H13.05V39Q13.05 39 13.05 39Q13.05 39 13.05 39H34.95Q34.95 39 34.95 39Q34.95 39 34.95 39ZM18.35 34.7H21.35V14.75H18.35ZM26.65 34.7H29.65V14.75H26.65ZM13.05 10.5V39Q13.05 39 13.05 39Q13.05 39 13.05 39Q13.05 39 13.05 39Q13.05 39 13.05 39Z"/>
-            </svg>
-            <span class="label">Delete</span>
-        </button>
+            <button onclick="window.ageSelected(1)" class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48">
+                    <path d="M22.5 31.4H25.5V22.3L29.2 26L31.3 23.9L24 16.6L16.7 23.9L18.8 26L22.5 22.3ZM24 44Q19.75 44 16.1 42.475Q12.45 40.95 9.75 38.25Q7.05 35.55 5.525 31.9Q4 28.25 4 24Q4 19.8 5.525 16.15Q7.05 12.5 9.75 9.8Q12.45 7.1 16.1 5.55Q19.75 4 24 4Q28.2 4 31.85 5.55Q35.5 7.1 38.2 9.8Q40.9 12.5 42.45 16.15Q44 19.8 44 24Q44 28.25 42.45 31.9Q40.9 35.55 38.2 38.25Q35.5 40.95 31.85 42.475Q28.2 44 24 44ZM24 41Q31.25 41 36.125 36.125Q41 31.25 41 24Q41 16.75 36.125 11.875Q31.25 7 24 7Q16.75 7 11.875 11.875Q7 16.75 7 24Q7 31.25 11.875 36.125Q16.75 41 24 41ZM24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Z"/>
+                </svg>
+                <span class="label">Move Up a Year</span>
+            </button>
 
-        <button onclick="window.ageSelected(1)" class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48">
-                <path d="M22.5 31.4H25.5V22.3L29.2 26L31.3 23.9L24 16.6L16.7 23.9L18.8 26L22.5 22.3ZM24 44Q19.75 44 16.1 42.475Q12.45 40.95 9.75 38.25Q7.05 35.55 5.525 31.9Q4 28.25 4 24Q4 19.8 5.525 16.15Q7.05 12.5 9.75 9.8Q12.45 7.1 16.1 5.55Q19.75 4 24 4Q28.2 4 31.85 5.55Q35.5 7.1 38.2 9.8Q40.9 12.5 42.45 16.15Q44 19.8 44 24Q44 28.25 42.45 31.9Q40.9 35.55 38.2 38.25Q35.5 40.95 31.85 42.475Q28.2 44 24 44ZM24 41Q31.25 41 36.125 36.125Q41 31.25 41 24Q41 16.75 36.125 11.875Q31.25 7 24 7Q16.75 7 11.875 11.875Q7 16.75 7 24Q7 31.25 11.875 36.125Q16.75 41 24 41ZM24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Z"/>
-            </svg>
-            <span class="label">Move Up a Year</span>
-        </button>
+            <button onclick="window.ageSelected(-1)" class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M24 31.4 31.3 24.1 29.2 22 25.5 25.7V16.6H22.5V25.7L18.8 22L16.7 24.1ZM24 44Q19.75 44 16.1 42.475Q12.45 40.95 9.75 38.25Q7.05 35.55 5.525 31.9Q4 28.25 4 24Q4 19.8 5.525 16.15Q7.05 12.5 9.75 9.8Q12.45 7.1 16.1 5.55Q19.75 4 24 4Q28.2 4 31.85 5.55Q35.5 7.1 38.2 9.8Q40.9 12.5 42.45 16.15Q44 19.8 44 24Q44 28.25 42.45 31.9Q40.9 35.55 38.2 38.25Q35.5 40.95 31.85 42.475Q28.2 44 24 44ZM24 41Q31.25 41 36.125 36.125Q41 31.25 41 24Q41 16.75 36.125 11.875Q31.25 7 24 7Q16.75 7 11.875 11.875Q7 16.75 7 24Q7 31.25 11.875 36.125Q16.75 41 24 41ZM24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Z"/></svg>
+                <span class="label">Move Down a Year</span>
+            </button>
 
-        <button onclick="window.ageSelected(-1)" class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M24 31.4 31.3 24.1 29.2 22 25.5 25.7V16.6H22.5V25.7L18.8 22L16.7 24.1ZM24 44Q19.75 44 16.1 42.475Q12.45 40.95 9.75 38.25Q7.05 35.55 5.525 31.9Q4 28.25 4 24Q4 19.8 5.525 16.15Q7.05 12.5 9.75 9.8Q12.45 7.1 16.1 5.55Q19.75 4 24 4Q28.2 4 31.85 5.55Q35.5 7.1 38.2 9.8Q40.9 12.5 42.45 16.15Q44 19.8 44 24Q44 28.25 42.45 31.9Q40.9 35.55 38.2 38.25Q35.5 40.95 31.85 42.475Q28.2 44 24 44ZM24 41Q31.25 41 36.125 36.125Q41 31.25 41 24Q41 16.75 36.125 11.875Q31.25 7 24 7Q16.75 7 11.875 11.875Q7 16.75 7 24Q7 31.25 11.875 36.125Q16.75 41 24 41ZM24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Z"/></svg>
-            <span class="label">Move Down a Year</span>
-        </button>
-
-        <button onclick="window.giveHPToSelected()" class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M22.5 38V25.5H10V22.5H22.5V10H25.5V22.5H38V25.5H25.5V38Z"/></svg>
-            <span class="label">Give House Point</span>
-        </button>
-
+            <button onclick="window.giveHPToSelected()" class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M22.5 38V25.5H10V22.5H22.5V10H25.5V22.5H38V25.5H25.5V38Z"/></svg>
+                <span class="label">Give House Point</span>
+            </button>
+        </div>
+        <div>
+            <label for="search"></label>
+            <input placeholder="search for name..." oninput="main(false)" id="search" autocomplete="off">
+        </div>
     </div>
     <div id="students"></div>
 </main>
