@@ -38,7 +38,8 @@ footer {
     margin: 0;
     display: flex;
     justify-content: center;
-    align-items: center
+    align-items: center;
+    text-align: center;
 }
 
 

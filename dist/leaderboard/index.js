@@ -3,6 +3,8 @@ const podium1stDiv = document.getElementById('podium-1st');
 const podium2ndDiv = document.getElementById('podium-2nd');
 const podium3rdDiv = document.getElementById('podium-3rd');
 
+let showYear = 0;
+
 function showStudent (student, div) {
     div.innerHTML += `
         <div class="student">
@@ -19,7 +21,18 @@ function showStudent (student, div) {
     return new Promise(r => setTimeout(r, 0));
 }
 
+function resetPodium () {
+    podium1stDiv.style.height = `80%`;
+    podium2ndDiv.style.height = `60%`;
+    podium3rdDiv.style.height = `40%`;
+    podium1stDiv.innerHTML = ``;
+    podium2ndDiv.innerHTML = ``;
+    podium3rdDiv.innerHTML = ``;
+}
+
 function leaderboard (hps) {
+
+    resetPodium();
 
     if (hps.length === 0) {
         leaderboardDiv.innerHTML = `
@@ -34,12 +47,10 @@ function leaderboard (hps) {
 
     let start = 3;
 
-    if (hps[0]['housepoints'] < 1) {
-        // if no-one has any house points, then show empty podium and put everyone in '4th' place visually
+    if (hps[0]['housepoints'] < 1 || hps.length < 3) {
+        // if no-one has any house points, or there aren't any people,
+        // then show empty podium and put everyone in '4th' place visually
         start = 0;
-        podium1stDiv.style.height = `80%`;
-        podium2ndDiv.style.height = `60%`;
-        podium3rdDiv.style.height = `40%`;
 
     } else {
         podium1stDiv.innerHTML = `<div>${hps[0]['name']} (Y${hps[0]['year']}) <br> <b>${hps[0]['housepoints']}</b></div>`;
@@ -64,6 +75,9 @@ function leaderboard (hps) {
     // handle lots of house points using promises
     setTimeout(async () => {
         for (let i = start; i < hps.length; i++) {
+            if (showYear && showYear !== hps[i]['year'].toString()) {
+                continue;
+            }
             await showStudent(hps[i], leaderboardDiv);
         }
     }, 0);
@@ -87,4 +101,11 @@ async function main (reload=true) {
 main();
 
 $("footer").load(`../footer.html`);
+
+const whichYears = document.getElementById('show-year');
+
+whichYears.onchange = () => {
+    showYear = whichYears.value;
+    main(false);
+};
 

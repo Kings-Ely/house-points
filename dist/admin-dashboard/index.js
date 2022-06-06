@@ -84,8 +84,21 @@ window.reject = async (id, reject) => {
 
 $("footer").load(`../footer.html`);
 
+const code = document.getElementById('add-hp-code');
+
+code.onchange = () => {
+    code.value = cleanCode(code.value);
+    setTimeout(() => {
+        code.value = cleanCode(code.value);
+    }, 0);
+};
+
+code.onkeydown = code.onchange;
+code.onclick = code.onchange;
+code.onpaste = code.onchange;
+
 document.getElementById('add-hp-submit').onclick = async () => {
-    const code = document.getElementById('add-hp-code');
+
     const reason = document.getElementById('add-hp-reason');
     const error = document.getElementById('add-hp-error');
     error.innerHTML = '';

@@ -27,3 +27,15 @@ const getRelativeTime = (d1, d2 = new Date()) => {
 window.copyToClipboard = async (text) => {
     await navigator.clipboard.writeText(text);
 };
+
+window.cleanCode = (code) => {
+    return code
+        .split('')
+        // remove non-alphabetic characters
+        .filter(c => 'abcdefghijklmnopqrstuvwxyz'.indexOf(c.toLowerCase()) !== -1)
+        .join('')
+        // default to upper case
+        .toUpperCase()
+        // max length
+        .substring(0, 10);
+}

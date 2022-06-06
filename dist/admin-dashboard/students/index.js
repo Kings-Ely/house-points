@@ -194,7 +194,12 @@ window.selectAll = (select=true) => {
 };
 
 window.giveHPToSelected = async () => {
-    const reason = window.prompt(`Please enter the reason to give ${selected.length} a house point`);
+
+    let reason = '';
+
+    while (!reason) {
+        reason = prompt(`Reason to give ${selected.length} people a house point`);
+    }
 
     for (let id of selected) {
         await fetch(`../../api/add-hp.php?adminID=${localStorage.hpCode}&description=${reason}&studentid=${id}`);

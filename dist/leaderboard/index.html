@@ -58,6 +58,10 @@
             background: #CD7F32;
         }
 
+        #show-year {
+            width: 40px;
+        }
+
     </style>
 </head>
 <body>
@@ -66,6 +70,13 @@
         <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M8 42V18L24.1 6L40 18V42H28.3V27.75H19.65V42ZM11 39H16.65V24.75H31.3V39H37V19.5L24.1 9.75L11 19.5ZM24 24.35Z"/></svg>
     </a>
     <h1>Leaderboard</h1>
+    <div>
+        <label>
+            Only show year
+            <input type="number" value="0" id="show-year" max="13" min="9">
+            (0 for all years)
+        </label>
+    </div>
     <div id="podium">
         <div id="podium-2nd"></div>
         <div id="podium-1st"></div>
