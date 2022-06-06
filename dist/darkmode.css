@@ -1,0 +1,14 @@
+:root {
+    --text: #ffffff;
+    --text-light: #efefef;
+    --bg: #343434;
+    --bg-accent: #505050;
+    --accent: #0b700b;
+    --text-warning: #c90303;
+    --border: #646464;
+    --border-light: #545454;
+}
+
+svg {
+
+}

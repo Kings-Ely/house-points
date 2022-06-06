@@ -3,7 +3,9 @@ const podium1stDiv = document.getElementById('podium-1st');
 const podium2ndDiv = document.getElementById('podium-2nd');
 const podium3rdDiv = document.getElementById('podium-3rd');
 
-let showYear = 0;
+// show all by default
+/** @type number[] */
+let showYears = [9, 10, 11, 12, 13];
 
 function showStudent (student, div) {
     div.innerHTML += `
@@ -75,7 +77,7 @@ function leaderboard (hps) {
     // handle lots of house points using promises
     setTimeout(async () => {
         for (let i = start; i < hps.length; i++) {
-            if (showYear && showYear !== hps[i]['year'].toString()) {
+            if (!showYears.includes(hps[i]['year'])) {
                 continue;
             }
             await showStudent(hps[i], leaderboardDiv);
@@ -88,8 +90,15 @@ async function main (reload=true) {
     if (reload) {
         fetch(`../api/valid-code.php?code=${localStorage.hpCode}`)
             .then(async res => {
-                if (await res.text() === '2') {
+                res = await res.text();
+                if (res === '2') {
                     document.getElementById('home-link').href = '../admin-dashboard';
+                } else if (res === '1') {
+                    const data = await (await fetch(`../api/student-info.php?code=${localStorage.hpCode}`)).json();
+                    const year = parseInt(data['year']);
+                    showYears = [year];
+                    whichYears.value = `${year}`;
+                    await main(false);
                 }
             });
 
@@ -105,7 +114,7 @@ $("footer").load(`../footer.html`);
 const whichYears = document.getElementById('show-year');
 
 whichYears.onchange = () => {
-    showYear = whichYears.value;
+    showYears = whichYears.value.split(',').map(y => parseInt(y));
     main(false);
 };
 

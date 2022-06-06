@@ -119,7 +119,11 @@ async function main () {
 
 document.getElementById('submit-hp').onclick = async () => {
     if (!hpReason.value) return;
-    await fetch(`../api/submit-hp.php?description=${hpReason.value}&student=${localStorage.hpCode}`);
+
+    for (let reason of hpReason.value.split('\n')) {
+        if (!reason) continue;
+        await fetch(`../api/submit-hp.php?description=${reason}&student=${localStorage.hpCode}`);
+    }
     await main();
     hpReason.value = '';
 };

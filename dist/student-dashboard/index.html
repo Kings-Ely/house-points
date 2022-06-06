@@ -48,6 +48,14 @@
         #leaderboard-link:hover .label {
             transform: scale(1) translate(-90%, 50px);
         }
+
+        #hp-reason {
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            outline: none;
+            transition: 0ms;
+            padding: 4px;
+        }
     </style>
 </head>
 <body>
@@ -64,7 +72,7 @@
     <div id="name"></div>
     <div>
         <label>
-            <input type="text" id="hp-reason" placeholder="Why did you get a House Point?">
+            <textarea id="hp-reason" placeholder="Why did you get a House Point? (separate multiple by new line)" rows="2"></textarea>
         </label>
         <button id="submit-hp" class="icon">
             <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M22.5 38V25.5H10V22.5H22.5V10H25.5V22.5H38V25.5H25.5V38Z"/></svg>

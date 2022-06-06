@@ -39,3 +39,23 @@ window.cleanCode = (code) => {
         // max length
         .substring(0, 10);
 }
+
+// proxy fetch api to show loading while requests are being made
+const oldFetch = fetch;
+window.fetch = async (...args) => {
+    // pre-fetch
+    document.body.style.cursor = 'progress';
+    const loader = document.createElement('div');
+    document.body.appendChild(loader)
+    loader.id = 'loader';
+    loader.innerHTML = `<div id="loader-center"></div>`;
+
+    // fetch
+    const res = await oldFetch(...args);
+
+    // post fetch
+    document.body.removeChild(loader);
+    document.body.style.cursor = 'default';
+
+    return res;
+};

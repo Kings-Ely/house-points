@@ -72,9 +72,16 @@
     <h1>Leaderboard</h1>
     <div>
         <label>
-            Only show year
-            <input type="number" value="0" id="show-year" max="13" min="9">
-            (0 for all years)
+            Only show for
+            <select id="show-year">
+                <option value="9,10,11,12,13">All</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="12,13">6th Form</option>
+            </select>
         </label>
     </div>
     <div id="podium">
@@ -82,6 +89,7 @@
         <div id="podium-1st"></div>
         <div id="podium-3rd"></div>
     </div>
+
     <div id="leaderboard"></div>
 </main>
 <footer></footer>
