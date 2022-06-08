@@ -67,10 +67,8 @@
     const code = document.getElementById('code');
     const error = document.getElementById('error');
 
-    // characters allowed in code
-    const keys = 'abcdefghijklmnopqrstuvwxyz';
 
-    go.onclick = async () => {
+	go.onclick = async () => {
         const myCode = code.value.toLowerCase();
         const valid = await (await fetch(`./api/valid-code.php?code=${myCode}`)).text();
         if (valid === '1') {

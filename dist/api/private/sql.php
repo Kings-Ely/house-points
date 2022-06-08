@@ -2,13 +2,26 @@
 // imports relative to file being used, so this file can only be used in api/*.php files
 require('./private/env.php');
 
-//* shows errors
+/* shows errors - possible security risk if uncommented
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 ini_set('display_errors', true);
 error_reporting(E_ALL);
 //*/
 
+// custom api for making queries to database with a callback
+/*
+ * Example:
+ *
+queries(function ($query) {
+    $query('SELECT * FROM something WHERE id = ?', 'i', 1);
+});
+
+ *
+ * Does SQL injection prevention of parameters.
+ * Closes connection after use.
+ */
 function queries ($cb) {
+	// DB credentials
     $servername = "localhost";
     $username = getenv('DB_USER');
     $password = getenv('DB_PASS');

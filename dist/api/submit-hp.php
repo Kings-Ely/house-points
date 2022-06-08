@@ -4,8 +4,7 @@ require('./private/util.php');
 queries(function ($query) {
     $studentID = $query(
         'SELECT id FROM students WHERE code = ?',
-        's',
-        $_GET['student']
+        's', $_GET['student']
     ) -> fetch_array(MYSQLI_ASSOC) ['id'];
     if (!$studentID) {
         die('invalid code');

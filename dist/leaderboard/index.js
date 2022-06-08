@@ -1,7 +1,17 @@
+// Slightly horrible with 1st, 2nd and 3rd place on the leaderboard...
+// could do an array or something but with always exactly 3 it's a bit pointless.
+
 const leaderboardDiv = document.getElementById('leaderboard');
 const podium1stDiv = document.getElementById('podium-1st');
 const podium2ndDiv = document.getElementById('podium-2nd');
 const podium3rdDiv = document.getElementById('podium-3rd');
+
+const whichYears = document.getElementById('show-year');
+
+whichYears.onchange = () => {
+    showYears = whichYears.value.split(',').map(y => parseInt(y));
+    main(false);
+};
 
 // show all by default
 /** @type number[] */
@@ -88,6 +98,7 @@ function leaderboard (hps) {
 let data;
 async function main (reload=true) {
     if (reload) {
+
         fetch(`../api/valid-code.php?code=${localStorage.hpCode}`)
             .then(async res => {
                 res = await res.text();
@@ -110,11 +121,3 @@ async function main (reload=true) {
 main();
 
 $("footer").load(`../footer.html`);
-
-const whichYears = document.getElementById('show-year');
-
-whichYears.onchange = () => {
-    showYears = whichYears.value.split(',').map(y => parseInt(y));
-    main(false);
-};
-

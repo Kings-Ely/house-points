@@ -40,22 +40,34 @@ window.cleanCode = (code) => {
         .substring(0, 10);
 }
 
-// proxy fetch api to show loading while requests are being made
+// Proxy fetch api to show loading while requests are being made
+// but only show the spinner if no other requests are still pending,
+// which would mean the spinner is already being shown.
 const oldFetch = fetch;
+let showingLoading = false;
 window.fetch = async (...args) => {
-    // pre-fetch
-    document.body.style.cursor = 'progress';
-    const loader = document.createElement('div');
-    document.body.appendChild(loader)
-    loader.id = 'loader';
-    loader.innerHTML = `<div id="loader-center"></div>`;
+    let shouldHideAtEnd = false;
+    let loader;
+    if (!showingLoading) {
+        // pre-fetch
+        showingLoading = true;
+        document.body.style.cursor = 'progress';
+        loader = document.createElement('div');
+        document.body.appendChild(loader)
+        loader.id = 'loader';
+        loader.innerHTML = `<div id="loader-center"></div>`;
+    }
 
     // fetch
     const res = await oldFetch(...args);
 
-    // post fetch
-    document.body.removeChild(loader);
-    document.body.style.cursor = 'default';
+    if (shouldHideAtEnd) {
+        // post fetch
+        showingLoading = false;
+        document.body.removeChild(loader);
+        document.body.style.cursor = 'default';
+    }
+
 
     return res;
 };

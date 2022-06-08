@@ -1,4 +1,5 @@
 <?php
+// Load a .env file into $_ENV
 
 class DotEnv {
     /**

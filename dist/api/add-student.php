@@ -13,7 +13,10 @@ queries(function ($query) use ($tokenLength, $customAlphabet) {
     $generator->setAlphabet($customAlphabet);
     $code = $generator->generate($tokenLength);
 
-    $query('INSERT INTO students (name, code, year) VALUES (?, ?, ?)', 'ssi', $_GET['name'], $code, $_GET['year']);
+    $query(
+		'INSERT INTO students (name, code, year) VALUES (?, ?, ?)',
+		'ssi', $_GET['name'], $code, $_GET['year']
+    );
 
     echo $code;
 });
