@@ -46,18 +46,28 @@
         #leaderboard-link:hover .label {
             transform: scale(1) translate(-90%, 50px);
         }
+
+        #signout {
+            font-size: 16px;
+            text-underline: #575757;
+            cursor: pointer;
+        }
+
+        #signout:hover {
+            color: vaR(--text-light);
+        }
     </style>
 </head>
 <body>
 <main style="display: block">
-    <div style="position: absolute; top: 10px; right: 10px">
+    <div style="position: absolute; top: 10px; right: 10px" id="top-right-menu">
         <a class="icon" href="../leaderboard" id="leaderboard-link">
             <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M7.5 38.5H16.5V21.5H7.5ZM19.5 38.5H28.5V9.5H19.5ZM31.5 38.5H40.5V25.5H31.5ZM4.5 41.5V18.5H16.5V6.5H31.5V22.5H43.5V41.5Z"/></svg>
             <span class="label">Leaderboard</span>
         </a>
     </div>
 
-    <button onclick="signout()" style="font-size: 16px; text-underline: #575757">
+    <button onclick="signout()" id="signout">
         Sign Out
     </button>
 

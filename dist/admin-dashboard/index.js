@@ -30,6 +30,20 @@ function housepoint (hp, div) {
 }
 
 async function main () {
+
+    fetch(`../api/student-info.php?code=${localStorage.hpCode}`)
+        .then(async data => {
+            data = await data.json();
+            if (data['student']) {
+                document.getElementById('top-right-menu').innerHTML += `
+                    <a class="icon" href="../student-dashboard">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M8 42V18L24.1 6L40 18V42H28.3V27.75H19.65V42ZM11 39H16.65V24.75H31.3V39H37V19.5L24.1 9.75L11 19.5ZM24 24.35Z"/></svg>
+                        <span class="label">Student Dashboard</span>
+                    </a>
+                `;
+            }
+        });
+
     const div = document.getElementById('pending');
 
     const pending = await (await fetch(`../api/pending-hps.php?myCode=${localStorage.hpCode}`)).json();
