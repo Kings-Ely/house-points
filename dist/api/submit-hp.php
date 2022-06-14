@@ -3,7 +3,7 @@ require('./private/util.php');
 
 queries(function ($query) {
     $studentID = $query(
-        'SELECT id FROM students WHERE code = ?',
+        'SELECT id FROM users WHERE code = ?',
         's', $_GET['student']
     ) -> fetch_array(MYSQLI_ASSOC) ['id'];
     if (!$studentID) {

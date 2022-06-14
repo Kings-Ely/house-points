@@ -17,7 +17,7 @@ queries(function ($query) use ($code) {
            UNIX_TIMESTAMP(completed) as accepted,
            rejectMessage 
         FROM housepoints
-        WHERE student=?
+        WHERE student = ?
         ORDER BY timestamp DESC
 SQL
         , 'i', $info['id']);

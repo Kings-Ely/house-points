@@ -1,8 +1,9 @@
 -- This script will rebuild the MySQL database from the existing one of the same schema.
 -- Comment out parts of the 'Clean database' section for if the schema is not the same,
 
+
 -- -- -- -- Clean database -- -- -- --
--- not part of the schema
+-- NOTE: not part of the db's schema
 SET FOREIGN_KEY_CHECKS = 0;
 
 ALTER TABLE housepoints
@@ -44,7 +45,8 @@ CREATE TABLE `awards` (
     `id` int(11) NOT NULL,
     `student` int(11) NOT NULL,
     `type` int(11) NOT NULL,
-    `time` timestamp NOT NULL
+    `time` timestamp NOT NULL,
+    `awarded` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE = InnoDB DEFAULT CHARSET = latin1;
 
 CREATE TABLE `awardTypes` (
@@ -69,6 +71,7 @@ ALTER TABLE `awards`
 ALTER TABLE `awardTypes`
     ADD PRIMARY KEY (`id`);
 
+
 -- -- -- -- 'AUTO_INCREMENT's -- -- -- --
 
 ALTER TABLE `housepoints`
@@ -82,6 +85,7 @@ ALTER TABLE `awards`
 
 ALTER TABLE `awardTypes`
     MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT = 0;
+
 
 -- -- -- -- Foreign Keys -- -- -- --
 

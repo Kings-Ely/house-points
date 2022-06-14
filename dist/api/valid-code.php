@@ -3,16 +3,18 @@ require('./private/util.php');
 
 $code = $_GET['code'];
 
-if ($code == $_ENV['ADMIN_PASS']) {
-    echo '2';
-} else {
+queries(function ($query) use ($code) {
+    $res = $query(
+		'SELECT admin FROM users WHERE code = ?',
+		's', $code
+    );
+    $row = $res->fetch_array(MYSQLI_ASSOC);
 
-    queries(function ($query) use ($code) {
-        $res = $query(
-			'SELECT * FROM students WHERE code = ?',
-			's', $code
-        );
-        echo !!$res->fetch_array(MYSQLI_NUM) ? '1' : '0';
-    });
-
-}
+	if (!$row) {
+		echo '0';
+	} else if ($row['admin'] == 1) {
+		echo '2';
+	} else {
+		echo '0';
+	}
+});

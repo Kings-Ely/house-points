@@ -3,11 +3,11 @@ require('./private/util.php');
 
 queries(function ($query) {
     $res = $query(<<<'SQL'
-        SELECT students.name, students.year,
+        SELECT users.name, users.year,
                SUM(CASE WHEN housepoints.status="Accepted" THEN 1 ELSE 0 END) AS housepoints
        FROM students LEFT JOIN housepoints
-       ON housepoints.student = students.id
-       GROUP BY students.name, students.year
+       ON housepoints.student = users.id
+       GROUP BY users.name, users.year
        ORDER BY housepoints DESC, year DESC, name ASC;
 SQL
     );
