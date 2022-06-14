@@ -1,18 +1,17 @@
 <?php
+
 require('./private/util.php');
 
-require_admin();
-
-queries(function ($query) {
+queries(true, function ($query) {
     $res = $query(<<<'SQL'
-		SELECT users.id, users.name, users.year, users.code,
+		SELECT users.id, users.name, users.year, users.code, users.admin, users.student,
 			SUM(CASE WHEN housepoints.status="Pending" THEN 1 ELSE 0 END) AS pending,
 			SUM(CASE WHEN housepoints.status="Accepted" THEN 1 ELSE 0 END) AS accepted,
 			SUM(CASE WHEN housepoints.status="Rejected" THEN 1 ELSE 0 END) AS rejected
 		FROM users LEFT JOIN housepoints
 		ON housepoints.student = users.id
 		GROUP BY users.id, users.name, users.year, users.code
-		ORDER BY year ASC, name ASC;
+		ORDER BY users.student ASC, users.admin DESC, year ASC, name ASC;
 SQL
     );
 

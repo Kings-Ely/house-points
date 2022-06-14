@@ -1,13 +1,11 @@
 <?php
-// imports relative to file being used, so this file can only be used in api/*.php files
-require('./private/sql.php');
 
-// needs an 'adminID' GET parameter to be specified and correct, otherwise kills the script
-function require_admin () {
-    if (!array_key_exists('adminID', $_GET)) {
-        die('0');
-    }
-    if ($_GET['adminID'] != $_ENV['ADMIN_PASS']) {
-        die('0');
-    }
-}
+// imports relative to file being used, so this file can only be used in api/*.php files
+
+//* shows errors - possible security risk if uncommented
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+ini_set('display_errors', true);
+error_reporting(E_ALL);
+//*/
+
+require('./private/sql.php');

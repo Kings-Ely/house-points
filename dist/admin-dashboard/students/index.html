@@ -23,6 +23,10 @@
             align-items: center;
         }
 
+        .student > div:first-child {
+            width: 130px;
+        }
+
         .student-link {
             border: none;
             text-underline: #575757;
@@ -58,13 +62,20 @@
         #csv-form > button:hover {
             color: var(--text-light);
         }
+
+        #students-header {
+            border-bottom-width: 2px;
+        }
+
     </style>
 </head>
 <body>
 <main style="display: block">
-    <a href="../">back</a>
+    <a href="../" class="icon">
+        <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M24 40 8 24 24 8 26.1 10.1 13.7 22.5H40V25.5H13.7L26.1 37.9Z"/></svg>
+    </a>
 
-    <h1>Admin Dashboard - Manage Students</h1>
+    <h1>Manage Students</h1>
 
     <h2>Add Student</h2>
     <div>
@@ -72,7 +83,7 @@
             <input type="text" id="add-student-name" placeholder="Name">
         </label>
         <label>
-            <input type="text" id="add-student-year" placeholder="Year">
+            <input type="number" id="add-student-year" max=13 min=9 placeholder="Year">
         </label>
         <button id="add-student-submit" class="icon">
             <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M22.5 38V25.5H10V22.5H22.5V10H25.5V22.5H38V25.5H25.5V38Z"/></svg>

@@ -1,7 +1,7 @@
 <?php
 require('./private/util.php');
 
-queries(function ($query) {
+queries(false, function ($query) {
     $studentID = $query(
         'SELECT id FROM users WHERE code = ?',
         's', $_GET['student']

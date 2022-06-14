@@ -1,7 +1,7 @@
 <?php
 require('./private/util.php');
 
-queries(function ($query) {
+queries(false, function ($query) {
     $res = $query(<<<'SQL'
         SELECT users.name, users.year,
                SUM(CASE WHEN housepoints.status="Accepted" THEN 1 ELSE 0 END) AS housepoints

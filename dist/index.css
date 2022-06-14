@@ -55,17 +55,17 @@ input, button {
     outline: none;
 }
 
-input[type=text] {
+input {
     border-bottom: 2px solid var(--border);
     border-radius: 10px 10px 0 0;
     padding: 6px;
 }
 
-input[type=text]:hover {
+input:hover {
     border-bottom: 2px solid black;
 }
 
-input[type=text]:focus {
+input:focus {
     background: var(--bg-accent);
 }
 
@@ -86,10 +86,19 @@ input[type=text]:focus {
     transform: scale(1.1);
 }
 
+.icon-info-only:hover > svg {
+    cursor: auto;
+    transform: scale(1);
+}
+
 .icon.no-scale:hover > svg {
     cursor: pointer;
     fill: var(--text);
     transform: scale(1);
+}
+
+.icon-accent > svg {
+    fill: var(--accent);
 }
 
 .label {

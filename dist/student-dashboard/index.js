@@ -2,7 +2,6 @@
 
     const nameDiv = document.getElementById('name');
     const hpsDiv = document.getElementById('hps');
-    const hpReason = document.getElementById('hp-reason');
 
     function title (info, hps) {
         const numHps = hps.filter(c => c['accepted'] && !c['rejectMessage']).length;
@@ -127,6 +126,8 @@
 
     await main();
 })();
+
+const hpReason = document.getElementById('hp-reason');
 
 document.getElementById('submit-hp').onclick = async () => {
     if (!hpReason.value) return;

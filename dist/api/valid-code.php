@@ -3,7 +3,7 @@ require('./private/util.php');
 
 $code = $_GET['code'];
 
-queries(function ($query) use ($code) {
+queries(false, function ($query) use ($code) {
     $res = $query(
 		'SELECT admin FROM users WHERE code = ?',
 		's', $code

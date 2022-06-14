@@ -1,9 +1,7 @@
 <?php
 require('./private/util.php');
 
-require_admin();
-
-queries(function ($query) {
+queries(true, function ($query) {
 
     $query(
 		'UPDATE users SET year = year + ? WHERE id=?',

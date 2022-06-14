@@ -2,12 +2,6 @@
 // imports relative to file being used, so this file can only be used in api/*.php files
 require('./private/env.php');
 
-/* shows errors - possible security risk if uncommented
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-ini_set('display_errors', true);
-error_reporting(E_ALL);
-//*/
-
 // custom api for making queries to database with a callback
 /*
  * Example:
@@ -20,7 +14,7 @@ queries(function ($query) {
  * Does SQL injection prevention of parameters.
  * Closes connection after use.
  */
-function queries ($cb) {
+function queries ($require_admin, $cb) {
 	// DB credentials
     $servername = "localhost";
     $username = getenv('DB_USER');
@@ -35,7 +29,8 @@ function queries ($cb) {
         die("Connection to database failed: " . $con->connect_error);
     }
 
-    $cb(function ($query, $d_types=null, &...$parameters) use ($con) {
+
+    $dbQuery = function ($query, $d_types=null, &...$parameters) use ($con) {
 
         $stmt = $con->prepare($query);
         if (!$stmt) {
@@ -53,7 +48,22 @@ function queries ($cb) {
         }
 
         return $stmt->get_result();
-    });
+    };
+
+    if ($require_admin) {
+        $res = $dbQuery(
+            'SELECT admin FROM users WHERE code = ?',
+            's', $_GET['myCode']
+        );
+        $row = $res->fetch_array(MYSQLI_ASSOC);
+        if (!$row) {
+            die('0');
+        } else if ($row['admin'] != 1) {
+            die('0');
+        }
+    }
+
+    $cb($dbQuery);
 
     $con->close();
 }
