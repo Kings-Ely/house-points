@@ -36,6 +36,7 @@ CREATE TABLE `housepoints` (
 CREATE TABLE `users` (
     `id` int(11) NOT NULL,
     `admin` TINYINT(1) NOT NULL DEFAULT 0,
+    `student` TINYINT(1) NOT NULL DEFAULT 1,
     `name` text NOT NULL,
     `code` varchar(16) NOT NULL,
     `year` int(8) NOT NULL
@@ -96,3 +97,8 @@ ALTER TABLE `awards`
     ADD CONSTRAINT fk_awards_type_awardTypes FOREIGN KEY (type) REFERENCES awardTypes(id),
     ADD CONSTRAINT fk_awards_student_user FOREIGN KEY (student) REFERENCES users(id);
 
+
+
+-- add default admin user
+
+INSERT INTO users (id, admin, student, name, code, year) VALUES (10001, 1, 0, 'Admin', 'admin', 14)

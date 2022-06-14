@@ -4,8 +4,18 @@ require('./private/util.php');
 $code = $_GET['code'];
 
 queries(function ($query) use ($code) {
+	$res = $query(
+		'SELECT * FROM users WHERE code = ?',
+		's', $code
+	);
+	$row = $res->fetch_array(MYSQLI_ASSOC);
+
+	if (!$row) {
+		die('{}');
+	}
+
     $res = $query(
-		'SELECT id, name, year FROM students WHERE code = ?',
+		'SELECT id, name, year, admin FROM users WHERE code = ?',
 		's', $code
     );
     $info = $res->fetch_array(MYSQLI_ASSOC);

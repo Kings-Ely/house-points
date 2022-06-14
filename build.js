@@ -7,7 +7,7 @@ import * as fs from "fs";
 
 const REMOTE_ADDRESS = 'josephcoppin@josephcoppin.com';
 const REMOTE_PATH = '/public_html/school/house-points';
-const LOCAL_PATH = './dist/'
+const LOCAL_PATH = './dist/';
 
 async function uploadFrontend () {
     const paths = fs.readdirSync(LOCAL_PATH);
@@ -31,7 +31,7 @@ async function main () {
 
     await uploadFrontend();
 
-    console.log(chalk.green('Finished Uploading in ' + (now() - start).toFixed(3)));
+    console.log(chalk.green(`Finished Uploading in ${(now() - start).toFixed(3)}`));
 }
 
 main();
