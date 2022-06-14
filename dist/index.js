@@ -51,11 +51,13 @@ window.fetch = async (...args) => {
     if (!showingLoading) {
         // pre-fetch
         showingLoading = true;
+        shouldHideAtEnd = true;
+
         document.body.style.cursor = 'progress';
         loader = document.createElement('div');
-        document.body.appendChild(loader)
-        loader.id = 'loader';
-        loader.innerHTML = `<div id="loader-center"></div>`;
+        document.body.appendChild(loader);
+        loader.classList.add('lds-ripple');
+        loader.innerHTML = `<div></div><div></div>`;
     }
 
     // fetch

@@ -42,6 +42,22 @@
         #search {
             background: none;
         }
+
+        #csv-form {
+            padding: 5px;
+            margin: 10px;
+            border: 1px solid var(--border-light);
+            border-radius: 5px;
+            width: fit-content;
+        }
+
+        #csv-form > button {
+            font-size: 15px;
+            cursor: pointer;
+        }
+        #csv-form > button:hover {
+            color: var(--text-light);
+        }
     </style>
 </head>
 <body>
@@ -63,6 +79,11 @@
         </button>
         <div id="add-student-error"></div>
     </div>
+
+    <form action="../../api/import-students-csv.php" id=csv-form>
+        <input type="file" name="filename" style="font-size: 15px">
+        <button >Upload CSV of students</button>
+    </form>
 
     <div id="with-all-students-menu">
         <div>
