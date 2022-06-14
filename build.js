@@ -18,6 +18,9 @@ async function uploadFrontend () {
             await $`sshpass -f './sshPass.txt' scp -r ${LOCAL_PATH}${path} ${REMOTE_ADDRESS}:~${REMOTE_PATH}`;
             continue;
         }
+        if (path.toLowerCase() === '.ds_store') {
+            continue;
+        }
         await $`sshpass -f './sshPass.txt' scp ${LOCAL_PATH}${path} ${REMOTE_ADDRESS}:~${REMOTE_PATH}`;
 
     }
