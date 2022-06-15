@@ -3,6 +3,8 @@ const selected = [];
 const searchFilterInput = document.getElementById('search');
 
 function showStudent (student, div, selected) {
+    const isMe = student['code'] === localStorage.hpCode;
+
     div.innerHTML += `
         <div class="student">
             <div>
@@ -39,13 +41,22 @@ function showStudent (student, div, selected) {
             </div>
             
             <div style="min-width: 150px">
-                <button 
-                    onclick="window.signInAs('${student['code']}', '${student['name']}')" 
-                    class="student-link"
-                >
-                    ${student['name']}
-                    <span class="label">Sign In As ${student['name']}</span>
-                </button>
+                ${isMe ? `
+                    <span 
+                        class="student-link"
+                    >
+                        <b>${student['name']}</b>
+                        <span class="label">Me</span>
+                    </span>
+                ` : `
+                    <button 
+                        onclick="window.signInAs('${student['code']}', '${student['name']}')" 
+                        class="student-link"
+                    >
+                        ${student['name']}
+                        <span class="label">Sign In As ${student['name']}</span>
+                    </button>
+                `}
             </div>
            
             <div>
