@@ -44,6 +44,8 @@ function resetPodium () {
 
 function leaderboard (hps) {
 
+    hps = hps.filter(user => showYears.includes(parseInt(user['year'])));
+
     resetPodium();
 
     if (hps.length === 0) {

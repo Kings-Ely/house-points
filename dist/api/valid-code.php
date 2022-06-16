@@ -15,6 +15,6 @@ queries(false, function ($query) use ($code) {
 	} else if ($row['admin'] == 1) {
 		echo '2';
 	} else {
-		echo '0';
+		echo '1';
 	}
 });

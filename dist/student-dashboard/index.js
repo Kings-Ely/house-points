@@ -1,59 +1,78 @@
-(async () => {
+const nameDiv = document.getElementById('name');
+const hpsDiv = document.getElementById('hps');
 
-    const nameDiv = document.getElementById('name');
-    const hpsDiv = document.getElementById('hps');
+function housePoints (hps) {
 
-    function title (info, hps) {
-        const numHps = hps.filter(c => c['accepted'] && !c['rejectMessage']).length;
+    if (hps.length === 0) {
+        hpsDiv.innerHTML = `
+            <p style="font-size: 30px; margin: 50px; text-align: center">
+                Looks like you haven't got any house point yet!
+            </p>
+        `;
+        return;
+    }
 
-        if (numHps < 1) {
-            nameDiv.innerHTML = `
+    hpsDiv.innerHTML = '';
+
+    // handle lots of house points using promises
+    setTimeout(async () => {
+        for (let hp of hps) {
+            await showHp(hp);
+        }
+    }, 0);
+}
+
+function title (info, hps) {
+    const numHps = hps.filter(c => c['accepted'] && !c['rejectMessage']).length;
+
+    if (numHps < 1) {
+        nameDiv.innerHTML = `
             <p style="font-size: 50px">
                 ${info['name']} has No House Points
             </p>
         `;
-        } else {
-            nameDiv.innerHTML = `
+    } else {
+        nameDiv.innerHTML = `
             <p style="font-size: 50px">
                 ${info['name']} has ${numHps} House Point${numHps < 2 ? '' :'s'}
             </p>
         `;
-        }
     }
+}
 
-    function showHp (hp) {
-        let acceptedHTML;
-        let icon = '';
+function showHp (hp) {
+    let acceptedHTML;
+    let icon = '';
 
-        if (hp['status'] === 'Rejected') {
-            acceptedHTML = `
+    if (hp['status'] === 'Rejected') {
+        acceptedHTML = `
             Rejected ${getRelativeTime(hp['accepted'] * 1000)}
             <br>
             <b>"${hp['rejectMessage']}"</b>
         `;
-            icon = `
+        icon = `
             <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" style="fill: red">
                 <path d="M12.45 37.65 10.35 35.55 21.9 24 10.35 12.45 12.45 10.35 24 21.9 35.55 10.35 37.65 12.45 26.1 24 37.65 35.55 35.55 37.65 24 26.1Z"/>
             </svg>
         `;
 
-        } else if (hp['status'] === 'Accepted') {
-            acceptedHTML = `
+    } else if (hp['status'] === 'Accepted') {
+        acceptedHTML = `
             Accepted ${getRelativeTime(hp['accepted'] * 1000)}
         `;
-            icon = `
+        icon = `
             <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" style="fill: var(--accent)">
                 <path d="M18.9 35.7 7.7 24.5 9.85 22.35 18.9 31.4 38.1 12.2 40.25 14.35Z"/>
             </svg>
         `;
 
-        } else {
-            acceptedHTML = 'Not Yet Accepted';
-        }
+    } else {
+        acceptedHTML = 'Not Yet Accepted';
+    }
 
-        const submittedTime = hp['timestamp'] * 1000;
+    const submittedTime = hp['timestamp'] * 1000;
 
-        hpsDiv.innerHTML += `
+    hpsDiv.innerHTML += `
         <div class="house-point">
             <div style="min-width: 50%">
                 ${hp['description']}
@@ -76,36 +95,11 @@
             </div>
         </div>
     `;
-        // stop it crashing with lots of house points
-        return new Promise(r => setTimeout(r, 0));
-    }
+    // stop it crashing with lots of house points
+    return new Promise(r => setTimeout(r, 0));
+}
 
-    function housePoints (hps) {
-
-        if (hps.length === 0) {
-            hpsDiv.innerHTML = `
-                <p style="font-size: 30px; margin: 50px; text-align: center">
-                    Looks like you haven't got any house point yet!
-                </p>
-            `;
-            return;
-        }
-
-        hpsDiv.innerHTML = '';
-
-        // handle lots of house points using promises
-        setTimeout(async () => {
-            for (let hp of hps) {
-                await showHp(hp);
-            }
-        }, 0);
-    }
-
-    async function main () {
-        const info = await (await fetch(`../api/student-info.php?code=${localStorage.hpCode}`)).json();
-        title(info, info['hps']);
-        housePoints(info['hps']);
-    }
+(async () => {
 
     $("footer").load(`../footer.html`);
 
@@ -156,3 +150,9 @@ window.signout = () => {
     localStorage.removeItem('hpCode');
     window.location.assign('../');
 };
+
+async function main () {
+    const info = await (await fetch(`../api/student-info.php?code=${localStorage.hpCode}`)).json();
+    title(info, info['hps']);
+    housePoints(info['hps']);
+}

@@ -26,6 +26,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 CREATE TABLE `housepoints` (
     `id` int(11) NOT NULL,
     `student` int(11) NOT NULL,
+    `count` int(11) NOT NULL DEFAULT 1,
     `description` text NOT NULL,
     `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `completed` timestamp NULL DEFAULT NULL,
