@@ -60,7 +60,7 @@ function showStudent (student, div, selected) {
             </div>
            
             <div>
-                ${student['accepted']}
+                ${student['student'] ? student['accepted'] : ''}
             </div>
             
             <div>
