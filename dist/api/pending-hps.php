@@ -9,7 +9,8 @@ queries(true, function ($query) {
                 housepoints.description,
                 UNIX_TIMESTAMP(housepoints.created) as timestamp, 
                 users.name as studentName,
-                users.code as studentCode
+                users.code as studentCode,
+                housepoints.quantity
             FROM housepoints, users
             WHERE 
                 housepoints.status = "Pending" AND

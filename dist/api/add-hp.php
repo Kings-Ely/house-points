@@ -18,8 +18,8 @@ queries(true, function ($query) {
     }
 
     $query(
-        'INSERT INTO housepoints (student, description, completed, status) VALUES (?, ?, CURRENT_TIMESTAMP, "Accepted")',
-        'is', $studentID, $_GET['description']
+        'INSERT INTO housepoints (student, description, completed, status, quantity) VALUES (?, ?, CURRENT_TIMESTAMP, "Accepted", ?)',
+        'is', $studentID, $_GET['description'], $_GET['quantity']
     );
 
     echo '1';

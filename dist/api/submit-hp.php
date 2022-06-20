@@ -11,8 +11,8 @@ queries(false, function ($query) {
     }
 
     $query(
-        'INSERT INTO housepoints (student, description) VALUES (?, ?)',
-        'is', $studentID, $_GET['description']
+        'INSERT INTO housepoints (student, description, quantity) VALUES (?, ?, ?)',
+        'is', $studentID, $_GET['description'], $_GET['quantity']
     );
 
     echo 1;

@@ -13,16 +13,15 @@ async function uploadFrontend () {
     const paths = fs.readdirSync(LOCAL_PATH);
 
     for (const path of paths) {
+        // skip hidden files and directories
+        if (path[0] === '.') continue;
+
         console.log('Uploading path ' + path);
         if (fs.statSync(LOCAL_PATH + path).isDirectory()) {
             await $`sshpass -f './sshPass.txt' scp -r ${LOCAL_PATH}${path} ${REMOTE_ADDRESS}:~${REMOTE_PATH}`;
             continue;
         }
-        if (path.toLowerCase() === '.ds_store') {
-            continue;
-        }
         await $`sshpass -f './sshPass.txt' scp ${LOCAL_PATH}${path} ${REMOTE_ADDRESS}:~${REMOTE_PATH}`;
-
     }
 }
 

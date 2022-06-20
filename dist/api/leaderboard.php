@@ -7,7 +7,7 @@ queries(false, function ($query) {
 			SUM(
 			    CASE 
 			        WHEN housepoints.status="Accepted" 
-			        THEN 1 ELSE 0
+			        THEN housepoints.quantity ELSE 0
 		        END
 		    ) AS housepoints
 		FROM users LEFT JOIN housepoints

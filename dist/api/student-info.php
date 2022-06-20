@@ -17,9 +17,10 @@ queries(false, function ($query) use ($code) {
     $info['hps'] = array();
     $res = $query(<<<'SQL'
         SELECT id, description, status,
-           UNIX_TIMESTAMP(created) as timestamp,
-           UNIX_TIMESTAMP(completed) as accepted,
-           rejectMessage 
+			UNIX_TIMESTAMP(created) as timestamp,
+			UNIX_TIMESTAMP(completed) as accepted,
+			rejectMessage
+        	quantity
         FROM housepoints
         WHERE student = ?
         ORDER BY timestamp DESC
