@@ -8,6 +8,7 @@
   },
   "type": "module",
   "devDependencies": {
-    "@types/node": "^17.0.42"
+    "@types/node": "^17.0.42",
+    "jest": "^28.1.1"
   }
 }
