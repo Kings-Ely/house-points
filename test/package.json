@@ -1,0 +1,12 @@
+{
+  "name": "house-points",
+  "version": "1.0.0",
+  "dependencies": {
+    "chalk": "^5.0.1",
+    "zx": "^6.1.0"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^17.0.42"
+  }
+}
