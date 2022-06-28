@@ -15,14 +15,20 @@ const tests = [
 ];
 
 async function startServer () {
-	$`cd dist/api; php -S localhost:${PORT}`;
+	try {
+		$`cd dist/api; php -S localhost:${PORT}`;
+	} catch (e) {
+		console.log(c.red`ERROR: --------- on PHP server start`);
+		console.error(e);
+	}
 
 	// sleep for a bit to wait for sever to start - not sure how long this takes however
 	await new Promise(r => setTimeout(r, 100));
 }
 
 async function api (path) {
-	return await fetch(`http://localhost:${PORT}/${path}`);
+	const res = await fetch(`http://localhost:${PORT}/${path}`);
+	return await res.text();
 }
 
 function logResults (results) {
@@ -42,8 +48,11 @@ function logResults (results) {
 	if (fails) {
 		console.log(c.red`${fails.length} Fails:`);
 	}
+	let i = 0;
 	for (let fail of fails) {
-		console.log(c.red`Fail: ${fail}`);
+		console.log(c.red`Fail #${i}:`);
+		console.log(fail);
+		i++;
 	}
 }
 
@@ -52,11 +61,11 @@ async function test () {
 
 	for (let test of tests) {
 		let res;
-		try {
+	//	try {
 			res = await test(api)
-		} catch (e) {
-			res = e;
-		}
+	//	} catch (e) {
+	//		res = e;
+		//}
 		results.push(res);
 	}
 
@@ -69,7 +78,9 @@ async function test () {
 		await setup();
 		await startServer();
 		await test();
-	} catch (e) {}
+	} catch (e) {
+		console.error(e);
+	}
 
 	// make ure to kill the php server even if something throws an error
 	$`kill $(ps aux | grep '[p]hp -S localhost' | awk '{print $2}')`;
