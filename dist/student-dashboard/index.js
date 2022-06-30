@@ -101,8 +101,6 @@ function showHp (hp) {
 
 (async () => {
 
-    $("footer").load(`../footer.html`);
-
     const validCode = await (await fetch(`../api/valid-code.php?code=${localStorage.hpCode}`)).text();
 
     if (validCode === '2') {
@@ -156,3 +154,6 @@ async function main () {
     title(info, info['hps']);
     housePoints(info['hps']);
 }
+
+$("footer").load(`../footer.html`);
+$("nav").load(`../nav.html`);

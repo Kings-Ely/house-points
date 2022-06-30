@@ -1,75 +1,45 @@
-// Utility script imported by all pages
+const go = document.getElementById('go');
+const code = document.getElementById('code');
+const error = document.getElementById('error');
 
-const units = {
-    year  : 24 * 60 * 60 * 1000 * 365,
-    month : 24 * 60 * 60 * 1000 * 365/12,
-    day   : 24 * 60 * 60 * 1000,
-    hour  : 60 * 60 * 1000,
-    minute: 60 * 1000,
-    second: 1000
+go.onclick = async () => {
+	const myCode = code.value.toLowerCase();
+	const valid = await (await fetch(`./api/valid-code.php?code=${myCode}`)).text();
+	if (valid === '1') {
+		localStorage.hpCode = myCode;
+		document.location.assign('./student-dashboard');
+		return;
+	} else if (valid === '2') {
+		localStorage.hpCode = myCode;
+		document.location.assign('./admin-dashboard');
+		return;
+	}
+	error.innerText = 'Looks like that is an invalid code, sorry!';
 };
 
-const rtf = new Intl.RelativeTimeFormat('en', {
-    numeric: 'auto',
-});
+code.onchange = (evt) => {
 
-const getRelativeTime = (d1, d2 = new Date()) => {
-    const elapsed = d1 - d2;
+	if (evt.key === 'Enter') {
+		go.onclick();
+		evt.preventDefault();
+		return;
+	}
 
-    // "Math.abs" accounts for both "past" & "future" scenarios
-    for (const u in units) {
-        if (Math.abs(elapsed) > units[u] || u === 'second') {
-            return rtf.format(Math.round(elapsed/units[u]), u);
-        }
-    }
+	code.value = cleanCode(code.value);
+
+	// just to make sure :]
+	setTimeout(() => {
+		code.value = cleanCode(code.value);
+	}, 0);
 };
 
-window.copyToClipboard = async (text) => {
-    await navigator.clipboard.writeText(text);
-};
+code.onkeydown = code.onchange;
+code.onclick = code.onchange;
+code.onpaste = code.onchange;
 
-window.cleanCode = (code) => {
-    return code
-        .split('')
-        // remove non-alphabetic characters
-        .filter(c => 'abcdefghijklmnopqrstuvwxyz'.indexOf(c.toLowerCase()) !== -1)
-        .join('')
-        // default to upper case
-        .toUpperCase()
-        // max length
-        .substring(0, 10);
-}
+$(`footer`).load(`footer.html`);
+$(`nav`).load(`nav.html`);
 
-// Proxy fetch api to show loading while requests are being made
-// but only show the spinner if no other requests are still pending,
-// which would mean the spinner is already being shown.
-const oldFetch = fetch;
-let showingLoading = false;
-window.fetch = async (...args) => {
-    let shouldHideAtEnd = false;
-    let loader;
-    if (!showingLoading) {
-        // pre-fetch
-        showingLoading = true;
-        shouldHideAtEnd = true;
-
-        document.body.style.cursor = 'progress';
-        loader = document.createElement('div');
-        document.body.appendChild(loader);
-        loader.classList.add('lds-ripple');
-        loader.innerHTML = `<div></div><div></div>`;
-    }
-
-    // fetch
-    const res = await oldFetch(...args);
-
-    if (shouldHideAtEnd) {
-        // post fetch
-        showingLoading = false;
-        document.body.removeChild(loader);
-        document.body.style.cursor = 'default';
-    }
-
-
-    return res;
+window.paste = async () => {
+	code.value = cleanCode(await navigator.clipboard.readText());
 };

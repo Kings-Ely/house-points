@@ -123,3 +123,4 @@ async function main (reload=true) {
 main();
 
 $("footer").load(`../footer.html`);
+$("nav").load(`../nav.html`);
