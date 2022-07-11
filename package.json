@@ -1,13 +1,11 @@
 {
-  "name": "house-points",
-  "version": "1.0.0",
-  "dependencies": {
-    "chalk": "^5.0.1",
-    "performance-now": "^2.1.0",
-    "zx": "^6.1.0"
-  },
-  "type": "module",
-  "devDependencies": {
-    "@types/node": "^17.0.42"
-  }
+    "name": "house-points",
+    "version": "0.1.0",
+    "type": "module",
+    "devDependencies": {
+        "@types/node": "^17.0.42",
+        "chalk": "^5.0.1",
+        "performance-now": "^2.1.0",
+        "zx": "^6.1.0"
+    }
 }

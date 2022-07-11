@@ -1,5 +1,8 @@
 #!/usr/bin/env zx
+$.verbose = false
+$.log = () => {};
 
+import fetch from 'node-fetch';
 import { $ } from "zx";
 import c from 'chalk';
 import setup from './setup.js';
@@ -9,8 +12,7 @@ const PORT = 8090;
 const tests = [
 	async (api) => {
 		let res = await api('ping.php');
-		if (res === '1') return true;
-		return res;
+		return res === '1' ?  true : res;
 	}
 ];
 
@@ -27,7 +29,16 @@ async function startServer () {
 }
 
 async function api (path) {
-	const res = await fetch(`http://localhost:${PORT}/${path}`);
+	const url = `http://localhost:${PORT}/${path}`;
+	console.log(`[GET] ${url}`);
+
+	const res = await fetch(url, {
+		method: 'GET'
+	}).catch(e => {
+		console.log('Error in API request');
+		console.log(e);
+	});
+
 	return await res.text();
 }
 
@@ -60,12 +71,7 @@ async function test () {
 	let results = [];
 
 	for (let test of tests) {
-		let res;
-	//	try {
-			res = await test(api)
-	//	} catch (e) {
-	//		res = e;
-		//}
+		let res = await test(api);
 		results.push(res);
 	}
 
@@ -81,7 +87,4 @@ async function test () {
 	} catch (e) {
 		console.error(e);
 	}
-
-	// make ure to kill the php server even if something throws an error
-	$`kill $(ps aux | grep '[p]hp -S localhost' | awk '{print $2}')`;
 })();

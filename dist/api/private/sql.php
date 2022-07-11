@@ -24,6 +24,7 @@ function queries ($require_admin, $cb) {
     // Create connection
     $con = new mysqli($servername, $username, $password, $db);
 
+
     // Check connection
     if ($con->connect_error) {
         die("Connection to database failed: " . $con->connect_error);
@@ -34,17 +35,17 @@ function queries ($require_admin, $cb) {
 
         $stmt = $con->prepare($query);
         if (!$stmt) {
-            die('Failed to execute statement');
+            echo 'Failed to execute statement';
         }
 
         if ($d_types) {
             if (!$stmt->bind_param($d_types, ...$parameters)) {
-                die('failed to bind parameters');
+                echo 'failed to bind parameters';
             }
         }
 
         if (!$stmt->execute()) {
-            die('failed to execute sql query');
+            echo 'failed to execute sql query';
         }
 
         return $stmt->get_result();
@@ -57,9 +58,11 @@ function queries ($require_admin, $cb) {
         );
         $row = $res->fetch_array(MYSQLI_ASSOC);
         if (!$row) {
-            die('0');
+            echo '0';
+            return;
         } else if ($row['admin'] != 1) {
-            die('0');
+            echo '0';
+            return;
         }
     }
 
