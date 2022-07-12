@@ -1,6 +1,14 @@
 <?php
 require('./private/util.php');
 
+/** ADMIN
+ * GET change-admin.php: '1' | error
+ *
+ * ?id= number - the id of the student to promote/demote
+ *
+ * Changes a user from admin to non-admin or vice versa. You cannot
+ */
+
 queries(true, function ($query) {
     $id = $_GET['id'];
 

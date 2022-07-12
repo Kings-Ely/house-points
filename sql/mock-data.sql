@@ -1,0 +1,1 @@
+INSERT INTO users (name, code, year, admin, student) VALUES ("ADMIN", "admin", 0, 1, 0);

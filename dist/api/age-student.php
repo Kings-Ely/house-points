@@ -1,6 +1,15 @@
 <?php
 require('./private/util.php');
 
+/** ADMIN
+ * GET age-student.php: '1' | error
+ *
+ * ?amount= number - the number of years to change by. Can be positive or negative.
+ * ?id= number - the id of the student to change years
+ *
+ * Changes the year of the student by an amount
+ */
+
 queries(true, function ($query) {
 
     $query(

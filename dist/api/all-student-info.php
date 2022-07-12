@@ -1,6 +1,10 @@
 <?php
-
 require('./private/util.php');
+
+/** ADMIN
+ * GET all-student-info.php: JSON ({id, name, year, code, admin, student, pending, accepted, rejected}[])
+ *                          - array of all users
+ */
 
 queries(true, function ($query) {
     $res = $query(<<<'SQL'

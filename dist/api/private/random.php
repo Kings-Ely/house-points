@@ -18,8 +18,7 @@ class RandomStringGenerator
     /**
      * @param string $alphabet
      */
-    public function __construct($alphabet = '')
-    {
+    public function __construct($alphabet = '') {
         if ('' !== $alphabet) {
             $this->setAlphabet($alphabet);
         } else {
@@ -33,8 +32,7 @@ class RandomStringGenerator
     /**
      * @param string $alphabet
      */
-    public function setAlphabet($alphabet)
-    {
+    public function setAlphabet($alphabet) {
         $this->alphabet = $alphabet;
         $this->alphabetLength = strlen($alphabet);
     }
@@ -43,8 +41,7 @@ class RandomStringGenerator
      * @param int $length
      * @return string
      */
-    public function generate($length)
-    {
+    public function generate($length) {
         $token = '';
 
         for ($i = 0; $i < $length; $i++) {
@@ -60,8 +57,7 @@ class RandomStringGenerator
      * @param int $max
      * @return int
      */
-    protected function getRandomInteger($min, $max)
-    {
+    protected function getRandomInteger($min, $max) {
         $range = ($max - $min);
 
         if ($range < 0) {
@@ -78,7 +74,7 @@ class RandomStringGenerator
         $bits = (int) $log + 1;
 
         // Set all lower bits to 1.
-        $filter = (int) (1 << $bits) - 1;
+        $filter = (1 << $bits) - 1;
 
         do {
             $rnd = hexdec(bin2hex(openssl_random_pseudo_bytes($bytes)));

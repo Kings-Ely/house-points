@@ -35,17 +35,17 @@ function queries ($require_admin, $cb) {
 
         $stmt = $con->prepare($query);
         if (!$stmt) {
-            echo 'Failed to execute statement';
+            die('Failed to execute statement');
         }
 
         if ($d_types) {
             if (!$stmt->bind_param($d_types, ...$parameters)) {
-                echo 'failed to bind parameters';
+                die('failed to bind parameters');
             }
         }
 
         if (!$stmt->execute()) {
-            echo 'failed to execute sql query';
+            die('failed to execute sql query');
         }
 
         return $stmt->get_result();
@@ -58,10 +58,10 @@ function queries ($require_admin, $cb) {
         );
         $row = $res->fetch_array(MYSQLI_ASSOC);
         if (!$row) {
-            echo '0';
+            echo 'ADMIN_REQUIRED';
             return;
         } else if ($row['admin'] != 1) {
-            echo '0';
+            echo 'ADMIN_REQUIRED';
             return;
         }
     }

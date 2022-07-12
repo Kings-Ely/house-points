@@ -1,6 +1,15 @@
 <?php
 require('./private/util.php');
 
+/** ADMIN
+ * GET accept-hp.php: '1' | error
+ *
+ * ?id= number - house point id
+ * ?reject= ?string - optional parameter, if present is reason for rejecting, if not present accepts hp
+ *
+ * Either rejects or accepts a house point that is currently pending
+ */
+
 queries(true, function ($query) {
     $id = $_GET['id'];
 
