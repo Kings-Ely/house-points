@@ -1,5 +1,4 @@
 import Test from '../framework.js';
-Test.battery('user-auth');
 
 const alphabet = 'abcdefghijklmnopqrstuvwxyz';
 
@@ -24,11 +23,12 @@ async function generateUsers (api, num=1) {
         if (code.length < 3 || code.length > 10) {
             return `User code is of incorrect length: '${code}'`;
         }
-        codes.push(code);
+        codes.push([code, name]);
     }
     return codes;
 }
 
+Test.battery('user-auth code generator');
 Test.test(() => {
     for (let i = 0; i < 10; i += 0.1) {
         let len = Math.ceil(i);
@@ -47,14 +47,23 @@ Test.test(() => {
     return true;
 });
 
+Test.battery('user-auth');
 Test.test(async (api) => {
 
     const codes = await generateUsers(api);
     if (!Array.isArray(codes)) return `Expected array of codes, got: ${codes}`;
-    const [ code ] = codes;
+    const [[ code, name ]] = codes;
 
     const validRes = await api(`valid-code.php?code=${code}`);
     if (validRes !== '1') return `Expected result of '1' from valid-code, got '${validRes}'`;
+
+    const infoRes = JSON.parse(await api(`student-info.php?code=${code}`));
+    if (infoRes.name !== name) return `Expected name to be '${name}', got '${infoRes.name}'`;
+    if (infoRes.name !== name) return `Expected name to be '${name}', got '${infoRes.name}'`;
+
+
+    const deleteRes = await api(`delete-student.php?id=${code}`);
+    if (deleteRes !== '1') return `Expected result of '1' from delete-student, got '${deleteRes}'`;
 
     return true;
 })

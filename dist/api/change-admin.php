@@ -5,8 +5,11 @@ require('./private/util.php');
  * GET change-admin.php: '1' | error
  *
  * ?id= number - the id of the student to promote/demote
+ * ?admin= number[0,1] - whether they should be an admin or not
  *
- * Changes a user from admin to non-admin or vice versa. You cannot
+ * Changes a user from admin to non-admin or vice versa.
+ * You cannot change your own admin privileges,
+ * so there must always be at least 1 admin account (if one originally)
  */
 
 queries(true, function ($query) {
