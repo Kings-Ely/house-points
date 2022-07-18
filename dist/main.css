@@ -39,7 +39,7 @@ footer {
     text-align: center;
 }
 
-svg {
+svg, img {
     fill: var(--text-light);
 }
 
