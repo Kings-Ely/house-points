@@ -1,0 +1,36 @@
+::-webkit-scrollbar {
+    display: none;
+}
+
+#error {
+    color: var(--text-warning);
+    text-align: center;
+    width: 100%;
+    min-height: 1em;
+    transition: 500ms;
+}
+
+#code {
+    height: 1.2em;
+}
+
+.label {
+    transform: scale(0);
+    position: absolute;
+    display: inline-block;
+    transition: 100ms;
+    font-size: 15px;
+}
+
+:hover > .label {
+    transform: scale(1) translate(-90%, 50px);
+    background: var(--bg-accent);
+    border-radius: 5px;
+    padding: 6px;
+    z-index: 1000;
+}
+
+#content {
+    display: flex;
+    justify-content: center;
+}

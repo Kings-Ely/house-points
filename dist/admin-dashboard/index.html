@@ -3,60 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin - Osmond House Points</title>
-    <link href="../main.css" rel="stylesheet">
-    <link href="../darkmode.css" rel="stylesheet">
-    <script src="../main.js" defer></script>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="description" content="House Point System">
+
+    <script src="../main.js"></script>
+    <link rel="preload" href="../main.css" as="style" onload="asyncCSS(this)">
+    <link rel="preload" href="../darkmode.css" as="style" onload="asyncCSS(this)">
+    <link rel="preload" href="./index.css" as="style" onload="asyncCSS(this)">
     <script src="index.js" defer></script>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
-    <style>
-        .house-point {
-            border-bottom: 1px solid var(--border);
-            padding: 4px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        #add-hp-code, #add-hp-reason {
-            background: none;
-        }
-
-        #add-hp-code {
-            width: 100px;
-        }
-        #add-hp-reason {
-            width: calc(100% - 200px);
-        }
-
-        #add-hp-error, #add-student-error {
-            text-align: center;
-            color: var(--text-warning);
-        }
-
-        #students-link {
-            margin: 20px;
-            font-size: 20px;
-        }
-
-        #students-link:hover {
-            color: var(--text-light);
-        }
-
-        #leaderboard-link:hover .label {
-            transform: scale(1) translate(-90%, 50px);
-        }
-
-        #signout {
-            font-size: 16px;
-            text-underline: #575757;
-            cursor: pointer;
-        }
-
-        #signout:hover {
-            color: vaR(--text-light);
-        }
-    </style>
 </head>
 <body>
 <main style="display: block">
@@ -67,7 +24,7 @@
         </a>
     </div>
 
-    <button onclick="signout()" id="signout">
+    <button onclick="signout()" id="signout" aria-label="sign out">
         Sign Out
     </button>
 
@@ -88,7 +45,7 @@
         <label>
             <input type="text" id="add-hp-reason" placeholder="Why did they get the House Point?">
         </label>
-        <button id="add-hp-submit" class="icon">
+        <button id="add-hp-submit" class="icon" aria-label="add-house-point">
             <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M22.5 38V25.5H10V22.5H22.5V10H25.5V22.5H38V25.5H25.5V38Z"/></svg>
         </button>
         <div id="add-hp-error"></div>

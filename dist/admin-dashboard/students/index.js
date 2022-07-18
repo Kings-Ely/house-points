@@ -97,7 +97,7 @@ async function main (reload=true) {
     `;
 
     if (reload) {
-        students = await (await fetch(`../../api/all-student-info.php?myCode=${localStorage.hpCode}`)).json();
+        students = await (await fetch(`../../api/all-student-info.php`)).json();
     }
 
     const searchValue = searchFilterInput.value;
@@ -111,7 +111,7 @@ async function main (reload=true) {
 }
 
 (async () => {
-    const validCode = await (await fetch(`../../api/valid-code.php?code=${localStorage.hpCode}`)).text();
+    const validCode = await (await fetch(`../../api/valid-code.php?code=${getCode()}`)).text();
 
     if (validCode !== '2') {
         window.location.assign('../../');
@@ -121,7 +121,7 @@ async function main (reload=true) {
     await main();
 })();
 
-$("footer").load(`../../footer.html`);
+$`footer`.load(`../../footer.html`);
 
 document.getElementById('add-student-submit').onclick = async () => {
     const name = document.getElementById('add-student-name');
@@ -148,7 +148,7 @@ document.getElementById('add-student-submit').onclick = async () => {
         }
     }
 
-    await fetch(`../../api/add-user.php?name=${name.value}&year=${year.value}&myCode=${localStorage.hpCode}&admin=${studentYear === 0}`);
+    await fetch(`../../api/add-user.php?name=${name.value}&year=${year.value}&admin=${studentYear === 0}`);
 
     name.value = '';
 
@@ -160,7 +160,7 @@ window.delete = async (id, name) => {
         return;
     }
 
-    await fetch(`../../api/delete-student.php?id=${id}&myCode=${localStorage.hpCode}`);
+    await fetch(`../../api/delete-student.php?id=${id}`);
 
     main();
 };
@@ -171,7 +171,7 @@ window.deleteSelected = async () => {
     }
 
     for (let id of selected) {
-        await fetch(`../../api/delete-student.php?id=${id}&myCode=${localStorage.hpCode}`);
+        await fetch(`../../api/delete-student.php?id=${id}`);
     }
 
     main();
@@ -209,7 +209,7 @@ window.ageSelected = async (amount) => {
     }
 
     for (let id of selected) {
-        await fetch(`../../api/age-student.php?id=${id}&amount=${amount}&myCode=${localStorage.hpCode}`);
+        await fetch(`../../api/age-student.php?id=${id}&amount=${amount}`);
     }
 
     main();
@@ -234,7 +234,7 @@ window.giveHPToSelected = async () => {
     if (!reason) return;
 
     for (let id of selected) {
-        await fetch(`../../api/add-hp.php?myCode=${localStorage.hpCode}&description=${reason}&studentid=${id}`);
+        await fetch(`../../api/add-hp.php?description=${reason}&studentid=${id}`);
     }
 
     main();
@@ -245,7 +245,7 @@ window.revokeAdmin = async (id, name) => {
         return;
     }
 
-    await fetch(`../../api/change-admin.php?myCode=${localStorage.hpCode}&id=${id}&admin=0`);
+    await fetch(`../../api/change-admin.php?id=${id}&admin=0`);
 
     main();
 }
@@ -255,7 +255,7 @@ window.makeAdmin = async (id, name) => {
         return;
     }
 
-    await fetch(`../../api/change-admin.php?myCode=${localStorage.hpCode}&id=${id}&admin=1`);
+    await fetch(`../../api/change-admin.php?id=${id}&admin=1`);
 
     main();
 }

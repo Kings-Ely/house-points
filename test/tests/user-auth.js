@@ -12,8 +12,10 @@ const randomFromAlph = (len=5) => {
 
 async function generateUsers (api, num=1) {
     let codes = [];
+
     for (let i = 0; i < num; i++) {
-        const code = await api(`add-user.php?myCode=admin&name=${randomFromAlph()}`);
+        const name = randomFromAlph();
+        const code = await api(`add-user.php?myCode=admin&name=${name}`);
         if (typeof code !== 'string') return 'Expected string from user code';
         for (const char of code) {
             if (!alphabet.includes(char)) {

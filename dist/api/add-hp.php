@@ -13,6 +13,9 @@ require('./private/util.php');
  * Immediately awards house points to a student. Must be admin.
  */
 
+define('quantity', $_GET['quantity']);
+define('description', $_GET['description']);
+
 queries(true, function ($query) {
     if (array_key_exists('studentid', $_GET)) {
         $studentID = $_GET['studentid'];
@@ -31,7 +34,7 @@ queries(true, function ($query) {
 
     $query(
         'INSERT INTO housepoints (student, description, completed, status, quantity) VALUES (?, ?, CURRENT_TIMESTAMP, "Accepted", ?)',
-        'is', $studentID, $_GET['description'], $_GET['quantity']
+        'is', $studentID, description, quantity
     );
 
     echo '1';

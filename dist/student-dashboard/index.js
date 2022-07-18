@@ -101,7 +101,7 @@ function showHp (hp) {
 
 (async () => {
 
-    const validCode = await (await fetch(`../api/valid-code.php?code=${localStorage.hpCode}`)).text();
+    const validCode = await (await fetch(`../api/valid-code.php?code=${getCode()}`)).text();
 
     if (validCode === '2') {
         document.getElementById('top-right-menu').innerHTML += `
@@ -126,7 +126,7 @@ document.getElementById('submit-hp').onclick = async () => {
 
     for (let reason of hpReason.value.split('\n')) {
         if (!reason) continue;
-        await fetch(`../api/submit-hp.php?description=${reason}&student=${localStorage.hpCode}`);
+        await fetch(`../api/submit-hp.php?description=${reason}&student=${getCode()}`);
     }
     await main();
     hpReason.value = '';
@@ -150,7 +150,7 @@ window.signout = () => {
 };
 
 async function main () {
-    const info = await (await fetch(`../api/student-info.php?code=${localStorage.hpCode}`)).json();
+    const info = await (await fetch(`../api/student-info.php?code=${getCode()}`)).json();
     title(info, info['hps']);
     housePoints(info['hps']);
 }

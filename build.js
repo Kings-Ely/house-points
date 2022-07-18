@@ -18,10 +18,10 @@ async function uploadFrontend () {
 
         console.log('Uploading path ' + path);
         if (fs.statSync(LOCAL_PATH + path).isDirectory()) {
-            await $`sshpass -f './sshPass.txt' scp -r ${LOCAL_PATH}${path} ${REMOTE_ADDRESS}:~${REMOTE_PATH}`;
+            await $`sshpass -f './sshPass.txt' rsync -r --exclude='*.env' ${LOCAL_PATH}${path} ${REMOTE_ADDRESS}:~${REMOTE_PATH}`;
             continue;
         }
-        await $`sshpass -f './sshPass.txt' scp ${LOCAL_PATH}${path} ${REMOTE_ADDRESS}:~${REMOTE_PATH}`;
+        await $`sshpass -f './sshPass.txt' rsync ${LOCAL_PATH}${path} ${REMOTE_ADDRESS}:~${REMOTE_PATH}`;
     }
 }
 

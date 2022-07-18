@@ -54,7 +54,10 @@ async function api (path) {
     const url = `http://localhost:${PORT}/${path}`;
 
     const res = await fetch(url, {
-        method: 'GET'
+        method: 'GET',
+        headers: {
+            cookie: 'myCode=admin'
+        }
     }).catch(e => {
         console.log('Error in API request');
         console.log(e);

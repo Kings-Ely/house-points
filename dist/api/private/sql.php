@@ -2,6 +2,11 @@
 // imports relative to file being used, so this file can only be used in api/*.php files
 require('./private/env.php');
 
+const USER_COOKIE_CODE_KEY = 'hpCode';
+
+define('USER_COOKIE_CODE', array_key_exists(USER_COOKIE_CODE_KEY, $_COOKIE) ?
+    $_COOKIE[USER_COOKIE_CODE_KEY] : '');
+
 // custom api for making queries to database with a callback
 /*
  * Example:
@@ -30,8 +35,7 @@ function queries ($require_admin, $cb) {
         die("Connection to database failed: " . $con->connect_error);
     }
 
-
-    $dbQuery = function ($query, $d_types=null, &...$parameters) use ($con) {
+    $dbQuery = function ($query, $d_types=null, ...$parameters) use ($con) {
 
         $stmt = $con->prepare($query);
         if (!$stmt) {
@@ -52,9 +56,10 @@ function queries ($require_admin, $cb) {
     };
 
     if ($require_admin) {
+
         $res = $dbQuery(
             'SELECT admin FROM users WHERE code = ?',
-            's', $_GET['myCode']
+            's', USER_COOKIE_CODE
         );
         $row = $res->fetch_array(MYSQLI_ASSOC);
         if (!$row) {
@@ -70,4 +75,3 @@ function queries ($require_admin, $cb) {
 
     $con->close();
 }
-

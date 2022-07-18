@@ -1,12 +1,12 @@
 <?php
 require('./private/util.php');
 
-$code = $_GET['code'];
+define('code', $_GET['code']);
 
-queries(false, function ($query) use ($code) {
+queries(false, function ($query) {
     $res = $query(
 		'SELECT admin FROM users WHERE code = ?',
-		's', $code
+		's', code
     );
     $row = $res->fetch_array(MYSQLI_ASSOC);
 

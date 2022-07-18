@@ -10,11 +10,14 @@ require('./private/util.php');
  * Changes the year of the student by an amount
  */
 
+define("id", $_GET['id']);
+define("amount", $_GET['amount']);
+
 queries(true, function ($query) {
 
     $query(
 		'UPDATE users SET year = year + ? WHERE id=?',
-		'ii', $_GET['amount'], $_GET['id']
+		'ii', amount, id
     );
 
     echo '1';

@@ -10,18 +10,20 @@ require('./private/util.php');
  * Either rejects or accepts a house point that is currently pending
  */
 
+define('id', $_GET['id']);
+
 queries(true, function ($query) {
-    $id = $_GET['id'];
+
 
     $query(
 		'UPDATE housepoints SET completed = CURRENT_TIMESTAMP, status="Accepted" WHERE id=?',
-		'i', $id
+		'i', id
     );
 
     if (array_key_exists('reject', $_GET)) {
         $query(
 			'UPDATE housepoints SET rejectMessage=?, status="Rejected" WHERE id=?',
-			'si', $_GET['reject'], $id
+			'si', $_GET['reject'], id
         );
     }
 

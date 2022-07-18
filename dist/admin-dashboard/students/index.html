@@ -3,71 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin - Osmond House Points</title>
-    <link href="../../main.css" rel="stylesheet">
-    <link href="../../darkmode.css" rel="stylesheet">
-    <script src="../../main.js" defer></script>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+
+    <script src="../../main.js"></script>
+    <link rel="preload" href="../../main.css" as="style" onload="asyncCSS(this)">
+    <link rel="preload" href="./index.css" as="style" onload="asyncCSS(this)">
+    <link rel="preload" href="../../darkmode.css" as="style" onload="asyncCSS(this)">
     <script src="index.js" defer></script>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
-    <style>
-
-        #students {
-            margin: 50px 20px 20px 20px;
-        }
-
-        .student {
-            border-bottom: 1px solid var(--border);
-            padding: 4px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .student > div:first-child {
-            width: 130px;
-        }
-
-        .student-link {
-            border: none;
-            text-underline: #575757;
-            font-size: 16px
-        }
-
-        .student-link:hover {
-            cursor: pointer;
-        }
-
-        #with-all-students-menu {
-            padding: 100px 20px 20px 20px;
-            display: flex; justify-content: space-between;
-            align-items: center;
-        }
-
-        #search {
-            background: none;
-        }
-
-        #csv-form {
-            padding: 5px;
-            margin: 10px;
-            border: 1px solid var(--border-light);
-            border-radius: 5px;
-            width: fit-content;
-        }
-
-        #csv-form > button {
-            font-size: 15px;
-            cursor: pointer;
-        }
-        #csv-form > button:hover {
-            color: var(--text-light);
-        }
-
-        #students-header {
-            border-bottom-width: 2px;
-        }
-
-    </style>
 </head>
 <body>
 <main style="display: block">
@@ -80,20 +25,20 @@
     <h2>Add Student</h2>
     <div>
         <label>
-            <input type="text" id="add-student-name" placeholder="Name">
+            <input type="text" id="add-student-name" placeholder="Name" aria-label="name">
         </label>
         <label>
-            <input type="number" id="add-student-year" max=13 min=9 placeholder="Year">
+            <input type="number" id="add-student-year" max=13 min=9 placeholder="Year" aria-label="year">
         </label>
         <button id="add-student-submit" class="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M22.5 38V25.5H10V22.5H22.5V10H25.5V22.5H38V25.5H25.5V38Z"/></svg>
+            <img src="../../resources/plus.svg" alt="submit">
         </button>
         <div id="add-student-error"></div>
     </div>
 
     <form action="../../api/import-students-csv.php" id=csv-form>
         <input type="file" name="filename" style="font-size: 15px">
-        <button >Upload CSV of students</button>
+        <button>Upload CSV of students</button>
     </form>
 
     <div id="with-all-students-menu">
@@ -114,33 +59,33 @@
         <div>
             With All Selected:
 
-            <button onclick="window.deleteSelected()" class="icon">
+            <button onclick="window.deleteSelected()" class="icon" aria-label="delete selected">
                 <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48">
                     <path d="M13.05 42Q11.85 42 10.95 41.1Q10.05 40.2 10.05 39V10.5H8V7.5H17.4V6H30.6V7.5H40V10.5H37.95V39Q37.95 40.2 37.05 41.1Q36.15 42 34.95 42ZM34.95 10.5H13.05V39Q13.05 39 13.05 39Q13.05 39 13.05 39H34.95Q34.95 39 34.95 39Q34.95 39 34.95 39ZM18.35 34.7H21.35V14.75H18.35ZM26.65 34.7H29.65V14.75H26.65ZM13.05 10.5V39Q13.05 39 13.05 39Q13.05 39 13.05 39Q13.05 39 13.05 39Q13.05 39 13.05 39Z"/>
                 </svg>
                 <span class="label">Delete</span>
             </button>
 
-            <button onclick="window.ageSelected(1)" class="icon">
+            <button onclick="window.ageSelected(1)" class="icon" aria-label="move selected up a year">
                 <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48">
                     <path d="M22.5 31.4H25.5V22.3L29.2 26L31.3 23.9L24 16.6L16.7 23.9L18.8 26L22.5 22.3ZM24 44Q19.75 44 16.1 42.475Q12.45 40.95 9.75 38.25Q7.05 35.55 5.525 31.9Q4 28.25 4 24Q4 19.8 5.525 16.15Q7.05 12.5 9.75 9.8Q12.45 7.1 16.1 5.55Q19.75 4 24 4Q28.2 4 31.85 5.55Q35.5 7.1 38.2 9.8Q40.9 12.5 42.45 16.15Q44 19.8 44 24Q44 28.25 42.45 31.9Q40.9 35.55 38.2 38.25Q35.5 40.95 31.85 42.475Q28.2 44 24 44ZM24 41Q31.25 41 36.125 36.125Q41 31.25 41 24Q41 16.75 36.125 11.875Q31.25 7 24 7Q16.75 7 11.875 11.875Q7 16.75 7 24Q7 31.25 11.875 36.125Q16.75 41 24 41ZM24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Z"/>
                 </svg>
                 <span class="label">Move Up a Year</span>
             </button>
 
-            <button onclick="window.ageSelected(-1)" class="icon">
+            <button onclick="window.ageSelected(-1)" class="icon" aria-label="move selected down a year">
                 <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M24 31.4 31.3 24.1 29.2 22 25.5 25.7V16.6H22.5V25.7L18.8 22L16.7 24.1ZM24 44Q19.75 44 16.1 42.475Q12.45 40.95 9.75 38.25Q7.05 35.55 5.525 31.9Q4 28.25 4 24Q4 19.8 5.525 16.15Q7.05 12.5 9.75 9.8Q12.45 7.1 16.1 5.55Q19.75 4 24 4Q28.2 4 31.85 5.55Q35.5 7.1 38.2 9.8Q40.9 12.5 42.45 16.15Q44 19.8 44 24Q44 28.25 42.45 31.9Q40.9 35.55 38.2 38.25Q35.5 40.95 31.85 42.475Q28.2 44 24 44ZM24 41Q31.25 41 36.125 36.125Q41 31.25 41 24Q41 16.75 36.125 11.875Q31.25 7 24 7Q16.75 7 11.875 11.875Q7 16.75 7 24Q7 31.25 11.875 36.125Q16.75 41 24 41ZM24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Z"/></svg>
                 <span class="label">Move Down a Year</span>
             </button>
 
-            <button onclick="window.giveHPToSelected()" class="icon">
+            <button onclick="window.giveHPToSelected()" class="icon" aria-label="give all selected a house point">
                 <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M22.5 38V25.5H10V22.5H22.5V10H25.5V22.5H38V25.5H25.5V38Z"/></svg>
                 <span class="label">Give House Point</span>
             </button>
         </div>
         <div>
             <label for="search"></label>
-            <input placeholder="search for name..." oninput="main(false)" id="search" autocomplete="off">
+            <input placeholder="search for name..." oninput="main(false)" id="search" autocomplete="off" aria-label="search">
         </div>
     </div>
     <div id="students"></div>

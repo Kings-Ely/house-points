@@ -31,7 +31,7 @@ function housepoint (hp, div) {
 
 async function main () {
 
-    fetch(`../api/student-info.php?code=${localStorage.hpCode}`)
+    fetch(`../api/student-info.php?code=${getCode()}`)
         .then(async data => {
             data = await data.json();
             if (data['student']) {
@@ -46,7 +46,7 @@ async function main () {
 
     const div = document.getElementById('pending');
 
-    const pending = await (await fetch(`../api/pending-hps.php?myCode=${localStorage.hpCode}`)).json();
+    const pending = await (await fetch(`../api/pending-hps.php`)).json();
 
     // clear after async request
     div.innerHTML = '';
@@ -75,7 +75,7 @@ async function main () {
 }
 
 (async () => {
-    const validCode = await (await fetch(`../api/valid-code.php?code=${localStorage.hpCode}`)).text();
+    const validCode = await (await fetch(`../api/valid-code.php?code=${getCode()}`)).text();
 
     if (validCode !== '2') {
         window.location.assign('../');
@@ -86,13 +86,13 @@ async function main () {
 })();
 
 window.accept = async (id) => {
-    await fetch(`../api/accept-hp.php?id=${id}&myCode=${localStorage.hpCode}`);
+    await fetch(`../api/accept-hp.php?id=${id}`);
     await main();
 };
 
 window.reject = async (id, reject) => {
     if (!reject) return;
-    await fetch(`../api/accept-hp.php?id=${id}&reject=${reject}&myCode=${localStorage.hpCode}`);
+    await fetch(`../api/accept-hp.php?id=${id}&reject=${reject}`);
     await main();
 };
 
@@ -134,7 +134,7 @@ document.getElementById('add-hp-submit').onclick = async () => {
         return;
     }
 
-    await fetch(`../api/add-hp.php?student=${code.value}&description=${reason.value}&myCode=${localStorage.hpCode}`);
+    await fetch(`../api/add-hp.php?student=${code.value}&description=${reason.value}`);
 
     code.value = '';
     reason.value = '';

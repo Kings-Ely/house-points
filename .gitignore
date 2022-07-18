@@ -5,7 +5,7 @@ node_modules
 
 sshPass.txt
 
-.env
+*.env
 
 *.txt
 *.log

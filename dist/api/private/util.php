@@ -19,8 +19,11 @@ error_log( "--------------" );
 //*/
 
 
+const lowerAlphabet = 'abcdefghijklmnopqrstuvwxyz';
+
+
 // as a public API, allow anyone to access
-function cors() {
+function cors () {
 
     // Allow from any origin
     if (isset($_SERVER['HTTP_ORIGIN'])) {
@@ -36,7 +39,7 @@ function cors() {
 
         if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
             // may also be using PUT, PATCH, HEAD etc
-            header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+            header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 
         if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
             header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");

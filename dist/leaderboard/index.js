@@ -67,9 +67,18 @@ function leaderboard (hps) {
         start = 0;
 
     } else {
-        podium1stDiv.innerHTML = `<div>${hps[0]['name']} (Y${hps[0]['year']}) <br> <b>${hps[0]['housepoints']}</b></div>`;
-        podium2ndDiv.innerHTML = `<div>${hps[1]['name']} (Y${hps[1]['year']}) <br> <b>${hps[1]['housepoints']}</b></div>`;
-        podium3rdDiv.innerHTML = `<div>${hps[2]['name']} (Y${hps[2]['year']}) <br> <b>${hps[2]['housepoints']}</b></div>`;
+        function podiumHTMl (idx) {
+            return `
+                <div>
+                    ${hps[idx]['name']} (Y${hps[idx]['year']}) 
+                    <br>
+                    <b>${hps[idx]['housepoints']}</b>
+                </div>
+            `;
+        }
+        podium1stDiv.innerHTML = podiumHTMl(0);
+        podium2ndDiv.innerHTML = podiumHTMl(1);
+        podium3rdDiv.innerHTML = podiumHTMl(2);
 
         // proportional heights
         const total =
@@ -101,13 +110,13 @@ let data;
 async function main (reload=true) {
     if (reload) {
 
-        fetch(`../api/valid-code.php?code=${localStorage.hpCode}`)
+        fetch(`../api/valid-code.php?code=${getCode()}`)
             .then(async res => {
                 res = await res.text();
                 if (res === '2') {
                     document.getElementById('home-link').href = '../admin-dashboard';
                 } else if (res === '1') {
-                    const data = await (await fetch(`../api/student-info.php?code=${localStorage.hpCode}`)).json();
+                    const data = await (await fetch(`../api/student-info.php?code=${getCode()}`)).json();
                     const year = parseInt(data['year']);
                     showYears = [year];
                     whichYears.value = `${year}`;

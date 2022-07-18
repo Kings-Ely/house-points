@@ -75,34 +75,34 @@ input:focus {
     text-decoration: none;
 }
 
-.icon > svg {
+.icon svg, .icon img {
     height: 50px;
     width: 50px;
     border: none;
 }
 
-.icon:hover > svg {
+.icon:hover svg, .icon:hover img {
     cursor: pointer;
     transform: scale(1.1);
 }
 
-.icon-info-only:hover > svg {
+.icon-info-only:hover svg, .icon-info-only:hover img {
     cursor: auto;
     transform: scale(1);
 }
 
-.icon.no-scale:hover > svg {
+.icon.no-scale:hover svg, .icon.no-scale:hover img {
     cursor: pointer;
     fill: var(--text);
     transform: scale(1);
 }
 
-.icon-accent > svg {
+.icon-accent svg, .icon-accent img {
     fill: var(--accent);
 }
 
 .label {
-    transform: scale(0);
+    transform: scale(0) translate(-70%, 50px);
     position: absolute;
     display: inline-block;
     transition: 0ms;
@@ -147,7 +147,7 @@ h2 {
     border: 4px solid var(--accent);
     opacity: 1;
     border-radius: 50%;
-    animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+    animation: lds-ripple 1.5s cubic-bezier(0, 0.2, 0.8, 1) infinite;
 }
 
 .lds-ripple div:nth-child(2) {

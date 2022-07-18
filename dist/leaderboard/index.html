@@ -3,70 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Leaderboard - Osmond House Points</title>
-    <link href="../main.css" rel="stylesheet">
     <script src="../main.js"></script>
+    <link rel="preload" href="../main.css" as="style" onload="asyncCSS()">
+    <link rel="preload" href="./index.css" as="style" onload="asyncCSS()">
     <script src="index.js" defer></script>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
-    <style>
-        .student {
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 4px 20px;
-            margin: 4px;
-            text-align: center;
-        }
-
-        #podium {
-            display: flex;
-            justify-content: center;
-            align-items: end;
-            height: 30vh;
-            margin: 80px 10px 30px 10px;
-        }
-
-        #podium > div {
-            width: 10vw;
-            border-radius: 10px 10px 0 0;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            margin: 0;
-            box-shadow: 0 -5px 6px 5px rgba(0, 0, 0, 0.1);
-            padding: 30px 10px;
-            height: 0;
-            transition: 500ms;
-        }
-
-        #podium > div > div {
-            text-align: center;
-        }
-
-        #podium-2nd {
-            background: silver;
-        }
-
-        #podium-1st {
-            background: gold;
-            box-shadow: 0 -5px 6px 5px rgba(0, 0, 0, 0.1);
-            z-index: 100;
-        }
-
-        #podium-3rd {
-            background: #CD7F32;
-        }
-
-        #show-year {
-            width: 40px;
-        }
-
-        main {
-            display: block;
-        }
-
-    </style>
 </head>
 <body>
 <nav></nav>

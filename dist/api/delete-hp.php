@@ -11,10 +11,12 @@ require('./private/util.php');
  * so there must always be at least 1 admin account (if one originally)
  */
 
+define("id", $_GET['id']);
+
 queries(false, function ($query) {
     $query(
 		'DELETE FROM housepoints WHERE id = ?',
-		'i', $_GET['id']
+		'i', id
     );
     echo '1';
 });
