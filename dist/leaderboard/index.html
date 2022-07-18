@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>Leaderboard - Osmond House Points</title>
     <script src="../main.js"></script>
-    <link rel="preload" href="../main.css" as="style" onload="asyncCSS()">
-    <link rel="preload" href="./index.css" as="style" onload="asyncCSS()">
+    <link rel="preload" href="../main.css" as="style" onload="asyncCSS(this)">
+    <link rel="preload" href="./index.css" as="style" onload="asyncCSS(this)">
     <script src="index.js" defer></script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -14,7 +14,7 @@
 <nav></nav>
 <main>
     <a class="icon" href="../student-dashboard" id="home-link">
-        <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path d="M8 42V18L24.1 6L40 18V42H28.3V27.75H19.65V42ZM11 39H16.65V24.75H31.3V39H37V19.5L24.1 9.75L11 19.5ZM24 24.35Z"/></svg>
+        <img src="../resources/home.svg" alt="home">
     </a>
     <h1>Leaderboard</h1>
     <div>

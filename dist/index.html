@@ -10,6 +10,7 @@
     <script src="main.js"></script>
     <link rel="preload" href="main.css" as="style" onload="asyncCSS(this)">
     <link rel="preload" href="index.css" as="style" onload="asyncCSS(this)">
+    <script defer src="index.js"></script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
@@ -18,11 +19,18 @@
 <main>
     <div>
         <div id="content">
-            <div style="display: flex; justify-content: center; align-items: center">
+            <div id="code-input-container">
                 <label for="code"></label>
-                <input type="text" id="code" autocomplete="off" autofocus name="code" placeholder="Code">
+                <input
+                    type="text"
+                    id="code"
+                    placeholder="Code"
+                    autocomplete="off"
+                    autofocus
+                    aria-label="code"
+                >
             </div>
-            <button id="go" class="icon" name="submit" type="submit">
+            <button id="go" class="icon" type="submit" aria-label="submit">
                 <img src="resources/right-arrow.svg" alt="Go!">
                 <span class="label">Go!</span>
             </button>
@@ -33,5 +41,3 @@
 <footer></footer>
 </body>
 </html>
-
-<script defer src="index.js"></script>

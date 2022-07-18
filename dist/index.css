@@ -2,6 +2,12 @@
     display: none;
 }
 
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 #error {
     color: var(--text-warning);
     text-align: center;
@@ -33,4 +39,10 @@
 #content {
     display: flex;
     justify-content: center;
+}
+
+#code-input-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
