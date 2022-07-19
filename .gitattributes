@@ -24,6 +24,6 @@
 *.css linguist-language=CSS
 *.css linguist-detectable=true
 
-kill-server linguist-vendored=false
-kill-server linguist-language=Shell
-kill-server linguist-detectable=true
+*.sh linguist-vendored=false
+*.sh linguist-language=Shell
+*.sh linguist-detectable=true
