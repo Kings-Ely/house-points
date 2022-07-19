@@ -1,5 +1,5 @@
 <?php
-require('./private/util.php');
+require('./private/main.php');
 require('./private/random.php');
 
 /** ADMIN

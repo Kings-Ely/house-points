@@ -1,5 +1,5 @@
 <?php
-require('./private/util.php');
+require('./private/main.php');
 
 /** ADMIN
  * GET change-admin.php: '1' | error

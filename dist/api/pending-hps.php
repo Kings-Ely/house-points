@@ -1,5 +1,5 @@
 <?php
-require('./private/util.php');
+require('./private/main.php');
 
 queries(true, function ($query) {
     $res = $query(
@@ -25,4 +25,3 @@ SQL
     }
     echo json_encode($info);
 });
-

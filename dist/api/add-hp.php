@@ -1,5 +1,5 @@
 <?php
-require('./private/util.php');
+require('./private/main.php');
 
 /** ADMIN
  * GET add-hp.php: '1' | error
@@ -17,25 +17,5 @@ define('quantity', $_GET['quantity']);
 define('description', $_GET['description']);
 
 queries(true, function ($query) {
-    if (array_key_exists('studentid', $_GET)) {
-        $studentID = $_GET['studentid'];
 
-    } else {
-        $studentID = $query(
-            'SELECT id FROM users WHERE code = ?',
-            's',
-            $_GET['student']
-        ) -> fetch_array(MYSQLI_ASSOC) ['id'];
-    }
-
-    if (!$studentID) {
-        die('invalid code');
-    }
-
-    $query(
-        'INSERT INTO housepoints (student, description, completed, status, quantity) VALUES (?, ?, CURRENT_TIMESTAMP, "Accepted", ?)',
-        'is', $studentID, description, quantity
-    );
-
-    echo '1';
 });

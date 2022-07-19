@@ -1,5 +1,5 @@
 <?php
-require('./private/util.php');
+require('./private/main.php');
 
 $code = $_GET['code'];
 
@@ -32,4 +32,3 @@ SQL
 
     echo json_encode($info);
 });
-

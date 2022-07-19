@@ -1,5 +1,5 @@
 <?php
-require('./private/util.php');
+require('./private/main.php');
 
 /** ADMIN
  * GET all-student-info.php: JSON ({id, name, year, code, admin, student, pending, accepted, rejected}[])
@@ -27,4 +27,3 @@ SQL
 
     echo json_encode($students);
 });
-

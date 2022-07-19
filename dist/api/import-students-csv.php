@@ -1,5 +1,5 @@
 <?php
-require('./private/util.php');
+require('./private/main.php');
 
 queries(false, function ($query) {
     $tmpName = $_FILES['csv']['tmp_name'];
@@ -7,4 +7,3 @@ queries(false, function ($query) {
 
     echo json_encode($csvAsArray);
 });
-

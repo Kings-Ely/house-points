@@ -1,5 +1,5 @@
 <?php
-require('./private/util.php');
+require('./private/main.php');
 
 queries(false, function ($query) {
     $res = $query(<<<'SQL'
@@ -26,4 +26,3 @@ SQL
 
     echo json_encode($students);
 });
-
