@@ -2,22 +2,12 @@
     display: none;
 }
 
-main {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#error {
-    color: var(--text-warning);
-    text-align: center;
-    width: 100%;
-    min-height: 1em;
-    transition: 500ms;
-}
-
 #code {
     height: 1.2em;
+}
+
+#content {
+    text-align: center;
 }
 
 .label {
@@ -36,7 +26,34 @@ main {
     z-index: 1000;
 }
 
-#content {
-    display: flex;
-    justify-content: center;
+@media only screen and (max-aspect-ratio: 6/5) {
+
+    * {
+        padding: 0;
+        border: 0;
+    }
+
+    #content {
+        flex-direction: column;
+    }
+
+    #go {
+        width: 80vw;
+        padding: 10px;
+        margin: 50px 0;
+        background: var(--bg-accent);
+        border-radius: 5px;
+        box-shadow: 2px 2px 3px 3px var(--border-light);
+    }
+
+    #code {
+        border: none;
+        font-size: 40px;
+        text-align: center;
+        margin: 0;
+    }
+
+    #code, #code:hover {
+        background: none;
+    }
 }

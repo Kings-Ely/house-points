@@ -1,6 +1,5 @@
 const go = document.getElementById('go');
 const code = document.getElementById('code');
-const error = document.getElementById('error');
 
 go.onclick = async () => {
 	const myCode = code.value.toLowerCase();
@@ -16,7 +15,7 @@ go.onclick = async () => {
 		document.location.assign('./admin-dashboard');
 		return;
 	}
-	error.innerText = 'Looks like that is an invalid code, sorry!';
+	showError`Looks like that is an invalid code, sorry!`;
 };
 
 code.onchange = (evt) => {

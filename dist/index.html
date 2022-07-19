@@ -4,42 +4,37 @@
     <meta charset="UTF-8">
     <title>Osmond House Points</title>
     <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <meta name="description" content="House Points for Osmond House">
 
-    <script src="assets/js/main.js"></script>
-    <link rel="preload" href="assets/css/main.css" as="style" onload="asyncCSS(this)">
-    <link rel="preload" href="index.css" as="style" onload="asyncCSS(this)">
-    <script defer src="index.js"></script>
+    <script src="./assets/js/main.js"></script>
+    <link rel="stylesheet" href="./assets/css/main.css">
+    <link rel="stylesheet" href="./index.css">
+    <script defer src="./index.js"></script>
 
-    <script src="assets/js/jquery.min.js"></script>
+    <script src="./assets/js/jquery.min.js"></script>
 </head>
 <body>
 <nav></nav>
 <main>
-    <div>
-        <div id="content">
-            <div class="flex-center">
-                <label for="code"></label>
-                <input
-                    type="text"
-                    id="code"
-                    placeholder="Code"
-                    autocomplete="off"
-                    autofocus
-                    aria-label="code"
-                >
-            </div>
-            <button
-                id="go"
-                class="icon"
-                type="submit"
-                aria-label="submit"
-                svg="./resources/right-arrow.svg"
-                label="Go!"
-            ></button>
-        </div>
-        <div id="error"></div>
+    <div class="flex-center fill-screen" id="content">
+        <label for="code"></label>
+        <input
+            type="text"
+            id="code"
+            placeholder="Code"
+            autocomplete="off"
+            autofocus
+            aria-label="code"
+        >
+        <button
+            id="go"
+            class="icon"
+            type="submit"
+            aria-label="submit"
+            svg="./resources/right-arrow.svg"
+            label="Go!"
+        ></button>
     </div>
 </main>
 <footer></footer>

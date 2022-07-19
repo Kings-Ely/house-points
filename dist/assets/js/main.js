@@ -251,3 +251,29 @@ const navigate = async (url) => {
     }
     await new Promise(() => {});
 }
+
+
+let errorDiv;
+/**
+ * @param {string} message - parsed as HTML
+ */
+function showError (message) {
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.id = 'error-container';
+        document.body.appendChild(errorDiv);
+    }
+
+    errorDiv.style.display = 'flex';
+
+    errorDiv.innerHTML = `
+        <p id="error">
+            ${message}
+            <span onclick="this.parentElement.parentElement.style.display='none'">&times;</span>
+        </p>
+    `;
+
+    setTimeout(() => {
+        errorDiv.style.display = 'none';
+    }, 5000);
+}
