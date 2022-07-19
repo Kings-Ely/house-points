@@ -42,5 +42,5 @@
 }
 
 #signout:hover {
-    color: vaR(--text-light);
+    color: var(--text-light);
 }

@@ -4,3 +4,4 @@
 *.html linguist-vendored=false
 *.js linguist-vendored=false
 *.sql linguist-vendored=false
+*.svg linguist-vendored=false

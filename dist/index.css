@@ -40,9 +40,3 @@ main {
     display: flex;
     justify-content: center;
 }
-
-#code-input-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}

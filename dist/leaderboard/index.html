@@ -3,24 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <title>Leaderboard - Osmond House Points</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+
     <script src="../main.js"></script>
     <link rel="preload" href="../main.css" as="style" onload="asyncCSS(this)">
     <link rel="preload" href="./index.css" as="style" onload="asyncCSS(this)">
     <script src="index.js" defer></script>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="../jquery.min.js"></script>
 </head>
 <body>
 <nav></nav>
 <main>
-    <a class="icon" href="../student-dashboard" id="home-link">
-        <img src="../resources/home.svg" alt="home">
-    </a>
+    <a
+        class="icon"
+        href="../student-dashboard"
+        id="home-link"
+        svg="../resources/home.svg"
+        aria-label="home"
+    ></a>
     <h1>Leaderboard</h1>
     <div>
         <label>
             Only show for
-            <select id="show-year">
+            <select id="show-year" aria-label="what years to show">
                 <option value="9,10,11,12,13">All</option>
                 <option value="9">9</option>
                 <option value="10">10</option>

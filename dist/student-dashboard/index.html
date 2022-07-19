@@ -11,16 +11,20 @@
     <link rel="preload" href="./index.css" as="style" onload="asyncCSS(this)">
     <script src="./index.js" defer></script>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="../jquery.min.js"></script>
 </head>
 <body>
 <nav></nav>
 <main>
     <div id="top-right-menu">
-        <a class="icon" href="../leaderboard" id="leaderboard-link">
-            <img src="../resources/leaderboard.svg" alt="Leaderboard">
-            <span class="label">Leaderboard</span>
-        </a>
+        <a
+            class="icon"
+            href="../leaderboard"
+            id="leaderboard-link"
+            aria-label="leaderboard"
+            svg="../resources/leaderboard.svg"
+            label="Leaderboard"
+        ></a>
     </div>
     <button onclick="signout()" id="signout">
         Sign Out
@@ -29,14 +33,17 @@
     <div>
         <label>
             <textarea
-                    id="hp-reason"
-                    placeholder="Why did you get a House Point? (separate multiple by new line)"
-                    rows="2"
+                id="hp-reason"
+                placeholder="Why did you get a House Point? (separate multiple by new line)"
+                rows="2"
             ></textarea>
         </label>
-        <button id="submit-hp" class="icon" aria-label="submit house point">
-            <img src="../resources/plus.svg" alt="submit">
-        </button>
+        <button
+            id="submit-hp"
+            class="icon"
+            svg="../resources/plus.svg"
+            aria-label="submit house point"
+        ></button>
     </div>
     <div id="hps"></div>
 </main>

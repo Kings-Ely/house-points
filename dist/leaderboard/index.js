@@ -14,11 +14,10 @@ whichYears.onchange = () => {
 };
 
 // show all by default
-/** @type number[] */
 let showYears = [9, 10, 11, 12, 13];
 
-function showStudent (student, div) {
-    div.innerHTML += `
+function showStudent (student) {
+    return `
         <div class="student">
             <div>
                 ${student['name']} (Y${student['year']})
@@ -28,9 +27,6 @@ function showStudent (student, div) {
             </div>
         </div>
     `;
-
-    // stop it crashing with lots of students
-    return new Promise(r => setTimeout(r, 0));
 }
 
 function resetPodium () {
@@ -96,14 +92,12 @@ function leaderboard (hps) {
     }
 
     // handle lots of house points using promises
-    setTimeout(async () => {
-        for (let i = start; i < hps.length; i++) {
-            if (!showYears.includes(hps[i]['year'])) {
-                continue;
-            }
-            await showStudent(hps[i], leaderboardDiv);
+    for (let i = start; i < hps.length; i++) {
+        if (!showYears.includes(hps[i]['year'])) {
+            continue;
         }
-    }, 0);
+        leaderboardDiv.innerHTML += showStudent(hps[i]);
+    }
 }
 
 let data;
@@ -116,7 +110,7 @@ async function main (reload=true) {
                 if (res === '2') {
                     document.getElementById('home-link').href = '../admin-dashboard';
                 } else if (res === '1') {
-                    const data = await (await fetch(`../api/student-info.php?code=${getCode()}`)).json();
+                    const data = await fetchJSON`../api/student-info.php?code=${getCode()}`;
                     const year = parseInt(data['year']);
                     showYears = [year];
                     whichYears.value = `${year}`;
@@ -124,12 +118,12 @@ async function main (reload=true) {
                 }
             });
 
-        data = await (await fetch(`../api/leaderboard.php`)).json();
+        data = await fetchJSON`../api/leaderboard.php`;
     }
     leaderboard(data);
 }
 
 main();
 
-$("footer").load(`../footer.html`);
-$("nav").load(`../nav.html`);
+footer`../footer.html`;
+nav`../nav.html`;

@@ -12,14 +12,14 @@
     <link rel="preload" href="index.css" as="style" onload="asyncCSS(this)">
     <script defer src="index.js"></script>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="jquery.min.js"></script>
 </head>
 <body>
 <nav></nav>
 <main>
     <div>
         <div id="content">
-            <div id="code-input-container">
+            <div class="flex-center">
                 <label for="code"></label>
                 <input
                     type="text"
@@ -30,10 +30,14 @@
                     aria-label="code"
                 >
             </div>
-            <button id="go" class="icon" type="submit" aria-label="submit">
-                <img src="resources/right-arrow.svg" alt="Go!">
-                <span class="label">Go!</span>
-            </button>
+            <button
+                id="go"
+                class="icon"
+                type="submit"
+                aria-label="submit"
+                svg="./resources/right-arrow.svg"
+                label="Go!"
+            ></button>
         </div>
         <div id="error"></div>
     </div>

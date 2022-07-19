@@ -108,6 +108,37 @@ window.cleanCode = (code) => {
         .substring(0, 10);
 }
 
+/**
+ * @param {HTMLElement} self
+ * @returns {Promise<void>}
+ */
+async function loadSVG (self) {
+    if (self.hasAttribute('svg-loaded')) {
+        return;
+    }
+    // set before loading, so we don't load twice while waiting for the svg to load
+    self.setAttribute('svg-loaded', '1');
+
+    const raw = await fetch(self.attributes['svg'].value);
+    self.innerHTML = await raw.text() + self.innerHTML;
+}
+
+/**
+ * @param {HTMLElement} self
+ */
+function loadLabel (self) {
+    if (self.hasAttribute('label-loaded')) {
+        return;
+    }
+    self.setAttribute('label-loaded', '1');
+
+    self.innerHTML = `
+        <span class="label">
+            ${self.attributes['label'].value}
+        </span> 
+        ${self.innerHTML}
+    `;
+}
 
 // Spinner
 const oldFetch = fetch;
@@ -132,11 +163,10 @@ function stopSpinner (loader) {
  * Proxy fetch api to show loading while requests are being made
  * but only show the spinner if no other requests are still pending,
  * which would mean the spinner is already being shown.
- * @param {RequestInfo} input
- * @param {RequestInit|undefined} [init=undefined]
  * @returns {Promise<Response>}
+ * @param args
  */
-window.fetch = async (input, init) => {
+window.fetch = async (...args) => {
     let shouldHideAtEnd = false;
     let loader;
     if (!showingLoading) {
@@ -148,7 +178,7 @@ window.fetch = async (input, init) => {
     }
 
     // fetch
-    const res = await oldFetch(input, init);
+    const res = await oldFetch(...args);
 
     if (shouldHideAtEnd) {
         // post fetch
@@ -159,9 +189,65 @@ window.fetch = async (input, init) => {
 };
 
 /**
+ * @returns {Promise<string>}
+ * @param args
+ */
+async function fetchTxt (...args) {
+    return await (await fetch(...args)).text();
+}
+
+/**
+ * @returns {Promise<string>}
+ * @param args
+ */
+async function fetchJSON (...args) {
+    return await (await fetch(...args)).json();
+}
+
+/**
  * Only to be called by async loaded css onload
  */
 function asyncCSS (self) {
     self.onload = null;
     self.rel = 'stylesheet';
+}
+
+async function loadSVGs () {
+    const allInBody = document.querySelectorAll('*');
+    for (const element of allInBody) {
+        if (element.attributes['svg']) {
+            // don't await, because we don't want to block the page load
+            loadSVG(element);
+        }
+
+        if (element.attributes['label']) {
+            loadLabel(element);
+        }
+    }
+}
+
+
+function footer (url) {
+    $`footer`.load(url);
+}
+function nav (url) {
+    $`nav`.load(url);
+}
+
+async function reloadDOM () {
+    loadSVGs();
+}
+
+window.onload = reloadDOM;
+
+/**
+ * Navigates to a webpage
+ * @param {string} url
+ * @returns {Promise<never>}
+ */
+const navigate = async (url) => {
+    if (!['', './', '.', location.pathname, location.href].includes(url)) {
+        window.location.assign(url);
+    }
+    await new Promise(() => {});
 }

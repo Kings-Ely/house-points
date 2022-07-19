@@ -50,6 +50,7 @@ main {
     font-size: 15px;
     cursor: pointer;
 }
+
 #csv-form > button:hover {
     color: var(--text-light);
 }
