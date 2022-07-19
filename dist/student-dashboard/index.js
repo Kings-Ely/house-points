@@ -51,7 +51,7 @@ function showHp (hp) {
             <b>"${hp['rejectMessage']}"</b>
         `;
         icon = `
-            <img src="../resources/red-cross.svg" alt="cross">
+            <img src="../assets/img/red-cross.svg" alt="cross">
         `;
 
     } else if (hp['status'] === 'Accepted') {
@@ -59,7 +59,7 @@ function showHp (hp) {
             Accepted ${getRelativeTime(hp['accepted'] * 1000)}
         `;
         icon = `
-            <img src="../resources/accent-tick.svg" alt="tick">
+            <img src="../assets/img/accent-tick.svg" alt="tick">
         `;
 
     } else {
@@ -84,7 +84,7 @@ function showHp (hp) {
             </div>
             <div style="min-width: 50px">
                 <button onclick="window.delete(${hp['id']}, '${hp['description']}')" class="icon">
-                    <img src="../resources/bin.svg" alt="delete">
+                    <img src="../assets/img/bin.svg" alt="delete">
                 </button>
             </div>
         </div>
@@ -100,7 +100,7 @@ function showHp (hp) {
     if (validCode === '2') {
         document.getElementById('top-right-menu').innerHTML += `
             <a class="icon" href="../admin-dashboard">
-                <img src="../resources/admin.svg" alt="admin page">
+                <img src="../assets/img/admin.svg" alt="admin page">
                 <span class="label">Admin</span>
             </a>
         `;
