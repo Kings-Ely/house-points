@@ -9,3 +9,6 @@ sshPass.txt
 
 *.txt
 *.log
+
+server/index.js
+*.js.map

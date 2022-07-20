@@ -1,0 +1,8 @@
+{
+    "dependencies": {
+        "@types/mysql": "^2.15.21",
+        "dotenv": "^16.0.0",
+        "mysql": "^2.18.1",
+        "ts-loader": "^9.3.1"
+    }
+}

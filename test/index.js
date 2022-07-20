@@ -9,7 +9,6 @@ import setup from './setup.js';
 import Test from './framework.js';
 import fs from 'fs';
 import path from 'path';
-import lighthouse from './ligthhouse.js';
 
 const VERBOSE = process.argv.indexOf('-v') !== -1;
 

@@ -2,7 +2,7 @@
 
 import { $ } from "zx";
 import now from "performance-now";
-import chalk from 'chalk';
+import c from 'chalk';
 import * as fs from "fs";
 
 const REMOTE_ADDRESS = 'josephcoppin@josephcoppin.com';
@@ -25,12 +25,11 @@ async function uploadFrontend () {
     }
 }
 
-async function main () {
+(async () => {
     const start = now();
 
     await uploadFrontend();
 
-    console.log(chalk.green(`Finished Uploading in ${(now() - start).toFixed(3)}`));
-}
-
-main();
+    const duration = now() - start;
+    console.log(c.green(`Finished Uploading in ${duration.toFixed(3)}`));
+})();

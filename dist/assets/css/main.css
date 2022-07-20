@@ -134,6 +134,7 @@ input:focus {
     position: absolute;
     top: 20px;
     left: 0;
+    z-index: 100;
 }
 
 #error {
@@ -141,7 +142,7 @@ input:focus {
     width: 50vw;
     min-width: 280px;
     border-radius: 4px;
-    background: rgba(255, 0, 0, 0.3);
+    background: rgba(255, 150, 150);
     border: none;
     border-left: 4px solid red;
     padding: 10px;
