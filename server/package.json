@@ -1,8 +1,13 @@
 {
     "dependencies": {
-        "@types/mysql": "^2.15.21",
-        "dotenv": "^16.0.0",
-        "mysql": "^2.18.1",
+        "cardinal": "^2.1.1",
+        "mysql2": "^2.3.3",
         "ts-loader": "^9.3.1"
+    },
+    "devDependencies": {
+        "@types/command-line-args": "^5.2.0",
+        "@types/mysql": "^2.15.21",
+        "command-line-args": "^5.2.1",
+        "dotenv": "^16.0.0"
     }
 }

@@ -1,19 +1,26 @@
 {
     "type": "module",
     "dependencies": {
-        "lighthouse": "^9.6.3",
         "@types/node": "^17.0.42",
         "chalk": "^5.0.1",
-        "performance-now": "^2.1.0",
-        "zx": "^6.1.0",
         "chrome-launcher": "^0.15.1",
         "dotenv": "^16.0.1",
-        "node-fetch": "^3.2.6"
+        "lighthouse": "^9.6.3",
+        "mysql2": "^2.3.3",
+        "node-fetch": "^3.2.6",
+        "performance-now": "^2.1.0",
+        "ts-loader": "^9.3.1",
+        "zx": "^6.1.0"
     },
     "scripts": {
-        "build": "cd server & webpack & cd .. & npm run test & npm run deploy",
-        "start-server": "cd server & pwd & webpack & node index --dev",
+        "build": "webpack -c server/webpack.config.js; npm run test; npm run deploy",
+        "serve-api": "npm run build-server; npm run start-server",
+        "build-server": "webpack -c server/webpack.config.js",
+        "start-server": "node --enable-source-maps server -dvc",
         "test": "node test",
         "deploy": "node build.js"
+    },
+    "devDependencies": {
+        "webpack-cli": "^4.10.0"
     }
 }

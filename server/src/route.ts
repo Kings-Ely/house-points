@@ -1,21 +1,27 @@
 import type { IncomingMessage, ServerResponse } from "http";
+import type { queryFunc } from "./sql";
+import log from "./log";
 
 export interface IHandlerArgs {
     url: string;
     res: ServerResponse;
     req: IncomingMessage;
     params: Record<string, string>;
-    positionParams: string[];
+    query: queryFunc;
 }
 
 export type Handler = (args: IHandlerArgs) => Promise<Record<any, any> | undefined>;
+
+function componentsFromPath(path?: string): string[] {
+    return (path || '').split('/').filter(Boolean);
+}
 
 export class Route {
     private readonly components: string[] = [];
     private readonly handler?: Handler;
 
     constructor (path: string, handler: Handler) {
-        this.components = path.split('/');
+        this.components = componentsFromPath(path);
         this.handler = handler;
 
         // check the path structure is valid
@@ -30,12 +36,15 @@ export class Route {
 
     public matches (path?: string): boolean {
 
-        const components = (path || '').split('/');
+        const components = componentsFromPath(path);
 
-        if (components.length !== this.components.length) {
+        let len = components.length;
+
+        if (len !== this.components.length) {
             return false;
         }
-        for (let i = 0; i < components.length; i++) {
+
+        for (let i = 0; i < len; i++) {
             // path matches exactly
             if (components[i] === this.components[i]) {
                 continue;
@@ -44,53 +53,47 @@ export class Route {
             if (this.components[i][0] === ':') {
                 continue;
             }
-            if (this.components[i] === '*') {
-                continue;
-            }
-            // ** means anything after matches
-            return this.components[i] === '**';
 
+            return false;
         }
+
+        log`path '${path}' matched with route '${this.components.join('/')}'`;
+
         return true;
     }
 
-    public getParams (path?: string): [ Record<any, any>, string[] ] {
-        const components = (path || '').split('/');
+    public getParams (path?: string): Record<any, any> {
+        const components = componentsFromPath(path);
 
         const params: Record<any, any> = {};
-        const posParams: string[] = [];
 
-        for (let i = 0; i < components.length; i++) {
+        for (let i = 0; i < this.components.length; i++) {
+            // check for dynamic component of path
             if (this.components[i][0] === ':') {
-                params[this.components[i].substr(1)] = components[i];
-
-            } else if (this.components[i] === '*') {
-                posParams.push(components[i]);
-
-            } else if (this.components[i] === '**') {
-                posParams.push(...components.slice(i));
+                params[this.components[i].substr(1)] = components[i] || '';
             }
         }
 
-        return [ params, posParams ];
+        return params;
     }
 
-    public async handle (args: IHandlerArgs): Promise<void> {
+    public async handle (args: IHandlerArgs): Promise<string> {
         if (!this.handler) {
-            return;
+            args.res.statusCode = 404;
+            return '';
         }
         const res = await this.handler(args) ?? {};
 
         if (typeof res !== 'object') {
             args.res.statusCode = 500;
             args.res.end('Internal Server Error');
+            return '';
         }
 
         if (res.error) {
             args.res.statusCode = 500;
             args.res.end(res.error);
         }
-
-        args.res.end(JSON.stringify(res));
+        return JSON.stringify(res);
     }
 }

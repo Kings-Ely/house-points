@@ -7,7 +7,8 @@
         "experimentalDecorators": true,
         "noEmit": false,
         "removeComments": true,
-        "downlevelIteration": true
+        "downlevelIteration": true,
+        "target": "es5",
     },
     "exclude": ["node_modules"]
 }

@@ -2,52 +2,86 @@ import * as https from "https";
 import * as fs from "fs";
 import * as http from "http";
 import type { IncomingMessage, ServerResponse } from "http";
-import { config } from 'dotenv';
+import dotenv from 'dotenv';
 import { Handler, Route } from "./route";
 import c from 'chalk';
+import connectSQL from './sql';
+import log, {error, LogLvl, setLogOptions, warning} from "./log";
+import commandLineArgs from 'command-line-args';
+import path from "path";
 
-export const flags = {
-    dev: process.argv.indexOf('--dev') !== -1
-};
+const flags = commandLineArgs([
+    { name: 'dev', alias: 'd', type: Boolean, defaultValue: false },
+    { name: 'log', type: Number, defaultValue: LogLvl.ALL },
+    { name: 'verbose', alias: 'v', type: Boolean, defaultValue: false },
+    { name: 'useConsole', alias: 'c', type: Boolean, defaultValue: false },
+]);
 
 const handlers: Route[] = [];
+
+let query = (...args: any[]) => new Promise(() => {
+    error`SQL server not connected`;
+});
 
 export function route (path: string, handler: Handler) {
     handlers.push(new Route(path, handler));
 }
 
+import './routes/users';
+import './routes/ping';
+
 async function serverResponse (req: IncomingMessage, res: ServerResponse) {
+
+    if (flags.verbose) {
+        log`${req.method} ${req.url}`;
+    }
 
     // set response headers
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST");
     res.setHeader("Access-Control-Allow-Credentials", "true");
 
 
     // find route which matches request path
-    const route = handlers.find((route) => route.matches(req.url));
+    const routes = handlers.filter((route) => route.matches(req.url));
 
-    // if one doesn't exist, return 404 and don't continue
-    if (!route) {
+    if (routes.length > 1) {
+        warning`Multiple routes match ${req.url}`;
+
+    } else if (routes.length === 0) {
         res.writeHead(404);
+        res.end('');
+        warning`404: ${req.method} ${req.url}`;
         return;
     }
 
-    const [params, positionParams] = route.getParams(req.url);
-    await route.handle({
+    const route = routes[0];
+
+    const params = route.getParams(req.url);
+    const finalResponse = await route.handle({
         params,
-        positionParams,
         res,
         req,
-        url: req.url || ''
+        url: req.url || '',
+        query
     });
+
+    res.end(finalResponse);
 }
 
-(async () => {
-    config();
+function loadEnv () {
+    const contents = fs.readFileSync(path.join(path.resolve(__dirname), '.env'), 'utf8');
+
+    process.env = {
+        ...process.env,
+        ...dotenv.parse(contents)
+    };
+}
+
+function startServer () {
+    log`Starting server...`;
 
     let options = {};
-
     if (!flags.dev) {
         options = {
             key: fs.readFileSync("./privatekey.pem"),
@@ -55,25 +89,34 @@ async function serverResponse (req: IncomingMessage, res: ServerResponse) {
         };
     }
 
-    console.log('Starting server...');
-
     const PORT = process.env.PORT;
 
     if (!PORT) {
-        console.error('No port specified in .env');
+        error`No port specified in .env`;
         return;
     }
 
     if (flags.dev) {
         http.createServer(options, serverResponse)
             .listen(PORT, () => {
-                console.log(c.green(`Dev server started on port ${PORT}`));
+                log(c.green(`Dev server started on port ${PORT}`));
             });
     } else {
         https.createServer(options, serverResponse)
             .listen(PORT, () => {
-                console.log(c.green(`Production server started on port ${PORT}`));
+                log(c.green(`Production server started on port ${PORT}`));
             });
     }
+}
 
+function connectToMySQL () {
+    log`Connecting to SQL server...`;
+    query = connectSQL();
+}
+
+(async () => {
+    loadEnv();
+    setLogOptions(flags);
+    connectToMySQL();
+    startServer();
 })();

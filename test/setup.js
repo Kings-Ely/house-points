@@ -1,12 +1,10 @@
 import { $ } from "zx";
 import { config} from 'dotenv';
 
-
-
 export default async function () {
 
 	// setup environment variables
-	config({ path: './dist/api/private/.env' });
+	config({ path: './server/.env' });
 
 	// clear and allow it to throw error if the db is not of the correct schema
 	$`
