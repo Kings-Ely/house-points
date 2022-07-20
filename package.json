@@ -13,12 +13,11 @@
         "zx": "^6.1.0"
     },
     "scripts": {
-        "build": "webpack -c server/webpack.config.js; npm run test; npm run deploy",
+        "build": "node --enable-source-maps build",
         "serve-api": "npm run build-server; npm run start-server",
         "build-server": "webpack -c server/webpack.config.js",
         "start-server": "node --enable-source-maps server -dvc",
-        "test": "node test",
-        "deploy": "node build.js"
+        "test": "node test"
     },
     "devDependencies": {
         "webpack-cli": "^4.10.0"

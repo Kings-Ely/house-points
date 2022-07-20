@@ -1,5 +1,6 @@
 // Utility script imported by all pages
 
+const API_ROOT = 'https://josephcoppin.com:4464';
 const codeCookieKey = 'hpCode';
 
 function getCode () {
@@ -141,7 +142,6 @@ function loadLabel (self) {
 }
 
 // Spinner
-const oldFetch = fetch;
 let showingLoading = false;
 
 function showSpinner () {
@@ -160,13 +160,24 @@ function stopSpinner (loader) {
 }
 
 /**
- * Proxy fetch api to show loading while requests are being made
+ * Show loading while requests are being made
  * but only show the spinner if no other requests are still pending,
  * which would mean the spinner is already being shown.
  * @returns {Promise<Response>}
- * @param args
+ * @param {string | TemplateStringsArray} path
  */
-window.fetch = async (...args) => {
+async function api (path, ...args) {
+
+    if (typeof path !== 'string') {
+        path = path.reduce((acc, cur, i) => {
+            if (typeof args[i] === 'object') {
+                args[i] = JSON.stringify(args[i]);
+            }
+            let paramStr = (args[i] || '').toString();
+            return acc + cur + paramStr;
+        }, '');
+    }
+
     let shouldHideAtEnd = false;
     let loader;
     if (!showingLoading) {
@@ -177,31 +188,21 @@ window.fetch = async (...args) => {
         loader = showSpinner();
     }
 
+    if (path[0] === '/') {
+        path = path.substring(1);
+    }
+
     // fetch
-    const res = await oldFetch(...args);
+    const res = await fetch(`${API_ROOT}/${path}`);
+
+    const asJson = await res.json();
 
     if (shouldHideAtEnd) {
         // post fetch
         stopSpinner(loader);
     }
 
-    return res;
-};
-
-/**
- * @returns {Promise<string>}
- * @param args
- */
-async function fetchTxt (...args) {
-    return await (await fetch(...args)).text();
-}
-
-/**
- * @returns {Promise<string>}
- * @param args
- */
-async function fetchJSON (...args) {
-    return await (await fetch(...args)).json();
+    return asJson;
 }
 
 /**

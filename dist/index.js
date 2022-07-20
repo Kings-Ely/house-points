@@ -3,16 +3,22 @@ const code = document.getElementById('code');
 
 go.onclick = async () => {
 	const myCode = code.value.toLowerCase();
-	const valid = await (await fetch(`./api/valid-code.php?code=${myCode}`)).text();
 
-	if (valid === '1') {
+	if (!myCode) {
+		showError`You need to enter a code first!`;
+		return;
+	}
+
+	const { level } = await api`user/get/auth/${myCode}`;
+
+	if (level === 1) {
 		setCodeCookie(myCode);
-		document.location.assign('./student-dashboard');
+		navigate`./student-dashboard`;
 		return;
 
-	} else if (valid === '2') {
+	} else if (level === 2) {
 		setCodeCookie(myCode);
-		document.location.assign('./admin-dashboard');
+		navigate`./admin-dashboard`;
 		return;
 	}
 	showError`Looks like that is an invalid code, sorry!`;

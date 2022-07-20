@@ -38,13 +38,8 @@ export class Route {
 
         const components = componentsFromPath(path);
 
-        let len = components.length;
 
-        if (len !== this.components.length) {
-            return false;
-        }
-
-        for (let i = 0; i < len; i++) {
+        for (let i = 0; i < this.components.length; i++) {
             // path matches exactly
             if (components[i] === this.components[i]) {
                 continue;
@@ -56,8 +51,6 @@ export class Route {
 
             return false;
         }
-
-        log`path '${path}' matched with route '${this.components.join('/')}'`;
 
         return true;
     }

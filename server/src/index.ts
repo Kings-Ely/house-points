@@ -37,7 +37,7 @@ async function serverResponse (req: IncomingMessage, res: ServerResponse) {
     }
 
     // set response headers
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Origin", req.headers.origin || '*');
     res.setHeader("Access-Control-Allow-Methods", "GET, POST");
     res.setHeader("Access-Control-Allow-Credentials", "true");
 
