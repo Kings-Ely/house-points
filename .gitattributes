@@ -12,6 +12,10 @@
 *.js linguist-language=JavaScript
 *.js linguist-detectable=true
 
+*.ts linguist-vendored=false
+*.ts linguist-language=TypeScript
+*.ts linguist-detectable=true
+
 *.php linguist-vendored=false
 *.php linguist-language=PHP
 *.php linguist-detectable=true
