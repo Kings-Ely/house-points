@@ -31,3 +31,7 @@
 *.sh linguist-vendored=false
 *.sh linguist-language=Shell
 *.sh linguist-detectable=true
+
+*.json linguist-vendored=false
+*.json linguist-language=JSON
+*.json linguist-detectable=true
