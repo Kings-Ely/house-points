@@ -1,6 +1,6 @@
 import { route } from "../index";
 
-route('user/get/auth/:code', async ({ query, params: { code} }) => {
+route('users/get/auth/:code', async ({ query, params: { code} }) => {
 
     if (!code) return { level: 0 };
 
