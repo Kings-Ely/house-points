@@ -1,16 +1,16 @@
 import route from "../";
-import { AUTH_ERR, requireAuth } from "../util";
+import { AUTH_ERR, requireAdmin } from "../util";
 import now from "performance-now";
 
 route('get/server/pid', async ({ cookies, query }) => {
-    if (!await requireAuth(cookies, query)) return AUTH_ERR;
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     return { pid: process.pid };
 });
 
 
 route('get/server/check', async ({ query, cookies }) => {
-    if (!await requireAuth(cookies, query)) return AUTH_ERR;
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     if ((await query`SELECT * FROM users LIMIT 1`).length !== 1) {
         return 'Something went wrong';
@@ -48,7 +48,7 @@ route('get/server/performance?iterations=100', async ({ query, params: { iterati
 
 
 route('delete/server/:code', async ({ query, cookies, params: { code}}) => {
-    if (!await requireAuth(cookies, query)) return AUTH_ERR;
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     if (code !== process.env.KILL_CODE) {
         return 'Invalid kill code' ;

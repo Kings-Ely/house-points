@@ -32,7 +32,7 @@ function housePointHML (hp) {
 }
 
 async function main () {
-    api`get/user/info/${getCode()}`
+    api`get/users/info/${getCode()}`
         .then(async data => {
             if (data['student']) {
                 document.getElementById('top-right-menu').innerHTML += `
@@ -48,7 +48,7 @@ async function main () {
 
     const div = document.getElementById('pending');
 
-    const pending = await api`get/house-points/pending`;
+    const { data: pending } = await api`get/house-points/pending`;
 
     // clear after async request
     div.innerHTML = '';

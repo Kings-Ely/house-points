@@ -10,6 +10,9 @@ export const AUTH_ERR = Object.freeze({
     status: 401
 });
 
+// overridden with .env variable if present
+export let COOKIE_CODE_KEY = 'myCode';
+
 /**
  * Checks to see if an object is JSON-parsable.
  * Note that this is expensive for large JSON strings
@@ -39,6 +42,10 @@ export function loadEnv (filePath = ".env"): void {
         ...process.env,
         ...dotenv.parse(contents)
     };
+
+    if (process.env.COOKIE_CODE_KEY) {
+        COOKIE_CODE_KEY = process.env.COOKIE_CODE_KEY;
+    }
 }
 
 
@@ -58,35 +65,45 @@ export function makeCode (length: number, chars='abcdefghijklmnopqrstuvwxyz'): s
  * Parses a string of the form "a=b;c=d" into an object
  */
 export function parseCookies (cookie: string): Record<string, string> {
-    const cookies: Record<string, string> = {};
+    const list: Record<string, any> = {};
+    if (!cookie) return list;
 
-    cookie.split(';').forEach(pair => {
-        const [key, value] = pair.split('=');
-        cookies[key] = value;
+    cookie.split(`;`).forEach(function(cookie) {
+        let [ name, ...rest] = cookie.split(`=`);
+        name = name?.trim();
+        if (!name) return;
+        const value = rest.join(`=`).trim();
+        if (!value) return;
+        list[name] = decodeURIComponent(value);
     });
 
-    return cookies;
+    return list;
 }
 
 // DB query helpers
 
+/**
+ * Gets the authorisation level of a user from their code
+ */
 export async function authLvl (code: string, query: queryFunc) {
     if (!code) return 0;
 
     const level = await query`SELECT admin FROM users WHERE code = ${code.toLowerCase()}`;
 
-    if (!level.length) return 0 ;
+    if (!level.length) return 0;
 
     const auth = level[0]['admin'] === 1;
 
     return auth ? 2 : 1;
 }
 
-
-export async function requireAuth (cookies: Cookies, query: queryFunc): Promise<boolean> {
-    return await authLvl(cookies['code'], query) === 2;
+export async function requireLoggedIn (cookies: Cookies, query: queryFunc): Promise<boolean> {
+    return await authLvl(cookies[COOKIE_CODE_KEY], query) > 0;
 }
 
+export async function requireAdmin (cookies: Cookies, query: queryFunc): Promise<boolean> {
+    return await authLvl(cookies[COOKIE_CODE_KEY], query) === 2;
+}
 
 /**
  * Returns a string for an error, otherwise a number which is the user's id

@@ -37,6 +37,7 @@ export default function route (path: string, handler: Handler) {
 
 import './routes/users';
 import './routes/server';
+import './routes/house-points';
 
 async function serverResponse (req: IncomingMessage, res: ServerResponse) {
 

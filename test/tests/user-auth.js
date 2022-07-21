@@ -97,6 +97,12 @@ Test.test(async (api) => {
         return `Expected {level: 2} from get/users/auth, got '${JSON.stringify(newAuthLevel)}'`;
     }
 
+    // check we can access restricted data with our code
+    const allUsersWithNewCodeRes = await api(`get/users/all`, code);
+    if (allUsersWithNewCodeRes.data.length !== 2) {
+        return `Expected 2 users, got '${JSON.stringify(allUsersWithNewCodeRes)}'`;
+    }
+
     // delete our user
     const deleteRes = await api(`delete/users/${code}`);
     if (deleteRes.ok !== true) {

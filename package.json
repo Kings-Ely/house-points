@@ -5,8 +5,8 @@
         "serve-api": "npm run build-server; npm run start-server",
         "build-server": "cd server; npm i; webpack",
         "start-server": "node --enable-source-maps server -dvc",
-        "test-full": "time node test -vl",
-        "test": "time node test"
+        "test-full": "time node --enable-source-maps test -vl",
+        "test": "time node --enable-source-maps test"
     },
     "dependencies": {
         "@types/node": "^17.0.42",

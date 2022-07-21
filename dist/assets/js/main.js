@@ -218,10 +218,7 @@ async function api (path, ...args) {
         mode: 'cors',
         cache: 'no-cache',
         redirect: 'follow',
-        headers: {
-            // manually place cookie in request to avoid CORS issues
-            cookie: 'code=' + getCookie('myCode')
-        }
+        credentials: 'include'
     }).catch(err => {
         console.error('Error with API request: ', err);
         if (shouldHideAtEnd) {

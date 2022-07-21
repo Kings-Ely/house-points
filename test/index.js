@@ -56,7 +56,7 @@ async function api (path, code='admin') {
 	const res = await fetch(url, {
 		method: 'GET',
 		headers: {
-			cookie: 'code=' + code
+			cookie: process.env.COOKIE_CODE_KEY + '=' + code
 		}
 	}).catch(e => {
 		// don't do anything fancy with fetch errors, just log them

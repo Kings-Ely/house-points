@@ -1,5 +1,5 @@
 import route from "../";
-import { AUTH_ERR, authLvl, idFromCodeOrID, makeCode, requireAuth } from "../util";
+import {AUTH_ERR, authLvl, COOKIE_CODE_KEY, idFromCodeOrID, makeCode, requireAdmin} from "../util";
 import log from "../log";
 
 
@@ -24,7 +24,7 @@ route('get/users/info/:code', async ({ query, params: { code} }) => {
 
 
 route('get/users/all', async ({ query, cookies }) => {
-    if (!await requireAuth(cookies, query)) return AUTH_ERR;
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     return {
         data: await query`SELECT admin, student, name, year FROM users`
@@ -33,7 +33,7 @@ route('get/users/all', async ({ query, cookies }) => {
 
 
 route('create/users/:name?year=9', async ({ query, params, cookies }) => {
-    if (!await requireAuth(cookies, query)) return AUTH_ERR;
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     const { name, year: yearStr} = params;
 
@@ -61,14 +61,16 @@ route('create/users/:name?year=9', async ({ query, params, cookies }) => {
 
 
 route('update/users/admin?id&code&admin', async ({ query, params, cookies }) => {
-    if (!await requireAuth(cookies, query)) return AUTH_ERR;
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     const { id: userID, code, admin } = params;
 
     let id = await idFromCodeOrID(query, userID, code);
     if (typeof id === 'string') return id;
 
-    let checkMyselfRes = await query`SELECT admin, id FROM users WHERE code = ${cookies['code']}`;
+    const myCode = cookies[COOKIE_CODE_KEY];
+    if (!myCode) return 'No code';
+    let checkMyselfRes = await query`SELECT admin, id FROM users WHERE code = ${myCode}`;
     const self = checkMyselfRes[0];
 
     if (self['id'] == id) {
@@ -80,7 +82,7 @@ route('update/users/admin?id&code&admin', async ({ query, params, cookies }) => 
 
 
 route('update/users/year?id&code&yearChange', async ({ query, params, cookies }) => {
-    if (!await requireAuth(cookies, query)) return AUTH_ERR;
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     const { id: userID, code, yearChange: yC } = params;
     const yearChange = parseInt(yC);
@@ -95,7 +97,7 @@ route('update/users/year?id&code&yearChange', async ({ query, params, cookies })
 
 
 route('delete/users/:code', async ({ query, params: { code}, cookies }) => {
-    if (!await requireAuth(cookies, query)) return AUTH_ERR;
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     const usersWithCode = await query`SELECT * FROM users WHERE code = ${code}`;
 

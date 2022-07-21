@@ -1,5 +1,5 @@
 import route from "../";
-import { AUTH_ERR, authLvl, idFromCodeOrID, makeCode, requireAuth } from "../util";
+import { AUTH_ERR, authLvl, idFromCodeOrID, makeCode, requireAdmin } from "../util";
 import log from "../log";
 import c from "chalk";
 
@@ -29,9 +29,9 @@ route('get/house-points/from-id/:id', async ({ query, params: { id: rawID} }) =>
 
 
 route('get/house-points/pending', async ({ query, cookies }) => {
-    if (!await requireAuth(cookies, query)) return AUTH_ERR;
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    return await query`
+    return { data: await query`
         SELECT
             housepoints.id as hpID,
             housepoints.description,
@@ -44,14 +44,14 @@ route('get/house-points/pending', async ({ query, cookies }) => {
             housepoints.status = 'Pending' AND
             housepoints.student = users.id
         ORDER BY timestamp DESC
-    `;
+    `};
 });
 
 
 route(
     'create/house-points/give/:user/:quantity?description&event',
 async ({ query, cookies, params }) => {
-    if (!await requireAuth(cookies, query)) return AUTH_ERR;
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     const { user, description, event: rawEvent, rawQuantity } = params;
 
@@ -78,7 +78,7 @@ async ({ query, cookies, params }) => {
 route(
     'create/house-points/request/:user/:quantity?description',
 async ({ query, cookies, params }) => {
-    if (!await requireAuth(cookies, query)) return AUTH_ERR;
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     const { user, description, rawQuantity } = params;
 
@@ -95,7 +95,7 @@ async ({ query, cookies, params }) => {
 route(
     'change/house-points/accepted/:id?reject',
 async ({ query, cookies, params }) => {
-    if (!await requireAuth(cookies, query)) return AUTH_ERR;
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     const { id: rawID, reject } = params;
 
