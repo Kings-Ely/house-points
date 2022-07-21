@@ -26,7 +26,9 @@ route('get/users/info/:code', async ({ query, params: { code} }) => {
 route('get/users/all', async ({ query, cookies }) => {
     if (!await requireAuth(cookies, query)) return AUTH_ERR;
 
-    return await query`SELECT admin, student, name, year FROM users`;
+    return {
+        data: await query`SELECT admin, student, name, year FROM users`
+    };
 });
 
 
@@ -73,9 +75,7 @@ route('update/users/admin?id&code&admin', async ({ query, params, cookies }) => 
         return 'You cannot change your own admin status';
     }
 
-    query`UPDATE users SET admin = ${admin} WHERE id = ${id}`;
-
-    await query``;
+    await query`UPDATE users SET admin = ${admin === '1'} WHERE id = ${id}`;
 });
 
 

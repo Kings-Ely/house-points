@@ -1,7 +1,7 @@
 import route from "../";
 import { AUTH_ERR, authLvl, idFromCodeOrID, makeCode, requireAuth } from "../util";
 import log from "../log";
-import {red} from "chalk";
+import c from "chalk";
 
 
 route('get/house-points/from-id/:id', async ({ query, params: { id: rawID} }) => {
@@ -48,7 +48,53 @@ route('get/house-points/pending', async ({ query, cookies }) => {
 });
 
 
-route('change/house-points/accepted/:id?reject', async ({ query, cookies, params }) => {
+route(
+    'create/house-points/give/:user/:quantity?description&event',
+async ({ query, cookies, params }) => {
+    if (!await requireAuth(cookies, query)) return AUTH_ERR;
+
+    const { user, description, event: rawEvent, rawQuantity } = params;
+
+    let quantity = parseInt(rawQuantity);
+    if (isNaN(quantity) || !quantity) quantity = 1;
+
+    let event: number | null = parseInt(rawEvent);
+    if (isNaN(event) || !event) event = null;
+
+    return await query`
+        INSERT INTO housepoints (student, quantity, event, description, status, completed)
+        VALUES (
+            ${await idFromCodeOrID(query, '', user)},
+            ${quantity},
+            ${event},
+            ${description},
+            'Accepted',
+            CURRENT_TIMESTAMP
+        )
+    `;
+});
+
+
+route(
+    'create/house-points/request/:user/:quantity?description',
+async ({ query, cookies, params }) => {
+    if (!await requireAuth(cookies, query)) return AUTH_ERR;
+
+    const { user, description, rawQuantity } = params;
+
+    let quantity = parseInt(rawQuantity);
+    if (isNaN(quantity) || !quantity) quantity = 1;
+
+    return await query`
+        INSERT INTO housepoints (student, quantity, description)
+        VALUES (${await idFromCodeOrID(query, '', user)}, ${quantity}, ${description})
+    `;
+});
+
+
+route(
+    'change/house-points/accepted/:id?reject',
+async ({ query, cookies, params }) => {
     if (!await requireAuth(cookies, query)) return AUTH_ERR;
 
     const { id: rawID, reject } = params;

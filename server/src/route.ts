@@ -16,7 +16,13 @@ export interface IHandlerArgs {
 
 export type Cookies = Record<string, string>;
 
-export type Handler = (args: IHandlerArgs) => Promise<Record<any, any> | undefined | void | null | string>;
+export type Handler = (args: IHandlerArgs) => Promise<
+    Record<any, any>
+    | undefined
+    | void
+    | null
+    | string
+>;
 
 export interface IJSONResponse {
     status: number;
@@ -97,12 +103,14 @@ export class Route {
         let res = await this.handler(args);
 
         if (typeof res === 'string') {
-            res = {
-                error: res
-            };
+            res = { error: res };
         }
 
         res ||= {};
+
+        if (Array.isArray(res)) {
+            res = { error: 'Arrays not allowed from handlers' };
+        }
 
         if (typeof res !== 'object') {
             res = {

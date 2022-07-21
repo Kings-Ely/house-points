@@ -99,7 +99,7 @@ export async function idFromCodeOrID (query: queryFunc, rawID?: string | number,
 
     let id: number = parseInt(rawID || '');
 
-    if (!id) {
+    if (!id || isNaN(id)) {
         const res = await query`SELECT id FROM users WHERE code = ${rawCode || ''}`;
         if (!res.length) {
             return `User not found with code '${rawCode}'`

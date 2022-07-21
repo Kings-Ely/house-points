@@ -14,14 +14,26 @@ const flags = commandLineArgs([
 	{ name: 'doLighthouse', alias: 'l', type: Boolean, defaultValue: false },
 ]);
 
+/**
+ * Imports all the tests from the 'tests' folder recursively
+ * Means when a new file is added, it will be automatically imported
+ * But means that this cannot be minified, as it will lose the folder structure
+ * @param {*} flags
+ * @param {string} [dir='./test/tests']
+ * @returns {Promise<void>}
+ */
 async function importAll (flags, dir='./test/tests') {
-	const files = fs.readdirSync(dir);
-	for (let f of files) {
+	// loop over files in directory
+	for (let f of fs.readdirSync(dir)) {
 
+		// add root path of directory to file path
 		const file = path.join(dir, f);
 
+		// if the file ends with '.js', import it
+		// otherwise, assume it's a director and import all the files in it
 		if (file.substring(file.length-3, file.length) !== '.js') {
 			await importAll(file);
+
 		} else {
 			// ../ as it is being run from the dir above, but imports are relative to this file
 			await import(path.join('../', file));
@@ -29,15 +41,25 @@ async function importAll (flags, dir='./test/tests') {
 	}
 }
 
-async function api (path) {
+/**
+ * Makes API request to localhost API server
+ * Uses http, and the port stored in the .env file
+ * @param {string} path
+ * @param {string} code
+ * @returns {Promise<Record<string, any>>}
+ */
+async function api (path, code='admin') {
+	// assume host is localhost
 	const url = `http://localhost:${process.env.PORT}/${path}`;
 
+	// get request to api server
 	const res = await fetch(url, {
 		method: 'GET',
 		headers: {
-			cookie: 'code=admin'
+			cookie: 'code=' + code
 		}
 	}).catch(e => {
+		// don't do anything fancy with fetch errors, just log them
 		console.log('Error in API request');
 		console.log(e);
 	});
@@ -57,6 +79,7 @@ async function api (path) {
 		return {};
 	}
 
+	// get text content of response
 	const body = await res.text();
 
     if (flags.verbose) {
@@ -82,6 +105,7 @@ async function api (path) {
 	}
 
 	try {
+		// stop the server process by sending it a 'kill signal'
 		if ((await api(`delete/server/${process.env.KILL_CODE}`)).ok) {
 			console.log(c.green`Server Killed, finished testing`);
 		} else {

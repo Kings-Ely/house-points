@@ -8,3 +8,7 @@
     --border: #646464;
     --border-light: #545454;
 }
+
+.error {
+    background: rgb(86, 33, 33);
+}

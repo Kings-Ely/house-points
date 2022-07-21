@@ -241,7 +241,7 @@ async function api (path, ...args) {
     let asJSON = {};
     try {
         // this might fail if the response is not JSON
-        const asJSON = await res.json();
+        asJSON = await res.json();
 
         // don't try to show error in response if there is no response, so also in try block
         if (asJSON.error) {
@@ -333,7 +333,7 @@ function showError (message) {
     let errorMessage = document.createElement('div');
     errorMessage.innerHTML = `
         ${message}
-        <span onclick="this.parentElement.style.display = 'none'">&times;</span>
+        <span onclick="this.parentElement.remove()">&times;</span>
     `;
     errorMessage.classList.add('error');
     errorMessage.id = `error-${myErrId}`;
@@ -341,7 +341,7 @@ function showError (message) {
     showingErrors.push(myErrId);
 
     setTimeout(() => {
-        errorMessage.style.display = 'none';
+        errorMessage.remove();
         showingErrors = showingErrors.filter(id => id !== myErrId);
     }, 5000);
 }

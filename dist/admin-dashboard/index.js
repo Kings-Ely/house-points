@@ -84,7 +84,7 @@ async function accept (id) {
 
 async function reject (id, reject) {
     if (!reject) return;
-    await fetch(`../api/accept-hp.php?id=${id}&reject=${reject}`);
+    await api`change/house-points/accepted/${id}?reject=${reject}`;
     await main();
 }
 
@@ -113,14 +113,14 @@ document.getElementById('add-hp-submit').onclick = async () => {
         return;
     }
 
-    const valid = await (await fetch(`../api/valid-code.php?code=${code.value}`)).text();
+    const { level: valid } = await api`get/users/auth/${code.value}`;
 
     if (valid !== '1') {
         error.innerHTML = 'Invalid Code';
         return;
     }
 
-    await fetch(`../api/add-hp.php?student=${code.value}&description=${reason.value}`);
+    await api`create/house-points/${code.value}&description=${reason.value}`;
 
     code.value = '';
     reason.value = '';
@@ -145,7 +145,7 @@ async function signout () {
     code.onclick = code.onchange;
     code.onpaste = code.onchange;
 
-    const { level } = await api`get/user/auth/${getCode()}`;
+    const { level } = await api`get/users/auth/${getCode()}`;
 
     if (level !== 2) {
         navigate`..?error=auth`;
