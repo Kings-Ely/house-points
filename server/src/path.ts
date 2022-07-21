@@ -20,6 +20,9 @@ export default class Path {
                 }
             }
 
+            // don't want the value in the list of parameters
+            p.params = p.params.map(p => p.split('=')[0]);
+
         } else if (parts.length < 1) {
             return 'Invalid path - no path';
         }

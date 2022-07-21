@@ -1,6 +1,14 @@
 import route from "../";
 import log from "../log";
 
+function makeCode (length: number, chars='abcdefghijklmnopqrstuvwxyz'): string {
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
 route('users/get/auth/:code', async ({ query, params: { code} }) => {
 
     if (!code) return { level: 0 };
@@ -21,14 +29,18 @@ route('users/post/new/:name?year=9', async ({ query, params: { name, year: yearS
     const year = parseInt(yearStr);
 
     if (isNaN(year)) return {
-        error: 'year is not a number'
+        error: `Year '${year}' is not a number`
     };
 
     if (name.length < 2) return {
-        error: 'Name too short'
+        error: `Name '${name}' too short`
     };
 
-    let code = '';
+    // get unique code
+    let code = makeCode(6);
+    while ((await query`SELECT * FROM users WHERE code = ${code}`).length) {
+        code = makeCode(6);
+    }
 
     const admin = year === 0 ? 1 : 0;
     const student = year === 0 ? 0 : 1;

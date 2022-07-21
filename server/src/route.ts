@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from "http";
 
 import type { queryFunc } from "./sql";
 import Path from "./path";
+import log, {warning} from "./log";
 
 export interface IHandlerArgs {
     url: string;
@@ -58,6 +59,7 @@ export class Route {
     public getParams (rawPath?: string): Record<any, any> {
         const path = Path.parse(rawPath);
         if (typeof path === 'string') {
+            warning`Path parse error: ${path}`;
             return {};
         }
 
@@ -66,11 +68,12 @@ export class Route {
         for (let i = 0; i < this.path.components.length; i++) {
             // check for dynamic component of path
             if (this.path.components[i][0] === ':') {
-                params[this.path.components[i].substr(1)] = path.components[i] || '';
+                params[this.path.components[i].substring(1)] = path.components[i] || '';
             }
         }
 
         for (let param of this.path.params) {
+            log` ${this.path.paramDict} ~ ${path.paramDict}`;
             const defaultValue = this.path.paramDict[param] || '';
             params[param] = path.paramDict[param] || defaultValue;
         }

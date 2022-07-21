@@ -55,9 +55,10 @@ async function serverResponse (req: IncomingMessage, res: ServerResponse) {
     }
 
     const route = routes[0];
+    const requestParameters = route.getParams(req.url);
 
     const finalResponse = await route.handle({
-        params: route.getParams(req.url),
+        params: requestParameters,
         res,
         req,
         url: req.url || '',
