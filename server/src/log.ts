@@ -1,4 +1,5 @@
 import fs from 'fs';
+import c from 'chalk';
 
 class Logger {
     private fileHandle?: fs.WriteStream;
@@ -73,11 +74,11 @@ export default function (msg: string | TemplateStringsArray, ...params: any[]) {
     }
 
     if (typeof msg === 'string') {
-        logger.log('LOG', msg + params.join(' '));
+        logger.log(c.grey`LOG`, msg + ' ' + params.join(' '));
         return;
     }
 
-    logger.log('LOG', reduceToMsg(msg, params));
+    logger.log(c.grey`LOG`, reduceToMsg(msg, params));
 }
 
 /**
@@ -89,7 +90,7 @@ export function warning (msg: string | TemplateStringsArray, ...params: any[]) {
     }
 
     if (typeof msg === 'string') {
-        logger.log('WARN', msg + params.join(' '));
+        logger.log(c.yellow`WARN`, msg + ' ' + params.join(' '));
         return;
     }
 
@@ -98,7 +99,7 @@ export function warning (msg: string | TemplateStringsArray, ...params: any[]) {
         return acc + cur + (params[i] || '');
     }, '');
 
-    logger.log('WARN', message);
+    logger.log(c.yellow`WARN`, message);
 }
 
 /**
@@ -110,7 +111,7 @@ export function error (msg: string | TemplateStringsArray, ...params: any[]) {
     }
 
     if (typeof msg === 'string') {
-        logger.log('ERR', msg + params.join(' '));
+        logger.log(c.red`ERR`, msg + ' ' + params.join(' '));
         return;
     }
 
@@ -119,5 +120,5 @@ export function error (msg: string | TemplateStringsArray, ...params: any[]) {
         return acc + cur + (params[i] || '');
     }, '');
 
-    logger.log('ERR', message);
+    logger.log(c.red`ERR`, message);
 }

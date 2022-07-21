@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "http";
+
 import type { queryFunc } from "./sql";
-import log from "./log";
+import Path from "./path";
 
 export interface IHandlerArgs {
     url: string;
@@ -10,42 +11,35 @@ export interface IHandlerArgs {
     query: queryFunc;
 }
 
-export type Handler = (args: IHandlerArgs) => Promise<Record<any, any> | undefined>;
-
-function componentsFromPath(path?: string): string[] {
-    return (path || '').split('/').filter(Boolean);
-}
+export type Handler = (args: IHandlerArgs) => Promise<Record<any, any> | undefined | void | null>;
 
 export class Route {
-    private readonly components: string[] = [];
+    private readonly path: Path;
     private readonly handler?: Handler;
 
     constructor (path: string, handler: Handler) {
-        this.components = componentsFromPath(path);
-        this.handler = handler;
-
-        // check the path structure is valid
-        for (let i = 0; i < this.components.length; i++) {
-            if (this.components[i] === '**') {
-                if (i !== this.components.length - 1) {
-                    throw `Invalid route '${path}': '**' must be last component`;
-                }
-            }
+        let pathOrError = Path.parse(path);
+        if (typeof pathOrError === 'string') {
+            throw new Error(pathOrError);
         }
+        this.path = pathOrError;
+        this.handler = handler;
     }
 
-    public matches (path?: string): boolean {
+    public matches (rawPath?: string): boolean {
 
-        const components = componentsFromPath(path);
+        const path = Path.parse(rawPath);
+        if (typeof path === 'string') {
+            return false;
+        }
 
-
-        for (let i = 0; i < this.components.length; i++) {
+        for (let i = 0; i < this.path.components.length; i++) {
             // path matches exactly
-            if (components[i] === this.components[i]) {
+            if (path.components[i] === this.path.components[i]) {
                 continue;
             }
             // path component is dynamic
-            if (this.components[i][0] === ':') {
+            if (this.path.components[i][0] === ':') {
                 continue;
             }
 
@@ -55,16 +49,24 @@ export class Route {
         return true;
     }
 
-    public getParams (path?: string): Record<any, any> {
-        const components = componentsFromPath(path);
+    public getParams (rawPath?: string): Record<any, any> {
+        const path = Path.parse(rawPath);
+        if (typeof path === 'string') {
+            return {};
+        }
 
         const params: Record<any, any> = {};
 
-        for (let i = 0; i < this.components.length; i++) {
+        for (let i = 0; i < this.path.components.length; i++) {
             // check for dynamic component of path
-            if (this.components[i][0] === ':') {
-                params[this.components[i].substr(1)] = components[i] || '';
+            if (this.path.components[i][0] === ':') {
+                params[this.path.components[i].substr(1)] = path.components[i] || '';
             }
+        }
+
+        for (let param of this.path.params) {
+            const defaultValue = this.path.paramDict[param] || '';
+            params[param] = path.paramDict[param] || defaultValue;
         }
 
         return params;
@@ -72,21 +74,23 @@ export class Route {
 
     public async handle (args: IHandlerArgs): Promise<string> {
         if (!this.handler) {
-            args.res.statusCode = 404;
+            args.res.writeHead(404);
             return '';
         }
-        const res = await this.handler(args) ?? {};
+
+        let res = await this.handler(args) ?? {};
 
         if (typeof res !== 'object') {
-            args.res.statusCode = 500;
-            args.res.end('Internal Server Error');
-            return '';
+            res = {
+                error: 'Handler returned non-object',
+                value: res
+            };
         }
 
         if (res.error) {
-            args.res.statusCode = 500;
-            args.res.end(res.error);
+            args.res.writeHead(500);
         }
+
         return JSON.stringify(res);
     }
 }

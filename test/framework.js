@@ -10,8 +10,6 @@ const now = performance.now;
  * @returns {boolean | Error}
  */
 
-const PORT = 8090;
-
 export class TestResult {
     failed = 0;
     passed = 0;
@@ -51,7 +49,7 @@ export class TestResult {
 }
 
 async function api (path) {
-    const url = `http://localhost:${PORT}/${path}`;
+    const url = `http://localhost:${process.env.PORT}/${path}`;
 
     const res = await fetch(url, {
         method: 'GET',
@@ -63,9 +61,9 @@ async function api (path) {
         console.log(e);
     });
 
-    const body = await res.text();
+    const body = await res.json();
 
-    console.log(`[GET] ${url}: ${body.substring(0, 50)}`);
+    console.log(`api [GET] ${url}: ${body.substring(0, 50)}`);
 
     return body;
 }

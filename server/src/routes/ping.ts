@@ -1,10 +1,12 @@
-import { route } from "../index";
+import route from "../";
 
-route('ping', async ({ query }) => {
-    const res = await query`SELECT * FROM users LIMIT 1`;
+route('check', async ({ query }) => {
     return {
-        ok: res.length === 1,
+        // run a little test to check that everything is actually working fine
+        ok: (await query`SELECT * FROM users LIMIT 1`).length === 1,
     };
 });
+
+route('ping', async () => ({ ok: 1 }));
 
 route('echo/:msg', async ({ params }) => params);

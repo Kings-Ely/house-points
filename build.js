@@ -57,6 +57,6 @@ async function uploadBackend () {
     await uploadFrontend();
     await uploadBackend();
 
-    const duration = now() - start;
-    console.log(c.green(`Finished Building in ${duration.toFixed(3)}`));
+    const duration = (now() - start)/1000;
+    console.log(c.green(`Finished Building in ${duration.toFixed(3)}s`));
 })();

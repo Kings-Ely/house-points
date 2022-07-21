@@ -1,29 +1,30 @@
-import * as https from "https";
+import { createServer } from "https";
+import { createServer as createServerHTTP } from "http";
 import * as fs from "fs";
-import * as http from "http";
 import type { IncomingMessage, ServerResponse } from "http";
-import dotenv from 'dotenv';
-import { Handler, Route } from "./route";
-import c from 'chalk';
-import connectSQL from './sql';
-import log, {error, LogLvl, setLogOptions, warning} from "./log";
 import commandLineArgs from 'command-line-args';
-import path from "path";
+import c from 'chalk';
+
+import { type Handler, Route } from "./route";
+import connectSQL, { type queryFunc } from './sql';
+import log, { error, LogLvl, setLogOptions, warning } from "./log";
+import {loadEnv} from "./util";
 
 const flags = commandLineArgs([
     { name: 'dev', alias: 'd', type: Boolean, defaultValue: false },
     { name: 'log', type: Number, defaultValue: LogLvl.ALL },
     { name: 'verbose', alias: 'v', type: Boolean, defaultValue: false },
     { name: 'useConsole', alias: 'c', type: Boolean, defaultValue: false },
+    { name: 'port', alias: 'p', type: Number, defaultValue: 0 }
 ]);
 
 const handlers: Route[] = [];
 
-let query = (...args: any[]) => new Promise(() => {
+let query: queryFunc = () => new Promise(() => {
     error`SQL server not connected`;
 });
 
-export function route (path: string, handler: Handler) {
+export default function route (path: string, handler: Handler) {
     handlers.push(new Route(path, handler));
 }
 
@@ -38,9 +39,9 @@ async function serverResponse (req: IncomingMessage, res: ServerResponse) {
 
     // set response headers
     res.setHeader("Access-Control-Allow-Origin", req.headers.origin || '*');
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST");
+    res.setHeader("Access-Control-Allow-Methods", "GET");
     res.setHeader("Access-Control-Allow-Credentials", "true");
-
+    res.setHeader('Content-Type', 'application/json');
 
     // find route which matches request path
     const routes = handlers.filter((route) => route.matches(req.url));
@@ -57,9 +58,10 @@ async function serverResponse (req: IncomingMessage, res: ServerResponse) {
 
     const route = routes[0];
 
-    const params = route.getParams(req.url);
+    res.writeHead(200);
+
     const finalResponse = await route.handle({
-        params,
+        params: route.getParams(req.url),
         res,
         req,
         url: req.url || '',
@@ -67,15 +69,6 @@ async function serverResponse (req: IncomingMessage, res: ServerResponse) {
     });
 
     res.end(finalResponse);
-}
-
-function loadEnv () {
-    const contents = fs.readFileSync(path.join(path.resolve(__dirname), '.env'), 'utf8');
-
-    process.env = {
-        ...process.env,
-        ...dotenv.parse(contents)
-    };
 }
 
 function startServer () {
@@ -89,20 +82,24 @@ function startServer () {
         };
     }
 
-    const PORT = process.env.PORT;
+    let PORT = process.env.PORT;
+
+    if (flags.port) {
+        PORT = flags.port;
+    }
 
     if (!PORT) {
-        error`No port specified in .env`;
+        error`No port specified in .env or command line`;
         return;
     }
 
     if (flags.dev) {
-        http.createServer(options, serverResponse)
+        createServerHTTP(options, serverResponse)
             .listen(PORT, () => {
                 log(c.green(`Dev server started on port ${PORT}`));
             });
     } else {
-        https.createServer(options, serverResponse)
+        createServer(options, serverResponse)
             .listen(PORT, () => {
                 log(c.green(`Production server started on port ${PORT}`));
             });

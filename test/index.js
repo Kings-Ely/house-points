@@ -1,10 +1,5 @@
 #!/usr/bin/env zx
-$.verbose = false
-$.log = () => {};
-
-
 import { $ } from "zx";
-import c from 'chalk';
 import setup from './setup.js';
 import Test from './framework.js';
 import fs from 'fs';
@@ -12,18 +7,14 @@ import path from 'path';
 
 const VERBOSE = process.argv.indexOf('-v') !== -1;
 
-const PORT = 8090;
+$.verbose = VERBOSE;
 
 async function startServer () {
-	try {
-		$`cd dist/api; php -S localhost:${PORT}`;
-	} catch (e) {
-		console.log(c.red`ERROR: --------- on PHP server start`);
-		console.error(e);
-	}
+	console.log('Building server...');
+	$`webpack -c server/webpack.config.js`;
 
-	// sleep for a bit to wait for sever to start - not sure how long this takes however
-	await new Promise(r => setTimeout(r, 100));
+	console.log('Starting server...');
+	$`node --enable-source-maps server -dc ${VERBOSE ? '-v' : ''}`;
 }
 
 async function importAll (dir='./test/tests') {

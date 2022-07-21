@@ -193,7 +193,16 @@ async function api (path, ...args) {
     }
 
     // fetch
-    const res = await fetch(`${API_ROOT}/${path}`);
+    const res = await fetch(`${API_ROOT}/${path}`, {
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-cache',
+        redirect: 'follow',
+        headers: {
+            // manually place cookie in request to avoid CORS issues
+            cookie: 'myCode=' + getCookie('myCode')
+        }
+    }).catch(console.error);
 
     const asJson = await res.json();
 

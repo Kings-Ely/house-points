@@ -1,4 +1,4 @@
-import { route } from "../index";
+import route from "../";
 
 route('users/get/auth/:code', async ({ query, params: { code} }) => {
 
@@ -13,4 +13,8 @@ route('users/get/auth/:code', async ({ query, params: { code} }) => {
     return {
         level: auth ? 2 : 1
     };
+});
+
+route('users/post/new/:name?year=9', async ({ query, params: { name, year} }) => {
+
 });

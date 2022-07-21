@@ -1,5 +1,7 @@
 import mysql from 'mysql2';
-import log, { error } from "./log";
+import c from 'chalk';
+
+import log, { error, warning } from "./log";
 
 export type queryFunc = (queryParts: TemplateStringsArray, ...params: any[]) => Promise<any>;
 
@@ -29,12 +31,13 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
                 setTimeout(handleDisconnect, 500);
             }
 
-            log`Connected to SQL server`;
+            log(c.green(`Connected to SQL server`));
             hasConnectedSQL = true;
         });
 
         con.on('error', (err: any) => {
             if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+                warning`Lost connection to SQL server`;
                 handleDisconnect();
             } else {
                 throw err;
@@ -54,11 +57,11 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
                 return acc + cur + (params[i] ? con.escape(params[i]) : '');
             }, '');
 
-           log('QUERY: ', query);
+           log(c.yellow`QUERY: `, query);
 
             con.query(query, (err, result) => {
                 if (err) {
-                    console.error(err);
+                    error(JSON.stringify(err));
                     fail(err);
                 }
                 resolve(result);
