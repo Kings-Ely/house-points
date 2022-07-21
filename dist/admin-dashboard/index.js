@@ -1,7 +1,7 @@
-function housepoint (hp, div) {
+function housePointHML (hp) {
     const submittedTime = hp['timestamp'] * 1000;
 
-    div.innerHTML += `
+    return `
         <div class="house-point">
             <div>
                 ${hp['studentName']}
@@ -32,9 +32,8 @@ function housepoint (hp, div) {
 }
 
 async function main () {
-    fetch(`../api/student-info.php?code=${getCode()}`)
+    api`get/user/info/${getCode()}`
         .then(async data => {
-            data = await data.json();
             if (data['student']) {
                 document.getElementById('top-right-menu').innerHTML += `
                     <a 
@@ -49,14 +48,15 @@ async function main () {
 
     const div = document.getElementById('pending');
 
-    const pending = await (await fetch(`../api/pending-hps.php`)).json();
+    const pending = await api`get/house-points/pending`;
 
     // clear after async request
     div.innerHTML = '';
 
     let i = 0;
     for (let hp of pending) {
-        await housepoint(hp, div);
+        div.innerHTML += housePointHML(hp);
+
         if (i === 4) {
             div.innerHTML += `
                 <div style="text-align: center; padding: 20px">
@@ -77,28 +77,16 @@ async function main () {
     }
 }
 
-(async () => {
-    const validCodeRes = await fetch(`../api/valid-code.php?code=${getCode()}`);
-    const validCode = await validCodeRes.text();
-
-    if (validCode !== '2') {
-        navigate`..?error=auth`;
-        return;
-    }
-
+async function accept (id) {
+    await api`change/house-points/accepted/${id}?`;
     await main();
-})();
+}
 
-window.accept = async (id) => {
-    await fetch(`../api/accept-hp.php?id=${id}`);
-    await main();
-};
-
-window.reject = async (id, reject) => {
+async function reject (id, reject) {
     if (!reject) return;
     await fetch(`../api/accept-hp.php?id=${id}&reject=${reject}`);
     await main();
-};
+}
 
 const code = document.getElementById('add-hp-code');
 
@@ -108,10 +96,6 @@ code.onchange = () => {
         code.value = cleanCode(code.value);
     }, 0);
 };
-
-code.onkeydown = code.onchange;
-code.onclick = code.onchange;
-code.onpaste = code.onchange;
 
 document.getElementById('add-hp-submit').onclick = async () => {
 
@@ -144,13 +128,29 @@ document.getElementById('add-hp-submit').onclick = async () => {
     main();
 };
 
-window.signout = () => {
+async function signout () {
     if (!confirm(`Are you sure you want to sign out?`)) {
         return;
     }
 
     eraseCookie(COOKIE_KEY);
-    navigate`..`;
-};
+    await navigate`..`;
+}
 
-footer('../footer.html');
+
+(async () => {
+    footer('../footer.html');
+
+    code.onkeydown = code.onchange;
+    code.onclick = code.onchange;
+    code.onpaste = code.onchange;
+
+    const { level } = await api`get/user/auth/${getCode()}`;
+
+    if (level !== 2) {
+        navigate`..?error=auth`;
+        return;
+    }
+
+    await main();
+})();

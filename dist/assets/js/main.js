@@ -222,16 +222,42 @@ async function api (path, ...args) {
             // manually place cookie in request to avoid CORS issues
             cookie: 'code=' + getCookie('myCode')
         }
-    }).catch(console.error);
+    }).catch(err => {
+        console.error('Error with API request: ', err);
+        if (shouldHideAtEnd) {
+            stopSpinner(loader);
+        }
+        showError('Something went wrong!');
+    });
 
-    const asJson = await res.json();
+    if (res.status === 404) {
+        showError('Something went wrong! (404 in API)');
+        if (shouldHideAtEnd) {
+            stopSpinner(loader);
+        }
+        return {};
+    }
+
+    let asJSON = {};
+    try {
+        // this might fail if the response is not JSON
+        const asJSON = await res.json();
+
+        // don't try to show error in response if there is no response, so also in try block
+        if (asJSON.error) {
+            showError(asJSON.error);
+        }
+
+    } catch (err) {
+        console.error('Error with API request: ', err);
+        showError('Something went wrong!');
+    }
 
     if (shouldHideAtEnd) {
-        // post fetch
         stopSpinner(loader);
     }
 
-    return asJson;
+    return asJSON;
 }
 
 /**
@@ -285,6 +311,8 @@ const navigate = async (url) => {
 
 
 let errorDiv;
+let errId = 0;
+let showingErrors = [];
 /**
  * @param {string} message - parsed as HTML
  */
@@ -295,19 +323,29 @@ function showError (message) {
         document.body.appendChild(errorDiv);
     }
 
-    errorDiv.style.display = 'flex';
+    let myErrId = errId++;
 
-    errorDiv.innerHTML = `
-        <p id="error">
-            ${message}
-            <span onclick="this.parentElement.parentElement.style.display='none'">&times;</span>
-        </p>
+    while (showingErrors.length > 4) {
+        let id = showingErrors.shift();
+        document.getElementById(`error-${id}`).remove();
+    }
+
+    let errorMessage = document.createElement('div');
+    errorMessage.innerHTML = `
+        ${message}
+        <span onclick="this.parentElement.style.display = 'none'">&times;</span>
     `;
+    errorMessage.classList.add('error');
+    errorMessage.id = `error-${myErrId}`;
+    errorDiv.appendChild(errorMessage);
+    showingErrors.push(myErrId);
 
     setTimeout(() => {
-        errorDiv.style.display = 'none';
+        errorMessage.style.display = 'none';
+        showingErrors = showingErrors.filter(id => id !== myErrId);
     }, 5000);
 }
+
 
 /**
  * Shows an error from a code (a string)

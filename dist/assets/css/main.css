@@ -129,6 +129,7 @@ input:focus {
 #error-container {
     display: flex;
     justify-content: center;
+    flex-direction: column;
     align-items: center;
     width: 100vw;
     position: absolute;
@@ -137,7 +138,7 @@ input:focus {
     z-index: 100;
 }
 
-#error {
+.error {
     height: fit-content;
     width: 50vw;
     min-width: 280px;

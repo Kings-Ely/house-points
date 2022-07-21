@@ -9,7 +9,7 @@ go.onclick = async () => {
 		return;
 	}
 
-	const { level } = await api`users/get/auth/${myCode}`;
+	const { level } = await api`get/users/auth/${myCode}`;
 
 	if (level === 1) {
 		setCodeCookie(myCode);
