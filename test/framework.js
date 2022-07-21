@@ -48,26 +48,6 @@ export class TestResult {
     }
 }
 
-async function api (path) {
-    const url = `http://localhost:${process.env.PORT}/${path}`;
-
-    const res = await fetch(url, {
-        method: 'GET',
-        headers: {
-            cookie: 'myCode=admin'
-        }
-    }).catch(e => {
-        console.log('Error in API request');
-        console.log(e);
-    });
-
-    const body = await res.json();
-
-    console.log(`api [GET] ${url}: ${body.substring(0, 50)}`);
-
-    return body;
-}
-
 export default class Test {
     test;
     id;
@@ -87,12 +67,8 @@ export default class Test {
         this.batteryID = batteryID;
     }
 
-    /**
-     * @param {Context} env
-     * @returns {boolean | Error}
-     */
-    run (env) {
-        return this.test(env);
+    run (...args) {
+        return this.test(...args);
     }
 
     static currentID = 0;
@@ -115,13 +91,13 @@ export default class Test {
     /**
      * @returns {TestResult}
      */
-    static async testAll () {
+    static async testAll (api, flags) {
         let time = now();
 
         const res = new TestResult();
 
         for (let test of Test.tests) {
-            res.register(await test.run(api), test);
+            res.register(await test.run(api, flags), test);
         }
 
         res.time = Math.round(now() - time);

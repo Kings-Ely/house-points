@@ -15,8 +15,10 @@ async function generateUsers (api, num=1) {
 
     for (let i = 0; i < num; i++) {
         const name = randomFromAlph();
-        const code = await api(`add-user.php?myCode=admin&name=${name}`);
-        if (typeof code !== 'string') return 'Expected string from user code';
+        const code = await api(`users/post/new/${name}?year=10`);
+        if (typeof code !== 'string') {
+            return 'Expected string from user code';
+        }
         for (const char of code) {
             if (!alphabet.includes(char)) {
                 return `Unexpected char in user code: '${char}' (${code})`;

@@ -3,7 +3,11 @@ import lighthouse, {goodScore, lighthouseResCategories} from "../ligthhouse.js";
 import c from 'chalk';
 
 Test.battery('frontend performance');
-Test.test(async () => {
+Test.test(async (_, { doLighthouse }) => {
+
+    if (!doLighthouse) {
+        return true;
+    }
 
     if (!process.env.SITE_URL) {
         return `SITE_URL is not specified in .env file`;

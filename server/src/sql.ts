@@ -53,13 +53,13 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
                 fail('SQL server not connected');
             }
 
-            const query =  queryParts.reduce((acc, cur, i) => {
-                return acc + cur + (params[i] ? con.escape(params[i]) : '');
+            const query = queryParts.reduce((acc, cur, i) => {
+                return acc + cur + (params[i] === undefined ? '' : '?');
             }, '');
 
-           log(c.yellow`QUERY: `, query);
+           log(c.yellow`QUERY: `, query, params);
 
-            con.query(query, (err, result) => {
+            con.query(query, params, (err, result) => {
                 if (err) {
                     error(JSON.stringify(err));
                     fail(err);

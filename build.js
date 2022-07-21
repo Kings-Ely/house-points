@@ -46,7 +46,7 @@ async function uploadBackend () {
     ];
 
     await Promise.all(paths.map(async (path) =>
-        await $`sshpass -f './sshPass.txt' rsync -r --exclude='*.env' ${path} ${REMOTE_ADDRESS}:~${REMOTE_BACKEND_PATH}`
+        await $`sshpass -f './sshPass.txt' rsync ${path} ${REMOTE_ADDRESS}:~${REMOTE_BACKEND_PATH}`
     ));
 }
 

@@ -1,23 +1,26 @@
 {
     "type": "module",
+    "scripts": {
+        "build": "node --enable-source-maps build",
+        "serve-api": "npm run build-server; npm run start-server",
+        "build-server": "cd server; npm i; webpack",
+        "start-server": "node --enable-source-maps server -dvc",
+        "test-full": "time node test -vl",
+        "test": "time node test"
+    },
     "dependencies": {
         "@types/node": "^17.0.42",
         "chalk": "^5.0.1",
         "chrome-launcher": "^0.15.1",
+        "command-line-args": "^5.2.1",
         "dotenv": "^16.0.1",
         "lighthouse": "^9.6.3",
         "mysql2": "^2.3.3",
         "node-fetch": "^3.2.6",
         "performance-now": "^2.1.0",
         "ts-loader": "^9.3.1",
+        "why-is-node-running": "^2.2.2",
         "zx": "^6.1.0"
-    },
-    "scripts": {
-        "build": "node --enable-source-maps build",
-        "serve-api": "npm run build-server; npm run start-server",
-        "build-server": "webpack -c server/webpack.config.js",
-        "start-server": "node --enable-source-maps server -dvc",
-        "test": "node test"
     },
     "devDependencies": {
         "webpack-cli": "^4.10.0"

@@ -1,12 +1,11 @@
 import route from "../";
 
 route('check', async ({ query }) => {
-    return {
-        // run a little test to check that everything is actually working fine
-        ok: (await query`SELECT * FROM users LIMIT 1`).length === 1,
-    };
+    if ((await query`SELECT * FROM users LIMIT 1`).length !== 1) {
+        return { error: 'Something went wrong' };
+    }
 });
 
-route('ping', async () => ({ ok: 1 }));
+route('ping', async () => void 0);
 
 route('echo/:msg', async ({ params }) => params);

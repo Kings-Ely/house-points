@@ -13,9 +13,15 @@ export interface IHandlerArgs {
 
 export type Handler = (args: IHandlerArgs) => Promise<Record<any, any> | undefined | void | null>;
 
+export interface IJSONResponse {
+    status: number;
+    ok: boolean;
+    error?: string;
+}
+
 export class Route {
     private readonly path: Path;
-    private readonly handler?: Handler;
+    private readonly handler: Handler;
 
     constructor (path: string, handler: Handler) {
         let pathOrError = Path.parse(path);
@@ -72,13 +78,10 @@ export class Route {
         return params;
     }
 
-    public async handle (args: IHandlerArgs): Promise<string> {
-        if (!this.handler) {
-            args.res.writeHead(404);
-            return '';
-        }
+    public async handle (args: IHandlerArgs): Promise<IJSONResponse & Record<any, any>> {
+        let res = await this.handler(args);
 
-        let res = await this.handler(args) ?? {};
+        res ||= {};
 
         if (typeof res !== 'object') {
             res = {
@@ -87,10 +90,10 @@ export class Route {
             };
         }
 
-        if (res.error) {
-            args.res.writeHead(500);
-        }
-
-        return JSON.stringify(res);
+        return {
+            ok: !res.error,
+            status: res.error ? 500 : 200,
+            ...res
+        };
     }
 }

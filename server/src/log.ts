@@ -1,11 +1,12 @@
 import fs from 'fs';
 import c from 'chalk';
+import ErrnoException = NodeJS.ErrnoException;
 
 class Logger {
     private fileHandle?: fs.WriteStream;
     private path_ = '';
     public level: LogLvl = 3;
-    public useConsole = false;
+    public useConsole = true;
 
     get path () {
         return this.path_;
@@ -14,25 +15,31 @@ class Logger {
     set path (path: string) {
         this.path_ = path;
 
-        // create file if it doesn't exist or delete contents if it does
-        fs.writeFileSync(path, '');
+        if (!fs.existsSync(path)) {
+            fs.writeFileSync(path, '');
+        }
 
         this.fileHandle = fs.createWriteStream(path, {
             flags: 'a'
         });
+
+        this.log('START', new Date().toISOString());
     }
 
-    constructor (path: string) {
-        this.path = path;
-    }
-
-    log (type: string, message: string) {
-        let out = `[${type}] ${message}`;
+    log (type: string, ...messages: any[]): void {
+        messages = messages.map(r => JSON.stringify(r, undefined, 5));
+        let out = `[${type}] ${messages.join(' ')}`;
         if (this.useConsole) {
             console.log(out);
         } else {
             fs.appendFileSync(this.path, out + '\n');
         }
+    }
+
+    async exit (): Promise<ErrnoException | null | undefined> {
+        return new Promise((resolve) => {
+            this.fileHandle?.close(resolve);
+        });
     }
 }
 
@@ -44,12 +51,16 @@ export enum LogLvl {
     VERBOSE
 }
 
-const logger = new Logger('./error.log');
+const logger = new Logger;
+
+export async function close () {
+    return await logger.exit();
+}
 
 export function setLogOptions (options: any) {
-    if (options.path) logger.path = options.path;
     if ('level' in options) logger.level = options.level;
     if ('useConsole' in options) logger.useConsole = options.useConsole;
+    if ('logTo' in options) logger.path = options.logTo;
 }
 
 /**
@@ -74,7 +85,7 @@ export default function (msg: string | TemplateStringsArray, ...params: any[]) {
     }
 
     if (typeof msg === 'string') {
-        logger.log(c.grey`LOG`, msg + ' ' + params.join(' '));
+        logger.log(c.grey`LOG`, msg, ...params);
         return;
     }
 

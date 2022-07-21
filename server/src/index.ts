@@ -1,5 +1,5 @@
-import { createServer } from "https";
-import { createServer as createServerHTTP } from "http";
+import https from "https";
+import http from "http";
 import * as fs from "fs";
 import type { IncomingMessage, ServerResponse } from "http";
 import commandLineArgs from 'command-line-args';
@@ -8,11 +8,12 @@ import c from 'chalk';
 import { type Handler, Route } from "./route";
 import connectSQL, { type queryFunc } from './sql';
 import log, { error, LogLvl, setLogOptions, warning } from "./log";
-import {loadEnv} from "./util";
+import { loadEnv } from "./util";
 
 const flags = commandLineArgs([
     { name: 'dev', alias: 'd', type: Boolean, defaultValue: false },
     { name: 'log', type: Number, defaultValue: LogLvl.ALL },
+    { name: 'logTo', type: String, defaultValue: 'server.log' },
     { name: 'verbose', alias: 'v', type: Boolean, defaultValue: false },
     { name: 'useConsole', alias: 'c', type: Boolean, defaultValue: false },
     { name: 'port', alias: 'p', type: Number, defaultValue: 0 }
@@ -30,12 +31,9 @@ export default function route (path: string, handler: Handler) {
 
 import './routes/users';
 import './routes/ping';
+import './routes/control';
 
 async function serverResponse (req: IncomingMessage, res: ServerResponse) {
-
-    if (flags.verbose) {
-        log`${req.method} ${req.url}`;
-    }
 
     // set response headers
     res.setHeader("Access-Control-Allow-Origin", req.headers.origin || '*');
@@ -50,15 +48,13 @@ async function serverResponse (req: IncomingMessage, res: ServerResponse) {
         warning`Multiple routes match ${req.url}`;
 
     } else if (routes.length === 0) {
+        warning`404: ${req.method} '${req.url}'`;
         res.writeHead(404);
         res.end('');
-        warning`404: ${req.method} ${req.url}`;
         return;
     }
 
     const route = routes[0];
-
-    res.writeHead(200);
 
     const finalResponse = await route.handle({
         params: route.getParams(req.url),
@@ -68,7 +64,14 @@ async function serverResponse (req: IncomingMessage, res: ServerResponse) {
         query
     });
 
-    res.end(finalResponse);
+    const strResponse = JSON.stringify(finalResponse);
+
+    if (flags.verbose) {
+        log`${req.method} '${req.url}' => '${strResponse.substring(0, 50)}'`;
+    }
+
+    res.writeHead(finalResponse.ok ? 200 : 500);
+    res.end(strResponse);
 }
 
 function startServer () {
@@ -93,17 +96,26 @@ function startServer () {
         return;
     }
 
+    let server: http.Server | https.Server;
+
     if (flags.dev) {
-        createServerHTTP(options, serverResponse)
+        server = http.createServer(options, serverResponse)
             .listen(PORT, () => {
                 log(c.green(`Dev server started on port ${PORT}`));
             });
     } else {
-        createServer(options, serverResponse)
+        server = https.createServer(options, serverResponse)
             .listen(PORT, () => {
                 log(c.green(`Production server started on port ${PORT}`));
             });
     }
+
+    process.on('SIGTERM', () => {
+        server.close(() => {
+            log`Server stopped, stopping process...`;
+            process.exit(0);
+        });
+    });
 }
 
 function connectToMySQL () {
