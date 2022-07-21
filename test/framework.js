@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import fetch from "node-fetch";
 import { performance } from 'perf_hooks';
 const now = performance.now;
 

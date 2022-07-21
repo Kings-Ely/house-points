@@ -15,7 +15,7 @@ async function generateUsers (api, num=1) {
 
     for (let i = 0; i < num; i++) {
         const name = randomFromAlph();
-        const code = await api(`users/post/new/${name}?year=10`);
+        const { code } = await api(`create/users/${name}?year=10`);
         if (typeof code !== 'string') {
             return 'Expected string from user code';
         }
@@ -55,19 +55,29 @@ Test.battery('user-auth');
 Test.test(async (api) => {
 
     const codes = await generateUsers(api);
-    if (!Array.isArray(codes)) return `Expected array of codes, got: ${codes}`;
+    if (!Array.isArray(codes)) {
+        return `Expected array of codes, got: ${codes}`;
+    }
     const [[ code, name ]] = codes;
 
-    const validRes = await api(`valid-code.php?code=${code}`);
-    if (validRes !== '1') return `Expected result of '1' from valid-code, got '${validRes}'`;
+    const validRes = await api(`get/users/auth/${code}`);
+    if (validRes.level !== 1) {
+        return `Expected {level: 1} from valid-code, got '${JSON.stringify(validRes)}'`;
+    }
 
-    const infoRes = JSON.parse(await api(`student-info.php?code=${code}`));
-    if (infoRes.name !== name) return `Expected name to be '${name}', got '${infoRes.name}'`;
-    if (infoRes.name !== name) return `Expected name to be '${name}', got '${infoRes.name}'`;
+    const infoRes = await api(`get/users/${code}`);
+    if (infoRes.name !== name) {
+        return `Expected name to be '${name}', got '${infoRes.name}'`;
+    }
+    if (infoRes.name !== name) {
+        return `Expected name to be '${name}', got '${infoRes.name}'`;
+    }
 
 
-    const deleteRes = await api(`delete-student.php?id=${code}`);
-    if (deleteRes !== '1') return `Expected result of '1' from delete-student, got '${deleteRes}'`;
+    const deleteRes = await api(`delete/users/${code}`);
+    if (deleteRes.ok !== true) {
+        return `Expected result of '1' from delete-student, got '${JSON.stringify(deleteRes)}'`;
+    }
 
     return true;
 })

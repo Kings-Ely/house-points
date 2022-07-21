@@ -2,7 +2,6 @@ import mysql from 'mysql2';
 import fs from 'fs';
 import now from 'performance-now';
 import c from 'chalk';
-
 import { config } from 'dotenv';
 import { $ } from "zx";
 
@@ -45,15 +44,17 @@ export default async function (flags) {
 				return;
 			}
 
-			console.log(`Database created`);
+			console.log(c.green`Database created`);
 
-			con.query(fs.readFileSync('./sql/schema.sql', 'utf8'), (err) => {
+			const setUpQuery = fs.readFileSync('./sql/schema.sql', 'utf8');
+
+			con.query(setUpQuery, (err) => {
 				if (err) {
 					reject(err);
 					return;
 				}
 
-				console.log(`Database schema created`);
+				console.log(c.green`Database schema created`);
 				con.end();
 
 				resolve();

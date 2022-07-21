@@ -82,7 +82,7 @@ async function main () {
     const validCode = await validCodeRes.text();
 
     if (validCode !== '2') {
-        navigate`..?error=auth-required`;
+        navigate`..?error=auth`;
         return;
     }
 
@@ -149,7 +149,7 @@ window.signout = () => {
         return;
     }
 
-    eraseCookie(codeCookieKey);
+    eraseCookie(COOKIE_KEY);
     navigate`..`;
 };
 

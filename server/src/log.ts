@@ -7,6 +7,8 @@ class Logger {
     private path_ = '';
     public level: LogLvl = 3;
     public useConsole = true;
+    public active = true;
+    public useColour = true;
 
     get path () {
         return this.path_;
@@ -27,6 +29,10 @@ class Logger {
     }
 
     log (type: string, ...messages: any[]): void {
+        if (!this.active) {
+            return;
+        }
+
         messages = messages.map(r => JSON.stringify(r, undefined, 5));
         let out = `[${type}] ${messages.join(' ')}`;
         if (this.useConsole) {
@@ -54,6 +60,7 @@ export enum LogLvl {
 const logger = new Logger;
 
 export async function close () {
+    logger.active = false;
     return await logger.exit();
 }
 
@@ -61,6 +68,7 @@ export function setLogOptions (options: any) {
     if ('level' in options) logger.level = options.level;
     if ('useConsole' in options) logger.useConsole = options.useConsole;
     if ('logTo' in options) logger.path = options.logTo;
+    if ('colour' in options) logger.useColour = options.colour;
 }
 
 /**

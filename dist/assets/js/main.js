@@ -1,14 +1,14 @@
 // Utility script imported by all pages
 
 const API_ROOT = 'https://josephcoppin.com:4464';
-const codeCookieKey = 'hpCode';
+const COOKIE_KEY = 'hpCode';
 
 function getCode () {
-    return getCookie(codeCookieKey);
+    return getCookie(COOKIE_KEY);
 }
 
 function setCodeCookie (code) {
-    setCookie(codeCookieKey, code);
+    setCookie(COOKIE_KEY, code);
 }
 
 const units = {
@@ -82,6 +82,24 @@ function getCookie (name) {
  */
 function eraseCookie (name) {
     document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+
+function GETParam (name) {
+    let result = null,
+        tmp = [];
+
+    location.search
+        .substring(1)
+        .split("&")
+        .forEach(function (item) {
+            tmp = item.split("=");
+            if (tmp[0] === name) {
+                result = decodeURIComponent(tmp[1]);
+            }
+        });
+
+    return result;
 }
 
 /**
@@ -163,8 +181,10 @@ function stopSpinner (loader) {
  * Show loading while requests are being made
  * but only show the spinner if no other requests are still pending,
  * which would mean the spinner is already being shown.
- * @returns {Promise<Response>}
+
  * @param {string | TemplateStringsArray} path
+ * @param args
+ * @returns {Promise<Record<string, any>>}
  */
 async function api (path, ...args) {
 
@@ -200,7 +220,7 @@ async function api (path, ...args) {
         redirect: 'follow',
         headers: {
             // manually place cookie in request to avoid CORS issues
-            cookie: 'myCode=' + getCookie('myCode')
+            cookie: 'code=' + getCookie('myCode')
         }
     }).catch(console.error);
 
@@ -256,6 +276,7 @@ window.onload = reloadDOM;
  * @returns {Promise<never>}
  */
 const navigate = async (url) => {
+    // check url against current url
     if (!['', './', '.', location.pathname, location.href].includes(url)) {
         window.location.assign(url);
     }
@@ -286,4 +307,14 @@ function showError (message) {
     setTimeout(() => {
         errorDiv.style.display = 'none';
     }, 5000);
+}
+
+/**
+ * Shows an error from a code (a string)
+ * @param {string} code
+ */
+function showErrorFromCode (code) {
+    showError({
+        'auth': 'You are not authorized for this action',
+    }[code] || 'An Unknown Error has Occurred');
 }

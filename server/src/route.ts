@@ -2,7 +2,8 @@ import type { IncomingMessage, ServerResponse } from "http";
 
 import type { queryFunc } from "./sql";
 import Path from "./path";
-import log, {warning} from "./log";
+import log, { warning } from "./log";
+import {AUTH_ERR} from "./util";
 
 export interface IHandlerArgs {
     url: string;
@@ -10,9 +11,12 @@ export interface IHandlerArgs {
     req: IncomingMessage;
     params: Record<string, string>;
     query: queryFunc;
+    cookies: Cookies;
 }
 
-export type Handler = (args: IHandlerArgs) => Promise<Record<any, any> | undefined | void | null>;
+export type Cookies = Record<string, string>;
+
+export type Handler = (args: IHandlerArgs) => Promise<Record<any, any> | undefined | void | null | string>;
 
 export interface IJSONResponse {
     status: number;
@@ -33,6 +37,9 @@ export class Route {
         this.handler = handler;
     }
 
+    /**
+     * Checks that the given path has the same structure as this route's path
+     */
     public matches (rawPath?: string): boolean {
 
         const path = Path.parse(rawPath);
@@ -56,6 +63,9 @@ export class Route {
         return true;
     }
 
+    /**
+     * Returns a map of parameters from a given path, based on this route's path
+     */
     public getParams (rawPath?: string): Record<any, any> {
         const path = Path.parse(rawPath);
         if (typeof path === 'string') {
@@ -73,7 +83,6 @@ export class Route {
         }
 
         for (let param of this.path.params) {
-            log` ${this.path.paramDict} ~ ${path.paramDict}`;
             const defaultValue = this.path.paramDict[param] || '';
             params[param] = path.paramDict[param] || defaultValue;
         }
@@ -81,8 +90,17 @@ export class Route {
         return params;
     }
 
+    /**
+     * Runs this route's handler and returns an object
+     */
     public async handle (args: IHandlerArgs): Promise<IJSONResponse & Record<any, any>> {
         let res = await this.handler(args);
+
+        if (typeof res === 'string') {
+            res = {
+                error: res
+            };
+        }
 
         res ||= {};
 

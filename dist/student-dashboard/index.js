@@ -83,7 +83,7 @@ function showHp (hp) {
                 ${icon}
             </div>
             <div style="min-width: 50px">
-                <button onclick="window.delete(${hp['id']}, '${hp['description']}')" class="icon">
+                <button onclick="delete(${hp['id']}, '${hp['description']}')" class="icon">
                     <img src="../assets/img/bin.svg" alt="delete">
                 </button>
             </div>
@@ -95,9 +95,9 @@ function showHp (hp) {
 
 (async () => {
 
-    const validCode = await (await fetch(`../api/valid-code.php?code=${getCode()}`)).text();
+    const { level } = await api`../api/valid-code.php?code=${getCode()}`;
 
-    if (validCode === '2') {
+    if (level === '2') {
         document.getElementById('top-right-menu').innerHTML += `
             <a class="icon" href="../admin-dashboard">
                 <img src="../assets/img/admin.svg" alt="admin page">
@@ -105,8 +105,8 @@ function showHp (hp) {
             </a>
         `;
 
-    } else if (validCode !== '1') {
-        window.location.assign('../');
+    } else if (level !== '1') {
+        navigate`..?error=auth`;
         return;
     }
 
@@ -120,7 +120,7 @@ document.getElementById('submit-hp').onclick = async () => {
 
     for (let reason of hpReason.value.split('\n')) {
         if (!reason) continue;
-        await fetch(`../api/submit-hp.php?description=${reason}&student=${getCode()}`);
+        await api`create/hp?description=${reason}&student=${getCode()}`;
     }
     await main();
     hpReason.value = '';
@@ -130,7 +130,7 @@ window.delete = async (id, desc) => {
     if (!confirm(`Are you sure you want to delete the house point you got for '${desc}'?`)) {
         return;
     }
-    await fetch(`../api/delete-hp.php?id=${id}`);
+    await api`delete/hp/${id}`;
     await main();
 };
 
@@ -139,15 +139,17 @@ window.signout = () => {
         return;
     }
 
-    localStorage.removeItem('hpCode');
-    window.location.assign('../');
+    setCodeCookie('');
+    navigate`../`;
 };
 
 async function main () {
-    const info = await (await fetch(`../api/student-info.php?code=${getCode()}`)).json();
+    const info = api`get/users/info/${getCode()}`;
     title(info, info['hps']);
     housePoints(info['hps']);
 }
 
-$`footer`.load(`../footer.html`);
-$`nav`.load(`../nav.html`);
+(async () => {
+    nav(`../assets/html/nav.html`);
+    footer(`../assets/html/footer.html`);
+})();

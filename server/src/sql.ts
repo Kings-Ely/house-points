@@ -2,6 +2,7 @@ import mysql from 'mysql2';
 import c from 'chalk';
 
 import log, { error, warning } from "./log";
+import { flags } from "./index";
 
 export type queryFunc = (queryParts: TemplateStringsArray, ...params: any[]) => Promise<any>;
 
@@ -57,7 +58,9 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
                 return acc + cur + (params[i] === undefined ? '' : '?');
             }, '');
 
-           log(c.yellow`QUERY: `, query, params);
+            if (flags.verbose) {
+                log`QUERY: ${con.escape(query)} ${JSON.stringify(params)}`;
+            }
 
             con.query(query, params, (err, result) => {
                 if (err) {

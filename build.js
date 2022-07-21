@@ -1,5 +1,4 @@
 #!/usr/bin/env zx
-
 import { $ } from "zx";
 import now from "performance-now";
 import c from 'chalk';
@@ -33,7 +32,6 @@ async function uploadFrontend () {
 
 async function buildBackend () {
     console.log('Building backend...');
-
     await $`npm run build-server`;
 }
 

@@ -7,10 +7,10 @@ import c from 'chalk';
 
 import { type Handler, Route } from "./route";
 import connectSQL, { type queryFunc } from './sql';
-import log, { error, LogLvl, setLogOptions, warning } from "./log";
-import { loadEnv } from "./util";
+import log, { error, LogLvl, setLogOptions, warning, close as stopLogger } from "./log";
+import {loadEnv, parseCookies} from "./util";
 
-const flags = commandLineArgs([
+export const flags = commandLineArgs([
     { name: 'dev', alias: 'd', type: Boolean, defaultValue: false },
     { name: 'log', type: Number, defaultValue: LogLvl.ALL },
     { name: 'logTo', type: String, defaultValue: 'server.log' },
@@ -21,17 +21,22 @@ const flags = commandLineArgs([
 
 const handlers: Route[] = [];
 
+/**
+ * Queries the database
+ */
 let query: queryFunc = () => new Promise(() => {
     error`SQL server not connected`;
 });
 
+/**
+ * Define a route that the server will respond to.
+ */
 export default function route (path: string, handler: Handler) {
     handlers.push(new Route(path, handler));
 }
 
 import './routes/users';
-import './routes/ping';
-import './routes/control';
+import './routes/server';
 
 async function serverResponse (req: IncomingMessage, res: ServerResponse) {
 
@@ -62,7 +67,8 @@ async function serverResponse (req: IncomingMessage, res: ServerResponse) {
         res,
         req,
         url: req.url || '',
-        query
+        query,
+        cookies: parseCookies(req.headers.cookie || '')
     });
 
     const strResponse = JSON.stringify(finalResponse);
@@ -71,12 +77,11 @@ async function serverResponse (req: IncomingMessage, res: ServerResponse) {
         log`${req.method} '${req.url}' => '${strResponse.substring(0, 50)}'`;
     }
 
-    res.writeHead(finalResponse.ok ? 200 : 500);
+    res.writeHead(finalResponse.status);
     res.end(strResponse);
 }
 
 function startServer () {
-    log`Starting server...`;
 
     let options = {};
     if (!flags.dev) {
@@ -112,8 +117,9 @@ function startServer () {
     }
 
     process.on('SIGTERM', () => {
-        server.close(() => {
+        server.close(async () => {
             log`Server stopped, stopping process...`;
+            await stopLogger();
             process.exit(0);
         });
     });

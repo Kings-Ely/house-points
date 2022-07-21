@@ -40,13 +40,20 @@ code.onchange = (evt) => {
 	}, 0);
 };
 
-code.onkeydown = code.onchange;
-code.onclick = code.onchange;
-code.onpaste = code.onchange;
 
-$`footer`.load(`footer.html`);
-$`nav`.load(`nav.html`);
-
-window.paste = async () => {
+async function paste () {
 	code.value = cleanCode(await navigator.clipboard.readText());
-};
+}
+
+(async () => {
+	code.onkeydown = code.onchange;
+	code.onclick = code.onchange;
+	code.onpaste = code.onchange;
+
+	if (GETParam('error')) {
+		showErrorFromCode(GETParam('error'));
+	}
+
+	nav(`./assets/html/nav.html`);
+	footer(`./assets/html/footer.html`);
+})();

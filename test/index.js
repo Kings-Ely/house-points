@@ -3,11 +3,11 @@ import { $ } from "zx";
 import fs from 'fs';
 import path from 'path';
 import c from 'chalk';
+import fetch from "node-fetch";
 import commandLineArgs from 'command-line-args';
 
 import setup from './setup.js';
 import Test from './framework.js';
-import fetch from "node-fetch";
 
 const flags = commandLineArgs([
 	{ name: 'verbose', alias: 'v', type: Boolean, defaultValue: false },
@@ -35,7 +35,7 @@ async function api (path) {
 	const res = await fetch(url, {
 		method: 'GET',
 		headers: {
-			cookie: 'myCode=admin'
+			cookie: 'code=admin'
 		}
 	}).catch(e => {
 		console.log('Error in API request');
@@ -77,11 +77,18 @@ async function api (path) {
 		const testRes = await Test.testAll(api, flags);
 		console.log(testRes.str(flags.verbose));
 
-		if ((await api(`control/kill/${process.env.KILL_CODE}`)).ok) {
-            console.log(c.green`Server Killed, finished testing`);
-        }
-
 	} catch (e) {
-		console.error(e);
+		console.error(c.red(e));
+	}
+
+	try {
+		if ((await api(`delete/server/${process.env.KILL_CODE}`)).ok) {
+			console.log(c.green`Server Killed, finished testing`);
+		} else {
+			console.log(c.red`Server not killed, finished testing`);
+		}
+	} catch (e) {
+		console.log(c.red`Server not killed (failed with error), finished testing`);
+		console.error(c.red(e));
 	}
 })();
