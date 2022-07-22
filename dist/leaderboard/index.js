@@ -8,9 +8,9 @@ const podium3rdDiv = document.getElementById('podium-3rd');
 
 const whichYears = document.getElementById('show-year');
 
-whichYears.onchange = () => {
-    showYears = whichYears.value.split(',').map(y => parseInt(y));
-    main(false);
+whichYears.onchange = async () => {
+    showYears = whichYears.value.split(',').map(parseInt);
+    await main(false);
 };
 
 // show all by default
@@ -103,27 +103,26 @@ function leaderboard (hps) {
 let data;
 async function main (reload=true) {
     if (reload) {
-
-        api`get/users/auth/${getCode()}`
-            .then(async ({ level }) => {
-                if (level === 2) {
-                    document.getElementById('home-link').href = '../admin-dashboard';
-
-                } else if (level === 1) {
-                    const { year } = await api`get/users/info/${getCode()}`;
-                    showYears = [year];
-                    whichYears.value = year.toString();
-                    await main(false);
-                }
-            });
-
-        data = await api`get/users/leaderboard`;
+        data = (await api`get/users/leaderboard`)['data'];
     }
     leaderboard(data);
 }
 
 (async () => {
-    rootPath('..');
+    rootPath('..')
+        .then(() => {
+            document.getElementById('leaderboard-link').style.display = 'none';
+        });
+
+    api`get/users/auth/${getCode()}`
+        .then(async ({ level }) => {
+            if (level > 0) {
+                const { year } = await api`get/users/info/${getCode()}`;
+                showYears = [year];
+                whichYears.value = year.toString();
+                await main(false);
+            }
+        });
 
     await main();
 })();

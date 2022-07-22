@@ -1,3 +1,6 @@
+const $reason = document.getElementById('add-hp-reason');
+const error = document.getElementById('add-hp-error');
+
 function housePointHML (hp) {
     const submittedTime = hp['timestamp'] * 1000;
 
@@ -99,11 +102,9 @@ code.onchange = () => {
 
 document.getElementById('add-hp-submit').onclick = async () => {
 
-    const reason = document.getElementById('add-hp-reason');
-    const error = document.getElementById('add-hp-error');
     error.innerHTML = '';
 
-    if (!reason.value) {
+    if (!$reason.value) {
         error.innerHTML = 'Reason required';
         return;
     }
@@ -120,22 +121,13 @@ document.getElementById('add-hp-submit').onclick = async () => {
         return;
     }
 
-    await api`create/house-points/${code.value}&description=${reason.value}`;
+    await api`create/house-points/${code.value}&description=${$reason.value}`;
 
     code.value = '';
-    reason.value = '';
+    $reason.value = '';
 
     main();
 };
-
-async function signout () {
-    if (!confirm(`Are you sure you want to sign out?`)) {
-        return;
-    }
-
-    eraseCookie(COOKIE_KEY);
-    await navigate`..`;
-}
 
 
 (async () => {

@@ -1,6 +1,7 @@
 // Utility script imported by all pages
 
-const API_ROOT = 'https://josephcoppin.com:4464';
+const API_PORT = 4464;
+const API_ROOT = location.origin + ':' + API_PORT;
 const COOKIE_KEY = 'hpCode';
 
 function getCode () {
@@ -30,7 +31,7 @@ const rtf = new Intl.RelativeTimeFormat('en', {
  * @param {number} [d2=new Date()]
  * @returns {string}
  */
-const getRelativeTime = (d1, d2) => {
+function getRelativeTime (d1, d2) {
     d2 ||= Date.now();
     const elapsed = d1 - d2;
 
@@ -40,7 +41,7 @@ const getRelativeTime = (d1, d2) => {
             return rtf.format(Math.round(elapsed/units[u]), u);
         }
     }
-};
+}
 
 // src: https://stackoverflow.com/questions/14573223/set-cookie-and-get-cookie-with-javascript
 /**
@@ -85,6 +86,10 @@ function eraseCookie (name) {
 }
 
 
+/**
+ * Gets a GET parameter from the URL of the page
+ * @param name
+ */
 function GETParam (name) {
     let result = null,
         tmp = [];
@@ -106,16 +111,16 @@ function GETParam (name) {
  * @param {string} text
  * @returns {Promise<void>}
  */
-window.copyToClipboard = async (text) => {
+async function copyToClipboard (text) {
     await navigator.clipboard.writeText(text);
-};
+}
 
 /**
  * Cleans a user code
  * @param {string} code
  * @returns {string}
  */
-window.cleanCode = (code) => {
+function cleanCode (code) {
     return code
         .split('')
         // remove non-alphabetic characters
@@ -290,33 +295,61 @@ let ROOT_PATH = '';
 let $nav;
 let $footer;
 
+async function loadNav () {
+    $nav.innerHTML = await (await fetch(`${ROOT_PATH}/assets/html/nav.html`)).text();
+
+    // replace links in nav relative to this page
+    document.querySelectorAll('nav a').forEach(a => {
+        a.setAttribute('href',
+            `${ROOT_PATH}${a.getAttribute('href')}`);
+    });
+
+    // TODO: show sign out button
+
+    // show page title
+    document.querySelector('#nav-center').innerHTML = `
+        <div>
+            ${document.title}
+        </div>
+    `;
+
+    // make home link point to right place
+    const { level } = await api`get/users/auth/${getCode()}`
+    document.querySelector('#home-link').setAttribute('url',
+        `${ROOT_PATH}/${level ? 'admin-dashboard' : 'student-dashboard'}`);
+}
+
 /**
  * Must be called first
  * @param {string} path
  */
-function rootPath (path) {
+async function rootPath (path) {
     ROOT_PATH = path;
 
-    $nav = $(`nav`);
-    $footer = $(`footer`);
+    // load footer and nav bar
+    $nav = document.querySelector(`nav`);
+    $footer = document.querySelector(`footer`);
 
-    $footer.load(`${ROOT_PATH}/assets/html/footer.html`);
+    $footer.innerHTML = await (await fetch(`${ROOT_PATH}/assets/html/footer.html`)).text();
+    if ($nav) {
+        await loadNav();
+    }
 
-    $nav.load(`${ROOT_PATH}/assets/html/nav.html`, () => {
-        $nav.find(`a`).each(function () {
-            const href = $(this).attr(`href`);
-            if (href[0] === '/') {
-                $(this).attr(`href`, `${ROOT_PATH}${href}`);
-            }
-        });
-    });
+    await reloadDOM();
 }
 
 async function reloadDOM () {
-    loadSVGs();
+    await loadSVGs();
 }
 
-window.onload = reloadDOM;
+function scrollToTop () {
+    document.body.scrollTop = document.documentElement.scrollTop = 0;
+}
+
+window.onload = async () => {
+    scrollToTop();
+    await reloadDOM();
+}
 
 /**
  * Navigates to a webpage
@@ -375,6 +408,17 @@ function showError (message) {
  */
 function showErrorFromCode (code) {
     showError({
+
         'auth': 'You are not authorized for this action',
+
     }[code] || 'An Unknown Error has Occurred');
+}
+
+async function signout () {
+    if (!confirm(`Are you sure you want to sign out?`)) {
+        return;
+    }
+
+    eraseCookie(COOKIE_KEY);
+    await navigate(ROOT_PATH);
 }

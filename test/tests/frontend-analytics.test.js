@@ -1,6 +1,6 @@
-import c from 'chalk';
-
 import Test from '../framework.js';
+
+import c from 'chalk';
 import lighthouse, { goodScore, lighthouseResCategories } from "../ligthhouse.js";
 
 
@@ -11,7 +11,7 @@ Test.test('frontend performance with Google LightHouse', async (_, { doLighthous
     }
 
     if (!process.env.SITE_URL) {
-        return `SITE_URL is not specified in .env file`;
+        return `SITE_URL is not specified in .env file, required for lighthouse tests`;
     }
 
     const paths = ['', 'admin-dashboard', 'admin-dashboard/students', 'leaderboard', 'student-dashboard'];

@@ -7,8 +7,6 @@
           content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <meta name="robots" content="noindex">
 
-    <script src="../assets/js/jquery.min.js"></script>
-
     <script src="../assets/js/main.js"></script>
     <link rel="preload" href="../assets/css/main.css" as="style" onload="asyncCSS(this)">
     <link rel="preload" href="../assets/css/darkmode.css" as="style" onload="asyncCSS(this)">
@@ -16,30 +14,16 @@
     <script src="index.js" defer></script>
 </head>
 <body>
+<nav></nav>
 <main>
-    <div style="position: absolute; top: 10px; right: 10px" id="top-right-menu">
-        <a
-            class="icon"
-            href="../leaderboard"
-            id="leaderboard-link"
-            aria-label="leaderboard"
-            svg="leaderboard.svg"
-            label="Leaderboard"
-        ></a>
-    </div>
-
-    <button onclick="signout()" id="signout" aria-label="sign out">
-        Sign Out
-    </button>
-
-    <h1>Admin Dashboard</h1>
-
     <a href="students" id="students-link">
         Manage Students
     </a>
 
-    <h2>Pending House Points</h2>
-    <div id="pending"></div>
+    <section>
+        <h2>Pending House Points</h2>
+        <div id="pending"></div>
+    </section>
 
     <h2>Add House Point</h2>
     <div>

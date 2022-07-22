@@ -1,10 +1,10 @@
-const nameDiv = document.getElementById('name');
-const hpsDiv = document.getElementById('hps');
+const $name = document.getElementById('name');
+const $hps = document.getElementById('hps');
 
 function housePoints (hps) {
 
     if (hps.length === 0) {
-        hpsDiv.innerHTML = `
+        $hps.innerHTML = `
             <p style="font-size: 30px; margin: 50px; text-align: center">
                 Looks like you haven't got any house point yet!
             </p>
@@ -17,20 +17,20 @@ function housePoints (hps) {
     for (let hp of hps) {
         html += showHp(hp);
     }
-    hpsDiv.innerHTML = html;
+    $hps.innerHTML = html;
 }
 
 function title (info, hps) {
     const numHps = hps.filter(c => c['accepted'] && !c['rejectMessage']).length;
 
     if (numHps < 1) {
-        nameDiv.innerHTML = `
+        $name.innerHTML = `
             <p style="font-size: 50px">
                 ${info['name']} has No House Points
             </p>
         `;
     } else {
-        nameDiv.innerHTML = `
+        $name.innerHTML = `
             <p style="font-size: 50px">
                 ${info['name']} has ${numHps} House Point${numHps < 2 ? '' :'s'}
             </p>
