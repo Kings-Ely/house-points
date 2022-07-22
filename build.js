@@ -49,7 +49,8 @@ async function uploadBackend () {
 
     // upload prod.package.json and rename it to package.json
     await $`sshpass -f './sshPass.txt' rsync ./server/prod.package.json ${REMOTE_ADDRESS}:~${REMOTE_BACKEND_PATH}/package.json`
-
+    // upload prod.env and rename it to .env
+    await $`sshpass -f './sshPass.txt' rsync ./server/prod.env ${REMOTE_ADDRESS}:~${REMOTE_BACKEND_PATH}/.env`
 }
 
 (async () => {

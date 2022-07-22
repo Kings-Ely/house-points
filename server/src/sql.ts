@@ -14,6 +14,7 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
         user: process.env.DB_USER,
         password: process.env.DB_PASS,
         database: process.env.DB,
+        port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
         ...(dbConfig ?? {})
     };
 
