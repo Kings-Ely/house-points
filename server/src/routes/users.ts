@@ -28,24 +28,24 @@ route('get/users/info/:code', async ({ query, params: { code} }) => {
 route('get/users/all', async ({ query, cookies }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    return {
-        data: await query`
-            SELECT 
-                users.id, 
-                users.name, 
-                users.year, 
-                users.code, 
-                users.admin, 
-                users.student,
-                SUM(CASE WHEN housepoints.status='Pending' THEN housepoints.quantity ELSE 0 END) AS pending,
-                SUM(CASE WHEN housepoints.status='Accepted' THEN housepoints.quantity ELSE 0 END) AS accepted,
-                SUM(CASE WHEN housepoints.status='Rejected' THEN housepoints.quantity ELSE 0 END) AS rejected
-            FROM users LEFT JOIN housepoints
-            ON housepoints.student = users.id
-            GROUP BY users.id, users.name, users.year, users.code, users.admin, users.student
-            ORDER BY users.student, users.admin DESC, year, name;
-        `
-    };
+    const data = await query`
+        SELECT 
+            users.id, 
+            users.name, 
+            users.year,
+            users.code,
+            users.admin,
+            users.student,
+            SUM(CASE WHEN housepoints.status='Pending' THEN housepoints.quantity ELSE 0 END) AS pending,
+            SUM(CASE WHEN housepoints.status='Accepted' THEN housepoints.quantity ELSE 0 END) AS accepted,
+            SUM(CASE WHEN housepoints.status='Rejected' THEN housepoints.quantity ELSE 0 END) AS rejected
+        FROM users LEFT JOIN housepoints
+        ON housepoints.student = users.id
+        GROUP BY users.id, users.name, users.year, users.code, users.admin, users.student
+        ORDER BY users.student, users.admin DESC, year, name;
+    `;
+
+    return { data };
 });
 
 route('get/users/leaderboard', async ({ query, cookies }) => {

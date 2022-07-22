@@ -2,6 +2,10 @@ import route from "../";
 import { AUTH_ERR, requireAdmin } from "../util";
 import now from "performance-now";
 
+route('', async ()  => {
+    return { 'message': 'Hello World' };
+});
+
 route('get/server/pid', async ({ cookies, query }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 

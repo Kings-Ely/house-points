@@ -4,10 +4,10 @@
         "build": "node --enable-source-maps build",
         "serve-api": "npm run build-server; npm run start-server",
         "build-server": "cd server; npm i; webpack",
-        "start-server": "node --enable-source-maps server -dvc",
-        "test-full": "time node --enable-source-maps test -vl",
+        "start-server": "node --enable-source-maps server -cdv",
+        "test-full": "time node --enable-source-maps test -lv",
         "test": "time node --enable-source-maps test",
-        "deploy": "time node --enable-source-maps test -vl --deploy"
+        "deploy": "time node --enable-source-maps test -lv --deploy"
     },
     "dependencies": {
         "@types/node": "^17.0.42",

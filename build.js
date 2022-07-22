@@ -40,12 +40,16 @@ async function uploadBackend () {
 
     const paths = [
         './server/index.js',
-        './server/index.js.map',
+        './server/Dockerfile',
     ];
 
     await Promise.all(paths.map(async (path) =>
         await $`sshpass -f './sshPass.txt' rsync ${path} ${REMOTE_ADDRESS}:~${REMOTE_BACKEND_PATH}`
     ));
+
+    // upload prod.package.json and rename it to package.json
+    await $`sshpass -f './sshPass.txt' rsync ./server/prod.package.json ${REMOTE_ADDRESS}:~${REMOTE_BACKEND_PATH}/package.json`
+
 }
 
 (async () => {

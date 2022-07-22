@@ -5,6 +5,8 @@ import path from 'path';
 import c from 'chalk';
 import fetch from "node-fetch";
 import commandLineArgs from 'command-line-args';
+import childProcess from 'child_process';
+import now from 'performance-now';
 
 import setup from './setup.js';
 import Test from './framework.js';
@@ -90,7 +92,35 @@ async function api (path, code='admin') {
 	return JSON.parse(body);
 }
 
+async function deploy () {
+	return await new Promise((resolve, reject) => {
+
+		let invoked = false;
+
+		let process = childProcess.fork('build');
+
+		// listen for errors as they may prevent the exit event from firing
+		process.on('error', err => {
+			if (invoked) return;
+			invoked = true;
+			reject(err);
+		});
+
+		// execute the callback once the process has finished running
+		process.on('exit', code => {
+			if (invoked) return;
+			invoked = true;
+			if (code !== 0) {
+				reject(new Error('exit code ' + code));
+			}
+		});
+	});
+
+}
+
 (async () => {
+
+	let start = now();
 
 	$.verbose = flags.verbose;
 
@@ -103,7 +133,9 @@ async function api (path, code='admin') {
 
 		if (testRes.failed === 0 && flags.deploy) {
 			console.log('All tests passed, Deploying...');
-			$`node --enable-source-maps build`;
+			deploy().then(() => {
+				console.log(c.green('Finished in ' + (now() - start).toFixed(2) + 'ms'));
+			});
 		}
 
 	} catch (e) {
