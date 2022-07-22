@@ -102,7 +102,7 @@ async function main (reload=true) {
     `;
 
     if (reload) {
-        students = await fetchJSON(`../../api/all-student-info.php`);
+        students = (await api`get/users/all`)['data'];
     }
 
     const searchValue = searchFilterInput.value;
@@ -119,7 +119,7 @@ async function main (reload=true) {
     reloadDOM();
 }
 
-$('#add-student-submit').click(async () => {
+$(`#add-student-submit`).click(async () => {
 
     $error.innerHTML = '';
 
@@ -142,8 +142,7 @@ $('#add-student-submit').click(async () => {
         }
     }
 
-    await fetch(
-        `../../api/add-user.php?name=${$nameInp.value}&year=${$yearInp.value}&admin=${studentYear === 0}`);
+    await api`create/users/${$nameInp.value}?year=${$yearInp.value}`;
 
     $nameInp.value = '';
 
@@ -155,7 +154,7 @@ async function deleteUser (id, name) {
         return;
     }
 
-    await fetch(`../../api/delete-student.php?id=${id}`);
+    await api`../../api/delete-student.php?id=${id}`;
 
     main();
 }
@@ -167,7 +166,7 @@ async function deleteSelected () {
     }
 
     for (let id of selected) {
-        await fetch(`../../api/delete-student.php?id=${id}`);
+        await api`../../api/delete-student.php?id=${id}`;
     }
 
     main();
@@ -205,7 +204,7 @@ async function ageSelected (amount) {
     }
 
     for (let id of selected) {
-        await fetch(`../../api/age-student.php?id=${id}&amount=${amount}`);
+        await api`../../api/age-student.php?id=${id}&amount=${amount}`;
     }
 
     main();
@@ -230,7 +229,7 @@ async function giveHPToSelected () {
     if (!reason) return;
 
     for (let id of selected) {
-        await fetch(`../../api/add-hp.php?description=${reason}&studentid=${id}`);
+        await api`../../api/add-hp.php?description=${reason}&studentid=${id}`;
     }
 
     main();
@@ -241,7 +240,7 @@ async function revokeAdmin (id, name) {
         return;
     }
 
-    await fetch(`../../api/change-admin.php?id=${id}&admin=0`);
+    await api`../../api/change-admin.php?id=${id}&admin=0`;
 
     main();
 }
@@ -251,7 +250,7 @@ async function makeAdmin (id, name) {
         return;
     }
 
-    await fetch(`../../api/change-admin.php?id=${id}&admin=1`);
+    await api`../../api/change-admin.php?id=${id}&admin=1`;
 
     main();
 }
@@ -259,9 +258,9 @@ async function makeAdmin (id, name) {
 (async () => {
     footer`../../footer.html`;
 
-    const validCode = await fetchTxt(`../../api/valid-code.php?code=${getCode()}`);
+    const { level } = await api`get/users/auth/${getCode()}`;
 
-    if (validCode !== '2') {
+    if (level !== 2) {
         navigate`../../`;
         return;
     }

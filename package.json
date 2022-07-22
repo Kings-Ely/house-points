@@ -6,7 +6,8 @@
         "build-server": "cd server; npm i; webpack",
         "start-server": "node --enable-source-maps server -dvc",
         "test-full": "time node --enable-source-maps test -vl",
-        "test": "time node --enable-source-maps test"
+        "test": "time node --enable-source-maps test",
+        "deploy": "time node --enable-source-maps test -vl --deploy"
     },
     "dependencies": {
         "@types/node": "^17.0.42",

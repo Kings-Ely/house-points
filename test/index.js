@@ -12,6 +12,7 @@ import Test from './framework.js';
 const flags = commandLineArgs([
 	{ name: 'verbose', alias: 'v', type: Boolean, defaultValue: false },
 	{ name: 'doLighthouse', alias: 'l', type: Boolean, defaultValue: false },
+	{ name: 'deploy', alias: 'd', type: Boolean, defaultValue: false },
 ]);
 
 /**
@@ -99,6 +100,11 @@ async function api (path, code='admin') {
 
 		const testRes = await Test.testAll(api, flags);
 		console.log(testRes.str(flags.verbose));
+
+		if (testRes.failed === 0 && flags.deploy) {
+			console.log('All tests passed, Deploying...');
+			$`node --enable-source-maps build`;
+		}
 
 	} catch (e) {
 		console.error(c.red(e));

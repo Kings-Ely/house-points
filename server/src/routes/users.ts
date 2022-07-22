@@ -1,5 +1,5 @@
 import route from "../";
-import { AUTH_ERR, authLvl, COOKIE_CODE_KEY, idFromCodeOrID, makeCode, requireAdmin } from "../util";
+import {AUTH_ERR, authLvl, COOKIE_CODE_KEY, idFromCodeOrID, makeCode, requireAdmin, requireLoggedIn} from "../util";
 
 
 route('get/users/auth/:code', async ({ query, params: { code} }) => {
@@ -29,7 +29,47 @@ route('get/users/all', async ({ query, cookies }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     return {
-        data: await query`SELECT admin, student, name, year FROM users`
+        data: await query`
+            SELECT 
+                users.id, 
+                users.name, 
+                users.year, 
+                users.code, 
+                users.admin, 
+                users.student,
+                SUM(CASE WHEN housepoints.status='Pending' THEN housepoints.quantity ELSE 0 END) AS pending,
+                SUM(CASE WHEN housepoints.status='Accepted' THEN housepoints.quantity ELSE 0 END) AS accepted,
+                SUM(CASE WHEN housepoints.status='Rejected' THEN housepoints.quantity ELSE 0 END) AS rejected
+            FROM users LEFT JOIN housepoints
+            ON housepoints.student = users.id
+            GROUP BY users.id, users.name, users.year, users.code, users.admin, users.student
+            ORDER BY users.student, users.admin DESC, year, name;
+        `
+    };
+});
+
+route('get/users/leaderboard', async ({ query, cookies }) => {
+    if (!await requireLoggedIn(cookies, query)) return AUTH_ERR;
+
+    return {
+        data: await query`
+            SELECT 
+                users.name, 
+                users.year,
+                SUM(
+                    CASE 
+                        WHEN housepoints.status='Accepted' 
+                            THEN housepoints.quantity 
+                        ELSE 0
+                    END
+                ) AS housepoints
+            FROM users 
+                LEFT JOIN housepoints
+                ON housepoints.student = users.id
+            WHERE users.student = true
+            GROUP BY users.name, users.year
+            ORDER BY housepoints DESC, year DESC, name;
+        `
     };
 });
 
@@ -72,6 +112,8 @@ route('update/users/admin?id&code&admin', async ({ query, params, cookies }) => 
 
     const myCode = cookies[COOKIE_CODE_KEY];
     if (!myCode) return 'No code';
+
+    // can't change own admin status
     let checkMyselfRes = await query`SELECT admin, id FROM users WHERE code = ${myCode}`;
     const self = checkMyselfRes[0];
     if (!self) return AUTH_ERR;
@@ -93,7 +135,9 @@ route('update/users/year?id&code&yearChange', async ({ query, params, cookies })
     const { id: userID, code, yearChange: yC } = params;
     const yearChange = parseInt(yC);
 
-    if (isNaN(yearChange)) return `Year change '${yearChange}' is not a number`;
+    if (isNaN(yearChange)) {
+        return `Year change '${yearChange}' is not a number`;
+    }
 
     let id = await idFromCodeOrID(query, userID, code);
     if (typeof id === 'string') return id;

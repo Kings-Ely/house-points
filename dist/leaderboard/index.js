@@ -104,7 +104,7 @@ let data;
 async function main (reload=true) {
     if (reload) {
 
-        api`../api/valid-code.php?code=${getCode()}`
+        api`get/users/auth/${getCode()}`
             .then(async ({ level }) => {
                 if (level === 2) {
                     document.getElementById('home-link').href = '../admin-dashboard';

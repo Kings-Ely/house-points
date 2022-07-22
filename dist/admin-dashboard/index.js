@@ -48,7 +48,7 @@ async function main () {
 
     const div = document.getElementById('pending');
 
-    const { data: pending } = await api`get/house-points/pending`;
+    const { data: pending } = await api`get/house-points/with-status/pending`;
 
     // clear after async request
     div.innerHTML = '';

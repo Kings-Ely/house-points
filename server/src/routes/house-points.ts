@@ -90,6 +90,26 @@ route('get/house-points/all', async ({ query, cookies }) => {
     `};
 });
 
+route('get/house-points/earned-by/:code', async ({ query, params: { code } }) => {
+    return { data: await query`
+        SELECT
+            housepoints.id as id,
+            users.name as student,
+            users.year as studentYear,
+            housepoints.quantity as quantity,
+            housepoints.event as eventID,
+            housepoints.description as description,
+            UNIX_TIMESTAMP(housepoints.created) as created,
+            UNIX_TIMESTAMP(housepoints.completed) as completed,
+            housepoints.status,
+            housepoints.rejectMessage
+        FROM housepoints, users
+        WHERE housepoints.student = users.id
+            AND users.code = ${code}
+        ORDER BY completed, created DESC
+    `};
+});
+
 
 route(
     'create/house-points/give/:user/:quantity?description&event',

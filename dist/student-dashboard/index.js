@@ -83,7 +83,7 @@ function showHp (hp) {
                 ${icon}
             </div>
             <div style="min-width: 50px">
-                <button onclick="delete(${hp['id']}, '${hp['description']}')" class="icon">
+                <button onclick="deleteHousePoint(${hp['id']}, '${hp['description']}')" class="icon">
                     <img src="../assets/img/bin.svg" alt="delete">
                 </button>
             </div>
@@ -93,9 +93,48 @@ function showHp (hp) {
     return new Promise(r => setTimeout(r, 0));
 }
 
-(async () => {
+const hpReason = document.getElementById('hp-reason');
 
-    const { level } = await api`../api/valid-code.php?code=${getCode()}`;
+document.getElementById('submit-hp').onclick = async () => {
+    if (!hpReason.value) return;
+
+    for (let reason of hpReason.value.split('\n')) {
+        if (!reason) continue;
+        await api`create/house-points/give/${getCode()}/1?description=${reason}`;
+    }
+    await main();
+    hpReason.value = '';
+};
+
+async function deleteHousePoint (id, desc) {
+    if (!confirm(`Are you sure you want to delete the house point you got for '${desc}'?`)) {
+        return;
+    }
+    await api`delete/house-points/with-id/${id}`;
+    await main();
+}
+
+function signout () {
+    if (!confirm(`Are you sure you want to sign out?`)) {
+        return;
+    }
+
+    setCodeCookie('');
+    navigate`../`;
+}
+
+async function main () {
+    const user = api`get/users/info/${getCode()}`;
+    const hps = api`get/house-points/earned-by/${getCode()}`;
+    title(user, hps);
+    housePoints(hps);
+}
+
+(async () => {
+    nav`../assets/html/nav.html`;
+    footer`../assets/html/footer.html`;
+
+    const { level } = await api`get/users/auth/${getCode()}`;
 
     if (level === '2') {
         document.getElementById('top-right-menu').innerHTML += `
@@ -111,45 +150,4 @@ function showHp (hp) {
     }
 
     await main();
-})();
-
-const hpReason = document.getElementById('hp-reason');
-
-document.getElementById('submit-hp').onclick = async () => {
-    if (!hpReason.value) return;
-
-    for (let reason of hpReason.value.split('\n')) {
-        if (!reason) continue;
-        await api`create/hp?description=${reason}&student=${getCode()}`;
-    }
-    await main();
-    hpReason.value = '';
-};
-
-window.delete = async (id, desc) => {
-    if (!confirm(`Are you sure you want to delete the house point you got for '${desc}'?`)) {
-        return;
-    }
-    await api`delete/hp/${id}`;
-    await main();
-};
-
-window.signout = () => {
-    if (!confirm(`Are you sure you want to sign out?`)) {
-        return;
-    }
-
-    setCodeCookie('');
-    navigate`../`;
-};
-
-async function main () {
-    const info = api`get/users/info/${getCode()}`;
-    title(info, info['hps']);
-    housePoints(info['hps']);
-}
-
-(async () => {
-    nav(`../assets/html/nav.html`);
-    footer(`../assets/html/footer.html`);
 })();
