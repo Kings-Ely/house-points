@@ -20,7 +20,7 @@
         "node-fetch": "^3.2.6",
         "performance-now": "^2.1.0",
         "ts-loader": "^9.3.1",
-        "zx": "^6.1.0"
+        "zx": "^7.0.7"
     },
     "devDependencies": {
         "webpack-cli": "^4.10.0"
