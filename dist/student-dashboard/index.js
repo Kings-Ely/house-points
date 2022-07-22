@@ -12,14 +12,12 @@ function housePoints (hps) {
         return;
     }
 
-    hpsDiv.innerHTML = '';
+    let html = '';
 
-    // handle lots of house points using promises
-    setTimeout(async () => {
-        for (let hp of hps) {
-            await showHp(hp);
-        }
-    }, 0);
+    for (let hp of hps) {
+        html += showHp(hp);
+    }
+    hpsDiv.innerHTML = html;
 }
 
 function title (info, hps) {
@@ -42,7 +40,7 @@ function title (info, hps) {
 
 function showHp (hp) {
     let acceptedHTML;
-    let icon = '';
+    let icon = 'red-cross.svg';
 
     if (hp['status'] === 'Rejected') {
         acceptedHTML = `
@@ -50,17 +48,11 @@ function showHp (hp) {
             <br>
             <b>"${hp['rejectMessage']}"</b>
         `;
-        icon = `
-            <img src="../assets/img/red-cross.svg" alt="cross">
-        `;
-
     } else if (hp['status'] === 'Accepted') {
         acceptedHTML = `
             Accepted ${getRelativeTime(hp['accepted'] * 1000)}
         `;
-        icon = `
-            <img src="../assets/img/accent-tick.svg" alt="tick">
-        `;
+        icon = 'accent-tick.svg';
 
     } else {
         acceptedHTML = 'Not Yet Accepted';
@@ -68,7 +60,7 @@ function showHp (hp) {
 
     const submittedTime = hp['timestamp'] * 1000;
 
-    hpsDiv.innerHTML += `
+    return `
         <div class="house-point">
             <div style="min-width: 50%">
                 ${hp['description']}
@@ -79,18 +71,21 @@ function showHp (hp) {
                 <br>
                 ${acceptedHTML}
             </div>
-            <div style="min-width: 50px">
-                ${icon}
+            <div 
+                style="min-width: 50px"
+                svg="${icon}"
+            >
             </div>
             <div style="min-width: 50px">
-                <button onclick="deleteHousePoint(${hp['id']}, '${hp['description']}')" class="icon">
-                    <img src="../assets/img/bin.svg" alt="delete">
-                </button>
+                <button 
+                    onclick="deleteHousePoint(${hp['id']}, '${hp['description']}')"
+                    class="icon"
+                    aria-label="Delete House Point"
+                    svg="bin.svg"
+                ></button>
             </div>
         </div>
     `;
-    // stop it crashing with lots of house points
-    return new Promise(r => setTimeout(r, 0));
 }
 
 const hpReason = document.getElementById('hp-reason');
@@ -126,8 +121,11 @@ function signout () {
 async function main () {
     const user = api`get/users/info/${getCode()}`;
     const hps = api`get/house-points/earned-by/${getCode()}`;
+
     title(user, hps);
     housePoints(hps);
+
+    await reloadDOM();
 }
 
 (async () => {
@@ -137,10 +135,12 @@ async function main () {
 
     if (level === '2') {
         document.getElementById('top-right-menu').innerHTML += `
-            <a class="icon" href="../admin-dashboard">
-                <img src="../assets/img/admin.svg" alt="admin page">
-                <span class="label">Admin</span>
-            </a>
+            <a 
+                class="icon"
+                href="../admin-dashboard"
+                label="Admin"
+                svg="admin.svg"
+            ></a>
         `;
 
     } else if (level !== '1') {

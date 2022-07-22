@@ -138,7 +138,12 @@ async function loadSVG (self) {
     // set before loading, so we don't load twice while waiting for the svg to load
     self.setAttribute('svg-loaded', '1');
 
-    const raw = await fetch(self.attributes['svg'].value);
+    const uri = ROOT_PATH + '/assets/img/' + self.attributes['svg'].value;
+    const raw = await fetch(uri);
+    if (!raw.ok) {
+        console.error(`Failed to load SVG at '${uri}' for `, self);
+        return;
+    }
     self.innerHTML = await raw.text() + self.innerHTML;
 }
 
@@ -282,8 +287,8 @@ async function loadSVGs () {
 
 let ROOT_PATH = '';
 
-let $nav = $(`nav`);
-let $footer = $(`footer`);
+let $nav;
+let $footer;
 
 /**
  * Must be called first
@@ -292,6 +297,8 @@ let $footer = $(`footer`);
 function rootPath (path) {
     ROOT_PATH = path;
 
+    $nav = $(`nav`);
+    $footer = $(`footer`);
 
     $footer.load(`${ROOT_PATH}/assets/html/footer.html`);
 

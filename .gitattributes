@@ -35,3 +35,15 @@
 *.json linguist-vendored=false
 *.json linguist-language=JSON
 *.json linguist-detectable=true
+
+Dockerfile linguist-vendored=false
+Dockerfile linguist-language=Dockerfile
+Dockerfile linguist-detectable=true
+
+.gitignore linguist-vendored=false
+.gitignore linguist-language=Ignore List
+.gitignore linguist-detectable=true
+
+.gitattributes linguist-vendored=false
+.gitattributes linguist-language=Git Attributes
+.gitattributes linguist-detectable=true

@@ -18,12 +18,12 @@ function housePointHML (hp) {
                     onclick="window.reject(${hp['hpID']}, prompt('Rejection Reason'))"
                     class="icon"
                     aria-label="Reject"
-                    svg="../resources/red-cross.svg"
+                    svg="red-cross.svg"
                 ></button>
                 <button
                     onclick="window.accept(${hp['hpID']})"
                     class="icon"
-                    svg="../resources/accent-tick.svg"
+                    svg="accent-tick.svg"
                     aria-label="Accept"
                 ></button>
             </div>
@@ -40,7 +40,7 @@ async function main () {
                         class="icon"
                         href="../student-dashboard"
                         label="Student Dashboard"
-                        svg="../resources/home.svg"
+                        svg="home.svg"
                     ></a>
                 `;
             }

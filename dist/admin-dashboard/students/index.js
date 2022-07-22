@@ -3,10 +3,8 @@ let students = [];
 
 const searchFilterInput = document.getElementById('search');
 
-const $nameInp = document.getElementById('add-student-name');
-const $yearInp = document.getElementById('add-student-year');
-const $error = document.getElementById('add-student-error');
-
+const $nameInp = $('#add-student-name');
+const $yearInp = $('#add-student-year');
 const $students = $(`#students`);
 
 function showStudent (student, selected) {
@@ -16,7 +14,7 @@ function showStudent (student, selected) {
                 <button 
                     onclick="select(${student['id']}, ${!selected})"
                     class="icon no-scale"
-                    svg="../../resources/${selected ? 'selected-checkbox' : 'unselected-checkbox'}.svg"
+                    svg="${selected ? 'selected-checkbox' : 'unselected-checkbox'}.svg"
                     aria-label="${selected ? 'Unselect' : 'Select'}"
                 ></button>
                 ${student['admin'] ? `
@@ -24,7 +22,7 @@ function showStudent (student, selected) {
                         class="icon ${student['student'] ? 'icon-accent' : ''}" 
                         onclick="revokeAdmin(${student['id']}, '${student['name']}')"
                         label="${student['student'] ? '' : '(Non-Student)'} Admin"
-                        svg="../../resources/star-filled.svg"
+                        svg="star-filled.svg"
                         aria-label="Revoke Admin"
                     >
                     </button>
@@ -34,7 +32,7 @@ function showStudent (student, selected) {
                         onclick="makeAdmin(${student['id']}, '${student['name']}')"
                         aria-label="Make ${student['name']} an admin"
                         label="Make Admin"
-                        svg="../../resources/star-empty.svg"
+                        svg="star-empty.svg"
                     ></button>                
                 `}
             </div>
@@ -70,14 +68,14 @@ function showStudent (student, selected) {
                 <button 
                     onclick="copyToClipboard('${student['code']}'.toUpperCase())"
                     class="icon"
-                    svg="../../resources/key.svg"
+                    svg="key.svg"
                     label="Copy ${student['name']}'s Code"
                     aria-label="Copy ${student['name']}'s Code"
                 ></button>
                 <button
                     onclick="deleteUser(${student['id']}, '${student['name']}')"
                     class="icon"
-                    svg="../../resources/bin.svg"
+                    svg="bin.svg"
                     label="Delete ${student['name']}"
                     aria-label="Delete ${student['name']}"
                 ></button>
@@ -87,7 +85,7 @@ function showStudent (student, selected) {
 }
 
 async function main (reload=true) {
-    $students.html`
+    $students.html(`
         <div class="student">
             <div style="width: 50px"></div>
             
@@ -99,7 +97,7 @@ async function main (reload=true) {
             
             <div style="width: 100px"></div>
         </div>
-    `;
+    `);
 
     if (reload) {
         students = (await api`get/users/all`)['data'];
@@ -107,31 +105,32 @@ async function main (reload=true) {
 
     const searchValue = searchFilterInput.value;
 
+    let html = '';
+
     for (let student of students) {
         if (searchValue && !student['name'].toLowerCase().includes(searchValue.toLowerCase())) {
             continue;
         }
-        $students.append(
-            showStudent(student, selected.indexOf(student['id']) !== -1)
-        );
+        html += showStudent(student, selected.indexOf(student['id']) !== -1);
     }
 
-    reloadDOM();
+    $students.html(html);
+
+    await reloadDOM();
 }
 
 $(`#add-student-submit`).click(async () => {
 
-    $error.innerHTML = '';
 
-    if (!$nameInp.value) {
-        $error.innerHTML = 'Name Required';
+    if (!$nameInp.val()) {
+        showError('Name Required');
         return;
     }
 
-    let studentYear = parseInt($yearInp.value || '0');
+    let studentYear = parseInt($yearInp.val() || '0');
 
     if ((studentYear > 13 || studentYear < 9) && studentYear !== 0) {
-        $error.innerHTML = 'Year must be between 9 and 13 or blank for non-students';
+        showError('Year must be between 9 and 13 or blank for non-students');
         return;
     }
 
@@ -142,9 +141,9 @@ $(`#add-student-submit`).click(async () => {
         }
     }
 
-    await api`create/users/${$nameInp.value}?year=${$yearInp.value}`;
+    await api`create/users/${$nameInp.value}?year=${$yearInp.val()}`;
 
-    $nameInp.value = '';
+    $nameInp.val('');
 
     main();
 });
@@ -156,7 +155,7 @@ async function deleteUser (code, name) {
 
     await api`delete/users/${code}`;
 
-    main();
+    await main();
 }
 
 async function deleteSelected () {
@@ -170,7 +169,7 @@ async function deleteSelected () {
         await api`delete/users/${code}`;
     }));
 
-    main();
+    await main();
 }
 
 async function signInAs (code, name) {
@@ -196,7 +195,7 @@ async function select (id, select) {
             console.error('Cannot unselect student with id ' + id);
         }
     }
-    main(false);
+    await main(false);
 }
 
 async function ageSelected (amount) {
@@ -204,11 +203,11 @@ async function ageSelected (amount) {
         return;
     }
 
-    for (let code of selected) {
-        await api`../../api/age-student.php?id=${code}&amount=${amount}`;
-    }
+    await Promise.all(selected.map(async code => {
+        await api`update/users/year/code=${code}&yearChange=${amount}`;
+    }));
 
-    main();
+    await main();
 }
 
 function selectAll (select=true) {
@@ -229,11 +228,11 @@ async function giveHPToSelected () {
 
     if (!reason) return;
 
-    for (let id of selected) {
-        await api`../../api/add-hp.php?description=${reason}&studentid=${id}`;
-    }
+    await Promise.all(selected.map(async code => {
+        await api`create/house-points/give/${code}/1?description=${reason}`;
+    }));
 
-    main();
+    await main();
 }
 
 async function revokeAdmin (code, name) {
@@ -243,7 +242,7 @@ async function revokeAdmin (code, name) {
 
     await api`../../api/change-admin.php?id=${code}&admin=0`;
 
-    main();
+    await main();
 }
 
 async function makeAdmin (code, name) {
@@ -253,7 +252,7 @@ async function makeAdmin (code, name) {
 
     await api`update/users/admin/${code}&admin=1`;
 
-    main();
+    await main();
 }
 
 (async () => {

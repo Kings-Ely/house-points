@@ -7,14 +7,13 @@
           content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <meta name="robots" content="noindex">
 
+    <script src="../../assets/js/jquery.min.js"></script>
+
     <script src="../../assets/js/main.js"></script>
     <link rel="preload" href="../../assets/css/main.css" as="style" onload="asyncCSS(this)">
     <link rel="preload" href="./index.css" as="style" onload="asyncCSS(this)">
     <link rel="preload" href="../../assets/css/darkmode.css" as="style" onload="asyncCSS(this)">
     <script src="index.js" defer></script>
-
-    <script src="../../assets/js/jquery.min.js"></script>
-
 </head>
 <body>
 <main>
@@ -22,7 +21,7 @@
         href="../"
         class="icon"
         aria-label="back to dashboard"
-        svg="../../resources/back-arrow.svg"
+        svg="back-arrow.svg"
     ></a>
 
     <h1>Manage Students</h1>
@@ -50,13 +49,13 @@
         <button
             id="add-student-submit"
             class="icon"
-            svg="../../resources/plus.svg"
+            svg="plus.svg"
             aria-label="add student"
         ></button>
         <div id="add-student-error"></div>
     </div>
 
-    <form action="../../api/import-students-csv.php" id=csv-form>
+    <form action="" id="csv-form">
         <input
             type="file"
             name="filename"
@@ -67,7 +66,7 @@
         <button
             type="submit"
             name="submit"
-            svg="../../resources/upload.svg"
+            svg="upload.svg"
             label="Upload .csv of students"
         ></button>
     </form>
@@ -75,11 +74,11 @@
     <div id="with-all-students-menu">
         <div>
             <span style="border: 1px solid var(--border); border-radius: 10px; display: inline-block; margin: 10px; padding: 5px;">
-                <span svg="../../resources/small-down-arrow.svg"></span>
+                <span svg="small-down-arrow.svg"></span>
                 <button
                     onclick="selectAll()"
                     class="icon"
-                    svg="../../resources/empty-checkbox.svg"
+                    svg="unselected-checkbox.svg"
                     label="Select All"
                     aria-label="select all"
                 ></button>
@@ -87,7 +86,7 @@
                 <button
                     onclick="window.selectAll(false)"
                     class="icon"
-                    svg="../../resources/unselect-checkbox.svg"
+                    svg="unselect-checkbox.svg"
                     label="Unselect All"
                     aria-label="unselect all"
                 ></button>
@@ -95,35 +94,35 @@
         </div>
         <div>
             <button
-                onclick="window.deleteSelected()"
+                onclick="deleteSelected()"
                 class="icon"
                 aria-label="delete selected"
                 label="Delete"
-                svg="../../resources/bin.svg"
+                svg="bin.svg"
             ></button>
 
             <button
-                onclick="window.ageSelected(1)"
+                onclick="ageSelected(1)"
                 class="icon"
                 aria-label="move selected up a year"
                 label="Move Up 1 Year"
-                svg="../../resources/circle-up-arrow.svg"
+                svg="circle-up-arrow.svg"
             ></button>
 
             <button
-                onclick="window.ageSelected(-1)"
+                onclick="ageSelected(-1)"
                 class="icon"
                 aria-label="move selected down a year"
                 label="Move Down 1 Year"
-                svg="../../resources/circle-down-arrow.svg"
+                svg="circle-down-arrow.svg"
             ></button>
 
             <button
-                onclick="window.giveHPToSelected()"
+                onclick="giveHPToSelected()"
                 class="icon"
                 aria-label="give all selected a house point"
                 label="Give House Point"
-                svg="../../resources/plus.svg"
+                svg="plus.svg"
             ></button>
         </div>
         <div>
