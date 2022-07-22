@@ -60,7 +60,7 @@ async function api (path, code='admin') {
 		}
 	}).catch(e => {
 		// don't do anything fancy with fetch errors, just log them
-		console.log('Error in API request');
+		console.log(c.red`Error in API request`);
 		console.log(e);
 	});
 
@@ -70,12 +70,12 @@ async function api (path, code='admin') {
 	}
 
 	if (res.status === 404) {
-		console.log(`404 on path '${path}'`);
-		return { error: '404' };
+		console.log(c.red(`404 on path '${path}'`));
+		return res;
 	}
 
 	if (!res.ok) {
-		console.error(`ERROR from '${path}': ${JSON.stringify(await res.json())}`);
+		console.error(c.red(`ERROR from '${path}': ${JSON.stringify(await res.json())}`));
 		return {};
 	}
 
@@ -83,7 +83,7 @@ async function api (path, code='admin') {
 	const body = await res.text();
 
     if (flags.verbose) {
-        console.log(`api [GET] ${url}: ${body.substring(0, 50)}`);
+        console.log(`${c.yellow`API`} '${url}': ${body}`);
     }
 
 	return JSON.parse(body);

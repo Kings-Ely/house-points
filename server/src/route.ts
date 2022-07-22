@@ -104,7 +104,17 @@ export class Route {
      * Runs this route's handler and returns an object
      */
     public async handle (args: IHandlerArgs): Promise<IJSONResponse & Record<any, any>> {
-        let res = await this.handler(args);
+        let res: Record<any, any> | void | string | null | undefined;
+
+        try {
+            res = await this.handler(args);
+        } catch (e: any) {
+            res = {
+                status: 500,
+                error: 'Internal server error',
+            };
+            error`Internal server error in route '${this.asString()}':\n     ${e} \n    Traceback:\n${e.stack}`;
+        }
 
         if (typeof res === 'string') {
             res = { error: res };

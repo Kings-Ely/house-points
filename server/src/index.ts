@@ -87,7 +87,7 @@ async function serverResponse (req: IncomingMessage, res: ServerResponse) {
     const strResponse = JSON.stringify(finalResponse);
 
     if (flags.verbose) {
-        log`${req.method} '${req.url}' => '${strResponse.substring(0, 50)}'`;
+        log`${req.method} '${req.url}' => '${strResponse}'`;
     }
 
     res.writeHead(finalResponse.status);

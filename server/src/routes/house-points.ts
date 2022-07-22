@@ -1,50 +1,92 @@
 import route from "../";
-import { AUTH_ERR, idFromCodeOrID, requireAdmin } from "../util";
+import { AUTH_ERR, COOKIE_CODE_KEY, idFromCodeOrID, requireAdmin } from "../util";
 
 
-route('get/house-points/from-id/:id', async ({ query, params: { id: rawID} }) => {
+route('get/house-points/with-id/:id', async ({ query, params, cookies }) => {
+    const { id: rawID } = params;
     const id = parseInt(rawID);
-    if (isNaN(id)) return "Invalid house point ID";
-    const data = await query`
+
+    if (isNaN(id)) return `ID '${rawID}' is not a number`;
+
+    if (!await requireAdmin(cookies, query)) {
+        const res = await query`
+            SELECT users.code
+            FROM housepoints, users
+            WHERE housepoints.id = ${id}
+              AND housepoints.student = users.id
+        `;
+
+        // doesn't get to know if house point even exists or not
+        if (!res.length) return AUTH_ERR;
+        if (res[0]['code'] !== cookies[COOKIE_CODE_KEY]) return AUTH_ERR;
+    }
+
+    const res = await query`
         SELECT 
-            housepoints.id, 
-            quantity, 
-            event, 
-            description, 
-            created, 
-            completed, 
-            status, 
-            rejectMessage,
-            users.name
+            users.name as student, 
+            users.year as studentYear, 
+            housepoints.quantity as quantity, 
+            housepoints.event as eventID, 
+            housepoints.description as description,
+            UNIX_TIMESTAMP(housepoints.created) as created,
+            UNIX_TIMESTAMP(housepoints.completed) as completed,
+            housepoints.status,
+            housepoints.rejectMessage
         FROM housepoints, users
-        WHERE
-            housepoints.id = ${id}
-        AND users.id = housepoints.student
+        WHERE housepoints.id = ${id}
+          AND housepoints.student = users.id
     `;
-    if (!data.length) return {
-        error: `No house point found with ID ${id}`,
-        status: 406
-    };
-    return data[0];
+    if (!res.length) return {
+        status: 406,
+        error: `No house point found with ID '${id}'`
+    }
+
+    return res[0];
 });
 
 
-route('get/house-points/pending', async ({ query, cookies }) => {
+route('get/house-points/with-status/:status', async ({ query, cookies, params: { status} }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     return { data: await query`
         SELECT
-            housepoints.id as hpID,
-            housepoints.description,
-            UNIX_TIMESTAMP(housepoints.created) as timestamp,
-            users.name as studentName,
-            users.code as studentCode,
-            housepoints.quantity
+            housepoints.id as id,
+            users.name as student,
+            users.year as studentYear,
+            housepoints.quantity as quantity,
+            housepoints.event as eventID,
+            housepoints.description as description,
+            UNIX_TIMESTAMP(housepoints.created) as created,
+            UNIX_TIMESTAMP(housepoints.completed) as completed,
+            housepoints.status,
+            housepoints.rejectMessage
         FROM housepoints, users
         WHERE
-            housepoints.status = 'Pending' AND
+            housepoints.status = ${status} AND
             housepoints.student = users.id
-        ORDER BY timestamp DESC
+        ORDER BY completed, created DESC
+    `};
+});
+
+
+route('get/house-points/all', async ({ query, cookies }) => {
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+
+    return { data: await query`
+        SELECT
+            housepoints.id as id,
+            users.name as student,
+            users.year as studentYear,
+            housepoints.quantity as quantity,
+            housepoints.event as eventID,
+            housepoints.description as description,
+            UNIX_TIMESTAMP(housepoints.created) as created,
+            UNIX_TIMESTAMP(housepoints.completed) as completed,
+            housepoints.status,
+            housepoints.rejectMessage
+        FROM housepoints, users
+        WHERE housepoints.student = users.id
+        ORDER BY completed, created DESC
     `};
 });
 
@@ -54,7 +96,7 @@ route(
 async ({ query, cookies, params }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    const { user, description, event: rawEvent, rawQuantity } = params;
+    const { user, description, event: rawEvent, quantity: rawQuantity } = params;
 
     let quantity = parseInt(rawQuantity);
     if (isNaN(quantity) || !quantity) quantity = 1;
@@ -82,21 +124,18 @@ async ({ query, cookies, params }) => {
 
 
 route(
-    'create/house-points/request/:user/:quantity?description',
+    'create/house-points/request/:user/?description',
 async ({ query, cookies, params }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    const { user, description, rawQuantity } = params;
-
-    let quantity = parseInt(rawQuantity);
-    if (isNaN(quantity) || !quantity) quantity = 1;
+    const { user, description } = params;
 
     const id = await idFromCodeOrID(query, '', user);
     if (typeof id === 'string') return id;
 
     await query`
         INSERT INTO housepoints (student, quantity, description)
-        VALUES (${id}, ${quantity}, ${description})
+        VALUES (${id}, 1, ${description})
     `;
 
     return { status: 201 };
@@ -127,4 +166,30 @@ async ({ query, cookies, params }) => {
     }
 
     return { status: 200 };
+});
+
+
+route('delete/house-points/with-id/:id', async ({ query, cookies, params }) => {
+    const { id: rawID } = params;
+    const id = parseInt(rawID);
+    if (isNaN(id)) return `Invalid house point ID '${rawID}', must be a number`;
+
+    if (!await requireAdmin(cookies, query)) {
+        const res = await query`
+            SELECT users.code
+            FROM housepoints, users
+            WHERE housepoints.id = ${id}
+              AND housepoints.student = users.id
+        `;
+
+        // doesn't get to know if house point even exists or not
+        if (!res.length) return AUTH_ERR;
+        if (res[0]['code'] !== cookies[COOKIE_CODE_KEY]) return AUTH_ERR;
+    }
+
+    const res = await query`DELETE FROM housepoints WHERE id = ${id}`;
+    if (!res.affectedRows) return {
+        status: 406,
+        error: `No house points to delete with ID '${id}'`
+    }
 });

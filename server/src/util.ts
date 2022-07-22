@@ -97,10 +97,16 @@ export async function authLvl (code: string, query: queryFunc) {
     return auth ? 2 : 1;
 }
 
+/**
+ * True if user code is valid
+ */
 export async function requireLoggedIn (cookies: Cookies, query: queryFunc): Promise<boolean> {
     return await authLvl(cookies[COOKIE_CODE_KEY], query) > 0;
 }
 
+/**
+ * True if user code is valid and an admin
+ */
 export async function requireAdmin (cookies: Cookies, query: queryFunc): Promise<boolean> {
     return await authLvl(cookies[COOKIE_CODE_KEY], query) === 2;
 }

@@ -104,26 +104,27 @@ let data;
 async function main (reload=true) {
     if (reload) {
 
-        fetch(`../api/valid-code.php?code=${getCode()}`)
-            .then(async res => {
-                res = await res.text();
-                if (res === '2') {
+        api`../api/valid-code.php?code=${getCode()}`
+            .then(async ({ level }) => {
+                if (level === 2) {
                     document.getElementById('home-link').href = '../admin-dashboard';
-                } else if (res === '1') {
-                    const data = await fetchJSON`../api/student-info.php?code=${getCode()}`;
-                    const year = parseInt(data['year']);
+
+                } else if (level === 1) {
+                    const { year } = await api`get/users/info/${getCode()}`;
                     showYears = [year];
-                    whichYears.value = `${year}`;
+                    whichYears.value = year.toString();
                     await main(false);
                 }
             });
 
-        data = await fetchJSON`../api/leaderboard.php`;
+        data = await api`get/users/leaderboard`;
     }
     leaderboard(data);
 }
 
-main();
+(async () => {
+    footer`../footer.html`;
+    nav`../nav.html`;
 
-footer`../footer.html`;
-nav`../nav.html`;
+    await main();
+})();
