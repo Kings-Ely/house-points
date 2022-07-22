@@ -8,7 +8,7 @@ import c from 'chalk';
 import { type Handler, Route } from "./route";
 import connectSQL, { type queryFunc } from './sql';
 import log, { error, LogLvl, setLogOptions, warning, close as stopLogger } from "./log";
-import {loadEnv, parseCookies} from "./util";
+import { loadEnv, parseCookies } from "./util";
 
 export const flags = commandLineArgs([
     { name: 'dev', alias: 'd', type: Boolean, defaultValue: false },
@@ -32,7 +32,11 @@ let query: queryFunc = () => new Promise(() => {
  * Define a route that the server will respond to.
  */
 export default function route (path: string, handler: Handler) {
-    handlers.push(new Route(path, handler));
+    try {
+        handlers.push(new Route(path, handler));
+    } catch (e) {
+        error`Error adding route: ${e}`;
+    }
 }
 
 import './routes/users';
@@ -48,15 +52,23 @@ async function serverResponse (req: IncomingMessage, res: ServerResponse) {
     res.setHeader('Content-Type', 'application/json');
 
     // find route which matches request path
-    const routes = handlers.filter((route) => route.matches(req.url));
+    const routes = handlers.filter((route) => {
+        return route.matches(req.method || 'GET', req.url);
+    });
 
     if (routes.length > 1) {
-        warning`Multiple routes match ${req.url}`;
+        warning`300: Multiple routes for ${req.method} '${req.url}'`;
+        res.writeHead(300);
+        res.end(JSON.stringify(routes.map(r => r.asString())));
+        return;
 
     } else if (routes.length === 0) {
         warning`404: ${req.method} '${req.url}'`;
         res.writeHead(404);
-        res.end('');
+        res.end(JSON.stringify({
+            status: 404,
+            error: `No path matches [${req.method}] '${req.url}'`
+        }));
         return;
     }
 

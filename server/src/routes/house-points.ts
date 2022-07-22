@@ -1,7 +1,5 @@
 import route from "../";
-import { AUTH_ERR, authLvl, idFromCodeOrID, makeCode, requireAdmin } from "../util";
-import log from "../log";
-import c from "chalk";
+import { AUTH_ERR, idFromCodeOrID, requireAdmin } from "../util";
 
 
 route('get/house-points/from-id/:id', async ({ query, params: { id: rawID} }) => {
@@ -23,7 +21,10 @@ route('get/house-points/from-id/:id', async ({ query, params: { id: rawID} }) =>
             housepoints.id = ${id}
         AND users.id = housepoints.student
     `;
-    if (!data.length) return `No house point found with ID ${id}`;
+    if (!data.length) return {
+        error: `No house point found with ID ${id}`,
+        status: 406
+    };
     return data[0];
 });
 
@@ -61,10 +62,13 @@ async ({ query, cookies, params }) => {
     let event: number | null = parseInt(rawEvent);
     if (isNaN(event) || !event) event = null;
 
-    return await query`
+    const id = await idFromCodeOrID(query, '', user);
+    if (typeof id === 'string') return id;
+
+    await query`
         INSERT INTO housepoints (student, quantity, event, description, status, completed)
         VALUES (
-            ${await idFromCodeOrID(query, '', user)},
+            ${id},
             ${quantity},
             ${event},
             ${description},
@@ -72,6 +76,8 @@ async ({ query, cookies, params }) => {
             CURRENT_TIMESTAMP
         )
     `;
+
+    return { status: 201 };
 });
 
 
@@ -85,10 +91,15 @@ async ({ query, cookies, params }) => {
     let quantity = parseInt(rawQuantity);
     if (isNaN(quantity) || !quantity) quantity = 1;
 
-    return await query`
+    const id = await idFromCodeOrID(query, '', user);
+    if (typeof id === 'string') return id;
+
+    await query`
         INSERT INTO housepoints (student, quantity, description)
-        VALUES (${await idFromCodeOrID(query, '', user)}, ${quantity}, ${description})
+        VALUES (${id}, ${quantity}, ${description})
     `;
+
+    return { status: 201 };
 });
 
 
@@ -103,7 +114,10 @@ async ({ query, cookies, params }) => {
     if (isNaN(id)) return `Invalid house point ID '${rawID}', must be a number`;
 
     if (!(await query`SELECT * FROM housepoints WHERE id = ${id}`).length) {
-        return `No house point found with ID '${id}'`;
+        return {
+            status: 406,
+            error: `No house point found with ID '${id}'`
+        };
     }
 
     await query`UPDATE housepoints SET completed = CURRENT_TIMESTAMP, status='Accepted' WHERE id = ${id}`;
@@ -111,4 +125,6 @@ async ({ query, cookies, params }) => {
     if (reject) {
         await query`UPDATE housepoints SET rejectMessage = ${reject}, status='Rejected' WHERE id = ${id}`;
     }
+
+    return { status: 200 };
 });

@@ -51,7 +51,10 @@ route('delete/server/:code', async ({ query, cookies, params: { code}}) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     if (code !== process.env.KILL_CODE) {
-        return 'Invalid kill code' ;
+        return {
+            status: 401,
+            error: 'Invalid kill code'
+        } ;
     }
     process.kill(process.pid, 'SIGTERM');
 });

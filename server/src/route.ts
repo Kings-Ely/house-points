@@ -2,8 +2,7 @@ import type { IncomingMessage, ServerResponse } from "http";
 
 import type { queryFunc } from "./sql";
 import Path from "./path";
-import log, { warning } from "./log";
-import {AUTH_ERR} from "./util";
+import { error, warning } from "./log";
 
 export interface IHandlerArgs {
     url: string;
@@ -31,6 +30,7 @@ export interface IJSONResponse {
 }
 
 export class Route {
+    private readonly methods: string[] = ['GET'];
     private readonly path: Path;
     private readonly handler: Handler;
 
@@ -46,7 +46,11 @@ export class Route {
     /**
      * Checks that the given path has the same structure as this route's path
      */
-    public matches (rawPath?: string): boolean {
+    public matches (method: string, rawPath?: string): boolean {
+
+        if (!this.methods.includes(method)) {
+            return false;
+        }
 
         const path = Path.parse(rawPath);
         if (typeof path === 'string') {
@@ -109,7 +113,8 @@ export class Route {
         res ||= {};
 
         if (Array.isArray(res)) {
-            res = { error: 'Arrays not allowed from handlers' };
+            error`Arrays not allowed from handlers`;
+            res = { status: 500 };
         }
 
         if (typeof res !== 'object') {
@@ -121,8 +126,15 @@ export class Route {
 
         return {
             ok: !res.error,
-            status: res.error ? 500 : 200,
+            status: res.error ? 400 : 200,
             ...res
         };
+    }
+
+    /**
+     * Returns a string representation of this route
+     */
+    asString (): string {
+        return `[${this.methods.join(', ')}] ${this.path.asString()}`;
     }
 }

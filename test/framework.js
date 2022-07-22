@@ -71,20 +71,16 @@ export default class Test {
     }
 
     static currentID = 0;
-    static currentName = 'unknownName';
-
-    static battery (name) {
-        this.currentName = name;
-    }
 
     /** @type {Test[]} */
     static tests = [];
 
     /**
+     * @param {string} name
      * @param {testExecutor} test
      */
-    static test (test) {
-        Test.tests.push(new Test(test, Test.tests.length, this.currentName, this.currentID));
+    static test (name, test) {
+        Test.tests.push(new Test(test, Test.tests.length, name, this.currentID));
     }
 
     /**

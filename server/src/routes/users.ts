@@ -1,6 +1,5 @@
 import route from "../";
-import {AUTH_ERR, authLvl, COOKIE_CODE_KEY, idFromCodeOrID, makeCode, requireAdmin} from "../util";
-import log from "../log";
+import { AUTH_ERR, authLvl, COOKIE_CODE_KEY, idFromCodeOrID, makeCode, requireAdmin } from "../util";
 
 
 route('get/users/auth/:code', async ({ query, params: { code} }) => {
@@ -17,7 +16,10 @@ route('get/users/info/:code', async ({ query, params: { code} }) => {
 
     const data = await query`SELECT admin, student, name, year FROM users WHERE code = ${code.toLowerCase()}`;
 
-    if (!data.length) return 'User not found';
+    if (!data.length) return {
+        status: 406,
+        error: 'User not found'
+    };
 
     return data[0];
 });
@@ -72,9 +74,13 @@ route('update/users/admin?id&code&admin', async ({ query, params, cookies }) => 
     if (!myCode) return 'No code';
     let checkMyselfRes = await query`SELECT admin, id FROM users WHERE code = ${myCode}`;
     const self = checkMyselfRes[0];
+    if (!self) return AUTH_ERR;
 
     if (self['id'] == id) {
-        return 'You cannot change your own admin status';
+        return {
+            status: 403,
+            error: 'You cannot change your own admin status'
+        };
     }
 
     await query`UPDATE users SET admin = ${admin === '1'} WHERE id = ${id}`;

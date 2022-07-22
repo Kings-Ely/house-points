@@ -3,6 +3,10 @@ export default class Path {
     params: string[] = [];
     paramDict: Record<string, string> = {};
 
+    asString (): string {
+        return this.components.join('/');
+    }
+
     static parse (path?: string): Path | string {
         const p = new Path();
 

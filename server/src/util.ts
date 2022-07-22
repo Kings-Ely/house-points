@@ -1,9 +1,9 @@
 import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
+
 import { queryFunc } from "./sql";
 import { Cookies } from "./route";
-import log from "./log";
 
 export const AUTH_ERR = Object.freeze({
     error: 'You are not authorized for this action',

@@ -3,8 +3,8 @@ import c from 'chalk';
 import Test from '../framework.js';
 import lighthouse, { goodScore, lighthouseResCategories } from "../ligthhouse.js";
 
-Test.battery('frontend performance with Google LightHouse');
-Test.test(async (_, { doLighthouse }) => {
+
+Test.test('frontend performance with Google LightHouse', async (_, { doLighthouse }) => {
 
     if (!doLighthouse) {
         return true;
