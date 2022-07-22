@@ -14,14 +14,43 @@ route('get/users/auth/:code', async ({ query, params: { code} }) => {
 route('get/users/info/:code', async ({ query, params: { code} }) => {
     if (!code) return 'No code';
 
-    const data = await query`SELECT admin, student, name, year FROM users WHERE code = ${code.toLowerCase()}`;
+    const data = await query`
+        SELECT 
+            id,
+            admin,
+            student,
+            name,
+            year
+        FROM users 
+        WHERE code = ${code.toLowerCase()}
+    `;
 
     if (!data.length) return {
         status: 406,
         error: 'User not found'
     };
 
-    return data[0];
+    const user = data[0];
+
+    const housePoints = await query`
+        SELECT 
+            id, 
+            description, 
+            status,
+            UNIX_TIMESTAMP(created) as timestamp,
+            UNIX_TIMESTAMP(completed) as accepted,
+            rejectMessage,
+            quantity
+        FROM housepoints
+        WHERE student = ${user.id}
+        ORDER BY timestamp DESC
+    `;
+
+    delete user.id;
+
+    user['housepoints'] = housePoints;
+
+    return user;
 });
 
 
@@ -30,7 +59,6 @@ route('get/users/all', async ({ query, cookies }) => {
 
     const data = await query`
         SELECT 
-            users.id, 
             users.name, 
             users.year,
             users.code,
@@ -125,7 +153,11 @@ route('update/users/admin?id&code&admin', async ({ query, params, cookies }) => 
         };
     }
 
-    await query`UPDATE users SET admin = ${admin === '1'} WHERE id = ${id}`;
+    const queryRes = await query`UPDATE users SET admin = ${admin === '1'} WHERE id = ${id}`;
+    if (!queryRes.affectedRows) return {
+        status: 406,
+        error: 'User not found'
+    };
 });
 
 
@@ -149,11 +181,14 @@ route('update/users/year?id&code&yearChange', async ({ query, params, cookies })
 route('delete/users/:code', async ({ query, params: { code}, cookies }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    const usersWithCode = await query`SELECT * FROM users WHERE code = ${code}`;
 
-    if (usersWithCode.length !== 1) {
-        return `No user with code '${code}'`;
-    }
+    const id = await idFromCodeOrID(query, '', code);
+    if (typeof id === 'string') return id;
 
-    await query`DELETE FROM users WHERE code = ${code}`;
+    const queryRes = await query`DELETE FROM users WHERE id = ${id}`;
+    if (!queryRes.affectedRows) return {
+        status: 406,
+        error: 'User not found'
+    };
+    await query`DELETE FROM housepoints WHERE student = ${id}`;
 });

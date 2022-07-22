@@ -139,7 +139,7 @@ async function signout () {
 
 
 (async () => {
-    footer('../footer.html');
+    rootPath('..');
 
     code.onkeydown = code.onchange;
     code.onclick = code.onchange;

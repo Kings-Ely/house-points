@@ -163,7 +163,7 @@ async ({ query, cookies, params }) => {
 
 
 route(
-    'change/house-points/accepted/:id?reject',
+    'update/house-points/accepted/:id?reject',
 async ({ query, cookies, params }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 

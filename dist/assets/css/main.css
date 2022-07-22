@@ -55,6 +55,10 @@ svg {
     height: 100vh;
 }
 
+section {
+    border-bottom: 1px solid var(--border);
+}
+
 /* INPUTS */
 
 input, button {

@@ -131,8 +131,7 @@ async function main () {
 }
 
 (async () => {
-    nav`../assets/html/nav.html`;
-    footer`../assets/html/footer.html`;
+    rootPath('..');
 
     const { level } = await api`get/users/auth/${getCode()}`;
 

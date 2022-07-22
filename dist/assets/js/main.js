@@ -280,11 +280,29 @@ async function loadSVGs () {
 }
 
 
-function footer (url) {
-    $`footer`.load(url);
-}
-function nav (url) {
-    $`nav`.load(url);
+let ROOT_PATH = '';
+
+let $nav = $(`nav`);
+let $footer = $(`footer`);
+
+/**
+ * Must be called first
+ * @param {string} path
+ */
+function rootPath (path) {
+    ROOT_PATH = path;
+
+
+    $footer.load(`${ROOT_PATH}/assets/html/footer.html`);
+
+    $nav.load(`${ROOT_PATH}/assets/html/nav.html`, () => {
+        $nav.find(`a`).each(function () {
+            const href = $(this).attr(`href`);
+            if (href[0] === '/') {
+                $(this).attr(`href`, `${ROOT_PATH}${href}`);
+            }
+        });
+    });
 }
 
 async function reloadDOM () {

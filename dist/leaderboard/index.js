@@ -123,8 +123,7 @@ async function main (reload=true) {
 }
 
 (async () => {
-    footer`../footer.html`;
-    nav`../nav.html`;
+    rootPath('..');
 
     await main();
 })();

@@ -46,6 +46,8 @@ async function paste () {
 }
 
 (async () => {
+	rootPath('.');
+
 	code.onkeydown = code.onchange;
 	code.onclick = code.onchange;
 	code.onpaste = code.onchange;
@@ -53,7 +55,4 @@ async function paste () {
 	if (GETParam('error')) {
 		showErrorFromCode(GETParam('error'));
 	}
-
-	nav(`./assets/html/nav.html`);
-	footer(`./assets/html/footer.html`);
 })();

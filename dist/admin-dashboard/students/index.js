@@ -149,12 +149,12 @@ $(`#add-student-submit`).click(async () => {
     main();
 });
 
-async function deleteUser (id, name) {
-    if (!confirm(`Are you sure you want to delete ${name} (ID ${id}) and all their house points?`)) {
+async function deleteUser (code, name) {
+    if (!confirm(`Are you sure you want to delete ${name} (Code '${code}') and all their house points?`)) {
         return;
     }
 
-    await api`../../api/delete-student.php?id=${id}`;
+    await api`delete/users/${code}`;
 
     main();
 }
@@ -165,9 +165,10 @@ async function deleteSelected () {
         return;
     }
 
-    for (let id of selected) {
-        await api`../../api/delete-student.php?id=${id}`;
-    }
+    // send API requests at the same time and wait for all to finish
+    await Promise.all(selected.map(async code => {
+        await api`delete/users/${code}`;
+    }));
 
     main();
 }
@@ -203,8 +204,8 @@ async function ageSelected (amount) {
         return;
     }
 
-    for (let id of selected) {
-        await api`../../api/age-student.php?id=${id}&amount=${amount}`;
+    for (let code of selected) {
+        await api`../../api/age-student.php?id=${code}&amount=${amount}`;
     }
 
     main();
@@ -235,33 +236,33 @@ async function giveHPToSelected () {
     main();
 }
 
-async function revokeAdmin (id, name) {
+async function revokeAdmin (code, name) {
     if (!confirm(`Are you sure you want to revoke ${name}'s admin access?`)) {
         return;
     }
 
-    await api`../../api/change-admin.php?id=${id}&admin=0`;
+    await api`../../api/change-admin.php?id=${code}&admin=0`;
 
     main();
 }
 
-async function makeAdmin (id, name) {
+async function makeAdmin (code, name) {
     if (!confirm(`Are you sure you want to make ${name} an admin?`)) {
         return;
     }
 
-    await api`../../api/change-admin.php?id=${id}&admin=1`;
+    await api`update/users/admin/${code}&admin=1`;
 
     main();
 }
 
 (async () => {
-    footer`../../footer.html`;
+    rootPath('../..');
 
     const { level } = await api`get/users/auth/${getCode()}`;
 
     if (level !== 2) {
-        navigate`../../`;
+        await navigate(ROOT_PATH);
         return;
     }
 

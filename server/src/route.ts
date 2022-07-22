@@ -57,6 +57,10 @@ export class Route {
             return false;
         }
 
+        if (path.components.length !== this.path.components.length) {
+            return false;
+        }
+
         for (let i = 0; i < this.path.components.length; i++) {
             // path matches exactly
             if (path.components[i] === this.path.components[i]) {
