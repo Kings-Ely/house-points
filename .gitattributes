@@ -47,3 +47,7 @@ Dockerfile linguist-detectable=true
 .gitattributes linguist-vendored=false
 .gitattributes linguist-language=Git Attributes
 .gitattributes linguist-detectable=true
+
+*.yml linguist-vendored=false
+*.yml linguist-language=YAML
+*.yml linguist-detectable=true
