@@ -80,7 +80,7 @@ h2 {
     color: var(--text-light);
 }
 
-/* MOBI:E */
+/* MOBILE */
 @media only screen and (max-aspect-ratio: 6/5) {
     * {
         transition: 0ms;

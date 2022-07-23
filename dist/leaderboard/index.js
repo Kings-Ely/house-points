@@ -1,20 +1,15 @@
 // Slightly horrible with 1st, 2nd and 3rd place on the leaderboard...
 // could do an array or something but with always exactly 3 it's a bit pointless.
 
-const leaderboardDiv = document.getElementById('leaderboard');
-const podium1stDiv = document.getElementById('podium-1st');
-const podium2ndDiv = document.getElementById('podium-2nd');
-const podium3rdDiv = document.getElementById('podium-3rd');
-const whichYears = document.getElementById('show-year');
+const $leaderboard = document.getElementById('leaderboard');
+const $podium1st = document.getElementById('podium-1st');
+const $podium2nd = document.getElementById('podium-2nd');
+const $podium3rd = document.getElementById('podium-3rd');
+const $whichYears = document.getElementById('show-year');
 
 // show all by default
 let showYears = [9, 10, 11, 12, 13];
 let leaderboardData;
-
-whichYears.onchange = async () => {
-    showYears = whichYears.value.split(',').map(parseInt);
-    await main(false);
-};
 
 function showStudent (student) {
     return `
@@ -30,12 +25,12 @@ function showStudent (student) {
 }
 
 function resetPodium () {
-    podium1stDiv.style.height = `80%`;
-    podium2ndDiv.style.height = `60%`;
-    podium3rdDiv.style.height = `40%`;
-    podium1stDiv.innerHTML = ``;
-    podium2ndDiv.innerHTML = ``;
-    podium3rdDiv.innerHTML = ``;
+    $podium1st.style.height = `80%`;
+    $podium2nd.style.height = `60%`;
+    $podium3rd.style.height = `40%`;
+    $podium1st.innerHTML = ``;
+    $podium2nd.innerHTML = ``;
+    $podium3rd.innerHTML = ``;
 }
 
 function leaderboard (hps) {
@@ -45,7 +40,7 @@ function leaderboard (hps) {
     resetPodium();
 
     if (hps.length === 0) {
-        leaderboardDiv.innerHTML = `
+        $leaderboard.innerHTML = `
             <p style="font-size: 30px; margin: 50px; text-align: center">
                 Looks like no-one has any house points yet!
             </p>
@@ -53,7 +48,7 @@ function leaderboard (hps) {
         return;
     }
 
-    leaderboardDiv.innerHTML = '';
+    $leaderboard.innerHTML = '';
 
     let start = 3;
 
@@ -72,9 +67,9 @@ function leaderboard (hps) {
                 </div>
             `;
         }
-        podium1stDiv.innerHTML = podiumHTMl(0);
-        podium2ndDiv.innerHTML = podiumHTMl(1);
-        podium3rdDiv.innerHTML = podiumHTMl(2);
+        $podium1st.innerHTML = podiumHTMl(0);
+        $podium2nd.innerHTML = podiumHTMl(1);
+        $podium3rd.innerHTML = podiumHTMl(2);
 
         // proportional heights
         const total =
@@ -86,9 +81,9 @@ function leaderboard (hps) {
         const height2 = Math.max(parseInt(hps[1]['housepoints']) / total * 100, 10);
         const height3 = Math.max(parseInt(hps[2]['housepoints']) / total * 100, 10);
 
-        podium1stDiv.style.height = `${height1}%`;
-        podium2ndDiv.style.height = `${height2}%`;
-        podium3rdDiv.style.height = `${height3}%`;
+        $podium1st.style.height = `${height1}%`;
+        $podium2nd.style.height = `${height2}%`;
+        $podium3rd.style.height = `${height3}%`;
     }
 
     // handle lots of house points using promises
@@ -96,15 +91,20 @@ function leaderboard (hps) {
         if (!showYears.includes(hps[i]['year'])) {
             continue;
         }
-        leaderboardDiv.innerHTML += showStudent(hps[i]);
+        $leaderboard.innerHTML += showStudent(hps[i]);
     }
 }
 async function main (reload=true) {
-    if (reload) {
+    if (reload || !leaderboardData) {
         leaderboardData = (await api`get/users/leaderboard`)['data'];
     }
     leaderboard(leaderboardData);
 }
+
+$whichYears.onchange = async () => {
+    showYears = $whichYears.value.split(',').map(parseInt);
+    await main(false);
+};
 
 (async () => {
     await init('..');
@@ -120,7 +120,7 @@ async function main (reload=true) {
 
     if (admin) {
         showYears = [year];
-        whichYears.value = year.toString();
+        $whichYears.value = year.toString();
         await main(false);
     }
 

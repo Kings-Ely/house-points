@@ -1,6 +1,10 @@
 const $go = document.getElementById('go');
 const $code = document.getElementById('code');
 
+async function paste () {
+	$code.value = cleanCode(await navigator.clipboard.readText());
+}
+
 $go.onclick = async () => {
 	const myCode = code.value.toLowerCase();
 
@@ -40,10 +44,6 @@ $code.onchange = (evt) => {
 	}, 0);
 };
 
-
-async function paste () {
-	$code.value = cleanCode(await navigator.clipboard.readText());
-}
 
 (async () => {
 	await init('.');

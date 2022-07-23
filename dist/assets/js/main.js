@@ -444,6 +444,10 @@ async function loadNav () {
                     setCodeCookie(getAltCode());
                     navigate(`${ROOT_PATH}/admin`);
                 };
+
+                if (!info['student']) {
+                    hideWithID('home-link')
+                }
             });
     }
 
@@ -583,6 +587,8 @@ async function init (rootPath) {
     await loadScript('/assets/js/components.js');
 
     await waitForReady();
+
+    scrollToTop();
 }
 
 (async () => {
@@ -605,7 +611,6 @@ async function init (rootPath) {
 
     function documentIsLoaded () {
         reloadDOM();
-        scrollToTop();
 
         documentLoaded = true;
 
