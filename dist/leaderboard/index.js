@@ -107,11 +107,9 @@ async function main (reload=true) {
 }
 
 (async () => {
-    rootPath('..')
-        .then(() => {
-            // hide leaderboard link as that is this page
-            document.getElementById('leaderboard-link').style.display = 'none';
-        });
+    await init('..');
+
+    hideWithID('leaderboard-link');
 
     if (!await signedIn()) {
         await navigate(ROOT_PATH);

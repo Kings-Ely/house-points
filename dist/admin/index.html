@@ -8,10 +8,11 @@
     <meta name="robots" content="noindex">
 
     <script src="../assets/js/main.js"></script>
-    <link rel="preload" href="../assets/css/main.css" as="style" onload="asyncCSS(this)">
-    <link rel="preload" href="../assets/css/darkmode.css" as="style" onload="asyncCSS(this)">
-    <link rel="preload" href="./index.css" as="style" onload="asyncCSS(this)">
     <script src="index.js" defer></script>
+
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/darkmode.css">
+    <link rel="stylesheet" href="./index.css">
 </head>
 <body>
 <nav></nav>
@@ -29,26 +30,26 @@
         <div id="pending"></div>
     </section>
 
-    <h2>Add House Point</h2>
-    <div>
-        <label>
+    <section>
+        <h2>Add House Point</h2>
+        <div>
+            <span id="add-hp-name-inp"></span>
+            <label>
+                <input
+                    type="text"
+                    id="add-hp-reason"
+                    placeholder="Why did they get the House Point?"
+                >
+            </label>
+            <button
+                id="add-hp-submit"
+                class="icon"
+                aria-label="add-house-point"
+                svg="plus.svg"
+            ></button>
+        </div>
+    </section>
 
-        </label>
-        <label>
-            <input
-                type="text"
-                id="add-hp-reason"
-                placeholder="Why did they get the House Point?"
-            >
-        </label>
-        <button
-            id="add-hp-submit"
-            class="icon"
-            aria-label="add-house-point"
-            svg="plus.svg"
-        ></button>
-        <div id="add-hp-error"></div>
-    </div>
 </main>
 <footer></footer>
 </body>

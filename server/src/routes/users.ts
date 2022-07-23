@@ -11,6 +11,28 @@ route('get/users/auth/:code', async ({ query, params: { code} }) => {
 });
 
 
+route('get/users/code-from-name/:name', async ({ query, params: { name}, cookies }) => {
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+
+    if (!name) return 'No code';
+
+    const data = await query`
+        SELECT code
+        FROM users
+        WHERE name = ${name}
+    `;
+
+    if (!data.length) return {
+        status: 406,
+        error: `User not found with name '${name}'`
+    };
+
+    return {
+        code: data[0]['code']
+    };
+});
+
+
 route('get/users/info/:code', async ({ query, params: { code} }) => {
     if (!code) return 'No code';
 

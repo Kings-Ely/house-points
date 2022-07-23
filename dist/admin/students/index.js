@@ -261,7 +261,7 @@ async function makeAdmin (code, name) {
 }
 
 (async () => {
-    rootPath('../..');
+    init('../..');
 
     const { level } = await api`get/users/auth/${getCode()}`;
 

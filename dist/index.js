@@ -1,7 +1,7 @@
-const go = document.getElementById('go');
-const code = document.getElementById('code');
+const $go = document.getElementById('go');
+const $code = document.getElementById('code');
 
-go.onclick = async () => {
+$go.onclick = async () => {
 	const myCode = code.value.toLowerCase();
 
 	if (!myCode) {
@@ -24,33 +24,33 @@ go.onclick = async () => {
 	showError`Looks like that is an invalid code, sorry!`;
 };
 
-code.onchange = (evt) => {
+$code.onchange = (evt) => {
 
 	if (evt.key === 'Enter') {
-		go.onclick();
+		$go.onclick();
 		evt.preventDefault();
 		return;
 	}
 
-	code.value = cleanCode(code.value);
+	$code.value = cleanCode($code.value);
 
 	// just to make sure :^)
 	setTimeout(() => {
-		code.value = cleanCode(code.value);
+		$code.value = cleanCode($code.value);
 	}, 0);
 };
 
 
 async function paste () {
-	code.value = cleanCode(await navigator.clipboard.readText());
+	$code.value = cleanCode(await navigator.clipboard.readText());
 }
 
 (async () => {
-	rootPath('.');
+	await init('.');
 
-	code.onkeydown = code.onchange;
-	code.onclick = code.onchange;
-	code.onpaste = code.onchange;
+	$code.onkeydown = $code.onchange;
+	$code.onclick = $code.onchange;
+	$code.onpaste = $code.onchange;
 
 	if (GETParam('error')) {
 		showErrorFromCode(GETParam('error'));

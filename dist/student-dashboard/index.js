@@ -1,8 +1,8 @@
 const $name = document.getElementById('name');
 const $hps = document.getElementById('hps');
+const $hpReasonInp = document.getElementById('hp-reason');
 
 function housePoints (hps) {
-
     if (hps.length === 0) {
         $hps.innerHTML = `
             <p style="font-size: 30px; margin: 50px; text-align: center">
@@ -44,13 +44,13 @@ function showHp (hp) {
 
     if (hp['status'] === 'Rejected') {
         acceptedHTML = `
-            Rejected ${getRelativeTime(hp['accepted'] * 1000)}
+            Rejected ${getRelativeTime(hp['completed'] * 1000)}
             <br>
             <b>"${hp['rejectMessage']}"</b>
         `;
     } else if (hp['status'] === 'Accepted') {
         acceptedHTML = `
-            Accepted ${getRelativeTime(hp['accepted'] * 1000)}
+            Accepted ${getRelativeTime(hp['completed'] * 1000)}
         `;
         icon = 'accent-tick.svg';
 
@@ -58,7 +58,7 @@ function showHp (hp) {
         acceptedHTML = 'Not Yet Accepted';
     }
 
-    const submittedTime = hp['timestamp'] * 1000;
+    const submittedTime = hp['created'] * 1000;
 
     return `
         <div class="house-point">
@@ -88,19 +88,6 @@ function showHp (hp) {
     `;
 }
 
-const hpReason = document.getElementById('hp-reason');
-
-document.getElementById('submit-hp').onclick = async () => {
-    if (!hpReason.value) return;
-
-    for (let reason of hpReason.value.split('\n')) {
-        if (!reason) continue;
-        await api`create/house-points/give/${getCode()}/1?description=${reason}`;
-    }
-    await main();
-    hpReason.value = '';
-};
-
 async function deleteHousePoint (id, desc) {
     if (!confirm(`Are you sure you want to delete the house point you got for '${desc}'?`)) {
         return;
@@ -118,11 +105,27 @@ async function main () {
     await reloadDOM();
 }
 
+document.getElementById('submit-hp').onclick = async () => {
+    if (!$hpReasonInp.value) return;
+
+    for (let reason of $hpReasonInp.value.split('\n')) {
+        if (!reason) continue;
+        await api`create/house-points/request/${getCode()}/1?description=${reason}`;
+    }
+    await main();
+    $hpReasonInp.value = '';
+};
+
 (async () => {
-    rootPath('..');
+    await init('..');
+    hideWithID('home-link');
 
     if (!await signedIn()) {
         navigate`..?error=auth`;
+    }
+
+    if ((await userInfo())['admin']) {
+        navigate`../admin`;
     }
 
     await main();

@@ -88,10 +88,14 @@ async function signedIn () {
 
 /**
  * @param {number} d1
- * @param {number} [d2=new Date()]
+ * @param {number?} [d2=Date.now()]
  * @returns {string}
  */
 function getRelativeTime (d1, d2) {
+    if (isNaN(d1)) {
+        console.error('getRelativeTime: d1 is not a number');
+        return 'In the Past';
+    }
     d2 ||= Date.now();
     const elapsed = d1 - d2;
 
@@ -111,12 +115,14 @@ function getRelativeTime (d1, d2) {
  * @returns {Promise<unknown>}
  */
 async function loadScript (url) {
+
     const script = document.createElement('script');
     script.type = 'text/javascript';
 
     if (url[0] === '/') {
         url = ROOT_PATH + url;
     }
+
     script.src = url;
 
     return await new Promise(resolve => {
@@ -255,6 +261,19 @@ function loadLabel (self) {
         </span> 
         ${self.innerHTML}
     `;
+}
+
+/**
+ * Hides an element by setting its display to 'none'
+ * @param {string} id
+ */
+function hideWithID (id) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.style.display = 'none';
+    } else {
+        console.error(`hideWithID: no element with id '${id}'`);
+    }
 }
 
 // Spinner
@@ -449,25 +468,6 @@ async function loadNav () {
         `${ROOT_PATH}/${level ? 'admin' : 'student-dashboard'}`);
 }
 
-/**
- * Must be called first
- * @param {string} path
- */
-async function rootPath (path) {
-    ROOT_PATH = path;
-
-    // load footer and nav bar
-    $nav = document.querySelector(`nav`);
-    $footer = document.querySelector(`footer`);
-
-    $footer.innerHTML = await (await fetch(`${ROOT_PATH}/assets/html/footer.html`)).text();
-    if ($nav) {
-        await loadNav();
-    }
-
-    reloadDOM();
-}
-
 function reloadDOM () {
     loadSVGs();
 }
@@ -488,7 +488,7 @@ const navigate = async (url) => {
 }
 
 /**
- * @param {string} message - parsed as HTML
+ * @param {string} message - is parsed as HTML
  */
 function showError (message) {
     if (!$error) {
@@ -533,17 +533,27 @@ function showErrorFromCode (code) {
     }[code] || 'An Unknown Error has Occurred');
 }
 
+/**
+ * Removes all authentication cookies and redirects to the login page
+ * @returns {Promise<void>}
+ */
 async function logout () {
     if (!confirm(`Are you sure you want to sign out?`)) {
         return;
     }
 
     eraseCookie(COOKIE_KEY);
+    eraseCookie(ALT_COOKIE_KEY);
     await navigate(ROOT_PATH);
 }
 
-async function waitForReady () {
-    await new Promise(resolve => {
+/**
+ * Returns a promise which resolves once the document has been loaded
+ * AND all necessary assets have been loaded from this script
+ * @returns {Promise<void>}
+ */
+function waitForReady () {
+    return new Promise(resolve => {
         if (documentLoaded) {
             resolve();
             return;
@@ -552,13 +562,27 @@ async function waitForReady () {
     });
 }
 
-function documentIsLoaded () {
-    reloadDOM();
-    scrollToTop();
+/**
+ * Must be called first
+ * @param {string} rootPath
+ */
+async function init (rootPath) {
+    ROOT_PATH = rootPath;
 
-    for (const cb of onLoadCBs) {
-        cb();
+    // load footer and nav bar
+    $nav = document.querySelector(`nav`);
+    $footer = document.querySelector(`footer`);
+
+    $footer.innerHTML = await (await fetch(`${ROOT_PATH}/assets/html/footer.html`)).text();
+    if ($nav) {
+        await loadNav();
     }
+
+    reloadDOM();
+
+    await loadScript('/assets/js/components.js');
+
+    await waitForReady();
 }
 
 (async () => {
@@ -579,7 +603,16 @@ function documentIsLoaded () {
             });
     }
 
-    await loadScript('/assets/js/components.js');
+    function documentIsLoaded () {
+        reloadDOM();
+        scrollToTop();
+
+        documentLoaded = true;
+
+        for (const cb of onLoadCBs) {
+            cb();
+        }
+    }
 
     if (document.readyState === 'complete') {
         documentIsLoaded();

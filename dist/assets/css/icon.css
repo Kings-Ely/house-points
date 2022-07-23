@@ -50,3 +50,9 @@ svg {
     padding: 6px;
     z-index: 1000;
 }
+
+@media only screen and (max-aspect-ratio: 6/5) {
+    .label {
+        display: none !important;
+    }
+}

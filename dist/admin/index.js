@@ -1,8 +1,9 @@
 const $addHpReason = document.getElementById('add-hp-reason');
-const $addHpName = document.getElementById('add-hp-code');
 const $pendingHPs = document.getElementById('pending');
-
-let studentNames = [];
+const $numPendingHPs = document.getElementById('num-pending');
+// gets replaced with input element once loaded
+let $addHPName = document.getElementById('add-hp-name-inp');
+const $addHPSubmit = document.getElementById('add-hp-submit');
 
 function housePointHML (hp) {
     const submittedTime = hp['timestamp'] * 1000;
@@ -54,6 +55,8 @@ async function main () {
 
     const { data: pending } = await api`get/house-points/with-status/pending`;
 
+    $numPendingHPs.innerText = pending.length;
+
     // clear after async request
     $pendingHPs.innerHTML = '';
 
@@ -92,40 +95,27 @@ async function reject (id, reject) {
     await main();
 }
 
-
-$addHpName.onchange = () => {
-    let options = [];
-    for (let name of studentNames) {
-        if (name.toLowerCase().includes($addHpName.value.toLowerCase())) {
-            options.push(name);
-        }
-    }
-
-};
-
-document.getElementById('add-hp-submit').onclick = async () => {
-
+$addHPSubmit.onclick = async () => {
 
     if (!$addHpReason.value) {
         showError('Reason required');
         return;
     }
 
-    if (!code.value) {
-        showError('Code required');
+    if (!$addHPName.value) {
+        showError('Name required');
         return;
     }
 
-    const { level: valid } = await api`get/users/auth/${code.value}`;
+    const codeRes = await api`get/users/code-from-name/${$addHPName.value}`;
 
-    if (valid !== 1) {
-        showError('Invalid Name');
+    if (!codeRes.ok || !codeRes.code) {
+        showError(`Sorry, couldn't find ${$addHPName.value}`);
         return;
     }
 
-    await api`create/house-points/${code.value}&description=${$addHpReason.value}`;
+    await api`create/house-points/give/${codeRes.code}/1?description=${$addHpReason.value}`;
 
-    $addHpName.value = '';
     $addHpReason.value = '';
 
     await main();
@@ -133,15 +123,15 @@ document.getElementById('add-hp-submit').onclick = async () => {
 
 
 (async () => {
-    rootPath('..').then();
+    await init('..');
 
-    $addHpName.onkeydown = $addHpName.onchange;
-    $addHpName.onclick = $addHpName.onchange;
-    $addHpName.onpaste = $addHpName.onchange;
+    $addHPName = insertComponent($addHPName).studentNameInputWithIntellisense('200px');
 
-    const signedIn = await signedIn();
+    hideWithID('admin-link');
 
-    if (!signedIn) {
+    const isSignedIn = await signedIn();
+
+    if (!isSignedIn) {
         navigate`..?error=auth`;
         return;
     }

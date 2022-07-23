@@ -11,7 +11,7 @@ Test.test('House point CRUD', async (api) => {
         return `Expected no house points ${JSON.stringify(res)}`;
     }
 
-    res = await api(`create/house-points/give/${code}/2`);
+    res = await api(`create/house-points/give/${code}/2?description=test%20house+point+%F0%9F%98%8B`);
     if (res.ok !== true) return `create/house-points/give/${code}/2 failed: ${JSON.stringify(res)}`;
 
     res = await api('get/house-points/all');
@@ -21,6 +21,9 @@ Test.test('House point CRUD', async (api) => {
     }
     if (res.data[0]['quantity'] !== 2) {
         return `Expected quantity of 1st hp to be '2' ${JSON.stringify(res)}`;
+    }
+    if (res.data[0]['description'] !== 'test house point 😋') {
+        return `Expected description of 1st hp to be 'test house point' ${JSON.stringify(res)}`;
     }
 
     const hpId = res.data[0]['id'];

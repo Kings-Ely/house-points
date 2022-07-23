@@ -1,8 +1,9 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import type {IncomingMessage, ServerResponse} from "http";
 
-import type { queryFunc } from "./sql";
+import type {queryFunc} from "./sql";
 import Path from "./path";
-import { error, warning } from "./log";
+import {error, warning} from "./log";
+import {decodeParam} from "./util";
 
 export interface IHandlerArgs {
     url: string;
@@ -92,13 +93,13 @@ export class Route {
         for (let i = 0; i < this.path.components.length; i++) {
             // check for dynamic component of path
             if (this.path.components[i][0] === ':') {
-                params[this.path.components[i].substring(1)] = path.components[i] || '';
+                const key = this.path.components[i].substring(1);
+                params[key] = decodeParam(path.components[i] || '');
             }
         }
 
         for (let param of this.path.params) {
-            const defaultValue = this.path.paramDict[param] || '';
-            params[param] = path.paramDict[param] || defaultValue;
+            params[param] = decodeParam(path.paramDict[param] || this.path.paramDict[param] || '');
         }
 
         return params;

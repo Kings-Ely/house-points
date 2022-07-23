@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jun 19, 2022 at 12:04 PM
+-- Generation Time: Jul 23, 2022 at 09:32 PM
 -- Server version: 5.7.38
--- PHP Version: 7.4.29
+-- PHP Version: 7.4.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
@@ -34,7 +34,7 @@ CREATE TABLE `awards` (
                           `type` int(11) NOT NULL,
                           `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                           `awarded` tinyint(1) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -44,9 +44,9 @@ CREATE TABLE `awards` (
 
 CREATE TABLE `awardTypes` (
                               `id` int(11) NOT NULL,
-                              `name` varchar(16) DEFAULT NULL,
+                              `name` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                               `hpsRequired` int(8) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -56,9 +56,9 @@ CREATE TABLE `awardTypes` (
 
 CREATE TABLE `events` (
                           `id` int(11) NOT NULL,
-                          `name` varchar(16) DEFAULT NULL,
+                          `name` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                           `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -71,12 +71,12 @@ CREATE TABLE `housepoints` (
                                `student` int(11) NOT NULL,
                                `quantity` int(11) NOT NULL DEFAULT '1',
                                `event` int(11) DEFAULT NULL,
-                               `description` text NOT NULL,
+                               `description` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
                                `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
                                `completed` timestamp NULL DEFAULT NULL,
-                               `status` enum('Pending','Accepted','Rejected') NOT NULL DEFAULT 'Pending',
-                               `rejectMessage` text
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+                               `status` enum('Pending','Accepted','Rejected') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pending',
+                               `rejectMessage` mediumtext COLLATE utf8mb4_unicode_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -88,17 +88,17 @@ CREATE TABLE `users` (
                          `id` int(11) NOT NULL,
                          `admin` tinyint(1) NOT NULL DEFAULT '0',
                          `student` tinyint(1) NOT NULL DEFAULT '1',
-                         `name` text NOT NULL,
-                         `code` varchar(16) NOT NULL,
+                         `name` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
+                         `code` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL,
                          `year` int(8) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `admin`, `student`, `name`, `code`, `year`) VALUES
-    (10001, 1, 0, 'Admin', 'admin', 0);
+                                                                           (10001, 1, 0, 'Admin', 'admin', 0);
 
 --
 -- Indexes for dumped tables
@@ -164,13 +164,13 @@ ALTER TABLE `events`
 -- AUTO_INCREMENT for table `housepoints`
 --
 ALTER TABLE `housepoints`
-    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1000;
+    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1002;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10002;
+    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10004;
 
 --
 -- Constraints for dumped tables

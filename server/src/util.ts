@@ -134,3 +134,12 @@ export async function idFromCodeOrID (query: queryFunc, rawID?: string | number,
 
     return id;
 }
+
+
+/**
+ * Decode URL parameter
+ * @param {string} param
+ */
+export function decodeParam (param: string): string {
+    return decodeURIComponent(param.replace(/\+/g, ' '))
+}
