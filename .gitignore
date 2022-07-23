@@ -1,14 +1,13 @@
 .idea
 
-package-lock.json
 node_modules
 
-sshPass.txt
+package-lock.json
 
+sshPass.txt
 *.env
 
 *.txt
 *.log
-
-server/index.js
 *.js.map
+/server/index.js
