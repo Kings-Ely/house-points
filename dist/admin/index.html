@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin - Osmond House Points</title>
+    <title>Admin Dashboard</title>
     <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="robots" content="noindex">
 
     <script src="../assets/js/main.js"></script>
@@ -16,23 +16,23 @@
 <body>
 <nav></nav>
 <main>
-    <a href="students" id="students-link">
+    <a href="students" id="students-link" class="icon">
         Manage Students
+        <span svg="student.svg" style="margin-left: 20px"></span>
     </a>
 
     <section>
-        <h2>Pending House Points</h2>
+        <h2>
+            Pending House Points
+            (<span id="num-pending">0</span>)
+        </h2>
         <div id="pending"></div>
     </section>
 
     <h2>Add House Point</h2>
     <div>
         <label>
-            <input
-                type="text"
-                id="add-hp-code"
-                placeholder="Code"
-            >
+
         </label>
         <label>
             <input

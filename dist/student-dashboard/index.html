@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Osmond House Points</title>
+    <title>Dashboard</title>
     <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="robots" content="noindex">
 
     <script src="../assets/js/main.js"></script>
@@ -15,19 +15,6 @@
 <body>
 <nav></nav>
 <main>
-    <div id="top-right-menu">
-        <a
-            class="icon"
-            href="../leaderboard"
-            id="leaderboard-link"
-            aria-label="leaderboard"
-            svg="leaderboard.svg"
-            label="Leaderboard"
-        ></a>
-    </div>
-    <button onclick="signout()" id="signout">
-        Sign Out
-    </button>
     <div id="name"></div>
     <div>
         <label>
@@ -42,9 +29,12 @@
             class="icon"
             svg="plus.svg"
             aria-label="submit house point"
+            label="Request House Points"
         ></button>
     </div>
-    <div id="hps"></div>
+    <div id="hps">
+        Loading...
+    </div>
 </main>
 <footer></footer>
 </body>

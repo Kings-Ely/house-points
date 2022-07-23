@@ -3,81 +3,84 @@ let students = [];
 
 const searchFilterInput = document.getElementById('search');
 
-const $nameInp = $('#add-student-name');
-const $yearInp = $('#add-student-year');
-const $students = $(`#students`);
+const $nameInp = document.querySelector('#add-student-name');
+const $yearInp = document.querySelector('#add-student-year');
+const $students = document.querySelector(`#students`);
 
 function showStudent (student, selected) {
+
+    const { code, name, year, student: isStudent, admin: isAdmin } = student;
+
     return `
         <div class="student">
             <div>
                 <button 
-                    onclick="select(${student['id']}, ${!selected})"
+                    onclick="select('${code}', ${!selected})"
                     class="icon no-scale"
                     svg="${selected ? 'selected-checkbox' : 'unselected-checkbox'}.svg"
                     aria-label="${selected ? 'Unselect' : 'Select'}"
                 ></button>
-                ${student['admin'] ? `
+                ${isAdmin ? `
                     <button 
-                        class="icon ${student['student'] ? 'icon-accent' : ''}" 
-                        onclick="revokeAdmin(${student['id']}, '${student['name']}')"
-                        label="${student['student'] ? '' : '(Non-Student)'} Admin"
+                        class="icon ${isStudent ? 'icon-accent' : ''}" 
+                        onclick="revokeAdmin('${code}', '${name}')"
+                        label="${isStudent ? '' : '(Non-Student)'} Admin"
                         svg="star-filled.svg"
                         aria-label="Revoke Admin"
                     >
                     </button>
                 ` : `
                     <button
-                        class="icon ${student['student'] ? 'icon-accent' : ''}" 
-                        onclick="makeAdmin(${student['id']}, '${student['name']}')"
-                        aria-label="Make ${student['name']} an admin"
+                        class="icon ${isStudent ? 'icon-accent' : ''}" 
+                        onclick="makeAdmin('${code}', '${name}')"
+                        aria-label="Make ${name} an admin"
                         label="Make Admin"
                         svg="star-empty.svg"
                     ></button>                
                 `}
             </div>
             <div>
-                ${student['year'] || ''}
+                ${year || ''}
             </div>
             
             <div style="min-width: 150px">
-                ${student['code'] === getCode() ? `
+                ${code === getCode() ? `
                     <span 
                         class="student-link"
                         label="Me"
                     >
-                        <b>${student['name']}</b>
+                        <b>${name}</b>
                     </span>
                 ` : `
                     <button 
-                        onclick="signInAs('${student['code']}', '${student['name']}')" 
+                        onclick="signInAs('${code}', '${name}')" 
                         class="student-link"
-                        label="Sign in as ${student['name']}"
-                        aria-label="Sign in as ${student['name']}"
+                        label="Sign in as ${name}"
+                        aria-label="Sign in as ${name}"
                     >
-                        ${student['name']}
+                        ${name}
                     </button>
                 `}
             </div>
            
             <div>
-                ${student['student'] ? student['accepted'] : ''}
+                ${isStudent ? student['accepted'] : ''}
             </div>
             
             <div>
                 <button 
-                    onclick="copyToClipboard('${student['code']}'.toUpperCase())"
+                    onclick="copyToClipboard('${code}'.toUpperCase())"
                     class="icon"
                     svg="key.svg"
-                    label="Copy ${student['name']}'s Code"
-                    aria-label="Copy ${student['name']}'s Code"
+                    label="Copy ${name}'s Code"
+                    aria-label="Copy ${name}'s Code"
                 ></button>
                 <button
-                    onclick="deleteUser(${student['id']}, '${student['name']}')"
+                    onclick="deleteUser('${code}', '${name}')"
                     class="icon"
                     svg="bin.svg"
-                    label="Delete ${student['name']}"
-                    aria-label="Delete ${student['name']}"
+                    label="Delete ${name}"
+                    aria-label="Delete ${name}"
                 ></button>
             </div>
         </div>
@@ -85,7 +88,12 @@ function showStudent (student, selected) {
 }
 
 async function main (reload=true) {
-    $students.html(`
+
+    if (reload) {
+        students = (await api`get/users/all`)['data'];
+    }
+
+    $students.innerHTML = `
         <div class="student">
             <div style="width: 50px"></div>
             
@@ -97,11 +105,7 @@ async function main (reload=true) {
             
             <div style="width: 100px"></div>
         </div>
-    `);
-
-    if (reload) {
-        students = (await api`get/users/all`)['data'];
-    }
+    `;
 
     const searchValue = searchFilterInput.value;
 
@@ -111,23 +115,23 @@ async function main (reload=true) {
         if (searchValue && !student['name'].toLowerCase().includes(searchValue.toLowerCase())) {
             continue;
         }
-        html += showStudent(student, selected.indexOf(student['id']) !== -1);
+        html += showStudent(student, selected.indexOf(student['code']) !== -1);
     }
 
-    $students.html(html);
+    $students.innerHTML += html;
 
     await reloadDOM();
 }
 
-$(`#add-student-submit`).click(async () => {
+document.getElementById(`add-student-submit`).onclick = async () => {
 
 
-    if (!$nameInp.val()) {
+    if (!$nameInp.value) {
         showError('Name Required');
         return;
     }
 
-    let studentYear = parseInt($yearInp.val() || '0');
+    let studentYear = parseInt($yearInp.value || '0');
 
     if ((studentYear > 13 || studentYear < 9) && studentYear !== 0) {
         showError('Year must be between 9 and 13 or blank for non-students');
@@ -141,12 +145,12 @@ $(`#add-student-submit`).click(async () => {
         }
     }
 
-    await api`create/users/${$nameInp.value}?year=${$yearInp.val()}`;
+    await api`create/users/${$nameInp.value}?year=${$yearInp.value}`;
 
-    $nameInp.val('');
+    $nameInp.value = '';
 
-    main();
-});
+    await main();
+};
 
 async function deleteUser (code, name) {
     if (!confirm(`Are you sure you want to delete ${name} (Code '${code}') and all their house points?`)) {
@@ -176,6 +180,7 @@ async function signInAs (code, name) {
     if (!confirm(`Sign in as ${name}?`)) {
         return;
     }
+    setAltCodeCookie(getCode());
     setCodeCookie(code);
     await navigate`../../student-dashboard`;
 }
@@ -240,7 +245,7 @@ async function revokeAdmin (code, name) {
         return;
     }
 
-    await api`../../api/change-admin.php?id=${code}&admin=0`;
+    await api`update/users/admin/${code}?admin=0`;
 
     await main();
 }
@@ -250,7 +255,7 @@ async function makeAdmin (code, name) {
         return;
     }
 
-    await api`update/users/admin/${code}&admin=1`;
+    await api`update/users/admin/${code}?admin=1`;
 
     await main();
 }

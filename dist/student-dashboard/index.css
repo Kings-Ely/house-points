@@ -23,17 +23,6 @@
     margin-top: 8vh;
 }
 
-#signout {
-    font-size: 16px;
-    text-underline: #575757;
-    transition: 250ms;
-    cursor: pointer;
-}
-
-#signout:hover {
-    color: var(--text-warning);
-}
-
 #leaderboard-link:hover .label {
     transform: scale(1) translate(-90%, 50px);
 }
@@ -44,10 +33,6 @@
     outline: none;
     transition: 0ms;
     padding: 4px;
-}
-
-main {
-    display: block;
 }
 
 #top-right-menu {

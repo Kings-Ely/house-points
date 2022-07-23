@@ -1,14 +1,32 @@
 <div id="nav-left">
-<a
-    id="home-link"
-    aria-label="home"
-
-></a>
+    <button
+        id="sign-out"
+        aria-label="logout"
+        svg="logout.svg"
+        onclick="logout()"
+        class="icon"
+    ></button>
+    <a
+        id="home-link"
+        aria-label="home"
+        svg="home.svg"
+        href="/student-dashboard"
+        class="icon"
+    ></a>
 </div>
 <div id="nav-center">
 
 </div>
 <div id="nav-right">
+    <a
+        id="admin-link"
+        aria-label="admin dashboard"
+        aria-hidden="true"
+        svg="admin.svg"
+        href="/admin"
+        style="display: none"
+        class="icon"
+    ></a>
     <a
         id="leaderboard-link"
         aria-label="leaderboard"

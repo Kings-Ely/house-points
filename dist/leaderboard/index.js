@@ -5,16 +5,16 @@ const leaderboardDiv = document.getElementById('leaderboard');
 const podium1stDiv = document.getElementById('podium-1st');
 const podium2ndDiv = document.getElementById('podium-2nd');
 const podium3rdDiv = document.getElementById('podium-3rd');
-
 const whichYears = document.getElementById('show-year');
+
+// show all by default
+let showYears = [9, 10, 11, 12, 13];
+let leaderboardData;
 
 whichYears.onchange = async () => {
     showYears = whichYears.value.split(',').map(parseInt);
     await main(false);
 };
-
-// show all by default
-let showYears = [9, 10, 11, 12, 13];
 
 function showStudent (student) {
     return `
@@ -99,30 +99,32 @@ function leaderboard (hps) {
         leaderboardDiv.innerHTML += showStudent(hps[i]);
     }
 }
-
-let data;
 async function main (reload=true) {
     if (reload) {
-        data = (await api`get/users/leaderboard`)['data'];
+        leaderboardData = (await api`get/users/leaderboard`)['data'];
     }
-    leaderboard(data);
+    leaderboard(leaderboardData);
 }
 
 (async () => {
     rootPath('..')
         .then(() => {
+            // hide leaderboard link as that is this page
             document.getElementById('leaderboard-link').style.display = 'none';
         });
 
-    api`get/users/auth/${getCode()}`
-        .then(async ({ level }) => {
-            if (level > 0) {
-                const { year } = await api`get/users/info/${getCode()}`;
-                showYears = [year];
-                whichYears.value = year.toString();
-                await main(false);
-            }
-        });
+    if (!await signedIn()) {
+        await navigate(ROOT_PATH);
+        return;
+    }
+
+    const { admin, year } = await userInfo();
+
+    if (admin) {
+        showYears = [year];
+        whichYears.value = year.toString();
+        await main(false);
+    }
 
     await main();
 })();

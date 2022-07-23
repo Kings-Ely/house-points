@@ -109,20 +109,10 @@ async function deleteHousePoint (id, desc) {
     await main();
 }
 
-function signout () {
-    if (!confirm(`Are you sure you want to sign out?`)) {
-        return;
-    }
-
-    setCodeCookie('');
-    navigate`../`;
-}
-
 async function main () {
-    const user = api`get/users/info/${getCode()}`;
-    const hps = api`get/house-points/earned-by/${getCode()}`;
+    const hps = (await api`get/house-points/earned-by/${getCode()}`)['data'];
 
-    title(user, hps);
+    title(await userInfo(), hps);
     housePoints(hps);
 
     await reloadDOM();
@@ -131,22 +121,10 @@ async function main () {
 (async () => {
     rootPath('..');
 
-    const { level } = await api`get/users/auth/${getCode()}`;
-
-    if (level === '2') {
-        document.getElementById('top-right-menu').innerHTML += `
-            <a 
-                class="icon"
-                href="../admin-dashboard"
-                label="Admin"
-                svg="admin.svg"
-            ></a>
-        `;
-
-    } else if (level !== '1') {
+    if (!await signedIn()) {
         navigate`..?error=auth`;
-        return;
     }
 
     await main();
+    scrollToTop();
 })();

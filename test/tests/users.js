@@ -35,9 +35,9 @@ Test.test('user-auth', async (api) => {
     }
 
     // make our user an admin
-    const updateAdminRes = await api(`update/users/admin?code=${code}&admin=1`);
+    const updateAdminRes = await api(`update/users/admin/${code}?admin=1`);
     if (updateAdminRes.ok !== true) {
-        return `Expected 'ok' from update/users, got '${JSON.stringify(updateAdminRes)}'`;
+        return `Expected 'ok' from update/users/admin, got '${JSON.stringify(updateAdminRes)}'`;
     }
 
     // check new auth level

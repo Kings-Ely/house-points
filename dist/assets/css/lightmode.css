@@ -1,0 +1,13 @@
+:root {
+    --nav-height: 50px;
+
+    --text: #1c1c1c;
+    --nav-colour: #d5d5d5;
+    --text-light: #575757;
+    --bg: #eeeeee;
+    --bg-accent: white;
+    --accent: #108c10;
+    --text-warning: red;
+    --border: #c5c5c5;
+    --border-light: #e8e8e8;
+}

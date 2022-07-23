@@ -18,7 +18,7 @@ go.onclick = async () => {
 
 	} else if (level === 2) {
 		setCodeCookie(myCode);
-		navigate`./admin-dashboard`;
+		navigate`./admin`;
 		return;
 	}
 	showError`Looks like that is an invalid code, sorry!`;
@@ -54,5 +54,14 @@ async function paste () {
 
 	if (GETParam('error')) {
 		showErrorFromCode(GETParam('error'));
+		await sleep(3000);
+	}
+
+	if (await signedIn()) {
+		if ((await userInfo())['admin']) {
+			navigate`./admin`;
+		} else {
+			navigate`./student-dashboard`;
+		}
 	}
 })();

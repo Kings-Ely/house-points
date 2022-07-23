@@ -14,7 +14,7 @@ Test.test('frontend performance with Google LightHouse', async (_, { doLighthous
         return `SITE_URL is not specified in .env file, required for lighthouse tests`;
     }
 
-    const paths = ['', 'admin-dashboard', 'admin-dashboard/students', 'leaderboard', 'student-dashboard'];
+    const paths = ['', 'admin', 'admin/students', 'leaderboard', 'student-dashboard'];
 
     let fails = [];
 

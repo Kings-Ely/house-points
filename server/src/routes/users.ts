@@ -130,12 +130,12 @@ route('create/users/:name?year=9', async ({ query, params, cookies }) => {
 });
 
 
-route('update/users/admin?id&code&admin', async ({ query, params, cookies }) => {
+route('update/users/admin/:code?admin', async ({ query, params, cookies }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    const { id: userID, code, admin } = params;
+    const { code, admin } = params;
 
-    let id = await idFromCodeOrID(query, userID, code);
+    let id = await idFromCodeOrID(query, '', code);
     if (typeof id === 'string') return id;
 
     const myCode = cookies[COOKIE_CODE_KEY];

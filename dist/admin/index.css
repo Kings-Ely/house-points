@@ -11,10 +11,10 @@
 }
 
 #add-hp-code {
-    width: 100px;
+    width: 200px;
 }
 #add-hp-reason {
-    width: calc(100% - 200px);
+    width: calc(100% - 300px);
 }
 
 #add-hp-error, #add-student-error {
@@ -25,10 +25,20 @@
 #students-link {
     margin: 20px;
     font-size: 20px;
+    text-decoration: none;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    height: fit-content;
+    width: fit-content;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #students-link:hover {
     color: var(--text-light);
+    background: var(--bg-accent);
 }
 
 #leaderboard-link:hover .label {

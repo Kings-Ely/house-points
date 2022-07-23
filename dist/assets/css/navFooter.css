@@ -1,0 +1,28 @@
+footer {
+    height: 200px;
+    background: var(--bg-accent);
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    background: var(--nav-colour);
+    height: var(--nav-height);
+    width: 100%;
+}
+
+#nav-left, #nav-right {
+    min-width: 50px;
+    width: fit-content;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

@@ -1,0 +1,52 @@
+svg {
+    fill: var(--text-light);
+}
+
+.icon {
+    background: none;
+    border: none;
+    text-decoration: none;
+}
+
+.icon svg, .icon img {
+    height: 50px;
+    width: 50px;
+    border: none;
+}
+
+.icon:hover svg {
+    cursor: pointer;
+    transform: scale(1.1);
+}
+
+.icon-info-only:hover svg {
+    cursor: auto;
+    transform: scale(1);
+}
+
+.icon.no-scale:hover svg {
+    cursor: pointer;
+    fill: var(--text);
+    transform: scale(1);
+}
+
+.icon-accent svg {
+    fill: var(--accent);
+}
+
+/* labels are not only for icons but normally are */
+.label {
+    transform: scale(0) translate(-70%, 50px);
+    position: absolute;
+    display: inline-block;
+    transition: 0ms !important;
+    font-size: 15px;
+}
+
+:hover > .label {
+    transform: scale(1) translate(-70%, 50px);
+    background: var(--bg-accent);
+    border-radius: 5px;
+    padding: 6px;
+    z-index: 1000;
+}

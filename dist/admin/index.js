@@ -1,5 +1,8 @@
-const $reason = document.getElementById('add-hp-reason');
-const error = document.getElementById('add-hp-error');
+const $addHpReason = document.getElementById('add-hp-reason');
+const $addHpName = document.getElementById('add-hp-code');
+const $pendingHPs = document.getElementById('pending');
+
+let studentNames = [];
 
 function housePointHML (hp) {
     const submittedTime = hp['timestamp'] * 1000;
@@ -49,19 +52,17 @@ async function main () {
             }
         });
 
-    const div = document.getElementById('pending');
-
     const { data: pending } = await api`get/house-points/with-status/pending`;
 
     // clear after async request
-    div.innerHTML = '';
+    $pendingHPs.innerHTML = '';
 
     let i = 0;
     for (let hp of pending) {
-        div.innerHTML += housePointHML(hp);
+        $pendingHPs.innerHTML += housePointHML(hp);
 
         if (i === 4) {
-            div.innerHTML += `
+            $pendingHPs.innerHTML += `
                 <div style="text-align: center; padding: 20px">
                     And ${pending.length-5} more...
                 </div>
@@ -72,7 +73,7 @@ async function main () {
     }
 
     if (i === 0) {
-        div.innerHTML = `
+        $pendingHPs.innerHTML = `
             <p style="text-align: center">
                 No Pending House Points!
             </p>
@@ -91,55 +92,63 @@ async function reject (id, reject) {
     await main();
 }
 
-const code = document.getElementById('add-hp-code');
 
-code.onchange = () => {
-    code.value = cleanCode(code.value);
-    setTimeout(() => {
-        code.value = cleanCode(code.value);
-    }, 0);
+$addHpName.onchange = () => {
+    let options = [];
+    for (let name of studentNames) {
+        if (name.toLowerCase().includes($addHpName.value.toLowerCase())) {
+            options.push(name);
+        }
+    }
+
 };
 
 document.getElementById('add-hp-submit').onclick = async () => {
 
-    error.innerHTML = '';
 
-    if (!$reason.value) {
-        error.innerHTML = 'Reason required';
+    if (!$addHpReason.value) {
+        showError('Reason required');
         return;
     }
 
     if (!code.value) {
-        error.innerHTML = 'Code required';
+        showError('Code required');
         return;
     }
 
     const { level: valid } = await api`get/users/auth/${code.value}`;
 
-    if (valid !== '1') {
-        error.innerHTML = 'Invalid Code';
+    if (valid !== 1) {
+        showError('Invalid Name');
         return;
     }
 
-    await api`create/house-points/${code.value}&description=${$reason.value}`;
+    await api`create/house-points/${code.value}&description=${$addHpReason.value}`;
 
-    code.value = '';
-    $reason.value = '';
+    $addHpName.value = '';
+    $addHpReason.value = '';
 
-    main();
+    await main();
 };
 
 
 (async () => {
-    rootPath('..');
+    rootPath('..').then();
 
-    code.onkeydown = code.onchange;
-    code.onclick = code.onchange;
-    code.onpaste = code.onchange;
+    $addHpName.onkeydown = $addHpName.onchange;
+    $addHpName.onclick = $addHpName.onchange;
+    $addHpName.onpaste = $addHpName.onchange;
 
-    const { level } = await api`get/users/auth/${getCode()}`;
+    const signedIn = await signedIn();
 
-    if (level !== 2) {
+    if (!signedIn) {
+        navigate`..?error=auth`;
+        return;
+    }
+
+    const { admin } = await userInfo();
+
+    if (!admin) {
         navigate`..?error=auth`;
         return;
     }

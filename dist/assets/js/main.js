@@ -1,18 +1,30 @@
 // Utility script imported by all pages
 
-const API_PORT = 4464;
-const API_ROOT = location.origin + ':' + API_PORT;
-const COOKIE_KEY = 'hpCode';
 
-function getCode () {
-    return getCookie(COOKIE_KEY);
-}
+// Global constants and variables
+const API_PORT = 4464,
+      API_ROOT = location.origin + ':' + API_PORT,
+      COOKIE_KEY = 'hpCode',
+      ALT_COOKIE_KEY = 'hpAltCode',
+      HOUSE_NAME = 'Osmond',
+      ALPHABET_UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+      ALPHABET_NUMBERS = '0123456789',
+      ALPHABET_LOWER = 'abcdefghijklmnopqrstuvwxyz';
 
-function setCodeCookie (code) {
-    setCookie(COOKIE_KEY, code);
-}
+let ROOT_PATH = '',
+    $nav, $footer, $error,
+    currentErrorMessageID = 0,
+    currentlyShowingErrorMessageIDs = [],
+    currentlyShowingLoadingAnim = false,
+    userInfoCallbacks = [],
+    userInfoJSON = null,
+    altUserInfoJSON = null,
+    isSignedIn = false,
+    userInfoIsLoaded = false,
+    onLoadCBs = [],
+    documentLoaded = false;
 
-const units = {
+const timeUnits = {
     year  : 24 * 60 * 60 * 1000 * 365,
     month : 24 * 60 * 60 * 1000 * 365/12,
     day   : 24 * 60 * 60 * 1000,
@@ -21,12 +33,60 @@ const units = {
     second: 1000
 };
 
-const rtf = new Intl.RelativeTimeFormat('en', {
+const relativeTimeFormat = new Intl.RelativeTimeFormat('en', {
     numeric: 'auto'
 });
 
+async function sleep (ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// user auth code utilities
+function getCode () {
+    return getCookie(COOKIE_KEY);
+}
+
+function setCodeCookie (code) {
+    setCookie(COOKIE_KEY, code);
+}
+
+function getAltCode () {
+    return getCookie(ALT_COOKIE_KEY);
+}
+
+function setAltCodeCookie (code) {
+    setCookie(ALT_COOKIE_KEY, code);
+}
+
+
+
 /**
- *
+ * @returns {Promise<unknown>}
+ */
+async function userInfo () {
+    if (userInfoIsLoaded) {
+        return userInfoJSON;
+    }
+    return new Promise(resolve => {
+        userInfoCallbacks.push(resolve);
+    });
+}
+
+/**
+ * @returns {Promise<unknown>}
+ */
+async function signedIn () {
+    if (userInfoIsLoaded) {
+        return isSignedIn;
+    }
+    return new Promise(resolve => {
+        userInfoCallbacks.push(() => {
+            resolve(isSignedIn);
+        });
+    });
+}
+
+/**
  * @param {number} d1
  * @param {number} [d2=new Date()]
  * @returns {string}
@@ -36,12 +96,41 @@ function getRelativeTime (d1, d2) {
     const elapsed = d1 - d2;
 
     // "Math.abs" accounts for both "past" & "future" scenarios
-    for (const u in units) {
-        if (Math.abs(elapsed) > units[u] || u === 'second') {
-            return rtf.format(Math.round(elapsed/units[u]), u);
+    for (const u in timeUnits) {
+        if (Math.abs(elapsed) > timeUnits[u] || u === 'second') {
+            return relativeTimeFormat.format(Math.round(elapsed/timeUnits[u]), u);
         }
     }
 }
+
+/**
+ * Loads a JS script from an url.
+ * If the url starts with '/', imports relative to ROOT_PATH.
+ * Resolves the promise once the script has been loaded.
+ * @param {string} url
+ * @returns {Promise<unknown>}
+ */
+async function loadScript (url) {
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+
+    if (url[0] === '/') {
+        url = ROOT_PATH + url;
+    }
+    script.src = url;
+
+    return await new Promise(resolve => {
+        // Then bind the event to the callback function.
+        // There are several events for cross browser compatibility.
+        script.onreadystatechange = resolve;
+        script.onload = resolve;
+
+        // Fire the loading
+        document.head.appendChild(script);
+    });
+}
+
+// Cookie Utilities
 
 // src: https://stackoverflow.com/questions/14573223/set-cookie-and-get-cookie-with-javascript
 /**
@@ -84,7 +173,6 @@ function getCookie (name) {
 function eraseCookie (name) {
     document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
-
 
 /**
  * Gets a GET parameter from the URL of the page
@@ -170,7 +258,6 @@ function loadLabel (self) {
 }
 
 // Spinner
-let showingLoading = false;
 
 function showSpinner () {
     document.body.style.cursor = 'progress';
@@ -182,9 +269,41 @@ function showSpinner () {
 }
 
 function stopSpinner (loader) {
-    showingLoading = false;
+    currentlyShowingLoadingAnim = false;
     document.body.removeChild(loader);
     document.body.style.cursor = 'default';
+}
+
+
+/**
+ * Connect to the API without all the checks and spinners and stuff
+ * @param path
+ * @returns {Promise<{}>}
+ */
+async function rawAPI (path) {
+    if (path[0] === '/') {
+        path = path.substring(1);
+    }
+
+    // fetch
+    const res = await fetch(`${API_ROOT}/${path}`, {
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-cache',
+        redirect: 'follow',
+        credentials: 'include'
+    });
+
+    let asJSON;
+    try {
+        asJSON = await res.json();
+    } catch (e) {
+        asJSON = {
+            error: 'Failed to parse response as JSON'
+        };
+    }
+
+    return asJSON;
 }
 
 /**
@@ -210,9 +329,9 @@ async function api (path, ...args) {
 
     let shouldHideAtEnd = false;
     let loader;
-    if (!showingLoading) {
+    if (!currentlyShowingLoadingAnim) {
         // pre-fetch
-        showingLoading = true;
+        currentlyShowingLoadingAnim = true;
         shouldHideAtEnd = true;
 
         loader = showSpinner();
@@ -275,12 +394,12 @@ function asyncCSS (self) {
     self.rel = 'stylesheet';
 }
 
-async function loadSVGs () {
+function loadSVGs () {
     const allInBody = document.querySelectorAll('*');
     for (const element of allInBody) {
         if (element.attributes['svg']) {
             // don't await, because we don't want to block the page load
-            loadSVG(element);
+            loadSVG(element).then();
         }
 
         if (element.attributes['label']) {
@@ -289,14 +408,25 @@ async function loadSVGs () {
     }
 }
 
-
-let ROOT_PATH = '';
-
-let $nav;
-let $footer;
-
 async function loadNav () {
     $nav.innerHTML = await (await fetch(`${ROOT_PATH}/assets/html/nav.html`)).text();
+
+    if (getAltCode()) {
+        rawAPI(`get/users/info/${getAltCode()}`)
+            .then(info => {
+                if (!info['ok']) return;
+                if (!info['admin']) return;
+                altUserInfoJSON = info;
+
+                const $adminLink = document.getElementById('admin-link');
+                $adminLink.style.display = 'block';
+                $adminLink.setAttribute('aria-hidden', 'false');
+                $adminLink.onclick = () => {
+                    setCodeCookie(getAltCode());
+                    navigate(`${ROOT_PATH}/admin`);
+                };
+            });
+    }
 
     // replace links in nav relative to this page
     document.querySelectorAll('nav a').forEach(a => {
@@ -309,14 +439,14 @@ async function loadNav () {
     // show page title
     document.querySelector('#nav-center').innerHTML = `
         <div>
-            ${document.title}
+            ${HOUSE_NAME} House Points - ${document.title}
         </div>
     `;
 
     // make home link point to right place
     const { level } = await api`get/users/auth/${getCode()}`
     document.querySelector('#home-link').setAttribute('url',
-        `${ROOT_PATH}/${level ? 'admin-dashboard' : 'student-dashboard'}`);
+        `${ROOT_PATH}/${level ? 'admin' : 'student-dashboard'}`);
 }
 
 /**
@@ -335,20 +465,15 @@ async function rootPath (path) {
         await loadNav();
     }
 
-    await reloadDOM();
+    reloadDOM();
 }
 
-async function reloadDOM () {
-    await loadSVGs();
+function reloadDOM () {
+    loadSVGs();
 }
 
 function scrollToTop () {
     document.body.scrollTop = document.documentElement.scrollTop = 0;
-}
-
-window.onload = async () => {
-    scrollToTop();
-    await reloadDOM();
 }
 
 /**
@@ -357,31 +482,25 @@ window.onload = async () => {
  * @returns {Promise<never>}
  */
 const navigate = async (url) => {
-    // check url against current url
-    if (!['', './', '.', location.pathname, location.href].includes(url)) {
-        window.location.assign(url);
-    }
+    window.location.assign(url);
+    // never resolve promise as just wait for the page to load
     await new Promise(() => {});
 }
 
-
-let errorDiv;
-let errId = 0;
-let showingErrors = [];
 /**
  * @param {string} message - parsed as HTML
  */
 function showError (message) {
-    if (!errorDiv) {
-        errorDiv = document.createElement('div');
-        errorDiv.id = 'error-container';
-        document.body.appendChild(errorDiv);
+    if (!$error) {
+        $error = document.createElement('div');
+        $error.id = 'error-container';
+        document.body.appendChild($error);
     }
 
-    let myErrId = errId++;
+    let myErrId = currentErrorMessageID++;
 
-    while (showingErrors.length > 4) {
-        let id = showingErrors.shift();
+    while (currentlyShowingErrorMessageIDs.length > 4) {
+        let id = currentlyShowingErrorMessageIDs.shift();
         document.getElementById(`error-${id}`).remove();
     }
 
@@ -392,12 +511,12 @@ function showError (message) {
     `;
     errorMessage.classList.add('error');
     errorMessage.id = `error-${myErrId}`;
-    errorDiv.appendChild(errorMessage);
-    showingErrors.push(myErrId);
+    $error.appendChild(errorMessage);
+    currentlyShowingErrorMessageIDs.push(myErrId);
 
     setTimeout(() => {
         errorMessage.remove();
-        showingErrors = showingErrors.filter(id => id !== myErrId);
+        currentlyShowingErrorMessageIDs = currentlyShowingErrorMessageIDs.filter(id => id !== myErrId);
     }, 5000);
 }
 
@@ -414,7 +533,7 @@ function showErrorFromCode (code) {
     }[code] || 'An Unknown Error has Occurred');
 }
 
-async function signout () {
+async function logout () {
     if (!confirm(`Are you sure you want to sign out?`)) {
         return;
     }
@@ -422,3 +541,49 @@ async function signout () {
     eraseCookie(COOKIE_KEY);
     await navigate(ROOT_PATH);
 }
+
+async function waitForReady () {
+    await new Promise(resolve => {
+        if (documentLoaded) {
+            resolve();
+            return;
+        }
+        onLoadCBs.push(resolve);
+    });
+}
+
+function documentIsLoaded () {
+    reloadDOM();
+    scrollToTop();
+
+    for (const cb of onLoadCBs) {
+        cb();
+    }
+}
+
+(async () => {
+    if (getCode()) {
+        rawAPI(`get/users/info/${getCode()}`)
+            .then(info => {
+                isSignedIn = info.ok;
+
+                if (!info.ok) {
+                    info = null;
+                }
+                userInfoJSON = info;
+                userInfoIsLoaded = true;
+
+                for (const cb of userInfoCallbacks) {
+                    cb(info);
+                }
+            });
+    }
+
+    await loadScript('/assets/js/components.js');
+
+    if (document.readyState === 'complete') {
+        documentIsLoaded();
+    } else {
+        window.onload = documentIsLoaded;
+    }
+})();
