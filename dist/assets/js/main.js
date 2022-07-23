@@ -430,24 +430,34 @@ function loadSVGs () {
 async function loadNav () {
     $nav.innerHTML = await (await fetch(`${ROOT_PATH}/assets/html/nav.html`)).text();
 
+    const $adminLink = document.getElementById('admin-link');
+
+    // make home link point to right place
+    if (!(await userInfo())['student']) {
+        hideWithID('home-link');
+    }
+
     if (getAltCode()) {
         rawAPI(`get/users/info/${getAltCode()}`)
-            .then(info => {
+            .then(async info => {
                 if (!info['ok']) return;
                 if (!info['admin']) return;
+
+                // if we are already an admin with the main code, just delete the alt code
+                if (!(await userInfo())['admin']) {
+                    eraseCookie(ALT_COOKIE_KEY);
+                    return;
+                }
+
                 altUserInfoJSON = info;
 
-                const $adminLink = document.getElementById('admin-link');
+
                 $adminLink.style.display = 'block';
                 $adminLink.setAttribute('aria-hidden', 'false');
                 $adminLink.onclick = () => {
                     setCodeCookie(getAltCode());
                     navigate(`${ROOT_PATH}/admin`);
                 };
-
-                if (!info['student']) {
-                    hideWithID('home-link')
-                }
             });
     }
 
@@ -457,19 +467,12 @@ async function loadNav () {
             `${ROOT_PATH}${a.getAttribute('href')}`);
     });
 
-    // TODO: show sign out button
-
     // show page title
     document.querySelector('#nav-center').innerHTML = `
         <div>
             ${HOUSE_NAME} House Points - ${document.title}
         </div>
     `;
-
-    // make home link point to right place
-    const { level } = await api`get/users/auth/${getCode()}`
-    document.querySelector('#home-link').setAttribute('url',
-        `${ROOT_PATH}/${level ? 'admin' : 'student-dashboard'}`);
 }
 
 function reloadDOM () {

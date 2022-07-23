@@ -50,20 +50,6 @@ async function reject (id, reject) {
 }
 
 async function main () {
-    api`get/users/info/${getCode()}`
-        .then(async data => {
-            if (data['student']) {
-                document.getElementById('top-right-menu').innerHTML += `
-                    <a 
-                        class="icon"
-                        href="../student-dashboard"
-                        label="Student Dashboard"
-                        svg="home.svg"
-                    ></a>
-                `;
-            }
-        });
-
     const { data: pending } = await api`get/house-points/with-status/pending`;
 
     $numPendingHPs.innerText = pending.length;

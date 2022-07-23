@@ -124,7 +124,7 @@ document.getElementById('submit-hp').onclick = async () => {
         navigate`..?error=auth`;
     }
 
-    if ((await userInfo())['admin']) {
+    if (!(await userInfo())['student']) {
         navigate`../admin`;
     }
 
