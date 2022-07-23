@@ -197,7 +197,7 @@ async function makeAdmin (code, name) {
 
 async function main (reload=true) {
 
-    if (reload) {
+    if (reload || !students) {
         students = (await api`get/users/all`)['data'];
     }
 

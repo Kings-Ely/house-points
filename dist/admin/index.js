@@ -38,6 +38,17 @@ function housePointHML (hp) {
     `;
 }
 
+async function accept (id) {
+    await api`change/house-points/accepted/${id}?`;
+    await main();
+}
+
+async function reject (id, reject) {
+    if (!reject) return;
+    await api`change/house-points/accepted/${id}?reject=${reject}`;
+    await main();
+}
+
 async function main () {
     api`get/users/info/${getCode()}`
         .then(async data => {
@@ -82,17 +93,6 @@ async function main () {
             </p>
         `;
     }
-}
-
-async function accept (id) {
-    await api`change/house-points/accepted/${id}?`;
-    await main();
-}
-
-async function reject (id, reject) {
-    if (!reject) return;
-    await api`change/house-points/accepted/${id}?reject=${reject}`;
-    await main();
 }
 
 $addHPSubmit.onclick = async () => {
