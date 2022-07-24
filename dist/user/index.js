@@ -21,19 +21,23 @@ function housePoints (hps) {
 }
 
 function title (info, hps) {
-    const numHps = hps.filter(c => c['accepted'] && !c['rejectMessage']).length;
 
-    if (numHps < 1) {
-        $name.innerHTML = `
-            <p style="font-size: 50px">
-                ${info['name']} has No House Points
-            </p>
-        `;
+    const name = info['name'] + (info['admin'] ? ' (Admin)' : '');
+
+    if (info['student']) {
+        const numHps = hps.filter(c => c['status'] === 'Accepted').length;
+        if (numHps < 1) {
+            $name.innerHTML = `
+                ${name} has No House Points
+            `;
+        } else {
+            $name.innerHTML = `    
+                ${name} has ${numHps} House Point${numHps < 2 ? '' :'s'}
+            `;
+        }
     } else {
         $name.innerHTML = `
-            <p style="font-size: 50px">
-                ${info['name']} has ${numHps} House Point${numHps < 2 ? '' :'s'}
-            </p>
+            ${name}
         `;
     }
 }
@@ -93,16 +97,17 @@ async function deleteHousePoint (id, desc) {
         return;
     }
     await api`delete/house-points/with-id/${id}`;
-    await main();
+    await reloadHousePoints();
 }
 
-async function main () {
+async function reloadHousePoints () {
     const hps = (await api`get/house-points/earned-by/${getCode()}`)['data'];
 
-    title(await userInfo(), hps);
     housePoints(hps);
 
-    await reloadDOM();
+    title(await userInfo(), hps);
+
+    reloadDOM();
 }
 
 document.getElementById('submit-hp').onclick = async () => {
@@ -118,16 +123,17 @@ document.getElementById('submit-hp').onclick = async () => {
 
 (async () => {
     await init('..');
-    hideWithID('home-link');
 
     if (!await signedIn()) {
-        navigate`..?error=auth`;
+        await navigate(`/?error=auth`);
     }
 
-    if (!(await userInfo())['student']) {
-        navigate`../admin`;
+    if ((await userInfo())['student']) {
+        await reloadHousePoints();
+    } else {
+        title(await userInfo(), []);
+        hideWithID('hps');
+        hideWithID('submit-hp-request');
     }
 
-    await main();
-    scrollToTop();
 })();

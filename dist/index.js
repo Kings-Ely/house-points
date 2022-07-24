@@ -17,13 +17,11 @@ $go.onclick = async () => {
 
 	if (level === 1) {
 		setCodeCookie(myCode);
-		navigate`./student-dashboard`;
-		return;
+		await navigate(`./user`);
 
 	} else if (level === 2) {
 		setCodeCookie(myCode);
-		navigate`./admin`;
-		return;
+		await navigate(`./admin`);
 	}
 	showError`Looks like that is an invalid code, sorry!`;
 };
@@ -59,9 +57,9 @@ $code.onchange = (evt) => {
 
 	if (await signedIn()) {
 		if ((await userInfo())['admin']) {
-			navigate`./admin`;
+			await navigate(`/admin`);
 		} else {
-			navigate`./student-dashboard`;
+			await navigate(`/user`);
 		}
 	}
 })();

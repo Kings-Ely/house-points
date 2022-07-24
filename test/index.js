@@ -122,6 +122,11 @@ async function deploy () {
 
 	let start = now();
 
+	const timeSinceStart = () => {
+		const t = now() - start;
+		return t.toFixed(2);
+	}
+
 	$.verbose = flags.verbose;
 
 	try {
@@ -134,7 +139,7 @@ async function deploy () {
 		if (testRes.failed === 0 && flags.deploy) {
 			console.log('All tests passed, Deploying...');
 			deploy().then(() => {
-				console.log(c.green('Finished in ' + (now() - start).toFixed(2) + 'ms'));
+				console.log(c.green('Finished in ' + timeSinceStart() + 'ms'));
 			});
 		}
 
@@ -145,12 +150,12 @@ async function deploy () {
 	try {
 		// stop the server process by sending it a 'kill signal'
 		if ((await api(`delete/server/${process.env.KILL_CODE}`)).ok) {
-			console.log(c.green`Server Killed, finished testing`);
+			console.log(c.green(`Server Killed, finished testing in ${timeSinceStart()}ms`));
 		} else {
-			console.log(c.red`Server not killed, finished testing`);
+			console.log(c.red(`Server not killed, finished testing in ${timeSinceStart()}ms`));
 		}
 	} catch (e) {
-		console.log(c.red`Server not killed (failed with error), finished testing`);
+		console.log(c.red(`Killing server failed with error, finished testing in ${timeSinceStart()}ms`));
 		console.error(c.red(e));
 	}
 })();

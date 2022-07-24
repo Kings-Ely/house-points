@@ -96,7 +96,7 @@ $addHPSubmit.onclick = async () => {
     const codeRes = await api`get/users/code-from-name/${$addHPName.value}`;
 
     if (!codeRes.ok || !codeRes.code) {
-        showError(`Sorry, couldn't find ${$addHPName.value}`);
+        // error automatically shown
         return;
     }
 
@@ -118,15 +118,13 @@ $addHPSubmit.onclick = async () => {
     const isSignedIn = await signedIn();
 
     if (!isSignedIn) {
-        navigate`..?error=auth`;
-        return;
+        await navigate(`/?error=auth`);
     }
 
     const { admin } = await userInfo();
 
     if (!admin) {
-        navigate`..?error=auth`;
-        return;
+        await navigate(`/?error=auth`);
     }
 
     await main();

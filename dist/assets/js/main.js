@@ -305,15 +305,22 @@ async function rawAPI (path) {
     }
 
     // fetch
-    const res = await fetch(`${API_ROOT}/${path}`, {
-        method: 'GET',
-        mode: 'cors',
-        cache: 'no-cache',
-        redirect: 'follow',
-        credentials: 'include'
-    });
-
+    let res;
     let asJSON;
+    try {
+        res = await fetch(`${API_ROOT}/${path}`, {
+            method: 'GET',
+            mode: 'cors',
+            cache: 'no-cache',
+            redirect: 'follow',
+            credentials: 'include'
+        });
+    } catch (e) {
+        return {
+            error: `Failed to fetch ${path}`
+        };
+    }
+
     try {
         asJSON = await res.json();
     } catch (e) {
@@ -431,35 +438,7 @@ async function loadNav () {
     $nav.innerHTML = await (await fetch(`${ROOT_PATH}/assets/html/nav.html`)).text();
 
     const $adminLink = document.getElementById('admin-link');
-
-    // make home link point to right place
-    if (!(await userInfo())['student']) {
-        hideWithID('home-link');
-    }
-
-    if (getAltCode()) {
-        rawAPI(`get/users/info/${getAltCode()}`)
-            .then(async info => {
-                if (!info['ok']) return;
-                if (!info['admin']) return;
-
-                // if we are already an admin with the main code, just delete the alt code
-                if (!(await userInfo())['admin']) {
-                    eraseCookie(ALT_COOKIE_KEY);
-                    return;
-                }
-
-                altUserInfoJSON = info;
-
-
-                $adminLink.style.display = 'block';
-                $adminLink.setAttribute('aria-hidden', 'false');
-                $adminLink.onclick = () => {
-                    setCodeCookie(getAltCode());
-                    navigate(`${ROOT_PATH}/admin`);
-                };
-            });
-    }
+    const $username = document.getElementById('nav-username');
 
     // replace links in nav relative to this page
     document.querySelectorAll('nav a').forEach(a => {
@@ -468,11 +447,33 @@ async function loadNav () {
     });
 
     // show page title
-    document.querySelector('#nav-center').innerHTML = `
+    const $center = document.querySelector('#nav-center');
+    $center.innerHTML = `
         <div>
             ${HOUSE_NAME} House Points - ${document.title}
         </div>
     `;
+
+    const user = await userInfo();
+
+    $username.innerText = user.name;
+
+    if (user['admin']) {
+        $adminLink.style.display = 'block';
+        $adminLink.setAttribute('aria-hidden', 'false');
+        $adminLink.onclick = () => {
+            navigate(`/admin`);
+        };
+    } else if (altUserInfoJSON) {
+        $adminLink.style.display = 'block';
+        $adminLink.setAttribute('aria-hidden', 'false');
+        $adminLink.onclick = () => {
+            setCodeCookie(getAltCode());
+            navigate(`/admin`);
+        };
+
+        $username.innerHTML = `${user.name} (${altUserInfoJSON.name})`;
+    }
 }
 
 function reloadDOM () {
@@ -489,6 +490,12 @@ function scrollToTop () {
  * @returns {Promise<never>}
  */
 const navigate = async (url) => {
+    await waitForReady();
+
+    if (url[0] === '/') {
+        url = ROOT_PATH + url;
+    }
+
     window.location.assign(url);
     // never resolve promise as just wait for the page to load
     await new Promise(() => {});
@@ -594,22 +601,42 @@ async function init (rootPath) {
     scrollToTop();
 }
 
+async function handleUserInfo (info) {
+    if (getAltCode()) {
+        const altInfo = await rawAPI(`get/users/info/${getAltCode()}`);
+        if (altInfo['ok'] && altInfo['admin']) {
+            // if we are already an admin with the main code, just delete the alt code
+            if (info['admin']) {
+                eraseCookie(ALT_COOKIE_KEY);
+            } else {
+                altUserInfoJSON = altInfo;
+            }
+        }
+    }
+
+    isSignedIn = info.ok;
+
+    if (!isSignedIn) {
+        info = {};
+    }
+    userInfoJSON = info;
+    userInfoIsLoaded = true;
+
+    for (const cb of userInfoCallbacks) {
+        cb(info);
+    }
+}
+
 (async () => {
     if (getCode()) {
         rawAPI(`get/users/info/${getCode()}`)
-            .then(info => {
-                isSignedIn = info.ok;
-
-                if (!info.ok) {
-                    info = null;
-                }
-                userInfoJSON = info;
-                userInfoIsLoaded = true;
-
-                for (const cb of userInfoCallbacks) {
-                    cb(info);
-                }
-            });
+            .then(handleUserInfo)
+    } else {
+        isSignedIn = false;
+        userInfoIsLoaded = true;
+        for (const cb of userInfoCallbacks) {
+            cb({});
+        }
     }
 
     function documentIsLoaded () {

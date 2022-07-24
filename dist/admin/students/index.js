@@ -1,4 +1,4 @@
-const selected = [];
+let selected = [];
 let students = [];
 
 const searchFilterInput = document.getElementById('search');
@@ -117,7 +117,7 @@ async function signInAs (code, name) {
     }
     setAltCodeCookie(getCode());
     setCodeCookie(code);
-    await navigate`../../student-dashboard`;
+    await navigate(`/user`);
 }
 
 async function select (id, select) {
@@ -152,11 +152,11 @@ async function ageSelected (amount) {
 
 function selectAll (select=true) {
     if (select) {
-        for (let student of students) {
-            selected.push(student['id']);
-        }
+        // select all students
+        selected = students.map(student => student.code);
     } else {
-        selected.splice(0, selected.length);
+        // unselect all students
+        selected = [];
     }
 
     main(false);
@@ -264,8 +264,7 @@ document.getElementById(`add-student-submit`).onclick = async () => {
     await init('../..');
 
     if (!await signedIn() || !(await userInfo())['admin']) {
-        await navigate`../..?error=auth`;
-        return;
+        await navigate(`/?error=auth`);
     }
 
     await main();
