@@ -114,21 +114,14 @@ export async function requireAdmin (cookies: Cookies, query: queryFunc): Promise
 /**
  * Returns a string for an error, otherwise a number which is the user's id
  */
-export async function idFromCodeOrID (query: queryFunc, rawID?: string | number, rawCode?: string): Promise<number | string> {
+export async function idFromCode (query: queryFunc, rawCode?: string): Promise<number | string> {
 
-    if (typeof rawID === 'number') {
-        return rawID;
+
+    const res = await query`SELECT id FROM users WHERE code = ${rawCode || ''}`;
+    if (!res.length) {
+        return `User not found with code '${rawCode}'`
     }
-
-    let id: number = parseInt(rawID || '');
-
-    if (!id || isNaN(id)) {
-        const res = await query`SELECT id FROM users WHERE code = ${rawCode || ''}`;
-        if (!res.length) {
-            return `User not found with code '${rawCode}'`
-        }
-        id = res[0]['id'];
-    }
+    const id = res[0]['id'];
 
     if (isNaN(id) || id < 100) return `Invalid user ID '${id}'`;
 

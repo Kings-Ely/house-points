@@ -1,5 +1,5 @@
 import route from "../";
-import {AUTH_ERR, authLvl, COOKIE_CODE_KEY, idFromCodeOrID, makeCode, requireAdmin, requireLoggedIn} from "../util";
+import {AUTH_ERR, authLvl, COOKIE_CODE_KEY, idFromCode, makeCode, requireAdmin, requireLoggedIn} from "../util";
 
 
 route('get/users/auth/:code', async ({ query, params: { code} }) => {
@@ -76,7 +76,7 @@ route('get/users/info/:code', async ({ query, params: { code} }) => {
 });
 
 
-route('get/users/all', async ({ query, cookies }) => {
+route('get/users/all', async ({ query, cookies, req }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     const data = await query`
@@ -125,14 +125,18 @@ route('get/users/leaderboard', async ({ query, cookies }) => {
 
 
 route('create/users/:name?year=9', async ({ query, params, cookies }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
-
     const { name, year: yearStr} = params;
 
     const year = parseInt(yearStr);
 
     if (isNaN(year)) return `Year '${year}' is not a number`;
-    if (name.length < 2) return `Name '${name}' too short`;
+    if ((year < 9 || year > 12) && year !== 0) {
+        return `Year '${year}' is not between 9 and 12`;
+    }
+
+    if (name.length < 3) return `Name '${name}' too short`;
+
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     // get unique code
     let newCode = makeCode(6);
@@ -157,7 +161,7 @@ route('update/users/admin/:code?admin', async ({ query, params, cookies }) => {
 
     const { code, admin } = params;
 
-    let id = await idFromCodeOrID(query, '', code);
+    let id = await idFromCode(query, code);
     if (typeof id === 'string') return id;
 
     const myCode = cookies[COOKIE_CODE_KEY];
@@ -183,28 +187,36 @@ route('update/users/admin/:code?admin', async ({ query, params, cookies }) => {
 });
 
 
-route('update/users/year?id&code&yearChange', async ({ query, params, cookies }) => {
+route('update/users/year/:code/:by', async ({ query, params, cookies }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    const { id: userID, code, yearChange: yC } = params;
+    const { code, by: yC } = params;
     const yearChange = parseInt(yC);
 
     if (isNaN(yearChange)) {
         return `Year change '${yearChange}' is not a number`;
     }
+    if (yearChange < -2 || yearChange > 2) {
+        return `Can't change year by more than 2 at once, trying to change by ${yearChange}`;
+    }
 
-    let id = await idFromCodeOrID(query, userID, code);
+    let id = await idFromCode(query, code);
     if (typeof id === 'string') return id;
 
-    await query`UPDATE users SET year = year + ${yearChange} WHERE id = ${id}`;
+    const queryRes = await query`UPDATE users SET year = year + ${yearChange} WHERE id = ${id}`;
+    if (!queryRes.affectedRows) return {
+        status: 406,
+        error: 'User not found'
+    };
 });
 
 
 route('delete/users/:code', async ({ query, params: { code}, cookies }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
+    if (code === cookies[COOKIE_CODE_KEY]) return AUTH_ERR;
 
-    const id = await idFromCodeOrID(query, '', code);
+    const id = await idFromCode(query, code);
     if (typeof id === 'string') return id;
 
     const queryRes = await query`DELETE FROM users WHERE id = ${id}`;

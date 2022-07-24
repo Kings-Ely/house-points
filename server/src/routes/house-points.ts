@@ -1,5 +1,5 @@
 import route from "../";
-import { AUTH_ERR, COOKIE_CODE_KEY, idFromCodeOrID, requireAdmin } from "../util";
+import { AUTH_ERR, COOKIE_CODE_KEY, idFromCode, requireAdmin } from "../util";
 
 
 route('get/house-points/with-id/:id', async ({ query, params, cookies }) => {
@@ -124,7 +124,7 @@ async ({ query, cookies, params }) => {
     let event: number | null = parseInt(rawEvent);
     if (isNaN(event) || !event) event = null;
 
-    const id = await idFromCodeOrID(query, '', user);
+    const id = await idFromCode(query, user);
     if (typeof id === 'string') return id;
 
     await query`
@@ -150,7 +150,7 @@ async ({ query, cookies, params }) => {
 
     const { user, description } = params;
 
-    const id = await idFromCodeOrID(query, '', user);
+    const id = await idFromCode(query, user);
     if (typeof id === 'string') return id;
 
     await query`

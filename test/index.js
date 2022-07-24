@@ -72,16 +72,6 @@ async function api (path, code='admin') {
 		return { error: 'No response' };
 	}
 
-	if (res.status === 404) {
-		console.log(c.red(`404 on path '${path}'`));
-		return res;
-	}
-
-	if (!res.ok) {
-		console.error(c.red(`ERROR from '${path}': ${JSON.stringify(await res.json())}`));
-		return {};
-	}
-
 	// get text content of response
 	const body = await res.text();
 

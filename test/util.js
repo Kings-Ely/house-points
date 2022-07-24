@@ -8,6 +8,7 @@ export const randomFromAlph = (len=5) => {
     return str;
 }
 
+let allCodes = [];
 /**
  * @param api - api request function
  * @param {number} year
@@ -15,10 +16,18 @@ export const randomFromAlph = (len=5) => {
  */
 export async function generateUser (api, year=10) {
     const name = randomFromAlph();
+
     const { code } = await api(`create/users/${name}?year=${year}`);
+
     if (typeof code !== 'string') {
         return 'Expected string from user code';
     }
+
+    if (code in allCodes) {
+        return `User code already exists: ${code}`;
+    }
+    allCodes.push(code);
+
     for (const char of code) {
         if (!alphabet.includes(char)) {
             return `Unexpected char in user code: '${char}' (${code})`;
@@ -27,5 +36,5 @@ export async function generateUser (api, year=10) {
     if (code.length < 3 || code.length > 10) {
         return `User code is of incorrect length: '${code}'`;
     }
-    return [code, name];
+    return [ code, name ];
 }
