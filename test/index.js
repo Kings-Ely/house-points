@@ -97,7 +97,7 @@ async function deploy () {
 
 		let invoked = false;
 
-		let process = childProcess.fork('build');
+		let process = childProcess.fork('./build/index.js');
 
 		// listen for errors as they may prevent the exit event from firing
 		process.on('error', err => {
