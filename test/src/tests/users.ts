@@ -1,5 +1,5 @@
-import Test from '../framework.js';
-import { generateUser } from '../util.js';
+import Test from '../framework';
+import { generateUser } from '../util';
 
 Test.test('user auth', async (api) => {
 

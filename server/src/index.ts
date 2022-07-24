@@ -1,6 +1,6 @@
 import https from "https";
 import http from "http";
-import * as fs from "fs";
+import fs from "fs";
 import type { IncomingMessage, ServerResponse } from "http";
 import commandLineArgs from 'command-line-args';
 import c from 'chalk';

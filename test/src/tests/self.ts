@@ -1,5 +1,5 @@
-import Test from "../framework.js";
-import {  alphabet, randomFromAlph} from "../util.js";
+import Test from "../framework";
+import {  alphabet, randomFromAlph} from "../util";
 
 Test.test('user-auth code generator', async () => {
     // test 100 codes

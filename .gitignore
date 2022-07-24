@@ -10,4 +10,6 @@ sshPass.txt
 *.txt
 *.log
 *.js.map
+
 /server/index.js
+/test/index.js

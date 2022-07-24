@@ -1,4 +1,4 @@
-import Test from '../framework.js';
+import Test from '../framework';
 
 
 Test.test('Ping server', async (api) => {

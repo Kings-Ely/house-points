@@ -10,11 +10,20 @@ async function startServer (flags: CommandLineOptions) {
 	let t = now();
 
 	return new Promise((resolve, reject) => {
-		exec(`npm run build-server; node --enable-source-maps server -d ${flags.verbose ? '-v' : ''}`, (err, out, er) => {
+		exec(`npm run build-server`, (err, out, er) => {
 			if (err) reject(err);
 			if (er) reject(er);
 
-			console.log(c.green(`Built and started server in ${(now() - t).toPrecision(4)}ms`));
+			console.log(c.green(`Built server in ${(now() - t).toPrecision(4)}ms`));
+
+			exec(`node --enable-source-maps server -d ${flags.verbose ? '-v' : ''}`, (err, out, er) => {
+				if (err) reject(err);
+				if (er) reject(er);
+
+				console.log(c.green(`Started server`));
+			});
+
+			setTimeout(resolve, 100);
 		});
 	});
 }

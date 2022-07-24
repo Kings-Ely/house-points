@@ -9,38 +9,16 @@ import now from 'performance-now';
 import setup from './setup';
 import Test from './framework';
 
+import './tests/smoke';
+import './tests/house-points';
+import './tests/self';
+import './tests/users';
+
 const flags = commandLineArgs([
 	{ name: 'verbose', alias: 'v', type: Boolean, defaultValue: false },
 	{ name: 'doLighthouse', alias: 'l', type: Boolean, defaultValue: false },
 	{ name: 'deploy', alias: 'd', type: Boolean, defaultValue: false },
 ]);
-
-/**
- * Imports all the tests from the 'tests' folder recursively
- * Means when a new file is added, it will be automatically imported
- * But means that this cannot be minified, as it will lose the folder structure
- * @param {*} flags
- * @param {string} [dir='./test/tests']
- * @returns {Promise<void>}
- */
-async function importAll (flags: CommandLineOptions, dir='./test/tests') {
-	// loop over files in directory
-	for (let f of fs.readdirSync(dir)) {
-
-		// add root path of directory to file path
-		const file = path.join(dir, f);
-
-		// if the file ends with '.js', import it
-		// otherwise, assume it's a director and import all the files in it
-		if (file.substring(file.length-3, file.length) !== '.js') {
-			await importAll(flags, file);
-
-		} else {
-			// ../ as it is being run from the dir above, but imports are relative to this file
-			await import(path.join('../', file));
-		}
-	}
-}
 
 export type API = (path: string, code?: string) => Promise<any>;
 export type testExecutor = (api: API, args: CommandLineOptions) => Promise<boolean | Error | string>;
@@ -117,7 +95,6 @@ async function deploy () {
 
 	try {
 		await setup(flags);
-		await importAll(flags);
 
 		const testRes = await Test.testAll(api, flags);
 		console.log(testRes.str(flags.verbose));

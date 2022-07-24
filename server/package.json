@@ -1,10 +1,11 @@
 {
     "dependencies": {
         "cardinal": "^2.1.1",
-        "mysql2": "^2.3.3",
-        "ts-loader": "^9.3.1",
         "command-line-args": "^5.2.1",
-        "dotenv": "^16.0.0"
+        "dotenv": "^16.0.0",
+        "mysql2": "^2.3.3",
+        "performance-now": "^2.1.0",
+        "ts-loader": "^9.3.1"
     },
     "devDependencies": {
         "@types/command-line-args": "^5.2.0",

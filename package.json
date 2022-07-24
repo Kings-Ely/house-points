@@ -2,10 +2,10 @@
     "scripts": {
         "build": "node --enable-source-maps ../build",
         "serve-api": "npm run build-server; npm run start-server",
-        "build-server": "cd ../server; npm i; webpack",
+        "build-server": "cd ./server; npm i; webpack",
         "start-server": "node --enable-source-maps ../server -cdv",
         "test-full": "time node --enable-source-maps  -lv",
-        "test": "cd test; webpack; cd ..; node --enable-source-maps ./test/test.js",
+        "test": "cd test; webpack; cd ..; node --enable-source-maps test",
         "deploy": "time node --enable-source-maps  -lv --deploy"
     }
 }
