@@ -2,7 +2,7 @@
 import { $ } from "zx";
 import now from "performance-now";
 import c from 'chalk';
-import * as fs from "fs";
+import * as fs from "fs.js";
 
 $.verbose = false;
 
