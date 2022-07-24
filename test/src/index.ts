@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 import c from 'chalk';
 import fetch from "node-fetch";
 import commandLineArgs, { CommandLineOptions } from 'command-line-args';
