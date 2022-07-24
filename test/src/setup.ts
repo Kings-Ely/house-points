@@ -3,21 +3,24 @@ import fs from 'fs';
 import now from 'performance-now';
 import c from 'chalk';
 import { config } from 'dotenv';
-import { $ } from "zx";
+import { CommandLineOptions } from "command-line-args";
+import { exec } from "child_process";
 
-async function startServer (flags) {
+async function startServer (flags: CommandLineOptions) {
 	let t = now();
-	await $`npm run build-server`;
-	console.log(c.green(`Built server in ${(now() - t).toPrecision(4)}ms`));
 
-	$`node --enable-source-maps server -d ${flags.verbose ? '-v' : ''}`;
-	console.log(c.green(`Started server`));
-	// wait some time for the server to start
-	return new Promise(r => setTimeout(r, 100));
+	return new Promise((resolve, reject) => {
+		exec(`npm run build-server; node --enable-source-maps server -d ${flags.verbose ? '-v' : ''}`, (err, out, er) => {
+			if (err) reject(err);
+			if (er) reject(er);
+
+			console.log(c.green(`Built and started server in ${(now() - t).toPrecision(4)}ms`));
+		});
+	});
 }
 
 
-export default async function (flags) {
+export default async function (flags: CommandLineOptions) {
 
 	// setup environment variables
 	config({ path: './server/.env' });
@@ -32,7 +35,7 @@ export default async function (flags) {
 		multipleStatements: true
 	});
 
-	return new Promise((resolve, reject) => {
+	return new Promise<void>((resolve, reject) => {
 		con.query(`
 			DROP DATABASE hpsnea;
 			CREATE DATABASE hpsnea;

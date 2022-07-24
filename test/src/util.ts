@@ -1,3 +1,5 @@
+import type { API } from "./index";
+
 export const alphabet = 'abcdefghijklmnopqrstuvwxyz';
 
 export const randomFromAlph = (len=5) => {
@@ -8,13 +10,9 @@ export const randomFromAlph = (len=5) => {
     return str;
 }
 
-let allCodes = [];
-/**
- * @param api - api request function
- * @param {number} year
- * @returns {Promise<string|(string|string)[]>}
- */
-export async function generateUser (api, year=10) {
+let allCodes: string[] = [];
+
+export async function generateUser (api: API, year=10) {
     const name = randomFromAlph();
 
     const { code } = await api(`create/users/${name}?year=${year}`);

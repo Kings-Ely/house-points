@@ -1,15 +1,13 @@
-#!/usr/bin/env zx
-import { $ } from "zx";
 import fs from 'fs';
 import path from 'path';
 import c from 'chalk';
 import fetch from "node-fetch";
-import commandLineArgs from 'command-line-args';
+import commandLineArgs, { CommandLineOptions } from 'command-line-args';
 import childProcess from 'child_process';
 import now from 'performance-now';
 
-import setup from './setup.js';
-import Test from './framework.js';
+import setup from './setup';
+import Test from './framework';
 
 const flags = commandLineArgs([
 	{ name: 'verbose', alias: 'v', type: Boolean, defaultValue: false },
@@ -25,7 +23,7 @@ const flags = commandLineArgs([
  * @param {string} [dir='./test/tests']
  * @returns {Promise<void>}
  */
-async function importAll (flags, dir='./test/tests') {
+async function importAll (flags: CommandLineOptions, dir='./test/tests') {
 	// loop over files in directory
 	for (let f of fs.readdirSync(dir)) {
 
@@ -35,7 +33,7 @@ async function importAll (flags, dir='./test/tests') {
 		// if the file ends with '.js', import it
 		// otherwise, assume it's a director and import all the files in it
 		if (file.substring(file.length-3, file.length) !== '.js') {
-			await importAll(file);
+			await importAll(flags, file);
 
 		} else {
 			// ../ as it is being run from the dir above, but imports are relative to this file
@@ -44,14 +42,14 @@ async function importAll (flags, dir='./test/tests') {
 	}
 }
 
+export type API = (path: string, code?: string) => Promise<any>;
+export type testExecutor = (api: API, args: CommandLineOptions) => Promise<boolean | Error | string>;
+
 /**
  * Makes API request to localhost API server
  * Uses http, and the port stored in the .env file
- * @param {string} path
- * @param {string} code
- * @returns {Promise<Record<string, any>>}
  */
-async function api (path, code='admin') {
+async function api (path: string, code='admin') {
 	// assume host is localhost
 	const url = `http://localhost:${process.env.PORT}/${path}`;
 
@@ -116,8 +114,6 @@ async function deploy () {
 		const t = now() - start;
 		return t.toFixed(2);
 	}
-
-	$.verbose = flags.verbose;
 
 	try {
 		await setup(flags);

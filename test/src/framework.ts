@@ -1,21 +1,16 @@
 import chalk from 'chalk';
 import { performance } from 'perf_hooks';
+import {API, testExecutor} from "./index";
+import {CommandLineOptions} from "command-line-args";
 const now = performance.now;
-
-/**
- * @name testExecutor
- * @function
- * @param {(path: string) => Promise<any>} api
- * @returns {boolean | Error}
- */
 
 export class TestResult {
     failed = 0;
     passed = 0;
-    fails = [];
+    fails: [any, any][] = [];
     time = 0;
 
-    register (res, test={batteryName: 'unknown', batteryID: -2}) {
+    register (res: any, test={batteryName: 'unknown', batteryID: -2}) {
         if (res === true) {
             this.passed++;
 
@@ -53,40 +48,30 @@ export default class Test {
     batteryName;
     batteryID;
 
-    /**
-     * @param {testExecutor} test
-     * @param {string | number} id
-     * @param {string} batteryName
-     * @param {number} batteryID
-     */
-    constructor (test, id = 'test', batteryName='', batteryID = 0) {
+    constructor (test: testExecutor, id: string | number = 'test', batteryName='', batteryID = 0) {
         this.id = id;
         this.test = test;
         this.batteryName = batteryName;
         this.batteryID = batteryID;
     }
 
-    run (...args) {
-        return this.test(...args);
+    run (api: API, code: CommandLineOptions) {
+        return this.test(api, code);
     }
 
     static currentID = 0;
 
-    /** @type {Test[]} */
-    static tests = [];
+    static tests: Test[] = [];
 
-    /**
-     * @param {string} name
-     * @param {testExecutor} test
-     */
-    static test (name, test) {
+
+    static test (name: string, test: testExecutor) {
         Test.tests.push(new Test(test, Test.tests.length, name, this.currentID));
     }
 
     /**
      * @returns {TestResult}
      */
-    static async testAll (api, flags) {
+    static async testAll (api: API, flags: CommandLineOptions) {
         let time = now();
 
         const res = new TestResult();

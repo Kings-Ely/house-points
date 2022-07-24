@@ -1,3 +1,4 @@
+// @ts-ignore
 import lighthouse from 'lighthouse';
 import chrome from 'chrome-launcher';
 import { fileURLToPath } from "url";
@@ -7,7 +8,7 @@ export const goodScore = 0.9;
 
 export const lighthouseResCategories = ['performance', 'accessibility', 'best-practices', 'seo'];
 
-function prettyPrintOutput (lhr) {
+function prettyPrintOutput (lhr: any) {
 
     if (lhr.runtimeError) {
         console.error(c.red`An error occurred running LightHouse: `);
@@ -33,7 +34,7 @@ function prettyPrintOutput (lhr) {
     console.log(c.green`Completed LightHouse analysis`);
 }
 
-export default async function run (url, log=false) {
+export default async function run (url: string, log=false) {
     console.log(c.yellow(`Starting lighthouse on ${url}`));
 
     const tab = await chrome.launch({
@@ -55,6 +56,7 @@ export default async function run (url, log=false) {
 // run as a script on the URL passed as an argument to the script
 // but only if this script is the one being run from the command line
 // and another argument is present
+// @ts-ignore
 if (process.argv[1] === fileURLToPath(import.meta.url) && process.argv.length > 2) {
     run(process.argv[2]);
 }

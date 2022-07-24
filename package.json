@@ -1,28 +1,11 @@
 {
-    "type": "module",
     "scripts": {
-        "build": "node --enable-source-maps build",
+        "build": "node --enable-source-maps ../build",
         "serve-api": "npm run build-server; npm run start-server",
-        "build-server": "cd server; npm i; webpack",
-        "start-server": "node --enable-source-maps server -cdv",
-        "test-full": "time node --enable-source-maps test -lv",
-        "test": "time node --enable-source-maps test",
-        "deploy": "time node --enable-source-maps test -lv --deploy"
-    },
-    "dependencies": {
-        "@types/node": "^18.0.6",
-        "chalk": "^5.0.1",
-        "chrome-launcher": "^0.15.1",
-        "command-line-args": "^5.2.1",
-        "dotenv": "^16.0.1",
-        "lighthouse": "^9.6.3",
-        "mysql2": "^2.3.3",
-        "node-fetch": "^3.2.6",
-        "performance-now": "^2.1.0",
-        "ts-loader": "^9.3.1",
-        "zx": "^7.0.7"
-    },
-    "devDependencies": {
-        "webpack-cli": "^4.10.0"
+        "build-server": "cd ../server; npm i; webpack",
+        "start-server": "node --enable-source-maps ../server -cdv",
+        "test-full": "time node --enable-source-maps  -lv",
+        "test": "cd test; webpack; cd ..; node --enable-source-maps ./test/test.js",
+        "deploy": "time node --enable-source-maps  -lv --deploy"
     }
 }
