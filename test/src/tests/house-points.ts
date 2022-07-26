@@ -2,8 +2,8 @@ import Test from '../framework';
 import { generateUser } from "../util";
 
 
-Test.test('House point CRUD', async (api) => {
-    const [code, _] = await generateUser(api);
+Test.test('Creating house points', async (api) => {
+    const [ code ] = await generateUser(api);
 
     let res = await api('get/house-points/all');
     if (res.ok !== true) return `get/house-points/all failed: ${JSON.stringify(res)}`;

@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { performance } from 'perf_hooks';
-import {API, testExecutor} from "./index";
-import {CommandLineOptions} from "command-line-args";
+import { API, testExecutor } from "./index";
+import { CommandLineOptions } from "command-line-args";
 const now = performance.now;
 
 export class TestResult {

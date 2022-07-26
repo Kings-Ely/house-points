@@ -1,11 +1,9 @@
 {
     "scripts": {
-        "build": "node --enable-source-maps ../build",
-        "serve-api": "npm run build-server; npm run start-server",
-        "build-server": "cd ./server; npm i; webpack",
-        "start-server": "node --enable-source-maps ../server -cdv",
-        "test-full": "time node --enable-source-maps  -lv",
+        "build": "node --enable-source-maps ./build",
+        "start-server": "cd server; webpack; node --enable-source-maps index.js -cv",
+        "stop-server": "cd server; npm run stop",
         "test": "cd test; webpack; cd ..; node --enable-source-maps test",
-        "deploy": "time node --enable-source-maps  -lv --deploy"
+        "deploy": "time node --enable-source-maps test -lv --deploy"
     }
 }

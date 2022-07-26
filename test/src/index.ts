@@ -1,7 +1,7 @@
 import c from 'chalk';
 import fetch from "node-fetch";
 import commandLineArgs, { CommandLineOptions } from 'command-line-args';
-import childProcess from 'child_process';
+import childProcess, {exec} from 'child_process';
 import now from 'performance-now';
 
 import setup from './setup';
@@ -91,32 +91,30 @@ async function deploy () {
 		return t.toFixed(2);
 	}
 
-	try {
-		await setup(flags);
+	await setup(flags);
 
-		const testRes = await Test.testAll(api, flags);
-		console.log(testRes.str(flags.verbose));
+	const testRes = await Test.testAll(api, flags);
+	console.log(testRes.str(flags.verbose));
 
-		if (testRes.failed === 0 && flags.deploy) {
-			console.log('All tests passed, Deploying...');
-			deploy().then(() => {
-				console.log(c.green('Finished in ' + timeSinceStart() + 'ms'));
-			});
-		}
-
-	} catch (e) {
-		console.error(c.red(e));
+	if (testRes.failed === 0 && flags.deploy) {
+		console.log('All tests passed, Deploying...');
+		deploy().then(() => {
+			console.log(c.green('Finished in ' + timeSinceStart() + 'ms'));
+		});
 	}
 
-	try {
-		// stop the server process by sending it a 'kill signal'
-		if ((await api(`delete/server/${process.env.KILL_CODE}`)).ok) {
-			console.log(c.green(`Server Killed, finished testing in ${timeSinceStart()}ms`));
-		} else {
-			console.log(c.red(`Server not killed, finished testing in ${timeSinceStart()}ms`));
-		}
-	} catch (e) {
-		console.log(c.red(`Killing server failed with error, finished testing in ${timeSinceStart()}ms`));
-		console.error(c.red(e));
+	// stop the server process by sending it a 'kill signal'
+	if ((await api(`delete/server/${process.env.KILL_CODE}`)).ok) {
+		console.log(c.green(`Server Killed, finished testing in ${timeSinceStart()}ms`));
+	} else {
+		console.log(c.red(`Server not killed`));
 	}
+
+	/*
+	exec(`npm run stop-server`, (err, _, er) => {
+		if (err) console.log(err);
+		if (er) console.log(er);
+		console.log(c.green(`Container stopped, finished testing in ${timeSinceStart()}ms`));
+	});
+	 */
 })();

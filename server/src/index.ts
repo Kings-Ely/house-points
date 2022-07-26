@@ -5,13 +5,12 @@ import type { IncomingMessage, ServerResponse } from "http";
 import commandLineArgs from 'command-line-args';
 import c from 'chalk';
 
-import { type Handler, Route } from "./route";
-import connectSQL, { type queryFunc } from './sql';
+import { Handler, Route } from "./route";
+import connectSQL, { queryFunc } from './sql';
 import log, { error, LogLvl, setLogOptions, warning, close as stopLogger } from "./log";
 import { loadEnv, parseCookies } from "./util";
 
 export const flags = commandLineArgs([
-    { name: 'dev', alias: 'd', type: Boolean, defaultValue: false },
     { name: 'log', type: Number, defaultValue: LogLvl.ALL },
     { name: 'logTo', type: String, defaultValue: 'server.log' },
     { name: 'verbose', alias: 'v', type: Boolean, defaultValue: false },
@@ -97,35 +96,35 @@ async function serverResponse (req: IncomingMessage, res: ServerResponse) {
 function startServer () {
 
     let options = {};
-    if (!flags.dev) {
+    if (process.env.PROD === '1') {
         options = {
             key: fs.readFileSync("./privatekey.pem"),
             cert: fs.readFileSync("./certificate.pem")
         };
     }
 
-    let PORT = process.env.PORT;
+    let port = process.env.PORT;
 
     if (flags.port) {
-        PORT = flags.port;
+        port = flags.port;
     }
 
-    if (!PORT) {
+    if (!port) {
         error`No port specified in .env or command line`;
         return;
     }
 
     let server: http.Server | https.Server;
 
-    if (flags.dev) {
+    if (process.env.PROD !== '1') {
         server = http.createServer(options, serverResponse)
-            .listen(PORT, () => {
-                log(c.green(`Dev server started on port ${PORT}`));
+            .listen(port, () => {
+                log(c.green(`Dev server started on port ${port}`));
             });
     } else {
         server = https.createServer(options, serverResponse)
-            .listen(PORT, () => {
-                log(c.green(`Production server started on port ${PORT}`));
+            .listen(port, () => {
+                log(c.green(`Production server started on port ${port}`));
             });
     }
 

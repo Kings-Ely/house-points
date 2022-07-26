@@ -54,11 +54,5 @@ route('get/server/performance?iterations=100', async ({ query, params: { iterati
 route('delete/server/:code', async ({ query, cookies, params: { code}}) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    if (code !== process.env.KILL_CODE) {
-        return {
-            status: 401,
-            error: 'Invalid kill code'
-        } ;
-    }
     process.kill(process.pid, 'SIGTERM');
 });

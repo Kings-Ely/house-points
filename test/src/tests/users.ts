@@ -30,7 +30,7 @@ Test.test('user auth', async (api) => {
         return `Expected 'ok' from get/users/all, got '${JSON.stringify(allUsers)}'`;
     }
     // 2 due to the user we just created and the default admin user
-    if (allUsers.data.length !== 2) {
+    if (allUsers?.data?.length !== 2) {
         return `Expected 2 users, got '${JSON.stringify(allUsers)}'`;
     }
 
@@ -48,7 +48,7 @@ Test.test('user auth', async (api) => {
 
     // check we can access restricted data with our code
     const allUsersWithNewCodeRes = await api(`get/users/all`, code);
-    if (allUsersWithNewCodeRes.data.length !== 2) {
+    if (allUsersWithNewCodeRes?.data?.length !== 2) {
         return `Expected 2 users, got '${JSON.stringify(allUsersWithNewCodeRes)}'`;
     }
 
@@ -95,7 +95,7 @@ Test.test('user auth with 2', async (api) => {
         return `Expected 'ok' from get/users/all, got '${JSON.stringify(res)}'`;
     }
     // 3 due to the 2 we just created and the default admin user
-    if (res.data.length !== 3) {
+    if (res?.data?.length !== 3) {
         return `Expected 3 users, got '${JSON.stringify(res)}'`;
     }
 
@@ -162,12 +162,12 @@ Test.test('Getting all users', async (api) => {
     const [ code1 ] = await generateUser(api, 0);
     const [ code2 ] = await generateUser(api);
 
-    let res = await api(`get/users/all?401`, code2);
+    let res = await api(`get/users/all`, code2);
     if (res.ok || res.status !== 401 || res.data) {
         return `Expected 401 from 'get/users/all', got '${JSON.stringify(res)}'`;
     }
     res = await api(`get/users/all`, code1);
-    if (res.data.length !== 3) {
+    if (res?.data?.length !== 3) {
         return `Expected 3 users, got '${JSON.stringify(res)}'`;
     }
 

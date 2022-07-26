@@ -10,20 +10,18 @@ async function startServer (flags: CommandLineOptions) {
 	let t = now();
 
 	return new Promise((resolve, reject) => {
-		exec(`npm run build-server`, (err, out, er) => {
+		exec(`cd server; webpack`, (err, out, er) => {
 			if (err) reject(err);
 			if (er) reject(er);
 
 			console.log(c.green(`Built server in ${(now() - t).toPrecision(4)}ms`));
 
-			exec(`node --enable-source-maps server -d ${flags.verbose ? '-v' : ''}`, (err, out, er) => {
+			exec(`node --enable-source-maps server -v`, (err, out, er) => {
 				if (err) reject(err);
 				if (er) reject(er);
-
-				console.log(c.green(`Started server`));
 			});
 
-			setTimeout(resolve, 100);
+			setTimeout(resolve, 500);
 		});
 	});
 }
@@ -52,7 +50,7 @@ export default async function (flags: CommandLineOptions) {
 		`, (err) => {
 
 			if (err) {
-				reject(err);
+				reject(`${err}, ${err.stack}`);
 				return;
 			}
 
@@ -62,7 +60,7 @@ export default async function (flags: CommandLineOptions) {
 
 			con.query(setUpQuery, (err) => {
 				if (err) {
-					reject(err);
+					reject(`${err}, ${err.stack}`);
 					return;
 				}
 

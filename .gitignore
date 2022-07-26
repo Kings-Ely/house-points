@@ -7,9 +7,11 @@ package-lock.json
 sshPass.txt
 *.env
 
+!server/structure.env
+
 *.txt
 *.log
 *.js.map
 
 /server/index.js
-/test/index.js
+/test/*index.js

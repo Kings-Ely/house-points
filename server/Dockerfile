@@ -8,4 +8,4 @@ RUN npm i
 
 EXPOSE 4464
 
-CMD ["node", "index.js", "--port=4464", "-cv"]
+CMD [ "node", "--enable-source-maps", "index.js", "-cv" ]
