@@ -10,58 +10,58 @@ Test.test('user auth', async (api) => {
     const [ code, name ] = codes;
 
     // check code actually works
-    const authLevel = await api(`get/users/auth/${code}`);
-    if (authLevel.level !== 1) {
-        return `Expected {level: 1} from get/users/auth, got '${JSON.stringify(authLevel)}'`;
+    let res = await api(`get/users/auth/${code}`);
+    if (res.level !== 1) {
+        return `Expected {level: 1} from get/users/auth, got '${JSON.stringify(res)}'`;
     }
 
     // checks that the user's name is correct
-    const infoRes = await api(`get/users/info/${code}`);
-    if (infoRes.name !== name) {
-        return `Expected name to be '${name}', got '${infoRes.name}'`;
+    res = await api(`get/users/info/${code}`);
+    if (res.name !== name) {
+        return `Expected name to be '${name}', got '${res.name}'`;
     }
-    if (infoRes.year !== 10) {
-        return `Expected year to be 10, got '${infoRes.name}'`;
+    if (res.year !== 10) {
+        return `Expected year to be 10, got '${res.name}'`;
     }
 
     // checks that the total number of users is correct
-    const allUsers = await api(`get/users/all`);
-    if (allUsers.ok !== true) {
-        return `Expected 'ok' from get/users/all, got '${JSON.stringify(allUsers)}'`;
+    res = await api(`get/users/all`);
+    if (res.ok !== true) {
+        return `Expected 'ok' from get/users/all, got '${JSON.stringify(res)}'`;
     }
     // 2 due to the user we just created and the default admin user
-    if (allUsers?.data?.length !== 2) {
-        return `Expected 2 users, got '${JSON.stringify(allUsers)}'`;
+    if (res?.data?.length !== 2) {
+        return `Expected 2 users, got ${res?.data?.length}: '${JSON.stringify(res)}'`;
     }
 
     // make our user an admin
-    const updateAdminRes = await api(`update/users/admin/${code}?admin=1`);
-    if (updateAdminRes.ok !== true) {
-        return `Expected 'ok' from update/users/admin, got '${JSON.stringify(updateAdminRes)}'`;
+    res = await api(`update/users/admin/${code}?admin=1`);
+    if (res.ok !== true) {
+        return `Expected 'ok' from update/users/admin, got '${JSON.stringify(res)}'`;
     }
 
     // check new auth level
-    const newAuthLevel = await api(`get/users/auth/${code}`);
-    if (newAuthLevel.level !== 2) {
-        return `Expected {level: 2} from get/users/auth, got '${JSON.stringify(newAuthLevel)}'`;
+    res = await api(`get/users/auth/${code}`);
+    if (res.level !== 2) {
+        return `Expected {level: 2} from get/users/auth, got '${JSON.stringify(res)}'`;
     }
 
     // check we can access restricted data with our code
-    const allUsersWithNewCodeRes = await api(`get/users/all`, code);
-    if (allUsersWithNewCodeRes?.data?.length !== 2) {
-        return `Expected 2 users, got '${JSON.stringify(allUsersWithNewCodeRes)}'`;
+    res = await api(`get/users/all`, code);
+    if (res?.data?.length !== 2) {
+        return `Expected 2 users, got '${JSON.stringify(res)}'`;
     }
 
     // delete our user
-    const deleteRes = await api(`delete/users/${code}`);
-    if (deleteRes.ok !== true) {
-        return `Expected 'ok' from delete/users, got '${JSON.stringify(deleteRes)}'`;
+    res = await api(`delete/users/${code}`);
+    if (res.ok !== true) {
+        return `Expected 'ok' from delete/users, got '${JSON.stringify(res)}'`;
     }
 
     // check that the user is gone
-    const goneRes = await api(`get/users/auth/${code}`);
-    if (goneRes.level !== 0) {
-        return `Expected {level: 0} from get/users/auth, got '${JSON.stringify(authLevel)}'`;
+    res = await api(`get/users/auth/${code}`);
+    if (res.level !== 0) {
+        return `Expected {level: 0} from get/users/auth, got '${JSON.stringify(res)}'`;
     }
 
     return true;
@@ -96,7 +96,7 @@ Test.test('user auth with 2', async (api) => {
     }
     // 3 due to the 2 we just created and the default admin user
     if (res?.data?.length !== 3) {
-        return `Expected 3 users, got '${JSON.stringify(res)}'`;
+        return `Expected 3 users, got ${res?.data?.length}: '${JSON.stringify(res)}'`;
     }
 
     res = await api(`delete/users/${code2}`);
@@ -168,7 +168,7 @@ Test.test('Getting all users', async (api) => {
     }
     res = await api(`get/users/all`, code1);
     if (res?.data?.length !== 3) {
-        return `Expected 3 users, got '${JSON.stringify(res)}'`;
+        return `Expected 3 users, got ${res?.data?.length}: '${JSON.stringify(res)}'`;
     }
 
     await api(`delete/users/${code1}`);

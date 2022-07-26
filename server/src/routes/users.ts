@@ -219,10 +219,11 @@ route('delete/users/:code', async ({ query, params: { code}, cookies }) => {
     const id = await idFromCode(query, code);
     if (typeof id === 'string') return id;
 
+    await query`DELETE FROM housepoints WHERE student = ${id}`;
+
     const queryRes = await query`DELETE FROM users WHERE id = ${id}`;
     if (!queryRes.affectedRows) return {
         status: 406,
         error: 'User not found'
     };
-    await query`DELETE FROM housepoints WHERE student = ${id}`;
 });

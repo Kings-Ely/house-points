@@ -1,16 +1,16 @@
 import c from 'chalk';
 import fetch from "node-fetch";
 import commandLineArgs, { CommandLineOptions } from 'command-line-args';
-import childProcess, {exec} from 'child_process';
+import childProcess from 'child_process';
 import now from 'performance-now';
 
 import setup from './setup';
 import Test from './framework';
 
 import './tests/smoke';
-import './tests/house-points';
 import './tests/self';
 import './tests/users';
+import './tests/house-points';
 
 const flags = commandLineArgs([
 	{ name: 'verbose', alias: 'v', type: Boolean, defaultValue: false },

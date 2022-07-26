@@ -48,14 +48,14 @@ export default class Test {
     batteryName;
     batteryID;
 
-    constructor (test: testExecutor, id: string | number = 'test', batteryName='', batteryID = 0) {
+    constructor(test: testExecutor, id: string | number = 'test', batteryName = '', batteryID = 0) {
         this.id = id;
         this.test = test;
         this.batteryName = batteryName;
         this.batteryID = batteryID;
     }
 
-    run (api: API, code: CommandLineOptions) {
+    run(api: API, code: CommandLineOptions) {
         return this.test(api, code);
     }
 
@@ -64,14 +64,14 @@ export default class Test {
     static tests: Test[] = [];
 
 
-    static test (name: string, test: testExecutor) {
+    static test(name: string, test: testExecutor) {
         Test.tests.push(new Test(test, Test.tests.length, name, this.currentID));
     }
 
     /**
      * @returns {TestResult}
      */
-    static async testAll (api: API, flags: CommandLineOptions) {
+    static async testAll(api: API, flags: CommandLineOptions) {
         let time = now();
 
         const res = new TestResult();
@@ -83,5 +83,29 @@ export default class Test {
         res.time = Math.round(now() - time);
 
         return res;
+    }
+
+    static eq (o1: Record<string, any>, o2: Record<string, any>) {
+        const keys1 = Object.keys(o1);
+        const keys2 = Object.keys(o2);
+        if (keys1.length !== keys2.length) {
+            return false;
+        }
+        for (const key of keys1) {
+            const val1 = o1[key];
+            const val2 = o2[key];
+            const areObjects = Test.isOb(val1) && Test.isOb(val2);
+            if (
+                areObjects && !Test.eq(val1, val2) ||
+                !areObjects && val1 !== val2
+            ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static isOb(o: any) {
+        return o != null && typeof o === 'object';
     }
 }

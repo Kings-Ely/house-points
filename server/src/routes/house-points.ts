@@ -119,7 +119,12 @@ async ({ query, cookies, params }) => {
     const { user, description, event: rawEvent, quantity: rawQuantity } = params;
 
     let quantity = parseInt(rawQuantity);
-    if (isNaN(quantity) || !quantity) quantity = 1;
+    if (isNaN(quantity) || !quantity) {
+        return 'Quantity must be a number';
+    }
+    if (quantity < 1) {
+        return 'Quantity must be at least 1';
+    }
 
     let event: number | null = parseInt(rawEvent);
     if (isNaN(event) || !event) event = null;
@@ -144,7 +149,7 @@ async ({ query, cookies, params }) => {
 
 
 route(
-    'create/house-points/request/:user/?description',
+    'create/house-points/request/:user/:quantity?description',
 async ({ query, cookies, params }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
