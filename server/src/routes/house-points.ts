@@ -150,17 +150,23 @@ async ({ query, cookies, params }) => {
 
 route(
     'create/house-points/request/:user/:quantity?description',
-async ({ query, cookies, params }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+async ({ query, params }) => {
+    const { user, description, quantity: rawQuantity } = params;
 
-    const { user, description } = params;
+    let quantity = parseInt(rawQuantity);
+    if (isNaN(quantity) || !quantity) {
+        return 'Quantity must be a number';
+    }
+    if (quantity < 1) {
+        return 'Quantity must be at least 1';
+    }
 
     const id = await idFromCode(query, user);
     if (typeof id === 'string') return id;
 
     await query`
         INSERT INTO housepoints (student, quantity, description)
-        VALUES (${id}, 1, ${description})
+        VALUES (${id}, ${quantity}, ${description})
     `;
 
     return { status: 201 };

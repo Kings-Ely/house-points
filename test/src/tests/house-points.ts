@@ -28,6 +28,9 @@ Test.test('Creating house points by giving', async (api) => {
     if (hp['description'] !== 'test house point 😋') {
         return `Expected description of 1st hp to be 'test house point' ${JSON.stringify(res)}`;
     }
+    if (hp['status'] !== 'Accepted') {
+        return `Expected status of hp to be 'Pending' ${JSON.stringify(res)}`;
+    }
 
     res = await api(`get/house-points/earned-by/${code}`);
     if (res.ok !== true) {
@@ -87,13 +90,54 @@ Test.test('Creating house points by giving', async (api) => {
 });
 
 Test.test('Creating house point requests', async (api) => {
-    const [ code ] = await generateUser(api);
+    const [ code, name ] = await generateUser(api);
 
     let res = await api(`create/house-points/request/${code}/4?description=test%20house+point+%F0%9F%98%8B`);
     if (res.ok !== true || res.status !== 201) {
         return `create/house-points/request/code/4 failed: ${JSON.stringify(res)}`;
     }
 
+    res = await api('get/house-points/all');
+    if (res?.data?.length !== 1) {
+        return `Expected 1 house point: ${JSON.stringify(res)}`;
+    }
+    const hp = res.data[0];
+    if (hp['quantity'] !== 4) {
+        return `Expected quantity of 1st hp to be '4' ${JSON.stringify(res)}`;
+    }
+    if (hp['description'] !== 'test house point 😋') {
+        return `Expected description of hp to be 'test house point' ${JSON.stringify(res)}`;
+    }
+    if (hp['status'] !== 'Pending') {
+        return `Expected status of hp to be 'Pending' ${JSON.stringify(res)}`;
+    }
+    if (hp['student'] !== name) {
+        return `Expected student of hp to be '${name}' ${JSON.stringify(res)}`;
+    }
+    if (hp['studentYear'] !== 10) {
+        return `Expected student year of hp to be '10' ${JSON.stringify(res)}`;
+    }
+
+    // invalid requests
+    res = await api(`create/house-points/request/${code}/-1`);
+    if (res.ok || res.status !== 400) {
+        return `Expected 400 from 'create/house-points/give/code/-1', got '${JSON.stringify(res)}'`;
+    }
+
+    res = await api(`create/house-points/request/${code}/0`);
+    if (res.ok || res.status !== 400) {
+        return `Expected 400 from 'create/house-points/give/code/0', got '${JSON.stringify(res)}'`;
+    }
+
+    res = await api(`create/house-points/request/${code}/ha`);
+    if (res.ok || res.status !== 400) {
+        return `Expected 400 from 'create/house-points/request/code/ha', got '${JSON.stringify(res)}'`;
+    }
+
+    res = await api(`create/house-points/request/invalid-code/1`);
+    if (res.ok || res.status !== 400) {
+        return `Expected 400 from 'create/house-points/give/invalid-code/ha', got '${JSON.stringify(res)}'`;
+    }
 
     return true;
 });
