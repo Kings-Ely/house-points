@@ -228,6 +228,8 @@ route('delete/house-points/with-id/:id', async ({ query, cookies, params }) => {
     const id = parseInt(rawID);
     if (isNaN(id)) return `Invalid house point ID '${rawID}', must be a number`;
 
+    // if we aren't an admin user, we can still delete it if
+    // they own the house point
     if (!await requireAdmin(cookies, query)) {
         const res = await query`
             SELECT users.code
@@ -238,7 +240,9 @@ route('delete/house-points/with-id/:id', async ({ query, cookies, params }) => {
 
         // doesn't get to know if house point even exists or not
         if (!res.length) return AUTH_ERR;
-        if (res[0]['code'] !== cookies[COOKIE_CODE_KEY]) return AUTH_ERR;
+        if (res[0]['code'] !== cookies[COOKIE_CODE_KEY]) {
+            return AUTH_ERR;
+        }
     }
 
     const res = await query`DELETE FROM housepoints WHERE id = ${id}`;

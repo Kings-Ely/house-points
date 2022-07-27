@@ -192,3 +192,60 @@ Test.test('Rejecting house points', async (api) => {
 
     return true;
 });
+
+Test.test('Rejecting house points', async (api) => {
+    const [ code1 ] = await generateUser(api);
+    const [ code2 ] = await generateUser(api);
+
+    // create two test house points
+    await api(`create/house-points/request/${code1}/1/doing-something`);
+
+    let res = await api(`get/house-points/all`);
+    const [ hp1 ] = res.data;
+
+    // delete with admin code
+    res = await api(`delete/house-points/with-id/${hp1.id}`);
+    if (res.ok !== true || res.status !== 200) {
+        return `delete/house-points/with-id/hp1.id failed: ${JSON.stringify(res)}`;
+    }
+    // check it's gone
+    res = await api(`get/house-points/all`);
+    if (res?.data?.length !== 0) {
+        return `Expected 0 house points: ${JSON.stringify(res)}`;
+    }
+
+    // create second test house point
+    await api(`create/house-points/request/${code1}/1/doing-something`);
+
+    res = await api(`get/house-points/all`);
+    const [ hp2 ] = res.data;
+
+    // delete with non-admin code
+    res = await api(`delete/house-points/with-id/${hp2.id}`, code2);
+    if (res.ok || res.status !== 401) {
+        return `Expected 401 from 'delete/house-points/with-id/hp2.id', got '${JSON.stringify(res)}'`;
+    }
+
+    // check it hasn't actually been deleted
+    res = await api(`get/house-points/all`);
+    if (res?.data?.length !== 1) {
+        return `Expected 1 house points: ${JSON.stringify(res)}`;
+    }
+
+    // now delete with same code as owns the house point
+    res = await api(`delete/house-points/with-id/${hp2.id}`, code1);
+    if (res.ok !== true || res.status !== 200) {
+        return `delete/house-points/with-id/hp2.id failed: ${JSON.stringify(res)}`;
+    }
+
+    // and finally check that it's gone
+    res = await api(`get/house-points/all`);
+    if (res?.data?.length !== 0) {
+        return `Expected 0 house points: ${JSON.stringify(res)}`;
+    }
+
+    await api(`delete/users/${code1}`);
+    await api(`delete/users/${code2}`);
+
+    return true;
+});
