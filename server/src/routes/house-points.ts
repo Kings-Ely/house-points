@@ -112,7 +112,7 @@ route('get/house-points/earned-by/:code', async ({ query, params: { code } }) =>
 
 
 route(
-    'create/house-points/give/:user/:quantity?description&event',
+    'create/house-points/give/:user/:quantity/:description?event',
 async ({ query, cookies, params }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
@@ -149,9 +149,9 @@ async ({ query, cookies, params }) => {
 
 
 route(
-    'create/house-points/request/:user/:quantity?description',
+    'create/house-points/request/:user/:quantity/:description?event',
 async ({ query, params }) => {
-    const { user, description, quantity: rawQuantity } = params;
+    const { user, description, event: rawEvent, quantity: rawQuantity } = params;
 
     let quantity = parseInt(rawQuantity);
     if (isNaN(quantity) || !quantity) {
@@ -161,12 +161,22 @@ async ({ query, params }) => {
         return 'Quantity must be at least 1';
     }
 
+    let event: number | null = parseInt(rawEvent);
+    if (isNaN(event) || !event) event = null;
+
     const id = await idFromCode(query, user);
     if (typeof id === 'string') return id;
 
     await query`
-        INSERT INTO housepoints (student, quantity, description)
-        VALUES (${id}, ${quantity}, ${description})
+        INSERT INTO housepoints (student, quantity, event, description, status, completed)
+        VALUES (
+            ${id},
+            ${quantity},
+            ${event},
+            ${description},
+            'Pending',
+            CURRENT_TIMESTAMP
+        )
     `;
 
     return { status: 201 };
@@ -181,7 +191,7 @@ async ({ query, cookies, params }) => {
     const { id: rawID, reject } = params;
 
     const id = parseInt(rawID);
-    if (isNaN(id)) return `Invalid house point ID '${rawID}', must be a number`;
+    if (isNaN(id) || !id) return `Invalid house point ID '${rawID}', must be a number`;
 
     if (!(await query`SELECT * FROM housepoints WHERE id = ${id}`).length) {
         return {
@@ -190,10 +200,23 @@ async ({ query, cookies, params }) => {
         };
     }
 
-    await query`UPDATE housepoints SET completed = CURRENT_TIMESTAMP, status='Accepted' WHERE id = ${id}`;
-
     if (reject) {
-        await query`UPDATE housepoints SET rejectMessage = ${reject}, status='Rejected' WHERE id = ${id}`;
+        await query`
+            UPDATE housepoints 
+            SET 
+                rejectMessage = ${reject},
+                completed = CURRENT_TIMESTAMP,
+                status='Rejected' 
+            WHERE id = ${id}
+        `;
+    } else {
+        await query`
+            UPDATE housepoints 
+            SET 
+                completed = CURRENT_TIMESTAMP,
+                status='Accepted' 
+            WHERE id = ${id}
+        `;
     }
 
     return { status: 200 };
