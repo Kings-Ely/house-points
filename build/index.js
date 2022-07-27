@@ -32,7 +32,7 @@ async function uploadFrontend () {
 
 async function buildBackend () {
     console.log('Building backend...');
-    await $`npm run build-server`;
+    await $`cd server; webpack`;
 }
 
 async function uploadBackend () {

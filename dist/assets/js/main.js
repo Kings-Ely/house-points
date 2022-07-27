@@ -561,6 +561,21 @@ async function logout () {
     await navigate(ROOT_PATH);
 }
 
+async function testApiCon () {
+    const res = await api`get/server/ping`
+        .catch(err => {
+            showError(`Can't connect to the server!`);
+            console.error(err);
+        });
+
+    if (!res.ok || res.status === 200) {
+        console.log('API connection OK');
+    } else {
+        showError(`Can't connect to the server!`);
+        console.error(res);
+    }
+}
+
 /**
  * Returns a promise which resolves once the document has been loaded
  * AND all necessary assets have been loaded from this script
@@ -628,6 +643,8 @@ async function handleUserInfo (info) {
 }
 
 (async () => {
+    await testApiCon();
+
     if (getCode()) {
         rawAPI(`get/users/info/${getCode()}`)
             .then(handleUserInfo)
