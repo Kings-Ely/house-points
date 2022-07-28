@@ -266,8 +266,8 @@ Test.test('Making sure hps are deleted when event is deleted', async (api) => {
     let res = await api(`get/events/all`);
     const { id: eventID } = res.data?.[0];
 
-    // create hps
-    await api(`create/house-points/${code}/1/being+awesome?event=${eventID}`);
+    // create hps and associate with event
+    await api(`create/house-points/give/${code}/1/being+awesome?event=${eventID}`);
 
     // delete event
     res = await api(`delete/events/with-id/${eventID}`);
@@ -276,7 +276,7 @@ Test.test('Making sure hps are deleted when event is deleted', async (api) => {
     }
 
     // check that hp is deleted
-    res = await api(`get/hps/all`);
+    res = await api(`get/house-points/all`);
     if (res?.data?.length !== 0) {
         return `Expected 0 house points, got ${JSON.stringify(res)}`;
     }

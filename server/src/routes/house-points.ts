@@ -6,7 +6,7 @@ route('get/house-points/with-id/:id', async ({ query, params, cookies }) => {
     const { id: rawID } = params;
     const id = parseInt(rawID);
 
-    if (isNaN(id)) return `ID '${rawID}' is not a number`;
+    if (isNaN(id)) return `ID '${rawID}' is not a integer`;
 
     if (!await requireAdmin(cookies, query)) {
         const res = await query`
@@ -120,7 +120,7 @@ async ({ query, cookies, params }) => {
 
     let quantity = parseInt(rawQuantity);
     if (isNaN(quantity) || !quantity) {
-        return 'Quantity must be a number';
+        return 'Quantity must be an integer';
     }
     if (quantity < 1) {
         return 'Quantity must be at least 1';
@@ -155,7 +155,7 @@ async ({ query, params }) => {
 
     let quantity = parseInt(rawQuantity);
     if (isNaN(quantity) || !quantity) {
-        return 'Quantity must be a number';
+        return 'Quantity must be an integer';
     }
     if (quantity < 1) {
         return 'Quantity must be at least 1';
@@ -191,7 +191,7 @@ async ({ query, cookies, params }) => {
     const { id: rawID, reject } = params;
 
     const id = parseInt(rawID);
-    if (isNaN(id) || !id) return `Invalid house point ID '${rawID}', must be a number`;
+    if (isNaN(id) || !id) return `Invalid house point ID '${rawID}', must be an integer`;
 
     if (!(await query`SELECT * FROM housepoints WHERE id = ${id}`).length) {
         return {
@@ -226,7 +226,7 @@ async ({ query, cookies, params }) => {
 route('delete/house-points/with-id/:id', async ({ query, cookies, params }) => {
     const { id: rawID } = params;
     const id = parseInt(rawID);
-    if (isNaN(id)) return `Invalid house point ID '${rawID}', must be a number`;
+    if (isNaN(id)) return `Invalid house point ID '${rawID}', must be a integer`;
 
     // if we aren't an admin user, we can still delete it if
     // they own the house point

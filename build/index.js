@@ -22,6 +22,8 @@ async function uploadFrontend () {
         // skip hidden files and directories
         if (path[0] === '.') continue;
 
+        console.log('...');
+
         if (fs.statSync(LOCAL_PATH + path).isDirectory()) {
             await $`sshpass -f './sshPass.txt' rsync -r --exclude='*.env' ${LOCAL_PATH}${path} ${REMOTE_ADDRESS}:~${REMOTE_FRONTEND_PATH}`;
             continue;

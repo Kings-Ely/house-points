@@ -18,7 +18,7 @@ Test.test('Creating, getting and deleting events', async (api) => {
     // to get timestamp from form
 
     // create event
-    const now = Date.now() / 1000;
+    const now = Math.round(Date.now() / 1000);
     res = await api(`create/events/doing+something+2022/${now}`);
     if (res.ok !== true || res.status !== 201) {
         return `create/events/doing+something+2022 failed: ${JSON.stringify(res)}`;
@@ -44,8 +44,8 @@ Test.test('Creating, getting and deleting events', async (api) => {
     if (res?.data?.length !== 1) {
         return `Expected 1 events, got ${JSON.stringify(res)}`;
     }
-    if (res.data?.[0].code !== 'doing something 2022') {
-        return `Expected event name to be 'doing something 2022', got '${res.data[0].code}'`;
+    if (res.data?.[0]?.name !== 'doing something 2022') {
+        return `1Expected event name to be 'doing something 2022', got '${res?.data?.[0]?.name}'`;
     }
 
     const id = res.data?.[0]?.id;
@@ -80,7 +80,7 @@ Test.test('Creating, getting and deleting events', async (api) => {
 });
 
 Test.test('Updating event name', async (api) => {
-    const now = Date.now() / 1000;
+    const now = Math.round(Date.now() / 1000);
 
     const [ code ] = await generateUser(api);
 
@@ -96,13 +96,13 @@ Test.test('Updating event name', async (api) => {
     }
     const { id, name } = res.data?.[0];
     if (name !== 'doing something 2022') {
-        return `Expected event name to be 'doing something 2022', got '${name}'`;
+        return `2Expected event name to be 'doing something 2022', got '${name}'`;
     }
 
     // update event name
     res = await api(`update/events/change-name/${id}/doing+something+else+2022`);
     if (res.ok !== true || res.status !== 200) {
-        return `update/events/${id}/name/doing+something+else+2022 failed: ${JSON.stringify(res)}`;
+        return `update/events/change-name/${id}/name/doing+something+else+2022 failed: ${JSON.stringify(res)}`;
     }
 
     res = await api(`get/events/all`);
@@ -143,7 +143,7 @@ Test.test('Updating event name', async (api) => {
 
 
 Test.test('Updating event timestamp', async (api) => {
-    const now = Date.now() / 1000;
+    const now = Math.round(Date.now() / 1000);
     // 1 week ago
     const then = now - 60 * 60 * 24 * 7;
 
@@ -161,7 +161,7 @@ Test.test('Updating event timestamp', async (api) => {
     }
     const { id, name, time } = res.data?.[0];
     if (name !== 'doing something 2022') {
-        return `Expected event name to be 'doing something 2022', got '${name}'`;
+        return `3Expected event name to be 'doing something 2022', got '${name}'`;
     }
     if (time !== now) {
         return `Expected event time to be '${now}', got '${time}'`;
@@ -202,3 +202,61 @@ Test.test('Updating event timestamp', async (api) => {
 
     return true;
 });
+
+
+Test.test('Events are gotten in order of time', async (api) => {
+    const now = Math.round(Date.now() / 1000);
+    // 1 week ago
+    const then = now - 60 * 60 * 24 * 7;
+
+    // create house points
+    await api(`create/events/now/${now}`);
+    await api(`create/events/then/${then}`);
+
+    let res = await api(`get/events/all`);
+    if (res?.data?.length !== 2) {
+        return `Expected 2 events, got ${JSON.stringify(res)}`;
+    }
+    // in order from closest to now to furthest in past
+    // so 0th index is most recent
+    let [
+        { time: time1, id: id1 },
+        { time: time2, id: id2 }
+    ] = res.data;
+
+    if (time1 !== now) {
+        return `Expected event time to be '${now}', got '${time1}'`;
+    }
+    if (time2 !== then) {
+        return `Expected event time to be '${then}', got '${time2}'`;
+    }
+
+    await api(`delete/events/with-id/${id1}`);
+    await api(`delete/events/with-id/${id2}`);
+
+    // repeat the other way round
+    await api(`create/events/then/${then}`);
+    await api(`create/events/now/${now}`);
+
+    res = await api(`get/events/all`);
+    if (res?.data?.length !== 2) {
+        return `Expected 2 events, got ${JSON.stringify(res)}`;
+    }
+    [
+        { time: time1, id: id1 },
+        { time: time2, id: id2 }
+    ] = res.data;
+
+    if (time1 !== now) {
+        return `Expected event time to be '${now}', got '${time1}'`;
+    }
+    if (time2 !== then) {
+        return `Expected event time to be '${then}', got '${time2}'`;
+    }
+
+    await api(`delete/events/with-id/${id1}`);
+    await api(`delete/events/with-id/${id2}`);
+
+    return true;
+});
+
