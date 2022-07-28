@@ -77,7 +77,13 @@ export default class Test {
         const res = new TestResult();
 
         for (let test of Test.tests) {
-            res.register(await test.run(api, flags), test);
+            let testRes;
+            try {
+                testRes = await test.run(api, flags)
+            } catch (e) {
+                testRes = e;
+            }
+            res.register(testRes, test);
         }
 
         res.time = Math.round(now() - time);

@@ -44,11 +44,11 @@ Test.test('Creating, getting and deleting events', async (api) => {
     if (res?.data?.length !== 1) {
         return `Expected 1 events, got ${JSON.stringify(res)}`;
     }
-    if (res.data[0].code !== 'doing something 2022') {
+    if (res.data?.[0].code !== 'doing something 2022') {
         return `Expected event name to be 'doing something 2022', got '${res.data[0].code}'`;
     }
 
-    const [ { id } ] = res.data;
+    const id = res.data?.[0]?.id;
 
     // deleting shouldn't work without admin user either
     res = await api(`delete/events/with-id/${id}`, code);
@@ -94,7 +94,7 @@ Test.test('Updating event name', async (api) => {
     if (res?.data?.length !== 1) {
         return `Expected 1 event, got ${JSON.stringify(res)}`;
     }
-    const [ { id, name } ] = res.data;
+    const { id, name } = res.data?.[0];
     if (name !== 'doing something 2022') {
         return `Expected event name to be 'doing something 2022', got '${name}'`;
     }
@@ -109,7 +109,7 @@ Test.test('Updating event name', async (api) => {
     if (res?.data?.length !== 1) {
         return `Expected 1 event, got ${JSON.stringify(res)}`;
     }
-    const [ { id: id2, name: name2 } ] = res.data;
+    const { id: id2, name: name2 } = res.data?.[0];
     if (id !== id2) {
         return `Expected event id to be '${id}', got '${id2}'`;
     }
@@ -127,7 +127,7 @@ Test.test('Updating event name', async (api) => {
     if (res?.data?.length !== 1) {
         return `Expected 1 event, got ${JSON.stringify(res)}`;
     }
-    const [ { id: id3, name: name3 } ] = res.data;
+    const { id: id3, name: name3 } = res.data?.[0];
     if (id !== id3) {
         return `Expected event id to be '${id}', got '${id3}'`;
     }
@@ -159,7 +159,7 @@ Test.test('Updating event timestamp', async (api) => {
     if (res?.data?.length !== 1) {
         return `Expected 1 event, got ${JSON.stringify(res)}`;
     }
-    const [ { id, name, time } ] = res.data;
+    const { id, name, time } = res.data?.[0];
     if (name !== 'doing something 2022') {
         return `Expected event name to be 'doing something 2022', got '${name}'`;
     }
@@ -177,7 +177,7 @@ Test.test('Updating event timestamp', async (api) => {
     if (res?.data?.length !== 1) {
         return `Expected 1 event, got ${JSON.stringify(res)}`;
     }
-    const [ { time: time2 } ] = res.data;
+    const time2 = res.data?.[0]?.['time'];
     if (time2 !== then) {
         return `Expected event time to be '${then}', got '${time2}'`;
     }
@@ -192,7 +192,7 @@ Test.test('Updating event timestamp', async (api) => {
     if (res?.data?.length !== 1) {
         return `Expected 1 event, got ${JSON.stringify(res)}`;
     }
-    const [ { time: time3 } ] = res.data;
+    const time3 = res.data?.[0]?.['time'];
     if (time3 !== then) {
         return `Expected event time to be '${then}', got '${time3}'`;
     }
