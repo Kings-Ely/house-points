@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="robots" content="noindex">
+
+    <script src="../../assets/js/main.js"></script>
+    <link rel="preload" href="../../assets/css/main.css" as="style" onload="asyncCSS(this)">
+    <link rel="preload" href="./index.css" as="style" onload="asyncCSS(this)">
+    <link rel="preload" href="../../assets/css/darkmode.css" as="style" onload="asyncCSS(this)">
+    <script src="index.js" defer></script>
+</head>
+<body>
+<nav></nav>
+<main>
+    <section>
+        <h2>Add Event</h2>
+        <div>
+            <label>
+                <input
+                    type="text"
+                    id="add-event-name"
+                    placeholder="Name"
+                    aria-label="name"
+                >
+            </label>
+            <label>
+                <input
+                    type="datetime-local"
+                    id="add-event-time"
+                    aria-label="event time"
+                >
+            </label>
+            <button
+                    id="add-event-submit"
+                    class="icon"
+                    svg="plus.svg"
+                    aria-label="add event"
+            ></button>
+            <label>
+                <textarea
+                    id="add-event-description"
+                    placeholder="Description"
+                    aria-label="description"
+                ></textarea>
+            </label>
+        </div>
+    </section>
+
+    <section>
+        <div id="with-all-events-menu">
+            <div>
+            <span style="border: 1px solid var(--border); border-radius: 10px; display: inline-block; margin: 10px; padding: 5px;">
+                <span svg="small-down-arrow.svg"></span>
+                <button
+                    onclick="selectAll()"
+                    class="icon"
+                    svg="unselected-checkbox.svg"
+                    label="Select All"
+                    aria-label="select all"
+                ></button>
+
+                <button
+                    onclick="selectAll(false)"
+                    class="icon"
+                    svg="unselect-checkbox.svg"
+                    label="Unselect All"
+                    aria-label="unselect all"
+                ></button>
+            </span>
+            </div>
+            <div>
+                <button
+                    onclick="deleteSelected()"
+                    class="icon"
+                    aria-label="delete selected"
+                    label="Delete"
+                    svg="bin.svg"
+                ></button>
+            </div>
+            <div>
+                <label>
+                    <input
+                        placeholder="search for event by name..."
+                        oninput="main(false)"
+                        id="search"
+                        autocomplete="off"
+                        aria-label="search"
+                    >
+                </label>
+            </div>
+        </div>
+        <div id="events"></div>
+    </section>
+</main>
+<footer></footer>
+</body>
+</html>

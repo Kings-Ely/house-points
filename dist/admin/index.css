@@ -22,7 +22,13 @@
     color: var(--text-warning);
 }
 
-#students-link {
+#big-links {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.big-link {
     margin: 20px;
     font-size: 20px;
     text-decoration: none;
@@ -36,7 +42,7 @@
     justify-content: center;
 }
 
-#students-link:hover {
+.big-link:hover {
     color: var(--text-light);
     background: var(--bg-accent);
 }

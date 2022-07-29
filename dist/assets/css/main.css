@@ -45,7 +45,7 @@ section:last-child {
 
 /* INPUTS */
 
-input, button {
+input, button, textarea {
     border: none;
     background: none;
     font-size: 25px;
@@ -64,6 +64,15 @@ input:hover {
 
 input:focus {
     background: var(--bg-accent);
+}
+
+textarea {
+    border: 1px solid var(--border);
+    border-radius: 0 0 10px 10px;
+    margin: 10px;
+    padding: 10px;
+    resize: vertical;
+    transition: 0s;
 }
 
 /* TEXT */

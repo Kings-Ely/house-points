@@ -17,10 +17,10 @@ route('get/events/all', async ({ query, cookies }) => {
     `};
 });
 
-route('create/events/:name/:timestamp', async ({ query, cookies, params }) => {
+route('create/events/:name/:timestamp/:description', async ({ query, cookies, params }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    const { name, timestamp: tsRaw } = params;
+    const { name, timestamp: tsRaw, description } = params;
 
     if (name.length < 3) {
         return `Event name must be more than 3 characters, got '${name}'`;
@@ -35,10 +35,11 @@ route('create/events/:name/:timestamp', async ({ query, cookies, params }) => {
     }
 
     await query`
-        INSERT INTO events (name, time)
+        INSERT INTO events (name, time, description)
         VALUES (
             ${name},
-            FROM_UNIXTIME(${time})
+            FROM_UNIXTIME(${time}),
+            ${description}
         )
     `;
 
