@@ -4,12 +4,16 @@ import now from "performance-now";
 import c from 'chalk';
 import * as fs from "fs";
 
-$.verbose = false;
+$.verbose = true;
 
 const REMOTE_ADDRESS = 'josephcoppin@josephcoppin.com';
 const REMOTE_FRONTEND_PATH = '/public_html/school/house-points';
 const REMOTE_BACKEND_PATH = '/hpsnea-server';
 const LOCAL_PATH = './dist/';
+
+async function upload (localPath, remotePath, args='') {
+    return await $`sshpass -f './sshPass.txt' rsync ${args.split(' ')} ${localPath} ${REMOTE_ADDRESS}:~${remotePath}`;
+}
 
 async function uploadFrontend () {
     if (process.argv.includes('--no-front')) return;
@@ -25,10 +29,10 @@ async function uploadFrontend () {
         console.log('...');
 
         if (fs.statSync(LOCAL_PATH + path).isDirectory()) {
-            await $`sshpass -f './sshPass.txt' rsync -r --exclude='*.env' ${LOCAL_PATH}${path} ${REMOTE_ADDRESS}:~${REMOTE_FRONTEND_PATH}`;
+            await upload(LOCAL_PATH + path, REMOTE_FRONTEND_PATH, "-r --exclude='*.env'");
             continue;
         }
-        await $`sshpass -f './sshPass.txt' rsync ${LOCAL_PATH}${path} ${REMOTE_ADDRESS}:~${REMOTE_FRONTEND_PATH}`;
+        await upload(LOCAL_PATH + path, REMOTE_FRONTEND_PATH);
     }
 }
 
@@ -48,12 +52,12 @@ async function uploadBackend () {
     ];
 
     await Promise.all(paths.map(async (path) =>
-        await $`sshpass -f './sshPass.txt' rsync ${path} ${REMOTE_ADDRESS}:~${REMOTE_BACKEND_PATH}`
+        await upload(path, REMOTE_BACKEND_PATH)
     ));
 
     if (fs.existsSync('./server/prod.env')) {
         // upload prod.env and rename it to .env
-        await $`sshpass -f './sshPass.txt' rsync ./server/prod.env ${REMOTE_ADDRESS}:~${REMOTE_BACKEND_PATH}/.env`;
+        await upload('./server/prod.env', REMOTE_BACKEND_PATH + '/.env')
     }
 }
 

@@ -2,14 +2,10 @@
 
 
 // Global constants and variables
-const API_PORT = 4464,
-      API_ROOT = location.origin + ':' + API_PORT,
+const API_ROOT = 'https://josephcoppin.com/school/house-points/fallback-api',
       COOKIE_KEY = 'hpCode',
       ALT_COOKIE_KEY = 'hpAltCode',
-      HOUSE_NAME = 'Osmond',
-      ALPHABET_UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-      ALPHABET_NUMBERS = '0123456789',
-      ALPHABET_LOWER = 'abcdefghijklmnopqrstuvwxyz';
+      HOUSE_NAME = 'Osmond';
 
 let ROOT_PATH = '',
     $nav, $footer, $error,
@@ -21,8 +17,10 @@ let ROOT_PATH = '',
     altUserInfoJSON = null,
     isSignedIn = false,
     userInfoIsLoaded = false,
-    onLoadCBs = [],
-    documentLoaded = false;
+    onLoadCBs = [ () => console.log('Document Loaded') ],
+    documentLoaded = false,
+    usingFallBackAPI = false;
+
 
 const timeUnits = {
     year  : 24 * 60 * 60 * 1000 * 365,
@@ -278,7 +276,9 @@ function hideWithID (id) {
 
 // Spinner
 
-function showSpinner () {
+async function showSpinner () {
+    await waitForReady();
+
     document.body.style.cursor = 'progress';
     const loader = document.createElement('div');
     document.body.appendChild(loader);
@@ -308,13 +308,13 @@ async function rawAPI (path) {
     let res;
     let asJSON;
     try {
-        res = await fetch(`${API_ROOT}/${path}`, {
+        res = await fetch(`${API_ROOT}?p=${encodeURI(path)}`, {
             method: 'GET',
             mode: 'cors',
             cache: 'no-cache',
             redirect: 'follow',
             credentials: 'include'
-        });
+        }).catch(console.error);
     } catch (e) {
         return {
             error: `Failed to fetch ${path}`
@@ -360,7 +360,7 @@ async function api (path, ...args) {
         currentlyShowingLoadingAnim = true;
         shouldHideAtEnd = true;
 
-        loader = showSpinner();
+        loader = await showSpinner();
     }
 
     if (path[0] === '/') {
@@ -368,7 +368,7 @@ async function api (path, ...args) {
     }
 
     // fetch
-    const res = await fetch(`${API_ROOT}/${path}`, {
+    const res = await fetch(`${API_ROOT}?p=${encodeURI(path)}`, {
         method: 'GET',
         mode: 'cors',
         cache: 'no-cache',
@@ -504,7 +504,9 @@ const navigate = async (url) => {
 /**
  * @param {string} message - is parsed as HTML
  */
-function showError (message) {
+async function showError (message) {
+    await waitForReady();
+
     if (!$error) {
         $error = document.createElement('div');
         $error.id = 'error-container';
@@ -562,6 +564,7 @@ async function logout () {
 }
 
 async function testApiCon () {
+
     const res = await api`get/server/ping`
         .catch(err => {
             showError(`Can't connect to the server!`);
@@ -643,6 +646,13 @@ async function handleUserInfo (info) {
 }
 
 (async () => {
+
+    if (document.readyState === 'complete') {
+        documentIsLoaded();
+    } else {
+        window.onload = documentIsLoaded;
+    }
+
     await testApiCon();
 
     if (getCode()) {
@@ -664,11 +674,5 @@ async function handleUserInfo (info) {
         for (const cb of onLoadCBs) {
             cb();
         }
-    }
-
-    if (document.readyState === 'complete') {
-        documentIsLoaded();
-    } else {
-        window.onload = documentIsLoaded;
     }
 })();
