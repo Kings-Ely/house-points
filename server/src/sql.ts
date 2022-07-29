@@ -56,11 +56,25 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
             }
 
             const query = queryParts.reduce((acc, cur, i) => {
-                return acc + cur + (params[i] === undefined ? '' : '?');
+                let str = acc + cur;
+                if (params[i] === undefined) {
+                    return str;
+                } else if (Array.isArray(params[i])) {
+                    return str + '?'.repeat(params[i].length);
+                } else {
+                    return str + '?';
+                }
             }, '');
 
             if (flags.verbose) {
                 log`QUERY: ${con.escape(query)} ${JSON.stringify(params)}`;
+            }
+
+            // if it's an array, add all the elements of the array in place as params
+            for (let i = 0; i < params.length; i++) {
+                if (Array.isArray(params[i])) {
+                    params.splice(i, 1, ...params[i]);
+                }
             }
 
             con.query(query, params, (err, result) => {

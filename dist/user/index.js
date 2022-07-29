@@ -2,6 +2,23 @@ const $name = document.getElementById('name');
 const $hps = document.getElementById('hps');
 const $hpReasonInp = document.getElementById('hp-reason');
 
+(async () => {
+    await init('..');
+
+    if (!await signedIn()) {
+        await navigate(`/?error=auth`);
+    }
+
+    if ((await userInfo())['student']) {
+        await reloadHousePoints();
+    } else {
+        title(await userInfo(), []);
+        hideWithID('hps');
+        hideWithID('submit-hp-request');
+    }
+
+})();
+
 function housePoints (hps) {
     if (hps.length === 0) {
         $hps.innerHTML = `
@@ -121,19 +138,3 @@ document.getElementById('submit-hp').onclick = async () => {
     $hpReasonInp.value = '';
 };
 
-(async () => {
-    await init('..');
-
-    if (!await signedIn()) {
-        await navigate(`/?error=auth`);
-    }
-
-    if ((await userInfo())['student']) {
-        await reloadHousePoints();
-    } else {
-        title(await userInfo(), []);
-        hideWithID('hps');
-        hideWithID('submit-hp-request');
-    }
-
-})();

@@ -13,8 +13,8 @@ Test.test('Creating house points by giving', async (api) => {
     }
 
     // create house point
-    res = await api(`create/house-points/give/${code}/2/test%20house+point+%F0%9F%98%8B`);
-    if (res.ok !== true) return `create/house-points/give/${code}/2 failed: ${JSON.stringify(res)}`;
+    res = await api(`create/house-points/give/${code}/2?description=test%20house+point+%F0%9F%98%8B`);
+    if (res.ok !== true) return `create/house-points/give/code/2 failed: ${JSON.stringify(res)}`;
 
     // check house point exists and info is correct
     res = await api('get/house-points/all');
@@ -48,33 +48,33 @@ Test.test('Creating house points by giving', async (api) => {
     }
 
     // can't give with non-admin code
-    res = await api(`create/house-points/give/${code}/3/invalid+test+hp`, code);
+    res = await api(`create/house-points/give/${code}/3`, code);
     if (res.ok || res.status !== 401) {
         return `Expected 401 from 'create/house-points/give/code/3', got '${JSON.stringify(res)}'`;
     }
 
     // can't give with negative quantity
-    res = await api(`create/house-points/give/${code}/-1/something`);
+    res = await api(`create/house-points/give/${code}/-1`);
     if (res.ok || res.status !== 400) {
         return `Expected 400 from 'create/house-points/give/code/-1', got '${JSON.stringify(res)}'`;
     }
 
     // can't give with 0 quantity
-    res = await api(`create/house-points/give/${code}/0/something`);
+    res = await api(`create/house-points/give/${code}/0`);
     if (res.ok || res.status !== 400) {
         return `Expected 400 from 'create/house-points/give/code/0', got '${JSON.stringify(res)}'`;
     }
 
     // can't give with invalid quantity
-    res = await api(`create/house-points/give/${code}/ha/something`);
+    res = await api(`create/house-points/give/${code}/ha`);
     if (res.ok || res.status !== 400) {
         return `Expected 400 from 'create/house-points/give/code/ha', got '${JSON.stringify(res)}'`;
     }
 
     // can't give with invalid code
-    res = await api(`create/house-points/give/invalid-code/1/something`);
+    res = await api(`create/house-points/give/invalid-code/1?description=just+a+test`);
     if (res.ok || res.status !== 400) {
-        return `Expected 400 from 'create/house-points/give/invalid-code/1/something', got '${JSON.stringify(res)}'`;
+        return `Expected 400 from 'create/house-points/give/invalid-code/1', got '${JSON.stringify(res)}'`;
     }
 
     res = await api('get/house-points/all');
@@ -98,7 +98,7 @@ Test.test('Creating house points by giving', async (api) => {
 Test.test('Creating house point requests', async (api) => {
     const [ code, name ] = await generateUser(api);
 
-    let res = await api(`create/house-points/request/${code}/4/test%20house+point+%F0%9F%98%8B`);
+    let res = await api(`create/house-points/request/${code}/4?description=test%20house+point+%F0%9F%98%8B`);
     if (res.ok !== true || res.status !== 201) {
         return `create/house-points/request/code/4 failed: ${JSON.stringify(res)}`;
     }
@@ -125,22 +125,22 @@ Test.test('Creating house point requests', async (api) => {
     }
 
     // invalid requests
-    res = await api(`create/house-points/request/${code}/-1/being+awesome`);
+    res = await api(`create/house-points/request/${code}/-1?description=being+awesome`);
     if (res.ok || res.status !== 400) {
         return `Expected 400 from 'create/house-points/request/code/-1', got '${JSON.stringify(res)}'`;
     }
 
-    res = await api(`create/house-points/request/${code}/0/doing+something+cool`);
+    res = await api(`create/house-points/request/${code}/0?description=doing+something+cool`);
     if (res.ok || res.status !== 400) {
         return `Expected 400 from 'create/house-points/request/code/0', got '${JSON.stringify(res)}'`;
     }
 
-    res = await api(`create/house-points/request/${code}/ha/being+nice`);
+    res = await api(`create/house-points/request/${code}/ha?description=doing+something+cool`);
     if (res.ok || res.status !== 400) {
         return `Expected 400 from 'create/house-points/request/code/ha', got '${JSON.stringify(res)}'`;
     }
 
-    res = await api(`create/house-points/request/invalid-code/1/being+epic`);
+    res = await api(`create/house-points/request/invalid-code/1?description=being+epic`);
     if (res.ok || res.status !== 400) {
         return `Expected 400 from 'create/house-points/give/invalid-code/1', got '${JSON.stringify(res)}'`;
     }
@@ -153,7 +153,7 @@ Test.test('Creating house point requests', async (api) => {
 Test.test('Accepting house points', async (api) => {
     const [ code, name ] = await generateUser(api);
 
-    await api(`create/house-points/request/${code}/2/doing-something`);
+    await api(`create/house-points/request/${code}/2?description=doing-something`);
 
     let res = await api(`get/house-points/all`);
     if (res?.data?.length !== 1) {
@@ -177,7 +177,7 @@ Test.test('Accepting house points', async (api) => {
 Test.test('Rejecting house points', async (api) => {
     const [ code, name ] = await generateUser(api);
 
-    await api(`create/house-points/request/${code}/3/doing-something`);
+    await api(`create/house-points/request/${code}/3?description=doing-something`);
 
     let res = await api(`get/house-points/all`);
     const hp = res.data[0];
@@ -203,7 +203,7 @@ Test.test('Rejecting house points', async (api) => {
     const [ code2 ] = await generateUser(api);
 
     // create two test house points
-    await api(`create/house-points/request/${code1}/1/doing-something`);
+    await api(`create/house-points/request/${code1}/1?description=doing-something`);
 
     let res = await api(`get/house-points/all`);
     const [ hp1 ] = res.data;
@@ -220,7 +220,7 @@ Test.test('Rejecting house points', async (api) => {
     }
 
     // create second test house point
-    await api(`create/house-points/request/${code1}/1/doing-something`);
+    await api(`create/house-points/request/${code1}/1?description=doing-something`);
 
     res = await api(`get/house-points/all`);
     const [ hp2 ] = res.data;
@@ -267,7 +267,12 @@ Test.test('Making sure hps are deleted when event is deleted', async (api) => {
     const { id: eventID } = res.data?.[0];
 
     // create hps and associate with event
-    await api(`create/house-points/give/${code}/1/being+awesome?event=${eventID}`);
+    await api(`create/house-points/give/${code}/1?event=${eventID}`);
+
+    res = await api(`get/house-points/all`);
+    if (res?.data?.length !== 1) {
+        return `Expected 1 house points, got ${JSON.stringify(res)}`;
+    }
 
     // delete event
     res = await api(`delete/events/with-id/${eventID}`);

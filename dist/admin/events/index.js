@@ -1,5 +1,6 @@
 let selected = [];
 let events = [];
+let studentsInEvent = {};
 
 const searchFilterInput = document.getElementById('search');
 
@@ -7,6 +8,21 @@ const $nameInp = document.querySelector('#add-event-name');
 const $descInp = document.querySelector('#add-event-description');
 const $timeInp = document.querySelector('#add-event-time');
 const $events = document.querySelector(`#events`);
+// replaced with input element
+let $addEventAddStudent = document.querySelector('#add-event-student-inp');
+let $addEventAddStudentsHTML = document.querySelector('#add-event-students');
+
+(async () => {
+    await init('../..');
+
+    $addEventAddStudent = insertComponent($addEventAddStudent).studentNameInputWithIntellisense();
+
+    if (!await signedIn() || !(await userInfo())['admin']) {
+        await navigate(`/?error=auth`);
+    }
+
+    await main();
+})();
 
 function showEvent (event, selected) {
 
@@ -16,7 +32,7 @@ function showEvent (event, selected) {
         <div class="event">
             <div>
                 <button 
-                    onclick="select('${id}', ${!selected})"
+                    onclick="select(${id}, ${!selected})"
                     class="icon no-scale"
                     svg="${selected ? 'selected-checkbox' : 'unselected-checkbox'}.svg"
                     aria-label="${selected ? 'Unselect' : 'Select'}"
@@ -50,6 +66,33 @@ async function deleteEvent (id, name) {
     await main();
 }
 
+async function addStudentToEvent () {
+    const name = $addEventAddStudent.value;
+
+    if (!name) {
+        showError('Need a name to add student to event');
+        return;
+    }
+
+    const codeRes = await api`get/users/code-from-name/${name}`;
+
+    if (!codeRes.ok || !codeRes.code) {
+        // error automatically shown
+        return;
+    }
+
+    studentsInEvent[codeRes.code] = 1;
+
+    $addEventAddStudent.value = '';
+
+    await main(false);
+}
+
+function removeStudentFromEvent (code) {
+    delete studentsInEvent[code];
+    main(false);
+}
+
 async function deleteSelected () {
     if (!confirm(
         `Are you sure you want to delete ${selected.length} events and the house points associated with it? This is irreversible.`)) {
@@ -58,20 +101,72 @@ async function deleteSelected () {
 
     // send API requests at the same time and wait for all to finish
     await Promise.all(selected.map(async id => {
-        await api`delete/events/width-id/${id}`;
+        await api`delete/events/with-id/${id}`;
     }));
 
     await main();
 }
 
+function updateStudentPoints (code, points) {
+    // can't go below 1 hp
+    studentsInEvent[code] = Math.max(points, 1);
+    main(false);
+}
+
+async function showStudentsInAddEvent () {
+
+    if (!Object.keys(studentsInEvent).length) {
+        $addEventAddStudentsHTML.innerHTML = 'No students selected';
+        return;
+    }
+
+    const { data } = await api`get/users/batch-info/${Object.keys(studentsInEvent).join(',')}`;
+
+    let html = '';
+    for (let user of data) {
+        const { name, code, year } = user;
+        html += `
+            <div class="add-student-to-event-student">
+                <div style="display: block">
+                    ${name} 
+                    (Y${year})
+                    gets
+                    <input
+                        type="number"
+                        value="${studentsInEvent[code]}"
+                        onchange="updateStudentPoints('${code}', this.value)"
+                        style="width: 40px"
+                    >
+                    house points
+                
+                </div>
+                <div style="display: block">
+                    <button
+                        onclick="removeStudentFromEvent('${code}')"
+                        label="Remove ${name} from new event"
+                        aria-label="Remove ${name} from new event"
+                        svg="bin.svg"
+                        class="icon"
+                    ></button>
+                </div>
+            </div>
+        `;
+    }
+
+    $addEventAddStudentsHTML.innerHTML = html;
+    reloadDOM();
+}
+
 async function select (id, select) {
     if (select) {
+        // add to selected
         if (selected.indexOf(id) !== -1) {
             console.error(`Cannot reselect event with ID '${id}'`);
             return;
         }
         selected.push(id);
     } else {
+        // remove from selected
         const index = selected.indexOf(id);
         if (index !== -1) {
             selected.splice(index, 1);
@@ -79,7 +174,7 @@ async function select (id, select) {
             console.error(`Cannot unselect event with ID '${id}'`);
         }
     }
-    await main(false);
+    main(false);
 }
 
 function selectAll (select=true) {
@@ -115,6 +210,8 @@ async function main (reload=true) {
         </div>
     `;
 
+    showStudentsInAddEvent();
+
     const searchValue = searchFilterInput.value;
 
     let html = '';
@@ -128,7 +225,7 @@ async function main (reload=true) {
 
     $events.innerHTML += html;
 
-    await reloadDOM();
+    reloadDOM();
 }
 
 document.getElementById(`add-event-submit`).onclick = async () => {
@@ -144,20 +241,14 @@ document.getElementById(`add-event-submit`).onclick = async () => {
     }
 
     const time = new Date($timeInp.value).getTime();
-    await api`create/events/${$nameInp.value}/${time}/${$descInp.value}`;
+    const { id } = await api`create/events/${$nameInp.value}/${time}?description=${$descInp.value}`;
 
     $nameInp.value = '';
     $descInp.value = '';
 
+    await Promise.all(Object.keys(studentsInEvent).map(async code => {
+        await api`create/house-points/give/${code}/${studentsInEvent[code]}?event=${id}`;
+    }));
+
     await main();
 };
-
-(async () => {
-    await init('../..');
-
-    if (!await signedIn() || !(await userInfo())['admin']) {
-        await navigate(`/?error=auth`);
-    }
-
-    await main();
-})();

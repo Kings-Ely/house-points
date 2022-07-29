@@ -112,7 +112,7 @@ route('get/house-points/earned-by/:code', async ({ query, params: { code } }) =>
 
 
 route(
-    'create/house-points/give/:user/:quantity/:description?event',
+    'create/house-points/give/:user/:quantity?description&event',
 async ({ query, cookies, params }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
@@ -138,7 +138,7 @@ async ({ query, cookies, params }) => {
             ${id},
             ${quantity},
             ${event},
-            ${description},
+            ${description || ''},
             'Accepted',
             CURRENT_TIMESTAMP
         )
@@ -149,7 +149,7 @@ async ({ query, cookies, params }) => {
 
 
 route(
-    'create/house-points/request/:user/:quantity/:description?event',
+    'create/house-points/request/:user/:quantity?description&event',
 async ({ query, params }) => {
     const { user, description, event: rawEvent, quantity: rawQuantity } = params;
 

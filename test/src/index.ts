@@ -105,17 +105,9 @@ async function deploy () {
 	}
 
 	// stop the server process by sending it a 'kill signal'
-	if ((await api(`delete/server/${process.env.KILL_CODE}`)).ok) {
+	if ((await api(`delete/server`)).ok) {
 		console.log(c.green(`Server Killed, finished testing in ${timeSinceStart()}ms`));
 	} else {
 		console.log(c.red(`Server not killed`));
 	}
-
-	/*
-	exec(`npm run stop-server`, (err, _, er) => {
-		if (err) console.log(err);
-		if (er) console.log(er);
-		console.log(c.green(`Container stopped, finished testing in ${timeSinceStart()}ms`));
-	});
-	 */
 })();

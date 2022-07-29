@@ -1,5 +1,6 @@
-import route from "../";
-import {AUTH_ERR, authLvl, COOKIE_CODE_KEY, idFromCode, makeCode, requireAdmin, requireLoggedIn} from "../util";
+import route from '../';
+import log from '../log';
+import {AUTH_ERR, authLvl, COOKIE_CODE_KEY, idFromCode, makeCode, requireAdmin, requireLoggedIn} from '../util';
 
 
 route('get/users/auth/:code', async ({ query, params: { code} }) => {
@@ -39,6 +40,7 @@ route('get/users/info/:code', async ({ query, params: { code} }) => {
     const data = await query`
         SELECT 
             id,
+            code,
             admin,
             student,
             name,
@@ -56,7 +58,7 @@ route('get/users/info/:code', async ({ query, params: { code} }) => {
 
     const housePoints = await query`
         SELECT 
-            id, 
+            id,
             description, 
             status,
             UNIX_TIMESTAMP(created) as timestamp,
@@ -73,6 +75,44 @@ route('get/users/info/:code', async ({ query, params: { code} }) => {
     user['housepoints'] = housePoints;
 
     return user;
+});
+
+
+route('get/users/batch-info/:codes', async ({ query, params: { codes} }) => {
+    if (!codes) return 'No codes';
+
+    const data = await query`
+        SELECT 
+            id,
+            code,
+            admin,
+            student,
+            name,
+            year
+        FROM users
+        WHERE code IN (${codes.split(',')})
+    `;
+
+    for (let i = 0; i < data.length; i++) {
+
+        data[i]['housepoints'] = await query`
+            SELECT 
+                id, 
+                description, 
+                status,
+                UNIX_TIMESTAMP(created) as timestamp,
+                UNIX_TIMESTAMP(completed) as accepted,
+                rejectMessage,
+                quantity
+            FROM housepoints
+            WHERE student = ${data[i].id}
+            ORDER BY timestamp DESC
+        `;
+
+        delete data[i].id;
+    }
+
+    return { data };
 });
 
 

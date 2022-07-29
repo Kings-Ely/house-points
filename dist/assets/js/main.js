@@ -308,7 +308,7 @@ async function rawAPI (path) {
     let res;
     let asJSON;
     try {
-        res = await fetch(`${API_ROOT}?p=${encodeURI(path)}`, {
+        res = await fetch(`${API_ROOT}/?p=${encodeURI(path)}`, {
             method: 'GET',
             mode: 'cors',
             cache: 'no-cache',
@@ -368,7 +368,7 @@ async function api (path, ...args) {
     }
 
     // fetch
-    const res = await fetch(`${API_ROOT}?p=${encodeURI(path)}`, {
+    const res = await fetch(`${API_ROOT}/?p=${encodeURI(path)}`, {
         method: 'GET',
         mode: 'cors',
         cache: 'no-cache',

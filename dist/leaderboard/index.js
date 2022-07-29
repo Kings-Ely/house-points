@@ -11,6 +11,28 @@ const $whichYears = document.getElementById('show-year');
 let showYears = [9, 10, 11, 12, 13];
 let leaderboardData;
 
+(async () => {
+    await init('..');
+
+    hideWithID('leaderboard-link');
+
+    if (!await signedIn()) {
+        await navigate(ROOT_PATH);
+        return;
+    }
+
+    const { admin, year } = await userInfo();
+
+    if (admin) {
+        showYears = [year];
+        $whichYears.value = year.toString();
+        await main(false);
+    }
+
+    await main();
+})();
+
+
 function showStudent (student) {
     return `
         <div class="student">
@@ -106,23 +128,3 @@ $whichYears.onchange = async () => {
     await main(false);
 };
 
-(async () => {
-    await init('..');
-
-    hideWithID('leaderboard-link');
-
-    if (!await signedIn()) {
-        await navigate(ROOT_PATH);
-        return;
-    }
-
-    const { admin, year } = await userInfo();
-
-    if (admin) {
-        showYears = [year];
-        $whichYears.value = year.toString();
-        await main(false);
-    }
-
-    await main();
-})();

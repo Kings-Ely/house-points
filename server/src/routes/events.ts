@@ -17,7 +17,7 @@ route('get/events/all', async ({ query, cookies }) => {
     `};
 });
 
-route('create/events/:name/:timestamp/:description', async ({ query, cookies, params }) => {
+route('create/events/:name/:timestamp?description', async ({ query, cookies, params }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     const { name, timestamp: tsRaw, description } = params;
@@ -39,7 +39,7 @@ route('create/events/:name/:timestamp/:description', async ({ query, cookies, pa
         VALUES (
             ${name},
             FROM_UNIXTIME(${time}),
-            ${description}
+            ${description || ''}
         )
     `;
 

@@ -7,6 +7,17 @@ const $nameInp = document.querySelector('#add-student-name');
 const $yearInp = document.querySelector('#add-student-year');
 const $students = document.querySelector(`#students`);
 
+(async () => {
+    await init('../..');
+
+    if (!await signedIn() || !(await userInfo())['admin']) {
+        await navigate(`/?error=auth`);
+    }
+
+    await main();
+})();
+
+
 function showStudent (student, selected) {
 
     const { code, name, year, student: isStudent, admin: isAdmin } = student;
@@ -259,13 +270,3 @@ document.getElementById(`add-student-submit`).onclick = async () => {
 
     await main();
 };
-
-(async () => {
-    await init('../..');
-
-    if (!await signedIn() || !(await userInfo())['admin']) {
-        await navigate(`/?error=auth`);
-    }
-
-    await main();
-})();

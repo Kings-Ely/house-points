@@ -5,6 +5,29 @@ const $numPendingHPs = document.getElementById('num-pending');
 let $addHPName = document.getElementById('add-hp-name-inp');
 const $addHPSubmit = document.getElementById('add-hp-submit');
 
+(async () => {
+    await init('..');
+
+    $addHPName = insertComponent($addHPName).studentNameInputWithIntellisense();
+
+    hideWithID('admin-link');
+
+    const isSignedIn = await signedIn();
+
+    if (!isSignedIn) {
+        await navigate(`/?error=auth`);
+    }
+
+    const { admin } = await userInfo();
+
+    if (!admin) {
+        await navigate(`/?error=auth`);
+    }
+
+    await main();
+})();
+
+
 function housePointHML (hp) {
     const submittedTime = hp['timestamp'] * 1000;
 
@@ -106,26 +129,3 @@ $addHPSubmit.onclick = async () => {
 
     await main();
 };
-
-
-(async () => {
-    await init('..');
-
-    $addHPName = insertComponent($addHPName).studentNameInputWithIntellisense('200px');
-
-    hideWithID('admin-link');
-
-    const isSignedIn = await signedIn();
-
-    if (!isSignedIn) {
-        await navigate(`/?error=auth`);
-    }
-
-    const { admin } = await userInfo();
-
-    if (!admin) {
-        await navigate(`/?error=auth`);
-    }
-
-    await main();
-})();

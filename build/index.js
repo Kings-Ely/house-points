@@ -26,8 +26,6 @@ async function uploadFrontend () {
         // skip hidden files and directories
         if (path[0] === '.') continue;
 
-        console.log('...');
-
         if (fs.statSync(LOCAL_PATH + path).isDirectory()) {
             await upload(LOCAL_PATH + path, REMOTE_FRONTEND_PATH, "-r --exclude='*.env'");
             continue;
