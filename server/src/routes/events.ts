@@ -1,5 +1,5 @@
 import route from "../";
-import { AUTH_ERR, requireAdmin, requireLoggedIn } from '../util';
+import { AUTH_ERR, generateUUID, requireAdmin, requireLoggedIn } from '../util';
 
 route('get/events/all', async ({ query, cookies }) => {
     if (!await requireLoggedIn(cookies, query)) return AUTH_ERR;
@@ -35,8 +35,9 @@ route('create/events/:name/:timestamp?description', async ({ query, cookies, par
     }
 
     await query`
-        INSERT INTO events (name, time, description)
+        INSERT INTO events (id, name, time, description)
         VALUES (
+            ${await generateUUID()},
             ${name},
             FROM_UNIXTIME(${time}),
             ${description || ''}
@@ -49,12 +50,7 @@ route('create/events/:name/:timestamp?description', async ({ query, cookies, par
 route('update/events/change-name/:id/:name', async ({ query, cookies, params }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    const { id: rawID, name: newName } = params;
-
-    const id = parseInt(rawID);
-    if (isNaN(id) || !id) {
-        return `Invalid event ID '${rawID}', must be an integer`;
-    }
+    const { id, name: newName } = params;
 
     let queryRes = await query`
         UPDATE events
@@ -73,15 +69,10 @@ route('update/events/change-name/:id/:name', async ({ query, cookies, params }) 
 route('update/events/change-time/:id/:time', async ({ query, cookies, params }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    const { id: rawID, time: rawTime } = params;
-
-    const id = parseInt(rawID);
-    if (isNaN(id) || !id) {
-        return `Invalid event ID '${rawID}', must be an integer`;
-    }
+    const { id, time: rawTime } = params;
 
     const time = parseInt(rawTime);
-    if (isNaN(id) || !id) {
+    if (isNaN(time) || !time) {
         return `Invalid event time '${rawTime}', must be an integer (UNIX timestamp)`;
     }
 
@@ -100,11 +91,7 @@ route('update/events/change-time/:id/:time', async ({ query, cookies, params }) 
 route('delete/events/with-id/:id?deleteHps=1', async ({ query, cookies, params }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    const { id: rawID, deleteHps } = params;
-    const id = parseInt(rawID);
-    if (isNaN(id) || !id) {
-        return `Invalid event ID '${rawID}', must be an integer`;
-    }
+    const { id, deleteHps } = params;
 
     if (deleteHps === '1') {
         await query`DELETE FROM housepoints WHERE event = ${id}`;

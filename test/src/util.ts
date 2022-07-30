@@ -10,29 +10,31 @@ export const randomFromAlph = (len=5) => {
     return str;
 }
 
-let allCodes: string[] = [];
+export interface IGenerateUserRes {
+    password: string;
+    sessionID: string
+    userID: string;
+    email: string;
+}
 
-export async function generateUser (api: API, year=10) {
-    const name = randomFromAlph();
+/**
+ * Just throws error if something goes wrong, doesn't bother to return an erroneous response
+ */
+export async function generateUser (api: API, year=10): Promise<IGenerateUserRes> {
 
-    const { code } = await api(`create/users/${name}?year=${year}`);
+    const email = `${randomFromAlph()}@example.com`;
 
-    if (typeof code !== 'string') {
-        return 'Expected string from user code';
+    const password = randomFromAlph();
+
+    let res = await api(`create/users/${email}/${password}?year=${year}`);
+    if (res.ok !== true || (res.status !== 200 && res.status !== 201)) {
+        throw `create/users/email/password failed: ${JSON.stringify(res)}`;
     }
 
-    if (code in allCodes) {
-        return `User code already exists: ${code}`;
+    res = await api(`create/session/${email}/${password}`);
+    if (res.ok !== true || res.status !== 200 || typeof res.sessionID !== 'string' || typeof res.userID !== 'string') {
+        throw `create/session/email/password failed: ${JSON.stringify(res)}`;
     }
-    allCodes.push(code);
 
-    for (const char of code) {
-        if (!alphabet.includes(char)) {
-            return `Unexpected char in user code: '${char}' (${code})`;
-        }
-    }
-    if (code.length < 3 || code.length > 10) {
-        return `User code is of incorrect length: '${code}'`;
-    }
-    return [ code, name ];
+    return { email, password, ...res };
 }

@@ -44,9 +44,9 @@ export default async function (flags: CommandLineOptions) {
 
 	return new Promise<void>((resolve, reject) => {
 		con.query(`
-			DROP DATABASE hpsnea;
-			CREATE DATABASE hpsnea;
-			use hpsnea;
+			DROP DATABASE ${process.env.DB};
+			CREATE DATABASE ${process.env.DB};
+			use ${process.env.DB};
 		`, (err) => {
 
 			if (err) {

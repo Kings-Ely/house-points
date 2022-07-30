@@ -51,7 +51,7 @@ route('get/server/performance?iterations=100', async ({ query, params: { iterati
 });
 
 
-route('delete/server/:code', async ({ query, cookies, params: { code}}) => {
+route('delete/server', async ({ query, cookies}) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     process.kill(process.pid, 'SIGTERM');

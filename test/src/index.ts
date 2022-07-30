@@ -22,19 +22,35 @@ const flags = commandLineArgs([
 export type API = (path: string, code?: string) => Promise<any>;
 export type testExecutor = (api: API, args: CommandLineOptions) => Promise<boolean | Error | string>;
 
+const adminPassword = 'password';
+const adminEmail = encodeURIComponent('admin@example.com');
+
+let adminSessionID: string | null = null;
+
 /**
  * Makes API request to localhost API server
  * Uses http, and the port stored in the .env file
  */
-async function api (path: string, code='admin') {
+async function api (path: string, session: string | null = null): Promise<any> {
 	// assume host is localhost
 	const url = `http://localhost:${process.env.PORT}/${path}`;
+
+	if (session === null) {
+		if (adminSessionID === null) {
+			let res = await api(`create/session/${adminEmail}/${adminPassword}`, '');
+			if (res.error || !res.ok) {
+				console.log(c.red(res.error));
+			}
+			adminSessionID = res.sessionID;
+		}
+		session = adminSessionID;
+	}
 
 	// get request to api server
 	const res = await fetch(url, {
 		method: 'GET',
 		headers: {
-			cookie: process.env.COOKIE_CODE_KEY + '=' + code
+			cookie: process.env.COOKIE_SESSION_KEY + '=' + session
 		}
 	}).catch(e => {
 		// don't do anything fancy with fetch errors, just log them

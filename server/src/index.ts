@@ -42,6 +42,7 @@ import './routes/users';
 import './routes/server';
 import './routes/house-points';
 import './routes/events';
+import './routes/session';
 
 async function serverResponse (req: IncomingMessage, res: ServerResponse) {
 

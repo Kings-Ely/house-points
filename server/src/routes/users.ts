@@ -1,31 +1,26 @@
+import emailValidator from 'email-validator';
+import * as crypto from "crypto";
+
 import route from '../';
-import log from '../log';
-import {AUTH_ERR, authLvl, COOKIE_CODE_KEY, idFromCode, makeCode, requireAdmin, requireLoggedIn} from '../util';
+import { AUTH_ERR, generateUUID, getSessionID, IDFromSession, requireAdmin, requireLoggedIn } from '../util';
 
 
-route('get/users/auth/:code', async ({ query, params: { code} }) => {
-    if (!code) return 'No code';
-
-    return {
-        level: await authLvl(code, query)
-    };
-});
-
-
-route('get/users/code-from-name/:name', async ({ query, params: { name}, cookies }) => {
+route('get/users/code-from-email/:name', async ({ query, params, cookies }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    if (!name) return 'No code';
+    const { email } = params;
+
+    if (!email) return 'No email';
 
     const data = await query`
         SELECT code
         FROM users
-        WHERE name = ${name}
+        WHERE email = ${email}
     `;
 
     if (!data.length) return {
         status: 406,
-        error: `User not found with name '${name}'`
+        error: `User not found with email '${email}'`
     };
 
     return {
@@ -33,20 +28,22 @@ route('get/users/code-from-name/:name', async ({ query, params: { name}, cookies
     };
 });
 
+route('get/users/from-id/:id', async ({ query, params, cookies }) => {
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-route('get/users/info/:code', async ({ query, params: { code} }) => {
-    if (!code) return 'No code';
+    const { id } = params;
+
+    if (!id) return 'No user ID';
 
     const data = await query`
         SELECT 
             id,
-            code,
+            email,
             admin,
             student,
-            name,
             year
-        FROM users 
-        WHERE code = ${code.toLowerCase()}
+        FROM users
+        WHERE id = ${id}
     `;
 
     if (!data.length) return {
@@ -56,7 +53,7 @@ route('get/users/info/:code', async ({ query, params: { code} }) => {
 
     const user = data[0];
 
-    const housePoints = await query`
+    user['housepoints'] = await query`
         SELECT 
             id,
             description, 
@@ -70,27 +67,108 @@ route('get/users/info/:code', async ({ query, params: { code} }) => {
         ORDER BY timestamp DESC
     `;
 
-    delete user.id;
-
-    user['housepoints'] = housePoints;
-
     return user;
 });
 
+route('get/users/from-email/:email', async ({ query, params, cookies }) => {
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-route('get/users/batch-info/:codes', async ({ query, params: { codes} }) => {
-    if (!codes) return 'No codes';
+    const { email } = params;
+
+    if (!email) return 'No email';
 
     const data = await query`
         SELECT 
             id,
-            code,
+            email,
             admin,
             student,
-            name,
             year
         FROM users
-        WHERE code IN (${codes.split(',')})
+        WHERE email = ${email}
+    `;
+
+    if (!data.length) return {
+        status: 406,
+        error: 'User not found'
+    };
+
+    const user = data[0];
+
+    user['housepoints'] = await query`
+        SELECT 
+            id,
+            description, 
+            status,
+            UNIX_TIMESTAMP(created) as timestamp,
+            UNIX_TIMESTAMP(completed) as accepted,
+            rejectMessage,
+            quantity
+        FROM housepoints
+        WHERE student = ${user.id}
+        ORDER BY timestamp DESC
+    `;
+
+    return user;
+});
+
+route('get/users/from-session/:session', async ({ query, params }) => {
+    const { session } = params;
+    if (!session) return 'No session ID';
+
+    const id = await IDFromSession(query, session);
+    if (!id) return 'Invalid session ID';
+
+    const data = await query`
+        SELECT
+            email,
+            admin,
+            student,
+            year
+        FROM users
+        WHERE id = ${id}
+    `;
+
+    if (!data.length) return {
+        status: 406,
+        error: 'User not found'
+    };
+
+    const user = data[0];
+
+    user['housepoints'] = await query`
+        SELECT 
+            id,
+            description, 
+            status,
+            UNIX_TIMESTAMP(created) as timestamp,
+            UNIX_TIMESTAMP(completed) as accepted,
+            rejectMessage,
+            quantity
+        FROM housepoints
+        WHERE student = ${user.id}
+        ORDER BY timestamp DESC
+    `;
+
+    return user;
+});
+
+route('get/users/batch-info/:userIDs', async ({ query, params, cookies }) => {
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+
+    const { userIDs } = params;
+
+    if (!userIDs) return 'No codes';
+
+    const data = await query`
+        SELECT 
+            id,
+            admin,
+            student,
+            email,
+            year
+        FROM users
+        WHERE id IN (${userIDs.split(',')})
     `;
 
     for (let i = 0; i < data.length; i++) {
@@ -105,25 +183,23 @@ route('get/users/batch-info/:codes', async ({ query, params: { codes} }) => {
                 rejectMessage,
                 quantity
             FROM housepoints
-            WHERE student = ${data[i].id}
+            WHERE student = ${data[i]['id']}
             ORDER BY timestamp DESC
         `;
-
-        delete data[i].id;
     }
 
     return { data };
 });
 
 
-route('get/users/all', async ({ query, cookies, req }) => {
+route('get/users/all', async ({ query, cookies }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
     const data = await query`
         SELECT 
-            users.name, 
+            users.id,
+            users.email, 
             users.year,
-            users.code,
             users.admin,
             users.student,
             SUM(CASE WHEN housepoints.status='Pending' THEN housepoints.quantity ELSE 0 END) AS pending,
@@ -131,8 +207,8 @@ route('get/users/all', async ({ query, cookies, req }) => {
             SUM(CASE WHEN housepoints.status='Rejected' THEN housepoints.quantity ELSE 0 END) AS rejected
         FROM users LEFT JOIN housepoints
         ON housepoints.student = users.id
-        GROUP BY users.id, users.name, users.year, users.code, users.admin, users.student
-        ORDER BY users.student, users.admin DESC, year, name;
+        GROUP BY users.id, users.email, users.year, users.admin, users.student
+        ORDER BY users.student, users.admin DESC, year, email;
     `;
 
     return { data };
@@ -144,7 +220,7 @@ route('get/users/leaderboard', async ({ query, cookies }) => {
     return {
         data: await query`
             SELECT 
-                users.name, 
+                users.email, 
                 users.year,
                 SUM(
                     CASE 
@@ -157,15 +233,17 @@ route('get/users/leaderboard', async ({ query, cookies }) => {
                 LEFT JOIN housepoints
                 ON housepoints.student = users.id
             WHERE users.student = true
-            GROUP BY users.name, users.year
-            ORDER BY housepoints DESC, year DESC, name;
+            GROUP BY users.email, users.year
+            ORDER BY housepoints DESC, year DESC, email;
         `
     };
 });
 
 
-route('create/users/:name?year=9', async ({ query, params, cookies }) => {
-    const { name, year: yearStr} = params;
+route('create/users/:email/:password?year=9', async ({ query, params, cookies }) => {
+    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+
+    const { email, year: yearStr, password } = params;
 
     const year = parseInt(yearStr);
 
@@ -174,52 +252,52 @@ route('create/users/:name?year=9', async ({ query, params, cookies }) => {
         return `Year '${year}' is not between 9 and 12`;
     }
 
-    if (name.length < 3) return `Name '${name}' too short`;
-
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
-
-    // get unique code
-    let newCode = makeCode(6);
-    while ((await query`SELECT * FROM users WHERE code = ${newCode}`).length) {
-        newCode = makeCode(6);
+    if (!emailValidator.validate(email)) {
+        return `Invalid email '${email}'`;
     }
+
+    // password requirements
+    if (!password) return 'No password';
+    if (password.length < 5) return 'Password is too short, must be over 4 characters';
+    if (password.length > 64) return 'Password is too long, must be under 64 characters';
 
     const admin = year === 0 ? 1 : 0;
     const student = year === 0 ? 0 : 1;
 
+    const salt = crypto.randomBytes(16).toString('base64');
+
+    const passwordHash = crypto
+        .createHash('sha256')
+        .update(password + salt)
+        .digest('hex');
+
     await query`
-        INSERT INTO users (name, code, year, admin, student)
-        VALUES (${name}, ${newCode}, ${year}, ${admin}, ${student})
+        INSERT INTO users
+            (id,                      email,    password,        salt,    year,    admin,     student)
+        VALUES
+            (${await generateUUID()}, ${email}, ${passwordHash}, ${salt}, ${year}, ${admin}, ${student})
     `;
 
-    return { code: newCode };
+    return { status: 201 };
 });
 
 
-route('update/users/admin/:code?admin', async ({ query, params, cookies }) => {
+route('update/users/admin/:userID?admin', async ({ query, params, cookies }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    const { code, admin } = params;
+    const { userID, admin } = params;
 
-    let id = await idFromCode(query, code);
-    if (typeof id === 'string') return id;
+    const mySession = getSessionID(cookies);
+    if (!mySession) return 'No session ID found';
 
-    const myCode = cookies[COOKIE_CODE_KEY];
-    if (!myCode) return 'No code';
-
-    // can't change own admin status
-    let checkMyselfRes = await query`SELECT admin, id FROM users WHERE code = ${myCode}`;
-    const self = checkMyselfRes[0];
-    if (!self) return AUTH_ERR;
-
-    if (self['id'] == id) {
+    if (await IDFromSession(query, mySession) === userID) {
         return {
             status: 403,
             error: 'You cannot change your own admin status'
         };
     }
 
-    const queryRes = await query`UPDATE users SET admin = ${admin === '1'} WHERE id = ${id}`;
+    const queryRes = await query`UPDATE users SET admin = ${admin === '1'} WHERE id = ${userID}`;
     if (!queryRes.affectedRows) return {
         status: 406,
         error: 'User not found'
@@ -227,10 +305,10 @@ route('update/users/admin/:code?admin', async ({ query, params, cookies }) => {
 });
 
 
-route('update/users/year/:code/:by', async ({ query, params, cookies }) => {
+route('update/users/year/:userID/:by', async ({ query, params, cookies }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    const { code, by: yC } = params;
+    const { userID: user, by: yC } = params;
     const yearChange = parseInt(yC);
 
     if (isNaN(yearChange)) {
@@ -240,10 +318,7 @@ route('update/users/year/:code/:by', async ({ query, params, cookies }) => {
         return `Can't change year by more than 2 at once, trying to change by ${yearChange}`;
     }
 
-    let id = await idFromCode(query, code);
-    if (typeof id === 'string') return id;
-
-    const queryRes = await query`UPDATE users SET year = year + ${yearChange} WHERE id = ${id}`;
+    const queryRes = await query`UPDATE users SET year = year + ${yearChange} WHERE id = ${user}`;
     if (!queryRes.affectedRows) return {
         status: 406,
         error: 'User not found'
@@ -251,17 +326,16 @@ route('update/users/year/:code/:by', async ({ query, params, cookies }) => {
 });
 
 
-route('delete/users/:code', async ({ query, params: { code}, cookies }) => {
+route('delete/users/:userID', async ({ query, params, cookies }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    if (code === cookies[COOKIE_CODE_KEY]) return AUTH_ERR;
+    const { userID } = params;
 
-    const id = await idFromCode(query, code);
-    if (typeof id === 'string') return id;
+    if (userID === await IDFromSession(query, getSessionID(cookies))) return AUTH_ERR;
 
-    await query`DELETE FROM housepoints WHERE student = ${id}`;
+    await query`DELETE FROM housepoints WHERE student = ${userID}`;
 
-    const queryRes = await query`DELETE FROM users WHERE id = ${id}`;
+    const queryRes = await query`DELETE FROM users WHERE id = ${userID}`;
     if (!queryRes.affectedRows) return {
         status: 406,
         error: 'User not found'

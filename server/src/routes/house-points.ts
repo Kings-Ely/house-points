@@ -1,12 +1,9 @@
 import route from "../";
-import { AUTH_ERR, COOKIE_CODE_KEY, idFromCode, requireAdmin } from "../util";
+import {AUTH_ERR, generateUUID, getSessionID, requireAdmin, requireLoggedIn, userFromID, userID} from '../util';
 
 
-route('get/house-points/with-id/:id', async ({ query, params, cookies }) => {
-    const { id: rawID } = params;
-    const id = parseInt(rawID);
-
-    if (isNaN(id)) return `ID '${rawID}' is not a integer`;
+route('get/house-points/with-id/:housePointID', async ({ query, params, cookies }) => {
+    const { housePointID: id } = params;
 
     if (!await requireAdmin(cookies, query)) {
         const res = await query`
@@ -18,7 +15,7 @@ route('get/house-points/with-id/:id', async ({ query, params, cookies }) => {
 
         // doesn't get to know if house point even exists or not
         if (!res.length) return AUTH_ERR;
-        if (res[0]['code'] !== cookies[COOKIE_CODE_KEY]) return AUTH_ERR;
+        if (res[0]['code'] !== getSessionID(cookies)) return AUTH_ERR;
     }
 
     const res = await query`
@@ -75,7 +72,7 @@ route('get/house-points/all', async ({ query, cookies }) => {
     return { data: await query`
         SELECT
             housepoints.id as id,
-            users.name as student,
+            users.email as studentEmail,
             users.year as studentYear,
             housepoints.quantity as quantity,
             housepoints.event as eventID,
@@ -90,11 +87,15 @@ route('get/house-points/all', async ({ query, cookies }) => {
     `};
 });
 
-route('get/house-points/earned-by/:code', async ({ query, params: { code } }) => {
+route('get/house-points/earned-by/:userID', async ({ query, params, cookies }) => {
+    if (!await requireLoggedIn(cookies, query)) return AUTH_ERR;
+
+    const { userID: id } = params;
+
     return { data: await query`
         SELECT
             housepoints.id as id,
-            users.name as student,
+            users.email as studentEmail,
             users.year as studentYear,
             housepoints.quantity as quantity,
             housepoints.event as eventID,
@@ -105,18 +106,22 @@ route('get/house-points/earned-by/:code', async ({ query, params: { code } }) =>
             housepoints.rejectMessage
         FROM housepoints, users
         WHERE housepoints.student = users.id
-            AND users.code = ${code}
+            AND users.id = ${id}
         ORDER BY completed, created DESC
     `};
 });
 
 
 route(
-    'create/house-points/give/:user/:quantity?description&event',
+    'create/house-points/give/:userID/:quantity?description&event',
 async ({ query, cookies, params }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    const { user, description, event: rawEvent, quantity: rawQuantity } = params;
+    const { userID, description, event, quantity: rawQuantity } = params;
+
+    let student = await userFromID(query, userID);
+    if (!student) return `Student with ID '${userID}' not found`;
+    if (!student.student) return 'Can only give house points to students';
 
     let quantity = parseInt(rawQuantity);
     if (isNaN(quantity) || !quantity) {
@@ -126,16 +131,11 @@ async ({ query, cookies, params }) => {
         return 'Quantity must be at least 1';
     }
 
-    let event: number | null = parseInt(rawEvent);
-    if (isNaN(event) || !event) event = null;
-
-    const id = await idFromCode(query, user);
-    if (typeof id === 'string') return id;
-
     await query`
-        INSERT INTO housepoints (student, quantity, event, description, status, completed)
+        INSERT INTO housepoints (id, student, quantity, event, description, status, completed)
         VALUES (
-            ${id},
+            ${await generateUUID()},
+            ${userID},
             ${quantity},
             ${event},
             ${description || ''},
@@ -149,9 +149,9 @@ async ({ query, cookies, params }) => {
 
 
 route(
-    'create/house-points/request/:user/:quantity?description&event',
+    'create/house-points/request/:userID/:quantity?description&event',
 async ({ query, params }) => {
-    const { user, description, event: rawEvent, quantity: rawQuantity } = params;
+    const { userID, description, event, quantity: rawQuantity } = params;
 
     let quantity = parseInt(rawQuantity);
     if (isNaN(quantity) || !quantity) {
@@ -161,21 +161,19 @@ async ({ query, params }) => {
         return 'Quantity must be at least 1';
     }
 
-    let event: number | null = parseInt(rawEvent);
-    if (isNaN(event) || !event) event = null;
-
-    const id = await idFromCode(query, user);
-    if (typeof id === 'string') return id;
+    let student = await userFromID(query, userID);
+    if (!student) return `Student with ID '${userID}' not found`;
+    if (!student.student) return 'Can only give house points to students';
 
     await query`
-        INSERT INTO housepoints (student, quantity, event, description, status, completed)
+        INSERT INTO housepoints (id, student, quantity, event, description, status)
         VALUES (
-            ${id},
+            ${await generateUUID()},
+            ${userID},
             ${quantity},
             ${event},
             ${description},
-            'Pending',
-            CURRENT_TIMESTAMP
+            'Pending'
         )
     `;
 
@@ -184,14 +182,11 @@ async ({ query, params }) => {
 
 
 route(
-    'update/house-points/accepted/:id?reject',
+    'update/house-points/accepted/:housePointID?reject',
 async ({ query, cookies, params }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
-    const { id: rawID, reject } = params;
-
-    const id = parseInt(rawID);
-    if (isNaN(id) || !id) return `Invalid house point ID '${rawID}', must be an integer`;
+    const { housePointID: id, reject } = params;
 
     if (!(await query`SELECT * FROM housepoints WHERE id = ${id}`).length) {
         return {
@@ -218,21 +213,19 @@ async ({ query, cookies, params }) => {
             WHERE id = ${id}
         `;
     }
-
-    return { status: 200 };
 });
 
 
-route('delete/house-points/with-id/:id', async ({ query, cookies, params }) => {
-    const { id: rawID } = params;
-    const id = parseInt(rawID);
-    if (isNaN(id)) return `Invalid house point ID '${rawID}', must be a integer`;
+route('delete/house-points/with-id/:housePointID', async ({ query, cookies, params }) => {
+    const { housePointID: id } = params;
 
     // if we aren't an admin user, we can still delete it if
     // they own the house point
     if (!await requireAdmin(cookies, query)) {
+        if (!await requireLoggedIn(cookies, query)) return AUTH_ERR;
+
         const res = await query`
-            SELECT users.code
+            SELECT users.id
             FROM housepoints, users
             WHERE housepoints.id = ${id}
               AND housepoints.student = users.id
@@ -240,7 +233,7 @@ route('delete/house-points/with-id/:id', async ({ query, cookies, params }) => {
 
         // doesn't get to know if house point even exists or not
         if (!res.length) return AUTH_ERR;
-        if (res[0]['code'] !== cookies[COOKIE_CODE_KEY]) {
+        if (res[0]['id'] !== await userID(cookies, query)) {
             return AUTH_ERR;
         }
     }

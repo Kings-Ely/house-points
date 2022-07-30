@@ -29,18 +29,18 @@ Test.test('Creating, getting and deleting events', async (api) => {
         return `Expected 1 event, got ${JSON.stringify(res)}`;
     }
 
-    const [ code ] = await generateUser(api);
+    const { sessionID } = await generateUser(api);
 
     // same but without admin user
 
     // this should fail, only admins can create events
-    res = await api(`create/events/doing+something+else+2022/${now}`, code);
+    res = await api(`create/events/doing+something+else+2022/${now}`, sessionID);
     if (res.ok || res.status !== 401) {
         return `Expected 401 from 'create/events/doing+something+else+2022', got '${JSON.stringify(res)}'`;
     }
 
     // everyone logged in can see the events though
-    res = await api(`get/events/all`, code);
+    res = await api(`get/events/all`, sessionID);
     if (res?.data?.length !== 1) {
         return `Expected 1 events, got ${JSON.stringify(res)}`;
     }
@@ -51,7 +51,7 @@ Test.test('Creating, getting and deleting events', async (api) => {
     const id = res.data?.[0]?.id;
 
     // deleting shouldn't work without admin user either
-    res = await api(`delete/events/with-id/${id}`, code);
+    res = await api(`delete/events/with-id/${id}`, sessionID);
     if (res.ok || res.status !== 401) {
         return `Expected 401 from 'delete/events/with-id/${id}', got '${JSON.stringify(res)}'`;
     }
@@ -74,7 +74,7 @@ Test.test('Creating, getting and deleting events', async (api) => {
         return `Expected no events, got ${JSON.stringify(res)}`;
     }
 
-    await api(`delete/users/${code}`);
+    await api(`delete/users/${sessionID}`);
 
     return true;
 });
@@ -82,7 +82,7 @@ Test.test('Creating, getting and deleting events', async (api) => {
 Test.test('Updating event name', async (api) => {
     const now = Math.round(Date.now() / 1000);
 
-    const [ code ] = await generateUser(api);
+    const { sessionID, userID } = await generateUser(api);
 
     // create event
     let res = await api(`create/events/doing+something+2022/${now}`);
@@ -118,7 +118,7 @@ Test.test('Updating event name', async (api) => {
     }
 
     // updating without permission
-    res = await api(`update/events/change-name/${id}/not+doing+anything`, code);
+    res = await api(`update/events/change-name/${id}/not+doing+anything`, sessionID);
     if (res.ok || res.status !== 401) {
         return `Expected 401 from 'update/events/${id}/name/not+doing+anything', got '${JSON.stringify(res)}'`;
     }
@@ -135,7 +135,7 @@ Test.test('Updating event name', async (api) => {
         return `Expected event name to be 'doing something else 2022', got '${name3}'`;
     }
 
-    await api(`delete/users/${code}`);
+    await api(`delete/users/${userID}`);
     await api(`delete/events/with-id/${id}`);
 
     return true;
@@ -147,7 +147,7 @@ Test.test('Updating event timestamp', async (api) => {
     // 1 week ago
     const then = now - 60 * 60 * 24 * 7;
 
-    const [ code ] = await generateUser(api);
+    const { sessionID, userID } = await generateUser(api);
 
     // create event
     let res = await api(`create/events/doing+something+2022/${now}`);
@@ -183,7 +183,7 @@ Test.test('Updating event timestamp', async (api) => {
     }
 
     // updating without permission
-    res = await api(`update/events/change-time/${id}/${now}`, code);
+    res = await api(`update/events/change-time/${id}/${now}`, sessionID);
     if (res.ok || res.status !== 401) {
         return `Expected 401 from 'update/events/change-time/id/now', got '${JSON.stringify(res)}'`;
     }
@@ -197,7 +197,7 @@ Test.test('Updating event timestamp', async (api) => {
         return `Expected event time to be '${then}', got '${time3}'`;
     }
 
-    await api(`delete/users/${code}`);
+    await api(`delete/users/${userID}`);
     await api(`delete/events/with-id/${id}`);
 
     return true;

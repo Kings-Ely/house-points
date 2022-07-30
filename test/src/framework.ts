@@ -10,7 +10,7 @@ export class TestResult {
     fails: [any, any][] = [];
     time = 0;
 
-    register (res: any, test={batteryName: 'unknown', batteryID: -2}) {
+    register (res: any, test={batteryName: 'unknown'}) {
         if (res === true) {
             this.passed++;
 
@@ -36,7 +36,7 @@ export class TestResult {
             ${this.failed === 0 ? chalk.green('All tests passed!') : ''}
             
             ${this.fails.map(([res, test]) =>
-                `\n ${test.batteryName} (#${test.batteryID+1}): ${res}`
+                `\n ${test.batteryName}: ${res}`
             )}
         `;
     }
@@ -46,13 +46,11 @@ export default class Test {
     test;
     id;
     batteryName;
-    batteryID;
 
-    constructor(test: testExecutor, id: string | number = 'test', batteryName = '', batteryID = 0) {
+    constructor(test: testExecutor, id: string | number = 'test', batteryName = '') {
         this.id = id;
         this.test = test;
         this.batteryName = batteryName;
-        this.batteryID = batteryID;
     }
 
     run(api: API, code: CommandLineOptions) {
@@ -65,7 +63,7 @@ export default class Test {
 
 
     static test(name: string, test: testExecutor) {
-        Test.tests.push(new Test(test, Test.tests.length, name, this.currentID));
+        Test.tests.push(new Test(test, Test.tests.length, name));
     }
 
     /**

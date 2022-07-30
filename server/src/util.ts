@@ -1,18 +1,24 @@
-import fs from "fs";
-import path from "path";
-import dotenv from "dotenv";
-import log from './log';
+import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
+import { v4 as UUIDv4 } from 'uuid';
+import { Cookies } from './route';
 
-import { queryFunc } from "./sql";
-import { Cookies } from "./route";
+import { queryFunc } from './sql';
+
+
+/**
+ * Gets the session ID from the cookies using the given cookies object
+ * and the COOKIE_SESSION_KEY environment variable.
+ */
+export function getSessionID (cookies: Cookies): string {
+    return cookies[process.env.COOKIE_SESSION_KEY || 'sessionID'] || '';
+}
 
 export const AUTH_ERR = Object.freeze({
     error: 'You are not authorized for this action',
     status: 401
 });
-
-// overridden with .env variable if present
-export let COOKIE_CODE_KEY = 'myCode';
 
 /**
  * Checks to see if an object is JSON-parsable.
@@ -43,23 +49,8 @@ export function loadEnv (filePath = ".env"): void {
         ...process.env,
         ...dotenv.parse(contents)
     };
-
-    if (process.env.COOKIE_CODE_KEY) {
-        COOKIE_CODE_KEY = process.env.COOKIE_CODE_KEY;
-    }
 }
 
-
-/**
- * Generates a random string of a given length from a given character set
- */
-export function makeCode (length: number, chars='abcdefghijklmnopqrstuvwxyz'): string {
-    let result = '';
-    for (let i = 0; i < length; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-}
 
 
 /**
@@ -85,49 +76,38 @@ export function parseCookies (cookie: string): Record<string, string> {
 
 /**
  * Gets the authorisation level of a user from their code
+ * 0: not signed in
+ * 1: normal student
+ * 2: admin
  */
-export async function authLvl (code: string, query: queryFunc) {
-    if (!code) return 0;
+export async function authLvl (sessionID: string, query: queryFunc) {
+    if (!sessionID) return 0;
 
-    const level = await query`SELECT admin FROM users WHERE code = ${code.toLowerCase()}`;
+    const level = await query`
+        SELECT admin
+        FROM sessions, users
+        WHERE sessions.id = ${sessionID}
+        AND sessions.user = users.id
+    `;
 
     if (!level.length) return 0;
 
-    const auth = level[0]['admin'] === 1;
-
-    return auth ? 2 : 1;
+    return (level?.[0]?.['admin'] === 1) ? 2 : 1;
 }
 
 /**
  * True if user code is valid
  */
 export async function requireLoggedIn (cookies: Cookies, query: queryFunc): Promise<boolean> {
-    return await authLvl(cookies[COOKIE_CODE_KEY], query) > 0;
+    return await authLvl(getSessionID(cookies), query) > 0;
 }
 
 /**
  * True if user code is valid and an admin
  */
 export async function requireAdmin (cookies: Cookies, query: queryFunc): Promise<boolean> {
-    return await authLvl(cookies[COOKIE_CODE_KEY], query) === 2;
+    return await authLvl(getSessionID(cookies), query) >= 2;
 }
-
-/**
- * Returns a string for an error, otherwise a number which is the user's id
- */
-export async function idFromCode (query: queryFunc, rawCode?: string): Promise<number | string> {
-
-    const res = await query`SELECT id FROM users WHERE code = ${rawCode || ''}`;
-    if (!res.length) {
-        return `User not found with code '${rawCode}'`
-    }
-    const id = res[0]['id'];
-
-    if (isNaN(id) || id < 100) return `Invalid user ID '${id}'`;
-
-    return id;
-}
-
 
 /**
  * Decode URL parameter
@@ -135,4 +115,46 @@ export async function idFromCode (query: queryFunc, rawCode?: string): Promise<n
  */
 export function decodeParam (param: string): string {
     return decodeURIComponent(param.replace(/\+/g, ' '))
+}
+
+/**
+ * Generate a random UUID using UUID v4 generator.
+ * Does not check for collisions at the moment, but should be fine.
+ */
+export async function generateUUID (): Promise<string> {
+    return UUIDv4();
+}
+
+export async function IDFromSession (query: queryFunc, sessionID: string): Promise<string | null> {
+    const res = await query`
+        SELECT user
+        FROM sessions
+        WHERE id = ${sessionID}
+        AND UNIX_TIMESTAMP(opened) + expires > UNIX_TIMESTAMP()
+    `;
+
+    if (!res.length) return null;
+
+    return res?.[0]?.['user'] || null;
+}
+
+export async function userID (cookies: Cookies, query: queryFunc) {
+    return IDFromSession(query, getSessionID(cookies));
+}
+
+export async function userFromID (query: queryFunc, id: string): Promise<Record<string, any> | null> {
+    const res = await query`
+        SELECT
+            id,
+            email,
+            year,
+            admin,
+            student
+        FROM users
+        WHERE id = ${id}
+    `;
+
+    if (!res.length) return null;
+
+    return res[0];
 }
