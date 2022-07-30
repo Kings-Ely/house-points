@@ -118,7 +118,7 @@ async function deleteHousePoint (id, desc) {
 }
 
 async function reloadHousePoints () {
-    const hps = (await api`get/house-points/earned-by/${getCode()}`)['data'];
+    const hps = (await api`get/house-points/earned-by/${getSession()}`)['data'];
 
     housePoints(hps);
 
@@ -132,7 +132,7 @@ document.getElementById('submit-hp').onclick = async () => {
 
     for (let reason of $hpReasonInp.value.split('\n')) {
         if (!reason) continue;
-        await api`create/house-points/request/${getCode()}/1?description=${reason}`;
+        await api`create/house-points/request/${getSession()}/1?description=${reason}`;
     }
     await main();
     $hpReasonInp.value = '';

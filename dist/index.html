@@ -15,14 +15,21 @@
 <body>
 <main>
     <div class="flex-center fill-screen" id="content">
-        <label for="code"></label>
+        <label for="email">Email</label>
         <input
-            type="text"
-            id="code"
-            placeholder="Code"
-            autocomplete="off"
+            type="email"
+            id="email"
+            autocomplete="on"
             autofocus
-            aria-label="code"
+            aria-label="email"
+        >
+        <label for="email">Password</label>
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            autocomplete="on"
+            aria-label="password"
         >
         <button
             id="go"

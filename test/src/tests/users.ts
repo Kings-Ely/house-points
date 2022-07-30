@@ -353,7 +353,7 @@ Test.test(`Updating user's year`, async (api) => {
     if (res.ok || res.status !== 401 || res.data) {
         return `Expected 401 from 'update/users/year/code3/1', got '${JSON.stringify(res)}'`;
     }
-    res = await api(`get/users/from-id/${userID2}`);
+    res = await api(`get/users/from-session/${sessionID2}`);
     if (res['year'] !== 10) {
         return `Expected {..., year: 10} from 'get/users/from-id/code2', got '${JSON.stringify(res)}'`;
     }

@@ -35,24 +35,56 @@ const relativeTimeFormat = new Intl.RelativeTimeFormat('en', {
     numeric: 'auto'
 });
 
+(async () => {
+
+    if (document.readyState === 'complete') {
+        documentIsLoaded();
+    } else {
+        window.onload = documentIsLoaded;
+    }
+
+    await testApiCon();
+
+    if (getSession()) {
+        rawAPI(`get/users/from-session/${getSession()}`)
+            .then(handleUserInfo)
+    } else {
+        isSignedIn = false;
+        userInfoIsLoaded = true;
+        for (const cb of userInfoCallbacks) {
+            cb({});
+        }
+    }
+
+    function documentIsLoaded () {
+        reloadDOM();
+
+        documentLoaded = true;
+
+        for (const cb of onLoadCBs) {
+            cb();
+        }
+    }
+})();
+
 async function sleep (ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 // user auth code utilities
-function getCode () {
+function getSession () {
     return getCookie(COOKIE_KEY);
 }
 
-function setCodeCookie (code) {
+function setSessionCookie (code) {
     setCookie(COOKIE_KEY, code);
 }
 
-function getAltCode () {
+function getAltSession () {
     return getCookie(ALT_COOKIE_KEY);
 }
 
-function setAltCodeCookie (code) {
+function setAltSessionCookie (code) {
     setCookie(ALT_COOKIE_KEY, code);
 }
 
@@ -205,23 +237,6 @@ function GETParam (name) {
  */
 async function copyToClipboard (text) {
     await navigator.clipboard.writeText(text);
-}
-
-/**
- * Cleans a user code
- * @param {string} code
- * @returns {string}
- */
-function cleanCode (code) {
-    return code
-        .split('')
-        // remove non-alphabetic characters
-        .filter(c => 'abcdefghijklmnopqrstuvwxyz'.indexOf(c.toLowerCase()) !== -1)
-        .join('')
-        // default to upper case
-        .toUpperCase()
-        // max length
-        .substring(0, 10);
 }
 
 /**
@@ -468,7 +483,7 @@ async function loadNav () {
         $adminLink.style.display = 'block';
         $adminLink.setAttribute('aria-hidden', 'false');
         $adminLink.onclick = () => {
-            setCodeCookie(getAltCode());
+            setSessionCookie(getAltSession());
             navigate(`/admin`);
         };
 
@@ -620,8 +635,8 @@ async function init (rootPath) {
 }
 
 async function handleUserInfo (info) {
-    if (getAltCode()) {
-        const altInfo = await rawAPI(`get/users/info/${getAltCode()}`);
+    if (getAltSession()) {
+        const altInfo = await rawAPI(`get/users/from-session/${getAltSession()}`);
         if (altInfo['ok'] && altInfo['admin']) {
             // if we are already an admin with the main code, just delete the alt code
             if (info['admin']) {
@@ -644,35 +659,3 @@ async function handleUserInfo (info) {
         cb(info);
     }
 }
-
-(async () => {
-
-    if (document.readyState === 'complete') {
-        documentIsLoaded();
-    } else {
-        window.onload = documentIsLoaded;
-    }
-
-    await testApiCon();
-
-    if (getCode()) {
-        rawAPI(`get/users/info/${getCode()}`)
-            .then(handleUserInfo)
-    } else {
-        isSignedIn = false;
-        userInfoIsLoaded = true;
-        for (const cb of userInfoCallbacks) {
-            cb({});
-        }
-    }
-
-    function documentIsLoaded () {
-        reloadDOM();
-
-        documentLoaded = true;
-
-        for (const cb of onLoadCBs) {
-            cb();
-        }
-    }
-})();

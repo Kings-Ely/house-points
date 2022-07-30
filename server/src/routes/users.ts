@@ -116,17 +116,16 @@ route('get/users/from-session/:session', async ({ query, params }) => {
     const { session } = params;
     if (!session) return 'No session ID';
 
-    const id = await IDFromSession(query, session);
-    if (!id) return 'Invalid session ID';
-
     const data = await query`
         SELECT
-            email,
-            admin,
-            student,
-            year
-        FROM users
-        WHERE id = ${id}
+            users.id,
+            users.email,
+            users.admin,
+            users.student,
+            users.year
+        FROM users, sessions
+        WHERE sessions.id = ${session}
+            AND sessions.user = users.id
     `;
 
     if (!data.length) return {

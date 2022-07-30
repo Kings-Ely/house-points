@@ -1,12 +1,9 @@
 const $go = document.getElementById('go');
-const $code = document.getElementById('code');
+const $email = document.getElementById('email');
+const $password = document.getElementById('password');
 
 (async () => {
 	await init('.');
-
-	$code.onkeydown = $code.onchange;
-	$code.onclick = $code.onchange;
-	$code.onpaste = $code.onchange;
 
 	if (GETParam('error')) {
 		showErrorFromCode(GETParam('error'));
@@ -22,43 +19,35 @@ const $code = document.getElementById('code');
 	}
 })();
 
-async function paste () {
-	$code.value = cleanCode(await navigator.clipboard.readText());
-}
-
 $go.onclick = async () => {
-	const myCode = code.value.toLowerCase();
+	const email = $email.value;
 
-	if (!myCode) {
-		showError`You need to enter a code first!`;
+	if (!email) {
+		showError`You need to enter a valid email first!`;
 		return;
 	}
 
-	const { level } = await api`get/users/auth/${myCode}`;
+	const password = $password.value;
 
-	if (level === 1) {
-		setCodeCookie(myCode);
-		await navigate(`./user`);
-
-	} else if (level === 2) {
-		setCodeCookie(myCode);
-		await navigate(`./admin`);
-	}
-	showError`Looks like that is an invalid code, sorry!`;
-};
-
-$code.onchange = (evt) => {
-
-	if (evt.key === 'Enter') {
-		$go.onclick();
-		evt.preventDefault();
+	if (!password) {
+		showError`You need to enter a password first!`;
 		return;
 	}
 
-	$code.value = cleanCode($code.value);
+	const res = await api`create/session/${email}/${password}`;
 
-	// just to make sure :^)
-	setTimeout(() => {
-		$code.value = cleanCode($code.value);
-	}, 0);
+	if (res.error) {
+		return;
+	}
+
+	const { sessionID } = res;
+
+	if (!sessionID) {
+		showError`Something went wrong!`;
+		return;
+	}
+
+	setSessionCookie(sessionID);
+	await navigate(`./user`);
+	// error shown automatically
 };

@@ -55,7 +55,7 @@ function showStudent (student, selected) {
             </div>
             
             <div style="min-width: 150px">
-                ${code === getCode() ? `
+                ${code === getSession() ? `
                     <span 
                         class="student-link"
                         label="Me"
@@ -126,8 +126,8 @@ async function signInAs (code, name) {
     if (!confirm(`Sign in as ${name}?`)) {
         return;
     }
-    setAltCodeCookie(getCode());
-    setCodeCookie(code);
+    setAltSessionCookie(getSession());
+    setSessionCookie(code);
     await navigate(`/user`);
 }
 
