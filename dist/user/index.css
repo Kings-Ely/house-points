@@ -23,10 +23,6 @@
     margin-top: 8vh;
 }
 
-#leaderboard-link:hover .label {
-    transform: scale(1) translate(-90%, 50px);
-}
-
 #hp-reason {
     border: 1px solid var(--border);
     border-radius: 5px;
@@ -39,4 +35,13 @@
     position: absolute;
     top: 10px;
     right: 10px;
+}
+
+#evt-link {
+    font-size: 1.2em;
+}
+
+.icon:hover #evt-link {
+    text-decoration: underline;
+    color: var(--text-light);
 }

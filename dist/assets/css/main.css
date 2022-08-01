@@ -4,14 +4,18 @@
 
 :root {
     --nav-height: 50px;
-
-    --text: #1c1c1c;
     --nav-colour: #d5d5d5;
+
+    --text: #000000;
     --text-light: #575757;
+    --text-v-light: #909090;
+
     --bg: #eeeeee;
     --bg-accent: white;
     --accent: #108c10;
+
     --text-warning: red;
+
     --border: #c5c5c5;
     --border-light: #e8e8e8;
 }
@@ -22,6 +26,8 @@
     font-family: 'Raleway', sans-serif;
     transition: 200ms;
 }
+
+/* --- STRUCTURE --- */
 
 html, body {
     padding: 0;
@@ -54,6 +60,7 @@ section:last-child {
     border-bottom: none;
 }
 
+/* --- INPUT --- */
 input, button, textarea {
     border: none;
     background: none;
@@ -83,6 +90,27 @@ textarea {
     resize: vertical;
     transition: 0s;
 }
+
+.big-link {
+    margin: 20px;
+    font-size: 20px;
+    text-decoration: none;
+    border-radius: 10px;
+    border: 1px solid var(--border) !important;
+    height: fit-content;
+    width: fit-content;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.big-link:hover {
+    color: var(--text-light);
+    background: var(--bg-accent);
+}
+
+/* --- FONTS --- */
 
 h1 {
     font-size: 30px;
@@ -155,20 +183,29 @@ nav {
     width: fit-content;
 }
 
-/* --- COMPONENTS --- */
-
-/* studentNameInputWithIntellisense */
-
-.student-name-input-wrapper {
-    position: relative;
-    display: inline-block;
+/* to stop the page expanding to the right when hovered */
+#nav-right > *:last-child {
+    transform: translateX(-2px);
 }
 
-.student-name-input-dropdown {
+/* --- COMPONENTS --- */
+
+/* studentEmailInputWithIntellisense */
+
+.student-email-input-wrapper {
+    --width: min(350px, 90vw);
+
+    position: relative;
+    display: inline-block;
+
+    width: var(--width);
+}
+
+.student-email-input-dropdown {
     display: none;
     position: absolute;
     background-color: var(--bg-accent);
-    width: 212px;
+    width: calc(var(--width) + 12px);
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.4);
     z-index: 1;
     max-height: 400px;
@@ -177,23 +214,27 @@ nav {
     border-radius: 0 0 10px 10px;
 }
 
-.student-name-input-dropdown::-webkit-scrollbar {
+.student-email-input-dropdown::-webkit-scrollbar {
     display: none;
 }
 
-.student-name-input-dropdown > div {
+.student-email-input-dropdown > div {
     padding: 12px 16px;
     text-decoration: none;
     display: block;
 }
 
-.student-name-input-dropdown > div:hover {
+.student-email-input-dropdown > div:hover {
     background-color: var(--bg);
     color: var(--text-light);
 }
 
-.student-name-input-show-dropdown {
+.student-email-input-show-dropdown {
     display: block;
+}
+
+.student-email-input {
+    width: var(--width);
 }
 
 /* pop-up error */
@@ -321,6 +362,7 @@ svg {
     background: none;
     border: none;
     text-decoration: none;
+    --hover-offset-y: 0px;
 }
 
 .icon svg, .icon img {
@@ -349,9 +391,19 @@ svg {
     fill: var(--accent);
 }
 
+.icon.small svg {
+    height: 20px;
+    width: 20px;
+}
+
+.icon.small {
+    --hover-offset-y: -20px;
+}
+
 /* labels are not only for icons but normally are */
 .label {
-    transform: scale(0) translate(-70%, 50px);
+    --hover-offset: 0px;
+    transform: scale(0);
     position: absolute;
     display: inline-block;
     transition: 0ms !important;
@@ -359,7 +411,7 @@ svg {
 }
 
 :hover > .label {
-    transform: scale(1) translate(-70%, 50px);
+    transform: scale(1) translate(calc(-70% + var(--hover-offset)), calc(50px + var(--hover-offset-y)));
     background: var(--bg-accent);
     border-radius: 5px;
     padding: 6px;

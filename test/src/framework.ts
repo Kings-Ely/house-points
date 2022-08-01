@@ -35,8 +35,8 @@ export class TestResult {
             
             ${this.failed === 0 ? chalk.green('All tests passed!') : ''}
             
-            ${this.fails.map(([res, test]) =>
-                `\n ${test.batteryName}: ${res}`
+            ${this.fails.map(([res, test], i) =>
+                `\n\n #${i} ${chalk.red(test.batteryName)}: ${res}`
             )}
         `;
     }

@@ -12,11 +12,19 @@ const $hpReasonInp = document.getElementById('hp-reason');
     if ((await userInfo())['student']) {
         await reloadHousePoints();
     } else {
-        title(await userInfo(), []);
-        hideWithID('hps');
+        await title(await userInfo(), []);
         hideWithID('submit-hp-request');
+        if ((await userInfo())['admin']) {
+            $hps.innerHTML = `
+                <a 
+                    href="../admin/"
+                    class="big-link"
+                >Admin Dashboard</a>
+            `;
+        } else {
+            hideWithID('hps');
+        }
     }
-
 })();
 
 function housePoints (hps) {
@@ -37,16 +45,18 @@ function housePoints (hps) {
     $hps.innerHTML = html;
 }
 
-function title (info, hps) {
+async function title (hps) {
+
+    const info = await userInfo();
 
     const [ username, emailExt ] = info['email'].split('@');
 
     const name = `
-        <p>
-            <span style="font-size: 3em">
-                ${username} 
+        <p style="font-size: 3em">
+            <span>
+                ${username}
             </span>
-            <span style="color: var(--text-light); font-size: 1.2em">
+            <span style="color: var(--text-v-light)">
                 @${emailExt} ${info['admin'] ? ' (Admin)' : ''}
             </span>
         </p>
@@ -72,7 +82,7 @@ function title (info, hps) {
 
 function showHp (hp) {
     let acceptedHTML;
-    let icon = 'red-cross.svg';
+    let icon = '';
 
     if (hp['status'] === 'Rejected') {
         acceptedHTML = `
@@ -80,6 +90,8 @@ function showHp (hp) {
             <br>
             <b>"${hp['rejectMessage']}"</b>
         `;
+        icon = 'red-cross.svg';
+
     } else if (hp['status'] === 'Accepted') {
         acceptedHTML = `
             Accepted ${getRelativeTime(hp['completed'] * 1000)}
@@ -95,6 +107,17 @@ function showHp (hp) {
     return `
         <div class="house-point">
             <div style="min-width: 50%">
+                ${hp['eventName'] ? `
+                    <a
+                        label="${hp['eventName']}"
+                        href="../events?id=${hp['eventID']}"
+                        aria-label="${hp['eventName']}"
+                        svg="event.svg"
+                        class="icon small evt-link"
+                    >
+                        <b>${hp['eventName']}</b>
+                    </a>
+                ` : ''}
                 ${hp['description']}
             </div>
             <div style="min-width: calc(40% - 60px)">
@@ -105,12 +128,12 @@ function showHp (hp) {
             </div>
             <div 
                 style="min-width: 50px"
-                svg="${icon}"
+                ${icon ? `svg="${icon}"` : ''}
             >
             </div>
             <div style="min-width: 50px">
                 <button 
-                    onclick="deleteHousePoint(${hp['id']}, '${hp['description']}')"
+                    onclick="deleteHousePoint('${hp['id']}', '${hp['description']}')"
                     class="icon"
                     aria-label="Delete House Point"
                     svg="bin.svg"
@@ -129,23 +152,25 @@ async function deleteHousePoint (id, desc) {
 }
 
 async function reloadHousePoints () {
-    const hps = (await api`get/house-points/earned-by/${getSession()}`)['data'];
+    const { data: hps } = await api`get/house-points?userID=${await userID()}`;
 
     housePoints(hps);
 
-    title(await userInfo(), hps);
+    await title(hps);
 
     reloadDOM();
 }
+
+
 
 document.getElementById('submit-hp').onclick = async () => {
     if (!$hpReasonInp.value) return;
 
     for (let reason of $hpReasonInp.value.split('\n')) {
         if (!reason) continue;
-        await api`create/house-points/request/${getSession()}/1?description=${reason}`;
+        await api`create/house-points/request/${await userID()}/1?description=${reason}`;
     }
-    await main();
+    await reloadHousePoints();
     $hpReasonInp.value = '';
 };
 

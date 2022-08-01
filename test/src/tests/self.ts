@@ -1,7 +1,7 @@
 import Test from "../framework";
 import {  alphabet, randomFromAlph} from "../util";
 
-Test.test('user-auth code generator', async () => {
+Test.test('Self | user-auth code generator', async () => {
     // test 100 codes
     for (let i = 0; i < 10; i += 0.1) {
         let len = Math.ceil(i);

@@ -123,7 +123,7 @@ async function signInAs (id, email) {
         return;
     }
 
-    const { sessionID } = await api`create/sessions/from-id/${id}`;
+    const { sessionID } = await api`create/sessions/${id}`;
 
     if (!sessionID) {
         return;

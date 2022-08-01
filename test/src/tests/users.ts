@@ -1,13 +1,13 @@
 import Test from '../framework';
 import { generateUser } from '../util';
 
-Test.test('user auth', async (api) => {
+Test.test('Users | user auth', async (api) => {
 
     const { userID, sessionID, email } = await generateUser(api);
 
-    let res = await api(`get/session/auth-level/${sessionID}`);
+    let res = await api(`get/sessions/auth-level/${sessionID}`);
     if (res.ok !== true || res.status !== 200 || res.level < 1) {
-        return `Expected {valid: true} from get/session/validity/sessionID, got '${JSON.stringify(res)}'`;
+        return `Expected {valid: true} from get/sessions/validity/sessionID, got '${JSON.stringify(res)}'`;
     }
 
     // check code actually works
@@ -39,9 +39,9 @@ Test.test('user auth', async (api) => {
     }
 
     // check new auth level
-    res = await api(`get/session/auth-level/${sessionID}`);
+    res = await api(`get/sessions/auth-level/${sessionID}`);
     if (res.level !== 2) {
-        return `Expected {level: 2} from get/session/auth-level, got '${JSON.stringify(res)}'`;
+        return `Expected {level: 2} from get/sessions/auth-level, got '${JSON.stringify(res)}'`;
     }
 
     // check we can access restricted data with our code
@@ -57,7 +57,7 @@ Test.test('user auth', async (api) => {
     }
 
     // check that the user is gone
-    res = await api(`get/session/auth-level/${sessionID}`);
+    res = await api(`get/sessions/auth-level/${sessionID}`);
     if (res.level !== 0) {
         return `Expected {level: 0} from get/users/auth, got '${JSON.stringify(res)}'`;
     }
@@ -65,7 +65,7 @@ Test.test('user auth', async (api) => {
     return true;
 });
 
-Test.test('user auth with 2', async (api) => {
+Test.test('Users | auth with 2', async (api) => {
 
     const { userID: userID1, sessionID: sessionID1 } = await generateUser(api);
     const { userID: userID2, sessionID: sessionID2 } = await generateUser(api);
@@ -85,11 +85,11 @@ Test.test('user auth with 2', async (api) => {
     }
 
     // check that both codes have been made and work
-    let res = await api(`get/session/auth-level/${sessionID1}`);
+    let res = await api(`get/sessions/auth-level/${sessionID1}`);
     if (res.level !== 1) {
         return `Expected {level: 1} from get/users/auth, got '${JSON.stringify(res)}'`;
     }
-    res = await api(`get/session/auth-level/${sessionID2}`);
+    res = await api(`get/sessions/auth-level/${sessionID2}`);
     if (res.level !== 1) {
         return `Expected {level: 1} from get/users/auth, got '${JSON.stringify(res)}'`;
     }
@@ -116,8 +116,34 @@ Test.test('user auth with 2', async (api) => {
     return true;
 });
 
+Test.test('Users | sign in with user ID', async (api) => {
+    const { userID, sessionID } = await generateUser(api, 0);
 
-Test.test('User with year: 0', async (api) => {
+    let res = await api(`create/sessions/${userID}`);
+    if (res.ok !== true) {
+        return `Expected 'ok' from create/sessions/from-id, got '${JSON.stringify(res)}'`;
+    }
+    if (res.sessionID === sessionID) {
+        return `Expected different sessionID, both were '${res.sessionID}'`;
+    }
+    if (res.userID !== userID) {
+        return `Expected userID to be '${userID}', got '${res.userID}'`;
+    }
+
+    const userSes1 = await api(`get/users/from-session/${res.sessionID}`);
+    const userSes2 = await api(`get/users/from-session/${sessionID}`);
+
+    if (!Test.eq(userSes1, userSes2)) {
+        return `Expected same from users: '${JSON.stringify(userSes1)}' and '${JSON.stringify(userSes2)}'`;
+    }
+
+    await api(`delete/users/${userID}`);
+
+    return true;
+});
+
+
+Test.test('Users | with year: 0', async (api) => {
     const { userID, email } = await generateUser(api, 0);
 
     let res = await api(`get/users/from-id/${userID}`);
@@ -139,7 +165,7 @@ Test.test('User with year: 0', async (api) => {
     return true;
 });
 
-Test.test('Getting info from email', async (api) => {
+Test.test('Users | Getting info from email', async (api) => {
     const { userID: userID1, sessionID: sessionID1, email: email1 } = await generateUser(api, 0);
     const { userID: userID2, sessionID: sessionID2, email: email2 } = await generateUser(api);
 
@@ -163,7 +189,7 @@ Test.test('Getting info from email', async (api) => {
     return true;
 });
 
-Test.test('Getting all users', async (api) => {
+Test.test('Users | Getting all', async (api) => {
     const { userID: userID1, sessionID: sessionID1 } = await generateUser(api, 0);
     const { userID: userID2, sessionID: sessionID2 } = await generateUser(api);
 
@@ -182,7 +208,7 @@ Test.test('Getting all users', async (api) => {
     return true;
 });
 
-Test.test('Getting leaderboard data', async (api) => {
+Test.test('Users | Getting leaderboard data', async (api) => {
     const { userID: userID1, sessionID: sessionID1 } = await generateUser(api, 0);
     const { userID: userID2, sessionID: sessionID2 } = await generateUser(api);
 
@@ -205,7 +231,7 @@ Test.test('Getting leaderboard data', async (api) => {
     return true;
 });
 
-Test.test('Creating users', async (api) => {
+Test.test('Users | Creating', async (api) => {
     const { userID: userID1, sessionID: sessionID1 } = await generateUser(api, 0);
     const { userID: userID2, sessionID: sessionID2 } = await generateUser(api);
 
@@ -234,9 +260,9 @@ Test.test('Creating users', async (api) => {
         return `Unexpected result from 'create/users/#6': '${JSON.stringify(res)}'`;
     }
 
-    res = await api(`create/session/fake@example.com/mypassword`, '');
+    res = await api(`create/sessions/fake@example.com/mypassword`, '');
     if (!res.ok || res.status !== 200 || !res.sessionID || !res.userID) {
-        return `Unexpected result from 'create/session/fake@example.com/...', got '${JSON.stringify(res)}'`;
+        return `Unexpected result from 'create/sessions/fake@example.com/...', got '${JSON.stringify(res)}'`;
     }
 
     const { sessionID: sessionID3, userID: userID3 } = res;
@@ -258,7 +284,7 @@ Test.test('Creating users', async (api) => {
     return true;
 });
 
-Test.test('Updating admin status', async (api) => {
+Test.test('Users | Updating admin status', async (api) => {
     const { userID: userID1, sessionID: sessionID1 } = await generateUser(api, 0);
     const { userID: userID2, sessionID: sessionID2 } = await generateUser(api);
     
@@ -289,7 +315,7 @@ Test.test('Updating admin status', async (api) => {
     return true;
 });
 
-Test.test('Deleting users', async (api) => {
+Test.test('Users | Deleting', async (api) => {
     const { userID: userID1, sessionID: sessionID1 } = await generateUser(api, 0);
     const { userID: userID2, sessionID: sessionID2 } = await generateUser(api);
     const { userID: userID3, sessionID: sessionID3 } = await generateUser(api);
@@ -299,7 +325,7 @@ Test.test('Deleting users', async (api) => {
     if (res.ok || res.status !== 401 || res.code) {
         return `Expected 401 from 'delete/users/code1', got '${JSON.stringify(res)}'`;
     }
-    res = await api(`get/session/auth-level/${sessionID1}`);
+    res = await api(`get/sessions/auth-level/${sessionID1}`);
     if (res.level !== 2) {
         return `Expected {level: 2} from get/users/auth, got '${JSON.stringify(res)}'`;
     }
@@ -308,7 +334,7 @@ Test.test('Deleting users', async (api) => {
     if (res.ok || res.status !== 401 || res.code) {
         return `Expected 401 from 'delete/users/code3', got '${JSON.stringify(res)}'`;
     }
-    res = await api(`get/session/auth-level/${sessionID3}`);
+    res = await api(`get/sessions/auth-level/${sessionID3}`);
     if (res.level !== 1) {
         return `Expected {level: 1} from get/users/auth/code3, got '${JSON.stringify(res)}'`;
     }
@@ -318,7 +344,7 @@ Test.test('Deleting users', async (api) => {
     if (res.ok !== true) {
         return `Expected 'ok' from 'delete/users/code2', got '${JSON.stringify(res)}'`;
     }
-    res = await api(`get/session/auth-level/${sessionID2}`);
+    res = await api(`get/sessions/auth-level/${sessionID2}`);
     if (res.level !== 0) {
         return `Expected {level: 0} from get/users/auth, got '${JSON.stringify(res)}'`;
     }
@@ -328,7 +354,7 @@ Test.test('Deleting users', async (api) => {
     if (res.ok || res.status !== 401 || res.code) {
         return `Expected 'ok' from 'delete/users/code1', got '${JSON.stringify(res)}'`;
     }
-    res = await api(`get/session/auth-level/${sessionID1}`);
+    res = await api(`get/sessions/auth-level/${sessionID1}`);
     if (res.level !== 2) {
         return `Expected {level: 2} from get/users/auth/code1, got '${JSON.stringify(res)}'`;
     }
@@ -341,7 +367,7 @@ Test.test('Deleting users', async (api) => {
 });
 
 
-Test.test(`Updating user's year`, async (api) => {
+Test.test(`Users | Updating year`, async (api) => {
     const { userID: userID1, sessionID: sessionID1 } = await generateUser(api, 0);
     const { userID: userID2, sessionID: sessionID2 } = await generateUser(api);
 

@@ -125,6 +125,14 @@ async function userInfo () {
     });
 }
 
+async function userID () {
+    const user = await userInfo();
+    if (!user['id']){
+        throw 'no user ID found';
+    }
+    return user['id'];
+}
+
 /**
  * @returns {Promise<unknown>}
  */
@@ -140,6 +148,7 @@ async function signedIn () {
 }
 
 /**
+ * timestamps are in milliseconds
  * @param {number} d1
  * @param {number?} [d2=Date.now()]
  * @returns {string}
@@ -297,8 +306,13 @@ function loadLabel (self) {
     }
     self.setAttribute('label-loaded', '1');
 
+    let offset = '0px';
+    if (self.hasAttribute('label-offset')) {
+        offset = self.attributes['label-offset'].value;
+    }
+
     self.innerHTML = `
-        <span class="label">
+        <span class="label" style="--hover-offset: ${offset}">
             ${self.attributes['label'].value}
         </span> 
         ${self.innerHTML}
@@ -471,13 +485,13 @@ function asyncCSS (self) {
 function loadSVGs () {
     const allInBody = document.querySelectorAll('*');
     for (const element of allInBody) {
+        if (element.attributes['label']) {
+            loadLabel(element);
+        }
+
         if (element.attributes['svg']) {
             // don't await, because we don't want to block the page load
             loadSVG(element).then();
-        }
-
-        if (element.attributes['label']) {
-            loadLabel(element);
         }
     }
 }

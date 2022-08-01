@@ -15,7 +15,7 @@ let $addEventAddStudentsHTML = document.querySelector('#add-event-students');
 (async () => {
     await init('../..');
 
-    $addEventAddStudent = insertComponent($addEventAddStudent).studentNameInputWithIntellisense();
+    $addEventAddStudent = insertComponent($addEventAddStudent).studentEmailInputWithIntellisense();
 
     if (!await signedIn() || !(await userInfo())['admin']) {
         await navigate(`/?error=auth`);
@@ -26,13 +26,17 @@ let $addEventAddStudentsHTML = document.querySelector('#add-event-students');
 
 function showEvent (event, selected) {
 
-    const { id, name, description } = event;
+    let { id, name, description } = event;
+
+    if (description.length > 50) {
+        description = description.substring(0, 50) + '...';
+    }
 
     return `
         <div class="event">
             <div>
                 <button 
-                    onclick="select(${id}, ${!selected})"
+                    onclick="select('${id}', ${!selected})"
                     class="icon no-scale"
                     svg="${selected ? 'selected-checkbox' : 'unselected-checkbox'}.svg"
                     aria-label="${selected ? 'Unselect' : 'Select'}"
@@ -40,7 +44,7 @@ function showEvent (event, selected) {
             </div>
             
             <div style="min-width: 150px">
-                ${name} (${description.substring(0, 50)})
+                ${name} ${description ? `(${description})` : ''}
             </div>
            
             <div>
@@ -67,30 +71,30 @@ async function deleteEvent (id, name) {
 }
 
 async function addStudentToEvent () {
-    const name = $addEventAddStudent.value;
+    const email = $addEventAddStudent.value;
 
-    if (!name) {
-        showError('Need a name to add student to event');
+    if (!email) {
+        showError('Need an email to add student to event').then();
         return;
     }
 
-    const codeRes = await api`get/users/code-from-name/${name}`;
+    const user = await api`get/users/from-email/${email}`;
 
-    if (!codeRes.ok || !codeRes.code) {
+    if (!user.ok) {
         // error automatically shown
         return;
     }
 
-    studentsInEvent[codeRes.code] = 1;
+    studentsInEvent[user['id']] = 1;
 
     $addEventAddStudent.value = '';
 
     await main(false);
 }
 
-function removeStudentFromEvent (code) {
-    delete studentsInEvent[code];
-    main(false);
+function removeStudentFromEvent (id) {
+    delete studentsInEvent[id];
+    main(false).then();
 }
 
 async function deleteSelected () {
@@ -107,10 +111,10 @@ async function deleteSelected () {
     await main();
 }
 
-function updateStudentPoints (code, points) {
+function updateStudentPoints (id, points) {
     // can't go below 1 hp
-    studentsInEvent[code] = Math.max(points, 1);
-    main(false);
+    studentsInEvent[id] = Math.max(points, 1);
+    main(false).then();
 }
 
 async function showStudentsInAddEvent () {
@@ -124,17 +128,17 @@ async function showStudentsInAddEvent () {
 
     let html = '';
     for (let user of data) {
-        const { name, code, year } = user;
+        const { email, id, year } = user;
         html += `
             <div class="add-student-to-event-student">
                 <div style="display: block">
-                    ${name} 
+                    ${email} 
                     (Y${year})
                     gets
                     <input
                         type="number"
-                        value="${studentsInEvent[code]}"
-                        onchange="updateStudentPoints('${code}', this.value)"
+                        value="${studentsInEvent[id]}"
+                        onchange="updateStudentPoints('${id}', this.value)"
                         style="width: 40px"
                     >
                     house points
@@ -142,9 +146,9 @@ async function showStudentsInAddEvent () {
                 </div>
                 <div style="display: block">
                     <button
-                        onclick="removeStudentFromEvent('${code}')"
-                        label="Remove ${name} from new event"
-                        aria-label="Remove ${name} from new event"
+                        onclick="removeStudentFromEvent('${id}')"
+                        label="Remove ${email} from new event"
+                        aria-label="Remove ${email} from new event"
                         svg="bin.svg"
                         class="icon"
                     ></button>
@@ -174,7 +178,7 @@ async function select (id, select) {
             console.error(`Cannot unselect event with ID '${id}'`);
         }
     }
-    main(false);
+    main(false).then();
 }
 
 function selectAll (select=true) {
@@ -186,7 +190,7 @@ function selectAll (select=true) {
         selected = [];
     }
 
-    main(false);
+    main(false).then();
 }
 
 
@@ -210,7 +214,7 @@ async function main (reload=true) {
         </div>
     `;
 
-    showStudentsInAddEvent();
+    await showStudentsInAddEvent();
 
     const searchValue = searchFilterInput.value;
 
@@ -230,25 +234,27 @@ async function main (reload=true) {
 
 document.getElementById(`add-event-submit`).onclick = async () => {
 
-    if (!$nameInp.value) {
-        showError('Event name is required');
+    if ($nameInp.value.length < 3) {
+        showError('Event name is too short').then();
         return;
     }
 
     if (!$timeInp.value) {
-        showError('Event time is required');
+        showError('Event time is required').then();
         return;
     }
 
     const time = new Date($timeInp.value).getTime();
-    const { id } = await api`create/events/${$nameInp.value}/${time}?description=${$descInp.value}`;
+    const { id: eventID } = await api`create/events/${$nameInp.value}/${time}?description=${$descInp.value}`;
 
     $nameInp.value = '';
     $descInp.value = '';
 
-    await Promise.all(Object.keys(studentsInEvent).map(async code => {
-        await api`create/house-points/give/${code}/${studentsInEvent[code]}?event=${id}`;
+    await Promise.all(Object.keys(studentsInEvent).map(async userID => {
+        await api`create/house-points/give/${userID}/${studentsInEvent[userID]}?event=${eventID}`;
     }));
+
+    studentsInEvent = {};
 
     await main();
 };

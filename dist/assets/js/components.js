@@ -7,47 +7,46 @@ let currentComponentID = 0;
  */
 function insertComponent (element) {
     return {
-        studentNameInputWithIntellisense: (width='200px') => {
+        studentEmailInputWithIntellisense: () => {
             const id = currentComponentID++;
             element.innerHTML += `
                 <span>
-                    <span class="student-name-input-wrapper">
+                    <span class="student-email-input-wrapper">
                         <input
                             type="text"
-                            class="student-name-input"
-                            placeholder="Name"
-                            aria-label="student name"
-                            id="student-name-input-${id}"
-                            style="width: ${width}"
+                            class="student-email-input"
+                            placeholder="Email"
+                            aria-label="student email"
+                            id="student-email-input-${id}"
                         >
                         <div
-                            class="student-name-input-dropdown" 
-                            id="student-name-input-dropdown-${id}"
+                            class="student-email-input-dropdown" 
+                            id="student-email-input-dropdown-${id}"
                         ></div>
                     </span>
                 </span>
             `;
 
-            const $studentNameInput = document.getElementById(`student-name-input-${id}`);
-            const $dropdown = document.getElementById(`student-name-input-dropdown-${id}`);
+            const $studentNameInput = document.getElementById(`student-email-input-${id}`);
+            const $dropdown = document.getElementById(`student-email-input-dropdown-${id}`);
 
-            window[`onClickStudentNamInput${id}`] = (value) => {
+            window[`onClickStudentEmailInput${id}`] = (value) => {
                 $studentNameInput.value = value;
             };
 
             window.addEventListener('click', () => {
-                $dropdown.classList.remove('student-name-input-show-dropdown');
+                $dropdown.classList.remove('student-email-input-show-dropdown');
             });
 
             api`get/users/all`.then(({ data }) => {
 
-                const studentNames = data.map(student => student['name']);
+                const studentNames = data.map(student => student['email']);
 
                 $studentNameInput.addEventListener('input', async () => {
                     const value = $studentNameInput.value;
 
                     if (!value) {
-                        $dropdown.classList.remove('student-name-input-show-dropdown');
+                        $dropdown.classList.remove('student-email-input-show-dropdown');
                         return;
                     }
 
@@ -56,17 +55,17 @@ function insertComponent (element) {
                     );
 
                     if (users.length === 0) {
-                        $dropdown.classList.remove('student-name-input-show-dropdown');
+                        $dropdown.classList.remove('student-email-input-show-dropdown');
                         return;
                     }
 
-                    $dropdown.classList.add('student-name-input-show-dropdown');
+                    $dropdown.classList.add('student-email-input-show-dropdown');
 
                     $dropdown.innerHTML = '';
 
                     for (let name of users) {
                         $dropdown.innerHTML += `
-                            <div onclick="window['onClickStudentNamInput${id}']('${name}')">
+                            <div onclick="window['onClickStudentEmailInput${id}']('${name}')">
                                 ${name} 
                             </div>
                         `;

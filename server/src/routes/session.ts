@@ -2,7 +2,7 @@ import route from '../index';
 import { error } from '../log';
 import {authLvl, generateUUID} from '../util';
 
-route('create/session/:email/:password?expires=86400', async ({ query, params }) => {
+route('create/sessions/:email/:password?expires=86400', async ({ query, params }) => {
 
     // password in plaintext
     const { email, password } = params;
@@ -39,7 +39,7 @@ route('create/session/:email/:password?expires=86400', async ({ query, params })
     return { sessionID, userID: res[0].id };
 });
 
-route('create/session/from-id/:userID?expires=86400', async ({ query, params }) => {
+route('create/sessions/:userID?expires=86400', async ({ query, params }) => {
 
     const { userID } = params;
 
@@ -64,7 +64,7 @@ route('create/session/from-id/:userID?expires=86400', async ({ query, params }) 
     return { sessionID, userID };
 });
 
-route('get/session/auth-level/:sessionID', async ({ query, params }) => {
+route('get/sessions/auth-level/:sessionID', async ({ query, params }) => {
     const { sessionID } = params;
 
     return {
@@ -72,7 +72,7 @@ route('get/session/auth-level/:sessionID', async ({ query, params }) => {
     };
 });
 
-route('delete/session/:sessionID', async ({ query, params }) => {
+route('delete/sessions/:sessionID', async ({ query, params }) => {
     const { sessionID } = params;
 
     const queryRes = await query`

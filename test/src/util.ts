@@ -31,9 +31,9 @@ export async function generateUser (api: API, year=10): Promise<IGenerateUserRes
         throw `create/users/email/password failed: ${JSON.stringify(res)}`;
     }
 
-    res = await api(`create/session/${email}/${password}`);
+    res = await api(`create/sessions/${email}/${password}`);
     if (res.ok !== true || res.status !== 200 || typeof res.sessionID !== 'string' || typeof res.userID !== 'string') {
-        throw `create/session/email/password failed: ${JSON.stringify(res)}`;
+        throw `create/sessions/email/password failed: ${JSON.stringify(res)}`;
     }
 
     return { email, password, ...res };

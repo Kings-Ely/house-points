@@ -2,7 +2,7 @@ import Test from '../framework';
 import { generateUser } from "../util";
 
 
-Test.test('Creating, getting and deleting events', async (api) => {
+Test.test('Events | Creating, getting and deleting events', async (api) => {
 
     // check no events at start
     let res = await api(`get/events/all`);
@@ -79,7 +79,7 @@ Test.test('Creating, getting and deleting events', async (api) => {
     return true;
 });
 
-Test.test('Updating event name', async (api) => {
+Test.test('Events | Updating event name', async (api) => {
     const now = Math.round(Date.now() / 1000);
 
     const { sessionID, userID } = await generateUser(api);
@@ -142,7 +142,7 @@ Test.test('Updating event name', async (api) => {
 });
 
 
-Test.test('Updating event timestamp', async (api) => {
+Test.test('Events | Updating event timestamp', async (api) => {
     const now = Math.round(Date.now() / 1000);
     // 1 week ago
     const then = now - 60 * 60 * 24 * 7;
@@ -204,7 +204,7 @@ Test.test('Updating event timestamp', async (api) => {
 });
 
 
-Test.test('Events are gotten in order of time', async (api) => {
+Test.test('Events | Events are gotten in order of time', async (api) => {
     const now = Math.round(Date.now() / 1000);
     // 1 week ago
     const then = now - 60 * 60 * 24 * 7;

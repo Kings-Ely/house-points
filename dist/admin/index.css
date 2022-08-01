@@ -6,6 +6,10 @@
     align-items: center;
 }
 
+.house-point:last-child {
+    border-bottom: none;
+}
+
 #add-hp-code, #add-hp-reason {
     background: none;
 }
@@ -26,29 +30,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.big-link {
-    margin: 20px;
-    font-size: 20px;
-    text-decoration: none;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    height: fit-content;
-    width: fit-content;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.big-link:hover {
-    color: var(--text-light);
-    background: var(--bg-accent);
-}
-
-#leaderboard-link:hover .label {
-    transform: scale(1) translate(-90%, 50px);
 }
 
 #signout {

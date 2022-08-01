@@ -34,17 +34,19 @@ route('create/events/:name/:timestamp?description', async ({ query, cookies, par
         return 'Timestamp must be at least 1';
     }
 
+    const id = await generateUUID();
+
     await query`
         INSERT INTO events (id, name, time, description)
         VALUES (
-            ${await generateUUID()},
+            ${id},
             ${name},
             FROM_UNIXTIME(${time}),
             ${description || ''}
         )
     `;
 
-    return { status: 201 };
+    return { status: 201, id };
 });
 
 route('update/events/change-name/:id/:name', async ({ query, cookies, params }) => {

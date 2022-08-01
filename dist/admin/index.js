@@ -8,7 +8,7 @@ const $addHPSubmit = document.getElementById('add-hp-submit');
 (async () => {
     await init('..');
 
-    $addHPName = insertComponent($addHPName).studentNameInputWithIntellisense();
+    $addHPName = insertComponent($addHPName).studentEmailInputWithIntellisense();
 
     hideWithID('admin-link');
 
@@ -27,53 +27,8 @@ const $addHPSubmit = document.getElementById('add-hp-submit');
     await main();
 })();
 
-
-function housePointHML (hp) {
-    const submittedTime = hp['timestamp'] * 1000;
-
-    return `
-        <div class="house-point">
-            <div>
-                ${hp['studentName']}
-            </div>
-            <div style="padding: 0 50px;">
-                ${hp['description']}
-            </div>
-            <div>
-                ${new Date(submittedTime).toDateString()}
-                (${getRelativeTime(submittedTime)})
-            </div>
-            <div>
-                <button 
-                    onclick="window.reject(${hp['hpID']}, prompt('Rejection Reason'))"
-                    class="icon"
-                    aria-label="Reject"
-                    svg="red-cross.svg"
-                ></button>
-                <button
-                    onclick="window.accept(${hp['hpID']})"
-                    class="icon"
-                    svg="accent-tick.svg"
-                    aria-label="Accept"
-                ></button>
-            </div>
-        </div>
-    `;
-}
-
-async function accept (id) {
-    await api`change/house-points/accepted/${id}?`;
-    await main();
-}
-
-async function reject (id, reject) {
-    if (!reject) return;
-    await api`change/house-points/accepted/${id}?reject=${reject}`;
-    await main();
-}
-
 async function main () {
-    const { data: pending } = await api`get/house-points/with-status/pending`;
+    const { data: pending } = await api`get/house-points?status=Pending`;
 
     $numPendingHPs.innerText = pending.length;
 
@@ -102,6 +57,76 @@ async function main () {
             </p>
         `;
     }
+
+    reloadDOM();
+}
+
+
+function housePointHML (hp) {
+    const submittedTime = hp['created'] * 1000;
+
+    return `
+        <div class="house-point">
+            <button 
+                onclick="signInAs('${hp['userID']}', '${hp['studentEmail']}')"
+                svg="login.svg"
+                label="Sign in as ${hp['studentEmail']}"
+                label-offset="50%"
+                class="icon small"
+                aria-label="Sign in as ${hp['studentEmail']}"
+            >
+                ${hp['studentEmail'].split('@')[0]}
+            </button>
+            <div style="padding: 0 50px;">
+                ${hp['description']}
+            </div>
+            <div>
+                ${new Date(submittedTime).toDateString()}
+                (${getRelativeTime(submittedTime)})
+            </div>
+            <div>
+                <button 
+                    onclick="reject('${hp['id']}', prompt('Rejection Reason'))"
+                    class="icon"
+                    aria-label="Reject"
+                    svg="red-cross.svg"
+                    label="Reject"
+                ></button>
+                <button
+                    onclick="accept('${hp['id']}')"
+                    class="icon"
+                    svg="accent-tick.svg"
+                    aria-label="Accept"
+                    label="Accept"
+                ></button>
+            </div>
+        </div>
+    `;
+}
+
+async function signInAs (id, email) {
+    if (!confirm(`Sign in as ${email}?`)) {
+        return;
+    }
+
+    const { sessionID } = await api`create/sessions/${id}`;
+
+    if (!sessionID) return;
+
+    setAltSessionCookie(getSession());
+    setSessionCookie(sessionID);
+    await navigate(`/user`);
+}
+
+async function accept (id) {
+    await api`update/house-points/accepted/${id}`;
+    await main();
+}
+
+async function reject (id, reject) {
+    if (!reject) return;
+    await api`update/house-points/accepted/${id}?reject=${reject}`;
+    await main();
 }
 
 $addHPSubmit.onclick = async () => {

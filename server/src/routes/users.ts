@@ -102,6 +102,7 @@ route('get/users/from-session/:session', async ({ query, params }) => {
         FROM users, sessions
         WHERE sessions.id = ${session}
             AND sessions.user = users.id
+            AND UNIX_TIMESTAMP(sessions.opened) + sessions.expires > UNIX_TIMESTAMP()
     `;
 
     if (!data.length) return {

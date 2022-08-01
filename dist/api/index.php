@@ -13,7 +13,8 @@ error_reporting(E_ALL);
 // this method is not very good though, meaning no GET parameters can be stripped from the request,
 // but makes everything easier with escaping stuff
 // which does work at the moment
-$uri_parts = explode("?", $_SERVER['REQUEST_URI']);
+// (Note last parameter is doing only first occurrence, so must return array of length 1 or 2)
+$uri_parts = explode("?", $_SERVER['REQUEST_URI'], 2);
 
 $api_uri = '';
 

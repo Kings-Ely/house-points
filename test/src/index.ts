@@ -36,7 +36,7 @@ async function api (path: string, session: string | null = null): Promise<any> {
 
 	if (session === null) {
 		if (adminSessionID === null) {
-			let res = await api(`create/session/${adminEmail}/${adminPassword}`, '');
+			let res = await api(`create/sessions/${adminEmail}/${adminPassword}`, '');
 			if (res.error || !res.ok) {
 				console.log(c.red(res.error));
 			}

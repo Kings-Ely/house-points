@@ -1,116 +1,80 @@
 import route from "../";
-import {AUTH_ERR, generateUUID, getSessionID, requireAdmin, requireLoggedIn, userFromID, userID} from '../util';
+import {
+    AUTH_ERR,
+    generateUUID,
+    getSessionID,
+    requireAdmin,
+    requireLoggedIn,
+    userFromID,
+    userFromSession,
+    userID
+} from '../util';
 
 
-route('get/house-points/with-id/:housePointID', async ({ query, params, cookies }) => {
-    const { housePointID: id } = params;
+route('get/house-points?id&userID&yearGroup&status&from&to', async ({ query, params, cookies }) => {
+    // Single route for getting house points with filters
 
-    if (!await requireAdmin(cookies, query)) {
-        const res = await query`
-            SELECT users.code
-            FROM housepoints, users
-            WHERE housepoints.id = ${id}
-              AND housepoints.student = users.id
-        `;
+    let { id, userID, yearGroup: ygRaw, status, from: fromRaw, to: toRaw } = params;
 
-        // doesn't get to know if house point even exists or not
-        if (!res.length) return AUTH_ERR;
-        if (res[0]['code'] !== getSessionID(cookies)) return AUTH_ERR;
-    }
+    let yearGroup = parseInt(ygRaw) || 0;
+    let from = parseInt(fromRaw) || 0;
+    let to = parseInt(toRaw) || 0;
 
     const res = await query`
-        SELECT 
-            users.email as studentEmail, 
-            users.year as studentYear, 
-            housepoints.quantity as quantity, 
-            housepoints.event as eventID, 
-            housepoints.description as description,
+        SELECT
+            housepoints.id,
+            housepoints.quantity,
+            housepoints.description,
+            housepoints.status,
             UNIX_TIMESTAMP(housepoints.created) as created,
             UNIX_TIMESTAMP(housepoints.completed) as completed,
-            housepoints.status,
-            housepoints.rejectMessage
-        FROM housepoints, users
-        WHERE housepoints.id = ${id}
-          AND housepoints.student = users.id
+            housepoints.rejectMessage,
+            
+            users.id as userID,
+            users.email as studentEmail,
+            users.year as studentYear,
+            
+            housepoints.event as eventID,
+            events.name as eventName,
+            events.description as eventDescription,
+            UNIX_TIMESTAMP(events.time) as eventTime
+            
+        FROM users, housepoints
+        LEFT JOIN events
+        ON events.id = housepoints.event
+        
+        WHERE
+            housepoints.student = users.id
+            
+            AND ((housepoints.id = ${id})         OR ${!id})
+            AND ((users.id = ${userID})           OR ${!userID})
+            AND ((housepoints.status = ${status}) OR ${!status})
+            AND ((users.year = ${yearGroup})      OR ${!yearGroup})
+            AND ((created >= ${from})             OR ${!from})
+            AND ((created <= ${to})               OR ${!to})
     `;
-    if (!res.length) return {
-        status: 406,
-        error: `No house point found with ID '${id}'`
+
+    // either require admin or the house point to belong to the user
+    if (!await requireAdmin(cookies, query)) {
+        const user = await userFromSession(query, getSessionID(cookies));
+        if (!user) return AUTH_ERR;
+        if (!user['id']) return AUTH_ERR;
+
+        for (let i = 0; i < res.length; i++) {
+            if (res[i]['userID'] === user['id']) {
+                continue;
+            }
+
+            // if the house point does not belong to the user, censor it
+            delete res[i]['userID'];
+            delete res[i]['studentEmail'];
+            delete res[i]['rejectMessage'];
+            delete res[i]['description'];
+        }
     }
 
-    return res[0];
+    return { data: res };
 });
-
-
-route('get/house-points/with-status/:status', async ({ query, cookies, params: { status} }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
-
-    return { data: await query`
-        SELECT
-            housepoints.id as id,
-            users.email as studentEmail,
-            users.year as studentYear,
-            housepoints.quantity as quantity,
-            housepoints.event as eventID,
-            housepoints.description as description,
-            UNIX_TIMESTAMP(housepoints.created) as created,
-            UNIX_TIMESTAMP(housepoints.completed) as completed,
-            housepoints.status,
-            housepoints.rejectMessage
-        FROM housepoints, users
-        WHERE
-            housepoints.status = ${status} AND
-            housepoints.student = users.id
-        ORDER BY completed, created DESC
-    `};
-});
-
-
-route('get/house-points/all', async ({ query, cookies }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
-
-    return { data: await query`
-        SELECT
-            housepoints.id as id,
-            users.email as studentEmail,
-            users.year as studentYear,
-            housepoints.quantity as quantity,
-            housepoints.event as eventID,
-            housepoints.description as description,
-            UNIX_TIMESTAMP(housepoints.created) as created,
-            UNIX_TIMESTAMP(housepoints.completed) as completed,
-            housepoints.status,
-            housepoints.rejectMessage
-        FROM housepoints, users
-        WHERE housepoints.student = users.id
-        ORDER BY completed, created DESC
-    `};
-});
-
-route('get/house-points/earned-by/:userID', async ({ query, params, cookies }) => {
-    if (!await requireLoggedIn(cookies, query)) return AUTH_ERR;
-
-    const { userID: id } = params;
-
-    return { data: await query`
-        SELECT
-            housepoints.id as id,
-            users.email as studentEmail,
-            users.year as studentYear,
-            housepoints.quantity as quantity,
-            housepoints.event as eventID,
-            housepoints.description as description,
-            UNIX_TIMESTAMP(housepoints.created) as created,
-            UNIX_TIMESTAMP(housepoints.completed) as completed,
-            housepoints.status,
-            housepoints.rejectMessage
-        FROM housepoints, users
-        WHERE housepoints.student = users.id
-            AND users.id = ${id}
-        ORDER BY completed, created DESC
-    `};
-});
-
 
 route(
     'create/house-points/give/:userID/:quantity?description&event',
@@ -146,7 +110,6 @@ async ({ query, cookies, params }) => {
 
     return { status: 201 };
 });
-
 
 route(
     'create/house-points/request/:userID/:quantity?description&event',

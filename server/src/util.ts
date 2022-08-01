@@ -88,6 +88,8 @@ export async function authLvl (sessionID: string, query: queryFunc) {
         FROM sessions, users
         WHERE sessions.id = ${sessionID}
             AND sessions.user = users.id
+            AND UNIX_TIMESTAMP(sessions.opened) + sessions.expires > UNIX_TIMESTAMP()
+           
     `;
 
     if (!res.length) return 0;
@@ -154,6 +156,27 @@ export async function userFromID (query: queryFunc, id: string): Promise<Record<
             student
         FROM users
         WHERE id = ${id}
+    `;
+
+    if (!res.length) return null;
+
+    return res[0];
+}
+
+export async function userFromSession (query: queryFunc, id: string): Promise<Record<string, any> | null> {
+    const res = await query`
+        SELECT
+            users.id,
+            users.email,
+            users.year,
+            users.admin,
+            users.student
+        FROM users, sessions
+        WHERE
+            sessions.user = users.id
+            
+            AND sessions.id = ${id}
+            AND UNIX_TIMESTAMP(opened) + expires > UNIX_TIMESTAMP()
     `;
 
     if (!res.length) return null;
