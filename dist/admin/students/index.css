@@ -25,7 +25,7 @@
 }
 
 #with-all-students-menu {
-    padding: 100px 20px 20px 20px;
+    padding: 0 20px;
     display: flex; justify-content: space-between;
     align-items: center;
 }
@@ -53,4 +53,13 @@
 
 #students-header {
     border-bottom-width: 2px;
+}
+
+#add-student-year {
+    width: 80px;
+}
+
+#add-student-email {
+    max-width: 350px;
+    width: 95%;
 }

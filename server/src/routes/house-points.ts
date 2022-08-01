@@ -20,7 +20,7 @@ route('get/house-points/with-id/:housePointID', async ({ query, params, cookies 
 
     const res = await query`
         SELECT 
-            users.name as student, 
+            users.email as studentEmail, 
             users.year as studentYear, 
             housepoints.quantity as quantity, 
             housepoints.event as eventID, 
@@ -48,7 +48,7 @@ route('get/house-points/with-status/:status', async ({ query, cookies, params: {
     return { data: await query`
         SELECT
             housepoints.id as id,
-            users.name as student,
+            users.email as studentEmail,
             users.year as studentYear,
             housepoints.quantity as quantity,
             housepoints.event as eventID,

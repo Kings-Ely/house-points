@@ -4,30 +4,6 @@ import * as crypto from "crypto";
 import route from '../';
 import { AUTH_ERR, generateUUID, getSessionID, IDFromSession, requireAdmin, requireLoggedIn } from '../util';
 
-
-route('get/users/code-from-email/:name', async ({ query, params, cookies }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
-
-    const { email } = params;
-
-    if (!email) return 'No email';
-
-    const data = await query`
-        SELECT code
-        FROM users
-        WHERE email = ${email}
-    `;
-
-    if (!data.length) return {
-        status: 406,
-        error: `User not found with email '${email}'`
-    };
-
-    return {
-        code: data[0]['code']
-    };
-});
-
 route('get/users/from-id/:id', async ({ query, params, cookies }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
@@ -204,10 +180,20 @@ route('get/users/all', async ({ query, cookies }) => {
             SUM(CASE WHEN housepoints.status='Pending' THEN housepoints.quantity ELSE 0 END) AS pending,
             SUM(CASE WHEN housepoints.status='Accepted' THEN housepoints.quantity ELSE 0 END) AS accepted,
             SUM(CASE WHEN housepoints.status='Rejected' THEN housepoints.quantity ELSE 0 END) AS rejected
-        FROM users LEFT JOIN housepoints
+        FROM users 
+        LEFT JOIN housepoints
         ON housepoints.student = users.id
-        GROUP BY users.id, users.email, users.year, users.admin, users.student
-        ORDER BY users.student, users.admin DESC, year, email;
+        GROUP BY 
+            users.id, 
+            users.email, 
+            users.year,
+            users.admin,
+            users.student
+        ORDER BY 
+            users.student,
+            users.admin DESC,
+            year,
+            email;
     `;
 
     return { data };
@@ -247,8 +233,8 @@ route('create/users/:email/:password?year=9', async ({ query, params, cookies })
     const year = parseInt(yearStr);
 
     if (isNaN(year)) return `Year '${year}' is not a number`;
-    if ((year < 9 || year > 12) && year !== 0) {
-        return `Year '${year}' is not between 9 and 12`;
+    if ((year < 9 || year > 13) && year !== 0) {
+        return `Year '${year}' is not between 9 and 13`;
     }
 
     if (!emailValidator.validate(email)) {
@@ -303,7 +289,6 @@ route('update/users/admin/:userID?admin', async ({ query, params, cookies }) => 
     };
 });
 
-
 route('update/users/year/:userID/:by', async ({ query, params, cookies }) => {
     if (!await requireAdmin(cookies, query)) return AUTH_ERR;
 
@@ -317,7 +302,24 @@ route('update/users/year/:userID/:by', async ({ query, params, cookies }) => {
         return `Can't change year by more than 2 at once, trying to change by ${yearChange}`;
     }
 
-    const queryRes = await query`UPDATE users SET year = year + ${yearChange} WHERE id = ${user}`;
+    const currentYear = await query`SELECT year FROM users WHERE id = ${user}`;
+    if (!currentYear.length) return {
+        status: 406,
+        error: 'User not found'
+    }
+    const year = currentYear[0].year;
+    if (year === 0) {
+        return `Cannot change year of user from '0'`;
+    }
+
+    const newYear = currentYear[0].year + yearChange;
+
+    const queryRes = await query`
+        UPDATE users 
+        SET year = ${newYear} 
+        WHERE id = ${user}
+    `;
+
     if (!queryRes.affectedRows) return {
         status: 406,
         error: 'User not found'

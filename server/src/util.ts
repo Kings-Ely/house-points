@@ -83,16 +83,18 @@ export function parseCookies (cookie: string): Record<string, string> {
 export async function authLvl (sessionID: string, query: queryFunc) {
     if (!sessionID) return 0;
 
-    const level = await query`
-        SELECT admin
+    const res = await query`
+        SELECT users.admin
         FROM sessions, users
         WHERE sessions.id = ${sessionID}
-        AND sessions.user = users.id
+            AND sessions.user = users.id
     `;
 
-    if (!level.length) return 0;
+    if (!res.length) return 0;
 
-    return (level?.[0]?.['admin'] === 1) ? 2 : 1;
+    const [ user ] = res;
+
+    return (user?.['admin'] === 1) ? 2 : 1;
 }
 
 /**

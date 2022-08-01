@@ -39,7 +39,18 @@ function housePoints (hps) {
 
 function title (info, hps) {
 
-    const name = info['name'] + (info['admin'] ? ' (Admin)' : '');
+    const [ username, emailExt ] = info['email'].split('@');
+
+    const name = `
+        <p>
+            <span style="font-size: 3em">
+                ${username} 
+            </span>
+            <span style="color: var(--text-light); font-size: 1.2em">
+                @${emailExt} ${info['admin'] ? ' (Admin)' : ''}
+            </span>
+        </p>
+    `;
 
     if (info['student']) {
         const numHps = hps.filter(c => c['status'] === 'Accepted').length;

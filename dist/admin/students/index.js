@@ -3,7 +3,8 @@ let students = [];
 
 const searchFilterInput = document.getElementById('search');
 
-const $nameInp = document.querySelector('#add-student-name');
+const $emailInp = document.querySelector('#add-student-email');
+const $passwordInp = document.querySelector('#add-student-password');
 const $yearInp = document.querySelector('#add-student-year');
 const $students = document.querySelector(`#students`);
 
@@ -18,15 +19,17 @@ const $students = document.querySelector(`#students`);
 })();
 
 
-function showStudent (student, selected) {
+async function showStudent (student, selected) {
 
-    const { code, name, year, student: isStudent, admin: isAdmin } = student;
+    const { id, email, year, student: isStudent, admin: isAdmin } = student;
+
+    const isMe = (id === (await userInfo())['id']);
 
     return `
         <div class="student">
             <div>
                 <button 
-                    onclick="select('${code}', ${!selected})"
+                    onclick="select('${id}', ${!selected})"
                     class="icon no-scale"
                     svg="${selected ? 'selected-checkbox' : 'unselected-checkbox'}.svg"
                     aria-label="${selected ? 'Unselect' : 'Select'}"
@@ -34,7 +37,7 @@ function showStudent (student, selected) {
                 ${isAdmin ? `
                     <button 
                         class="icon ${isStudent ? 'icon-accent' : ''}" 
-                        onclick="revokeAdmin('${code}', '${name}')"
+                        onclick="revokeAdmin('${id}', '${email}')"
                         label="${isStudent ? '' : '(Non-Student)'} Admin"
                         svg="star-filled.svg"
                         aria-label="Revoke Admin"
@@ -43,8 +46,8 @@ function showStudent (student, selected) {
                 ` : `
                     <button
                         class="icon ${isStudent ? 'icon-accent' : ''}" 
-                        onclick="makeAdmin('${code}', '${name}')"
-                        aria-label="Make ${name} an admin"
+                        onclick="makeAdmin('${id}', '${email}')"
+                        aria-label="Make ${email} an admin"
                         label="Make Admin"
                         svg="star-empty.svg"
                     ></button>                
@@ -55,21 +58,21 @@ function showStudent (student, selected) {
             </div>
             
             <div style="min-width: 150px">
-                ${code === getSession() ? `
+                ${isMe ? `
                     <span 
                         class="student-link"
                         label="Me"
                     >
-                        <b>${name}</b>
+                        <b>${email}</b>
                     </span>
                 ` : `
                     <button 
-                        onclick="signInAs('${code}', '${name}')" 
+                        onclick="signInAs('${id}', '${email}')" 
                         class="student-link"
-                        label="Sign in as ${name}"
-                        aria-label="Sign in as ${name}"
+                        label="Sign in as ${email}"
+                        aria-label="Sign in as ${email}"
                     >
-                        ${name}
+                        ${email}
                     </button>
                 `}
             </div>
@@ -79,31 +82,24 @@ function showStudent (student, selected) {
             </div>
             
             <div>
-                <button 
-                    onclick="copyToClipboard('${code}'.toUpperCase())"
-                    class="icon"
-                    svg="key.svg"
-                    label="Copy ${name}'s Code"
-                    aria-label="Copy ${name}'s Code"
-                ></button>
                 <button
-                    onclick="deleteUser('${code}', '${name}')"
+                    onclick="deleteUser('${id}', '${email}')"
                     class="icon"
                     svg="bin.svg"
-                    label="Delete ${name}"
-                    aria-label="Delete ${name}"
+                    label="Delete ${email}"
+                    aria-label="Delete ${email}"
                 ></button>
             </div>
         </div>
     `;
 }
 
-async function deleteUser (code, name) {
-    if (!confirm(`Are you sure you want to delete ${name} (Code '${code}') and all their house points?`)) {
+async function deleteUser (id, email) {
+    if (!confirm(`Are you sure you want to delete ${email} and all their house points?`)) {
         return;
     }
 
-    await api`delete/users/${code}`;
+    await api`delete/users/${id}`;
 
     await main();
 }
@@ -115,19 +111,26 @@ async function deleteSelected () {
     }
 
     // send API requests at the same time and wait for all to finish
-    await Promise.all(selected.map(async code => {
-        await api`delete/users/${code}`;
+    await Promise.all(selected.map(async id => {
+        await api`delete/users/${id}`;
     }));
 
     await main();
 }
 
-async function signInAs (code, name) {
-    if (!confirm(`Sign in as ${name}?`)) {
+async function signInAs (id, email) {
+    if (!confirm(`Sign in as ${email}?`)) {
         return;
     }
+
+    const { sessionID } = await api`create/sessions/from-id/${id}`;
+
+    if (!sessionID) {
+        return;
+    }
+
     setAltSessionCookie(getSession());
-    setSessionCookie(code);
+    setSessionCookie(sessionID);
     await navigate(`/user`);
 }
 
@@ -154,8 +157,8 @@ async function ageSelected (amount) {
         return;
     }
 
-    await Promise.all(selected.map(async code => {
-        await api`update/users/year/code=${code}&yearChange=${amount}`;
+    await Promise.all(selected.map(async id => {
+        await api`update/users/year/${id}/${amount}`;
     }));
 
     await main();
@@ -164,7 +167,7 @@ async function ageSelected (amount) {
 function selectAll (select=true) {
     if (select) {
         // select all students
-        selected = students.map(student => student.code);
+        selected = students.map(s => s['id']);
     } else {
         // unselect all students
         selected = [];
@@ -179,29 +182,29 @@ async function giveHPToSelected () {
 
     if (!reason) return;
 
-    await Promise.all(selected.map(async code => {
-        await api`create/house-points/give/${code}/1?description=${reason}`;
+    await Promise.all(selected.map(async id => {
+        await api`create/house-points/give/${id}/1?description=${reason}`;
     }));
 
     await main();
 }
 
-async function revokeAdmin (code, name) {
-    if (!confirm(`Are you sure you want to revoke ${name}'s admin access?`)) {
+async function revokeAdmin (id, email) {
+    if (!confirm(`Are you sure you want to revoke '${email}'s admin access?`)) {
         return;
     }
 
-    await api`update/users/admin/${code}?admin=0`;
+    await api`update/users/admin/${id}?admin=0`;
 
     await main();
 }
 
-async function makeAdmin (code, name) {
-    if (!confirm(`Are you sure you want to make ${name} an admin?`)) {
+async function makeAdmin (id, email) {
+    if (!confirm(`Are you sure you want to make '${email}' an admin?`)) {
         return;
     }
 
-    await api`update/users/admin/${code}?admin=1`;
+    await api`update/users/admin/${id}?admin=1`;
 
     await main();
 }
@@ -218,7 +221,7 @@ async function main (reload=true) {
             
             <div> <b>Year</b> </div>
             
-            <div style="min-width: 150px"> <b>Name</b> </div>
+            <div style="min-width: 150px"> <b>Email</b> </div>
             
             <div> <b>House Points</b> </div>
             
@@ -231,10 +234,10 @@ async function main (reload=true) {
     let html = '';
 
     for (let student of students) {
-        if (searchValue && !student['name'].toLowerCase().includes(searchValue.toLowerCase())) {
+        if (searchValue && !student['email'].toLowerCase().includes(searchValue.toLowerCase())) {
             continue;
         }
-        html += showStudent(student, selected.indexOf(student['code']) !== -1);
+        html += await showStudent(student, selected.indexOf(student['id']) !== -1);
     }
 
     $students.innerHTML += html;
@@ -244,9 +247,13 @@ async function main (reload=true) {
 
 document.getElementById(`add-student-submit`).onclick = async () => {
 
+    if (!$emailInp.value) {
+        showError('Email Required');
+        return;
+    }
 
-    if (!$nameInp.value) {
-        showError('Name Required');
+    if ($passwordInp.value.length < 4) {
+        showError('Password too short');
         return;
     }
 
@@ -264,9 +271,9 @@ document.getElementById(`add-student-submit`).onclick = async () => {
         }
     }
 
-    await api`create/users/${$nameInp.value}?year=${$yearInp.value}`;
+    await api`create/users/${$emailInp.value}/${$passwordInp.value}?year=${$yearInp.value}`;
 
-    $nameInp.value = '';
+    $emailInp.value = '';
 
     await main();
 };

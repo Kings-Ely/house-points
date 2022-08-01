@@ -3,8 +3,8 @@
 
 // Global constants and variables
 const API_ROOT = 'https://josephcoppin.com/school/house-points/fallback-api',
-      COOKIE_KEY = 'hpCode',
-      ALT_COOKIE_KEY = 'hpAltCode',
+      COOKIE_KEY = 'hpnea_SessionID',
+      ALT_COOKIE_KEY = 'hpnea_AltSessionID',
       HOUSE_NAME = 'Osmond';
 
 let ROOT_PATH = '',
@@ -471,7 +471,9 @@ async function loadNav () {
 
     const user = await userInfo();
 
-    $username.innerText = user.name;
+    const username = user['email']?.split('@')?.[0] || 'Unknown Name';
+
+    $username.innerText = username;
 
     if (user['admin']) {
         $adminLink.style.display = 'block';
@@ -480,6 +482,9 @@ async function loadNav () {
             navigate(`/admin`);
         };
     } else if (altUserInfoJSON) {
+
+        const altUsername = altUserInfoJSON['email']?.split('@')?.[0] || 'Unknown Alt';
+
         $adminLink.style.display = 'block';
         $adminLink.setAttribute('aria-hidden', 'false');
         $adminLink.onclick = () => {
@@ -487,7 +492,7 @@ async function loadNav () {
             navigate(`/admin`);
         };
 
-        $username.innerHTML = `${user.name} (${altUserInfoJSON.name})`;
+        $username.innerHTML = `${username} (${altUsername})`;
     }
 }
 
