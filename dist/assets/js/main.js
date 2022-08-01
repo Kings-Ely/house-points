@@ -18,13 +18,13 @@ let ROOT_PATH = '',
     isSignedIn = false,
     userInfoIsLoaded = false,
     onLoadCBs = [ () => console.log('Document Loaded') ],
-    documentLoaded = false,
-    usingFallBackAPI = false;
+    documentLoaded = false;
 
 
+/** @type {{[ k: 'month'|'hour'|'year'|'day'|'minute'|'second' ]: number}} */
 const timeUnits = {
     year  : 24 * 60 * 60 * 1000 * 365,
-    month : 24 * 60 * 60 * 1000 * 365/12,
+    month : 24 * 60 * 60 * 1000 * 365 / 12,
     day   : 24 * 60 * 60 * 1000,
     hour  : 60 * 60 * 1000,
     minute: 60 * 1000,
@@ -34,6 +34,8 @@ const timeUnits = {
 const relativeTimeFormat = new Intl.RelativeTimeFormat('en', {
     numeric: 'auto'
 });
+
+const svgCache = {};
 
 (async () => {
 
@@ -67,8 +69,29 @@ const relativeTimeFormat = new Intl.RelativeTimeFormat('en', {
     }
 })();
 
-async function sleep (ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+/**
+ * Must be called first
+ * @param {string} rootPath
+ */
+async function init (rootPath) {
+    ROOT_PATH = rootPath;
+
+    // load footer and nav bar
+    $nav = document.querySelector(`nav`);
+    $footer = document.querySelector(`footer`);
+
+    $footer.innerHTML = await (await fetch(`${ROOT_PATH}/assets/html/footer.html`)).text();
+    if ($nav) {
+        await loadNav();
+    }
+
+    reloadDOM();
+
+    await loadScript('/assets/js/components.js');
+
+    await waitForReady();
+
+    scrollToTop();
 }
 
 // user auth code utilities
@@ -232,18 +255,11 @@ function GETParam (name) {
 }
 
 /**
- * @param {string} text
- * @returns {Promise<void>}
- */
-async function copyToClipboard (text) {
-    await navigator.clipboard.writeText(text);
-}
-
-/**
  * @param {HTMLElement} self
  * @returns {Promise<void>}
  */
 async function loadSVG (self) {
+    // if the SVG has already been loaded then skip
     if (self.hasAttribute('svg-loaded')) {
         return;
     }
@@ -251,12 +267,25 @@ async function loadSVG (self) {
     self.setAttribute('svg-loaded', '1');
 
     const uri = ROOT_PATH + '/assets/img/' + self.attributes['svg'].value;
-    const raw = await fetch(uri);
-    if (!raw.ok) {
-        console.error(`Failed to load SVG at '${uri}' for `, self);
-        return;
+
+    let svg;
+
+    // check if the svg is cached
+    if (svgCache[uri]) {
+        svg = svgCache[uri];
+    } else {
+        // if not cached, then go get it
+        const raw = await fetch(uri);
+        if (!raw.ok) {
+            console.error(`Failed to load SVG at '${uri}' for `, self);
+            return;
+        }
+        svg = await raw.text();
+
+        svgCache[uri] = svg;
     }
-    self.innerHTML = await raw.text() + self.innerHTML;
+
+    self.innerHTML = svg + self.innerHTML;
 }
 
 /**
@@ -398,7 +427,8 @@ async function api (path, ...args) {
     });
 
     if (res.status === 404) {
-        showError('Something went wrong! (404 in API)');
+        showError('Something went wrong! (404 in API)')
+            .then();
         if (shouldHideAtEnd) {
             stopSpinner(loader);
         }
@@ -412,12 +442,14 @@ async function api (path, ...args) {
 
         // don't try to show error in response if there is no response, so also in try block
         if (asJSON.error) {
-            showError(asJSON.error);
+            showError(asJSON.error)
+                .then();
         }
 
     } catch (err) {
         console.error('Error with API request: ', err);
-        showError('Something went wrong!');
+        showError('Something went wrong!')
+            .then();
     }
 
     if (shouldHideAtEnd) {
@@ -500,10 +532,6 @@ function reloadDOM () {
     loadSVGs();
 }
 
-function scrollToTop () {
-    document.body.scrollTop = document.documentElement.scrollTop = 0;
-}
-
 /**
  * Navigates to a webpage
  * @param {string} url
@@ -560,9 +588,10 @@ async function showError (message) {
 /**
  * Shows an error from a code (a string)
  * @param {string} code
+ * @returns {Promise<void>}
  */
 function showErrorFromCode (code) {
-    showError({
+    return showError({
 
         'auth': 'You are not authorized for this action',
 
@@ -594,8 +623,9 @@ async function testApiCon () {
     if (!res.ok || res.status === 200) {
         console.log('API connection OK');
     } else {
-        showError(`Can't connect to the server!`);
         console.error(res);
+        showError(`Can't connect to the server!`)
+            .then();
     }
 }
 
@@ -610,33 +640,8 @@ function waitForReady () {
             resolve();
             return;
         }
-        onLoadCBs.push(resolve);
+        onLoadCBs.push((...args) => resolve(...args));
     });
-}
-
-/**
- * Must be called first
- * @param {string} rootPath
- */
-async function init (rootPath) {
-    ROOT_PATH = rootPath;
-
-    // load footer and nav bar
-    $nav = document.querySelector(`nav`);
-    $footer = document.querySelector(`footer`);
-
-    $footer.innerHTML = await (await fetch(`${ROOT_PATH}/assets/html/footer.html`)).text();
-    if ($nav) {
-        await loadNav();
-    }
-
-    reloadDOM();
-
-    await loadScript('/assets/js/components.js');
-
-    await waitForReady();
-
-    scrollToTop();
 }
 
 async function handleUserInfo (info) {
@@ -663,4 +668,12 @@ async function handleUserInfo (info) {
     for (const cb of userInfoCallbacks) {
         cb(info);
     }
+}
+
+async function sleep (ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function scrollToTop () {
+    document.body.scrollTop = document.documentElement.scrollTop = 0;
 }

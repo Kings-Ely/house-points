@@ -15,7 +15,6 @@ import './tests/house-points';
 
 const flags = commandLineArgs([
 	{ name: 'verbose', alias: 'v', type: Boolean, defaultValue: false },
-	{ name: 'doLighthouse', alias: 'l', type: Boolean, defaultValue: false },
 	{ name: 'deploy', alias: 'd', type: Boolean, defaultValue: false },
 ]);
 

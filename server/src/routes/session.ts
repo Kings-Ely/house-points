@@ -39,6 +39,31 @@ route('create/session/:email/:password?expires=86400', async ({ query, params })
     return { sessionID, userID: res[0].id };
 });
 
+route('create/session/from-id/:userID?expires=86400', async ({ query, params }) => {
+
+    const { userID } = params;
+
+    if (!userID) {
+        return 'UserID not specified';
+    }
+
+    const res = await query`
+        SELECT email
+        FROM users
+        WHERE id = ${userID}
+    `;
+    if (!res.length) return 'Invalid userID';
+
+    const sessionID = await generateUUID();
+
+    await query`
+        INSERT INTO sessions (id, user)
+        VALUES (${sessionID}, ${userID})
+    `;
+
+    return { sessionID, userID };
+});
+
 route('get/session/auth-level/:sessionID', async ({ query, params }) => {
     const { sessionID } = params;
 
