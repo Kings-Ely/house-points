@@ -2,14 +2,17 @@ let currentComponentID = 0;
 
 /**
  *
- * @param {HTMLElement} element
+ * @param {HTMLElement|string} $el
  * @returns {{[key: string]: (...args: any[]) => any}}
  */
-function insertComponent (element) {
+function insertComponent ($el) {
+    if (typeof $el === 'string') {
+        $el = document.querySelector($el);
+    }
     return {
         studentEmailInputWithIntellisense: () => {
             const id = currentComponentID++;
-            element.innerHTML += `
+            $el.innerHTML += `
                 <span>
                     <span class="student-email-input-wrapper">
                         <input
@@ -38,7 +41,7 @@ function insertComponent (element) {
                 $dropdown.classList.remove('student-email-input-show-dropdown');
             });
 
-            api`get/users/all`.then(({ data }) => {
+            api`get/users/all`.then(({data}) => {
 
                 const studentNames = data.map(student => student['email']);
 
@@ -74,6 +77,61 @@ function insertComponent (element) {
             });
 
             return $studentNameInput;
+        },
+        cookiePopUp: () => {
+
+            /**
+             * The user has allowed cookies
+             */
+            window.allowedCookies = value => {
+                hideWithID('cookie-popup');
+                if (!value) {
+                    navigate('/');
+                    return;
+                }
+                setCookie(COOKIE_ALLOW_COOKIES_KEY, value.toString(), 365);
+            }
+            $el.innerHTML += `
+                <h2>Cookies</h2>
+                <p>
+                    We and selected third parties use cookies or similar technologies for
+                    technical purposes and, with your consent, for other purposes.
+                    Denying consent may make related features unavailable.
+                    You can freely give, deny, or withdraw your consent at any time.
+                    You can consent to the use of such technologies by using the “Accept” button.
+                </p>
+        
+                <button 
+                    onclick="allowedCookies(1)"
+                    class="big-link"
+                >
+                    Accept
+                </button>
+                <button 
+                    onclick="allowedCookies(0)"
+                    class="big-link"
+                >
+                    Reject
+                </button>
+            `;
+        },
+        fullPagePopUp: (content) => {
+            if (document.getElementById('full-page-popup')) {
+                // remove any current popups
+                const $p = document.getElementById('full-page-popup');
+                $p.parentElement.removeChild($p);
+            }
+            $el.innerHTML += `
+                <div id="full-page-popup">
+                    <div id="full-page-popup-content">
+                        ${content}
+                    </div>
+                </div>
+            `;
+            const $fullPagePopup = document.querySelector('#full-page-popup');
+            $fullPagePopup.addEventListener('click', () => {
+                hide($fullPagePopup);
+            });
         }
-    }
+    };
 }

@@ -59,9 +59,7 @@ const svgCache = {};
         }
     }
 
-    function documentIsLoaded () {
-        cookiePopUp();
-
+    async function documentIsLoaded () {
         reloadDOM();
 
         documentLoaded = true;
@@ -95,6 +93,7 @@ async function init (rootPath) {
     await waitForReady();
 
     scrollToTop();
+    cookiePopUp();
 }
 
 async function handleUserInfo (info) {
@@ -242,6 +241,12 @@ async function loadScript (url) {
  * @param {number} days
  */
 function setCookie (name, value='', days=1) {
+
+    if (getCookie(COOKIE_ALLOW_COOKIES_KEY) !== '1' && name !== COOKIE_ALLOW_COOKIES_KEY) {
+        showError('Cookies are disabled');
+        return;
+    }
+
     let expires = "";
     if (days) {
         const date = new Date();
@@ -274,6 +279,11 @@ function getCookie (name) {
  * @param {string} name
  */
 function eraseCookie (name) {
+    if (getCookie(COOKIE_ALLOW_COOKIES_KEY) !== '1') {
+        showError('Cookies are disabled');
+        return;
+    }
+
     document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
 
@@ -352,19 +362,6 @@ function loadLabel (self) {
         </span> 
         ${self.innerHTML}
     `;
-}
-
-/**
- * Hides an element by setting its display to 'none'
- * @param {string} id
- */
-function hideWithID (id) {
-    const el = document.getElementById(id);
-    if (el) {
-        el.style.display = 'none';
-    } else {
-        console.error(`hideWithID: no element with id '${id}'`);
-    }
 }
 
 // Spinner
@@ -648,11 +645,10 @@ function showErrorFromCode (code) {
     }[code] || 'An Unknown Error has Occurred');
 }
 
-function allowedCookies () {
-    hideWithID('cookie-popup');
-    setCookie(COOKIE_ALLOW_COOKIES_KEY, '1', 365);
-}
-
+/**
+ * Checks if the user has allowed cookies
+ * and if not then shows a popup to get them to allow them
+ */
 function cookiePopUp () {
     if (getCookie(COOKIE_ALLOW_COOKIES_KEY)) {
         return;
@@ -660,23 +656,11 @@ function cookiePopUp () {
 
     const $cookiePopUp = document.createElement('div');
     $cookiePopUp.id = 'cookie-popup';
-    $cookiePopUp.innerHTML = `
-
-        <h2>Cookies</h2>
-        <p>
-            This website uses cookies to store your login information.
-            By continuing to use this website, you agree to our use of cookies.
-        </p>
-
-        <button 
-            onclick="allowedCookies()"
-            class="big-link"
-        >
-            I agree
-        </button>
-    `;
+    insertComponent($cookiePopUp).cookiePopUp();
     document.body.appendChild($cookiePopUp);
 }
+
+
 
 /**
  * Removes all authentication cookies and redirects to the login page
@@ -730,4 +714,27 @@ async function sleep (ms) {
 
 function scrollToTop () {
     document.body.scrollTop = document.documentElement.scrollTop = 0;
+}
+
+function hide (el) {
+    if (typeof el === 'string') {
+        el = document.getElementById(el);
+    }
+    if (el) {
+        el.style.display = 'none';
+    } else {
+        console.error(`hideWithID: no element with id '${id}'`);
+    }
+}
+
+/**
+ * Hides an element by setting its display to 'none'
+ * @param {string} id
+ */
+function hideWithID (id) {
+    hide(document.getElementById(id));
+}
+
+function fullPagePopup (content) {
+    insertComponent(document.body).fullPagePopUp(content);
 }
