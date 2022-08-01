@@ -446,6 +446,16 @@ svg {
     padding: 20px;
     border: 2px solid var(--border);
     text-align: center;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 #cookie-popup h2 {
@@ -454,6 +464,15 @@ svg {
 }
 
 #cookie-popup button {
-    background-color: var(--bg-accent);
     cursor: pointer;
+    transition: 0.3s;
+}
+
+#cookie-popup:hover button {
+    border: 2px solid var(--text-light) !important;
+}
+
+#cookie-popup button:hover {
+    border: 2px solid var(--border) !important;
+    background: var(--bg) !important;
 }
