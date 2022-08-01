@@ -1,20 +1,33 @@
 <?php
 
-/* For debugging:
+const PORT = 4464;
+const HOST = 'https://localhost';
+
+//* For debugging:
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 ini_set('display_errors', true);
 error_reporting(E_ALL);
 //*/
 
-// would use GET_['p'] but that auto-decodes the parameters in a weird way
-// so just use the raw string
-// this method is not very good though, meaning this can be the only GET parameter int eh request,
+// Use the raw string over a $_GET param to avoid auto-decoding of URI parameter
+// this method is not very good though, meaning no GET parameters can be stripped from the request,
+// but makes everything easier with escaping stuff
 // which does work at the moment
-$url = '0.0.0.0:4464/' . explode("p=", $_SERVER['REQUEST_URI'])[1];
+$uri_parts = explode("?", $_SERVER['REQUEST_URI']);
+
+$api_uri = '';
+
+if (count($uri_parts) == 2) {
+	$api_uri = $uri_parts[1];
+} else {
+	die(json_encode(array('error' => "Invalid API request format, must have '?' followed by API route")));
+}
+
+$url = HOST.':'.PORT.'/'.$api_uri;
 
 $ch = curl_init();
 
-/* If there was a POST request, then forward that as well.*/
+/* Support for POST requests */
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     curl_setopt($ch, CURLOPT_POST, TRUE);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $_POST);
@@ -35,8 +48,15 @@ if (isset($headers['Cookie'])) {
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
+// Dangerous but as only localhost requests should be fine
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
 $response = curl_exec($ch);
+
+if ($response === false)  {
+	die(json_encode(array('error' => curl_error($ch))));
+}
 
 $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 $headers = substr($response, 0, $header_size);
@@ -57,8 +77,11 @@ foreach($headerArray as $header)
         if (trim($headerName) == 'Content-Length') continue;
         if (trim($headerName) == 'Transfer-Encoding') continue;
         if (trim($headerName) == 'Location') continue;
+
     }
     header($header, FALSE);
 }
+
+curl_close ($ch);
+
 echo $body;
-curl_close($ch);

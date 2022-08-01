@@ -1,3 +1,8 @@
 {
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "chalk": "^5.0.1",
+    "performance-now": "^2.1.0",
+    "zx": "^7.0.7"
+  }
 }

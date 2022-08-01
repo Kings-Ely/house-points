@@ -3,15 +3,14 @@
         "bufferutil": "^4.0.6",
         "cardinal": "^2.1.1",
         "chalk": "^5.0.1",
-        "chrome-launcher": "^0.15.1",
         "command-line-args": "^5.2.1",
         "dotenv": "^16.0.1",
-        "lighthouse": "^9.6.3",
         "mysql2": "^2.3.3",
         "node-fetch": "^3.2.6",
         "performance-now": "^2.1.0",
         "ts-loader": "^9.3.1",
-        "utf-8-validate": "^5.0.9"
+        "utf-8-validate": "^5.0.9",
+        "zx": "^7.0.7"
     },
     "devDependencies": {
         "@tsconfig/node14": "^1.0.1",

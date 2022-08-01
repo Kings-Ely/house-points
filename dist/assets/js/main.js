@@ -2,7 +2,7 @@
 
 
 // Global constants and variables
-const API_ROOT = 'https://josephcoppin.com/school/house-points/fallback-api',
+const API_ROOT = 'https://josephcoppin.com/school/house-points/api',
       COOKIE_KEY = 'hpnea_SessionID',
       ALT_COOKIE_KEY = 'hpnea_AltSessionID',
       HOUSE_NAME = 'Osmond';
@@ -352,7 +352,7 @@ async function rawAPI (path) {
     let res;
     let asJSON;
     try {
-        res = await fetch(`${API_ROOT}/?p=${encodeURI(path)}`, {
+        res = await fetch(`${API_ROOT}/?${encodeURI(path)}`, {
             method: 'GET',
             mode: 'cors',
             cache: 'no-cache',
@@ -412,7 +412,8 @@ async function api (path, ...args) {
     }
 
     // fetch
-    const res = await fetch(`${API_ROOT}/?p=${encodeURI(path)}`, {
+    // include '/' in request as otherwise you get redirected, which takes lots of time
+    const res = await fetch(`${API_ROOT}/?${encodeURI(path)}`, {
         method: 'GET',
         mode: 'cors',
         cache: 'no-cache',

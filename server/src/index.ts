@@ -46,6 +46,10 @@ import './routes/session';
 
 async function serverResponse (req: IncomingMessage, res: ServerResponse) {
 
+    if (flags.verbose) {
+        log`Dealing with request: ${req.method} ${req.url}`;
+    }
+
     // set response headers
     res.setHeader("Access-Control-Allow-Origin", req.headers.origin || '*');
     res.setHeader("Access-Control-Allow-Methods", "GET");
