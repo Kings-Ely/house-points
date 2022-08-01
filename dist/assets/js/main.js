@@ -4,6 +4,7 @@
 // Global constants and variables
 const API_ROOT = 'https://josephcoppin.com/school/house-points/api',
       COOKIE_KEY = 'hpnea_SessionID',
+      COOKIE_ALLOW_COOKIES_KEY = 'hpnea_AllowedCookies',
       ALT_COOKIE_KEY = 'hpnea_AltSessionID',
       HOUSE_NAME = 'Osmond';
 
@@ -59,6 +60,8 @@ const svgCache = {};
     }
 
     function documentIsLoaded () {
+        cookiePopUp();
+
         reloadDOM();
 
         documentLoaded = true;
@@ -94,7 +97,33 @@ async function init (rootPath) {
     scrollToTop();
 }
 
-// user auth code utilities
+async function handleUserInfo (info) {
+    if (getAltSession()) {
+        const altInfo = await rawAPI(`get/users/from-session/${getAltSession()}`);
+        if (altInfo['ok'] && altInfo['admin']) {
+            // if we are already an admin with the main code, just delete the alt code
+            if (info['admin']) {
+                eraseCookie(ALT_COOKIE_KEY);
+            } else {
+                altUserInfoJSON = altInfo;
+            }
+        }
+    }
+
+    isSignedIn = info.ok;
+
+    if (!isSignedIn) {
+        info = {};
+    }
+    userInfoJSON = info;
+    userInfoIsLoaded = true;
+
+    for (const cb of userInfoCallbacks) {
+        cb(info);
+    }
+}
+
+// user auth cookie utilities
 function getSession () {
     return getCookie(COOKIE_KEY);
 }
@@ -112,8 +141,8 @@ function setAltSessionCookie (code) {
 }
 
 
-
 /**
+ * Gets the user info from the session stored in the session cookie
  * @returns {Promise<unknown>}
  */
 async function userInfo () {
@@ -125,6 +154,10 @@ async function userInfo () {
     });
 }
 
+/**
+ * Gets the user ID from the session stored in the session cookie
+ * @returns {Promise<string>}
+ */
 async function userID () {
     const user = await userInfo();
     if (!user['id']){
@@ -134,7 +167,8 @@ async function userID () {
 }
 
 /**
- * @returns {Promise<unknown>}
+ * Returns true if the session stored in the cookie is valid
+ * @returns {Promise<boolean>}
  */
 async function signedIn () {
     if (userInfoIsLoaded) {
@@ -148,7 +182,8 @@ async function signedIn () {
 }
 
 /**
- * timestamps are in milliseconds
+ * Gets the difference in the timestamps as a human-readable string, like '2 days' (ago)
+ * Timestamps are in milliseconds.
  * @param {number} d1
  * @param {number?} [d2=Date.now()]
  * @returns {string}
@@ -613,6 +648,36 @@ function showErrorFromCode (code) {
     }[code] || 'An Unknown Error has Occurred');
 }
 
+function allowedCookies () {
+    hideWithID('cookie-popup');
+    setCookie(COOKIE_ALLOW_COOKIES_KEY, '1', 365);
+}
+
+function cookiePopUp () {
+    if (getCookie(COOKIE_ALLOW_COOKIES_KEY)) {
+        return;
+    }
+
+    const $cookiePopUp = document.createElement('div');
+    $cookiePopUp.id = 'cookie-popup';
+    $cookiePopUp.innerHTML = `
+
+        <h2>Cookies</h2>
+        <p>
+            This website uses cookies to store your login information.
+            By continuing to use this website, you agree to our use of cookies.
+        </p>
+
+        <button 
+            onclick="allowedCookies()"
+            class="big-link"
+        >
+            I agree
+        </button>
+    `;
+    document.body.appendChild($cookiePopUp);
+}
+
 /**
  * Removes all authentication cookies and redirects to the login page
  * @returns {Promise<void>}
@@ -657,32 +722,6 @@ function waitForReady () {
         }
         onLoadCBs.push((...args) => resolve(...args));
     });
-}
-
-async function handleUserInfo (info) {
-    if (getAltSession()) {
-        const altInfo = await rawAPI(`get/users/from-session/${getAltSession()}`);
-        if (altInfo['ok'] && altInfo['admin']) {
-            // if we are already an admin with the main code, just delete the alt code
-            if (info['admin']) {
-                eraseCookie(ALT_COOKIE_KEY);
-            } else {
-                altUserInfoJSON = altInfo;
-            }
-        }
-    }
-
-    isSignedIn = info.ok;
-
-    if (!isSignedIn) {
-        info = {};
-    }
-    userInfoJSON = info;
-    userInfoIsLoaded = true;
-
-    for (const cb of userInfoCallbacks) {
-        cb(info);
-    }
 }
 
 async function sleep (ms) {

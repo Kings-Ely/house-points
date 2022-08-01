@@ -400,8 +400,9 @@ svg {
     --hover-offset-y: -20px;
 }
 
-/* labels are not only for icons but normally are */
+
 .label {
+    /* labels are not only for icons but normally are */
     --hover-offset: 0px;
     transform: scale(0);
     position: absolute;
@@ -422,4 +423,37 @@ svg {
     .label {
         display: none !important;
     }
+}
+
+/* Cookie popup */
+#cookie-popup {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 95%;
+    max-width: 400px;
+    height: fit-content;
+    background-color: var(--bg-accent);
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    transition: 0.3s;
+    color: var(--text);
+    margin: 15px;
+    border-radius: 10px;
+    padding: 20px;
+    border: 2px solid var(--border);
+    text-align: center;
+}
+
+#cookie-popup h2 {
+    margin: 0;
+    padding: 0;
+}
+
+#cookie-popup button {
+    background-color: var(--bg-accent);
+    cursor: pointer;
 }
