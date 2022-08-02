@@ -1,5 +1,5 @@
 import route from "../";
-import { AUTH_ERR, requireAdmin } from "../util";
+import { AUTH_ERR, isAdmin } from "../util";
 import now from "performance-now";
 
 route('', async ()  => {
@@ -7,14 +7,14 @@ route('', async ()  => {
 });
 
 route('get/server/pid', async ({ cookies, query }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
     return { pid: process.pid };
 });
 
 
 route('get/server/check', async ({ query, cookies }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
     if ((await query`SELECT * FROM users LIMIT 1`).length !== 1) {
         return 'Something went wrong';
@@ -52,7 +52,7 @@ route('get/server/performance?iterations=100', async ({ query, params: { iterati
 
 
 route('delete/server', async ({ query, cookies}) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
     process.kill(process.pid, 'SIGTERM');
 });

@@ -3,8 +3,8 @@ import {
     AUTH_ERR,
     generateUUID,
     getSessionID,
-    requireAdmin,
-    requireLoggedIn,
+    isAdmin,
+    isLoggedIn,
     userFromID,
     userFromSession,
     userID
@@ -55,7 +55,7 @@ route('get/house-points?id&userID&yearGroup&status&from&to', async ({ query, par
     `;
 
     // either require admin or the house point to belong to the user
-    if (!await requireAdmin(cookies, query)) {
+    if (!await isAdmin(cookies, query)) {
         const user = await userFromSession(query, getSessionID(cookies));
         if (!user) return AUTH_ERR;
         if (!user['id']) return AUTH_ERR;
@@ -79,7 +79,7 @@ route('get/house-points?id&userID&yearGroup&status&from&to', async ({ query, par
 route(
     'create/house-points/give/:userID/:quantity?description&event',
 async ({ query, cookies, params }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
     const { userID, description, event, quantity: rawQuantity } = params;
 
@@ -147,7 +147,7 @@ async ({ query, params }) => {
 route(
     'update/house-points/accepted/:housePointID?reject',
 async ({ query, cookies, params }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
     const { housePointID: id, reject } = params;
 
@@ -184,8 +184,8 @@ route('delete/house-points/with-id/:housePointID', async ({ query, cookies, para
 
     // if we aren't an admin user, we can still delete it if
     // they own the house point
-    if (!await requireAdmin(cookies, query)) {
-        if (!await requireLoggedIn(cookies, query)) return AUTH_ERR;
+    if (!await isAdmin(cookies, query)) {
+        if (!await isLoggedIn(cookies, query)) return AUTH_ERR;
 
         const res = await query`
             SELECT users.id

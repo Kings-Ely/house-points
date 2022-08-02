@@ -102,14 +102,14 @@ export async function authLvl (sessionID: string, query: queryFunc) {
 /**
  * True if user code is valid
  */
-export async function requireLoggedIn (cookies: Cookies, query: queryFunc): Promise<boolean> {
+export async function isLoggedIn (cookies: Cookies, query: queryFunc): Promise<boolean> {
     return await authLvl(getSessionID(cookies), query) > 0;
 }
 
 /**
  * True if user code is valid and an admin
  */
-export async function requireAdmin (cookies: Cookies, query: queryFunc): Promise<boolean> {
+export async function isAdmin (cookies: Cookies, query: queryFunc): Promise<boolean> {
     return await authLvl(getSessionID(cookies), query) >= 2;
 }
 

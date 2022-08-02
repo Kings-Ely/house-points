@@ -54,77 +54,7 @@
             ></button>
         </div>
     </section>
-
-    <section>
-        <h2>Users</h2>
-        <div id="with-all-students-menu">
-            <div>
-            <span style="border: 1px solid var(--border); border-radius: 10px; display: inline-block; margin: 10px; padding: 5px;">
-                <span svg="small-down-arrow.svg"></span>
-                <button
-                        onclick="selectAll()"
-                        class="icon"
-                        svg="unselected-checkbox.svg"
-                        label="Select All"
-                        aria-label="select all"
-                ></button>
-
-                <button
-                        onclick="selectAll(false)"
-                        class="icon"
-                        svg="unselect-checkbox.svg"
-                        label="Unselect All"
-                        aria-label="unselect all"
-                ></button>
-            </span>
-            </div>
-            <div>
-                <button
-                        onclick="deleteSelected()"
-                        class="icon"
-                        aria-label="delete selected"
-                        label="Delete"
-                        svg="bin.svg"
-                ></button>
-
-                <button
-                        onclick="ageSelected(1)"
-                        class="icon"
-                        aria-label="move selected up a year"
-                        label="Move Up 1 Year"
-                        svg="circle-up-arrow.svg"
-                ></button>
-
-                <button
-                        onclick="ageSelected(-1)"
-                        class="icon"
-                        aria-label="move selected down a year"
-                        label="Move Down 1 Year"
-                        svg="circle-down-arrow.svg"
-                ></button>
-
-                <button
-                        onclick="giveHPToSelected()"
-                        class="icon"
-                        aria-label="give all selected a house point"
-                        label="Give House Point"
-                        svg="plus.svg"
-                ></button>
-            </div>
-            <div>
-                <label>
-                    <input
-                            placeholder="search for name..."
-                            oninput="main(false)"
-                            id="search"
-                            autocomplete="off"
-                            aria-label="search"
-                    >
-                </label>
-            </div>
-        </div>
-        <div id="students"></div>
-    </section>
+    <section id="students"></section>
 </main>
 <footer></footer>
 </body>

@@ -1,7 +1,7 @@
 let selected = [];
 let students = [];
 
-const searchFilterInput = document.getElementById('search');
+const $searchFilterInput = document.getElementById('search');
 
 const $emailInp = document.querySelector('#add-student-email');
 const $passwordInp = document.querySelector('#add-student-password');
@@ -10,6 +10,40 @@ const $students = document.querySelector(`#students`);
 
 (async () => {
     await init('../..', true, true);
+
+    insertComponent('#').selectableList('Students', `
+        <button
+            onclick="deleteSelected()"
+            class="icon"
+            aria-label="delete selected"
+            label="Delete"
+            svg="bin.svg"
+        ></button>
+        
+        <button
+            onclick="ageSelected(1)"
+            class="icon"
+            aria-label="move selected up a year"
+            label="Move Up 1 Year"
+            svg="circle-up-arrow.svg"
+        ></button>
+        
+        <button
+            onclick="ageSelected(-1)"
+            class="icon"
+            aria-label="move selected down a year"
+            label="Move Down 1 Year"
+            svg="circle-down-arrow.svg"
+        ></button>
+        
+        <button
+            onclick="giveHPToSelected()"
+            class="icon"
+            aria-label="give all selected a house point"
+            label="Give House Point"
+            svg="plus.svg"
+        ></button>
+    `);
 
     await main();
 })();
@@ -160,18 +194,6 @@ async function ageSelected (amount) {
     await main();
 }
 
-function selectAll (select=true) {
-    if (select) {
-        // select all students
-        selected = students.map(s => s['id']);
-    } else {
-        // unselect all students
-        selected = [];
-    }
-
-    main(false);
-}
-
 async function giveHPToSelected () {
 
     let reason = prompt(`Reason to give ${selected.length} people a house point`);
@@ -225,7 +247,7 @@ async function main (reload=true) {
         </div>
     `;
 
-    const searchValue = searchFilterInput.value;
+    const searchValue = $searchFilterInput.value;
 
     let html = '';
 

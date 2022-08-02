@@ -755,6 +755,17 @@ function hideWithID (id) {
     hide(document.getElementById(id));
 }
 
+function show (el, display = 'block') {
+    if (typeof el === 'string') {
+        el = document.getElementById(el);
+    }
+    if (el) {
+        el.style.display = display;
+    } else {
+        console.error(`showWithID: no element with id '${id}'`);
+    }
+}
+
 function fullPagePopup (content) {
     insertComponent(document.body).fullPagePopUp(content);
 }

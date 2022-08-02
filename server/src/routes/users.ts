@@ -2,10 +2,10 @@ import emailValidator from 'email-validator';
 import * as crypto from "crypto";
 
 import route from '../';
-import { AUTH_ERR, generateUUID, getSessionID, IDFromSession, requireAdmin, requireLoggedIn } from '../util';
+import { AUTH_ERR, generateUUID, getSessionID, IDFromSession, isAdmin, isLoggedIn } from '../util';
 
 route('get/users/from-id/:id', async ({ query, params, cookies }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
     const { id } = params;
 
@@ -47,7 +47,7 @@ route('get/users/from-id/:id', async ({ query, params, cookies }) => {
 });
 
 route('get/users/from-email/:email', async ({ query, params, cookies }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
     const { email } = params;
 
@@ -130,7 +130,7 @@ route('get/users/from-session/:session', async ({ query, params }) => {
 });
 
 route('get/users/batch-info/:userIDs', async ({ query, params, cookies }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
     const { userIDs } = params;
 
@@ -169,7 +169,7 @@ route('get/users/batch-info/:userIDs', async ({ query, params, cookies }) => {
 
 
 route('get/users/all', async ({ query, cookies }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
     const data = await query`
         SELECT 
@@ -201,7 +201,7 @@ route('get/users/all', async ({ query, cookies }) => {
 });
 
 route('get/users/leaderboard', async ({ query, cookies }) => {
-    if (!await requireLoggedIn(cookies, query)) return AUTH_ERR;
+    if (!await isLoggedIn(cookies, query)) return AUTH_ERR;
 
     return {
         data: await query`
@@ -227,7 +227,7 @@ route('get/users/leaderboard', async ({ query, cookies }) => {
 
 
 route('create/users/:email/:password?year=9', async ({ query, params, cookies }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
     const { email, year: yearStr, password } = params;
 
@@ -269,7 +269,7 @@ route('create/users/:email/:password?year=9', async ({ query, params, cookies })
 
 
 route('update/users/admin/:userID?admin', async ({ query, params, cookies }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
     const { userID, admin } = params;
 
@@ -291,7 +291,7 @@ route('update/users/admin/:userID?admin', async ({ query, params, cookies }) => 
 });
 
 route('update/users/year/:userID/:by', async ({ query, params, cookies }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
     const { userID: user, by: yC } = params;
     const yearChange = parseInt(yC);
@@ -329,7 +329,7 @@ route('update/users/year/:userID/:by', async ({ query, params, cookies }) => {
 
 
 route('delete/users/:userID', async ({ query, params, cookies }) => {
-    if (!await requireAdmin(cookies, query)) return AUTH_ERR;
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
     const { userID } = params;
 

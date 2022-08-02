@@ -1,60 +1,3 @@
-#students {
-    margin: 50px 20px 20px 20px;
-}
-
-.student {
-    border-bottom: 1px solid var(--border);
-    padding: 4px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.student > div:first-child {
-    width: 130px;
-}
-
-.student-link {
-    border: none;
-    text-underline: #575757;
-    font-size: 16px
-}
-
-.student-link:hover {
-    cursor: pointer;
-}
-
-#with-all-students-menu {
-    padding: 0 20px;
-    display: flex; justify-content: space-between;
-    align-items: center;
-}
-
-#search {
-    background: none;
-}
-
-#csv-form {
-    padding: 5px;
-    margin: 10px;
-    border: 1px solid var(--border-light);
-    border-radius: 5px;
-    width: fit-content;
-}
-
-#csv-form > button {
-    font-size: 15px;
-    cursor: pointer;
-}
-
-#csv-form > button:hover {
-    color: var(--text-light);
-}
-
-#students-header {
-    border-bottom-width: 2px;
-}
-
 #add-student-year {
     width: 80px;
 }
@@ -62,4 +5,13 @@
 #add-student-email {
     max-width: 350px;
     width: 95%;
+}
+#selectable-list .student-link {
+    border: none;
+    text-underline: #575757;
+    font-size: 16px
+}
+
+#selectable-list .student-link:hover {
+    cursor: pointer;
 }
