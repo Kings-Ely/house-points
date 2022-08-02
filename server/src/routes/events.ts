@@ -9,32 +9,20 @@ route('get/events?id&userID&from&to', async ({ query, params, cookies }) => {
     let from = parseInt(fromRaw) || 0;
     let to = parseInt(toRaw) || 0;
 
-    const res = await query`
+    let data = await query`
         SELECT
-            events.id,
-            events.name,
-            events.description,
-            UNIX_TIMESTAMP(events.time) as time,
-            SUM(
-                CASE 
-                    WHEN housepoints.status='Accepted' 
-                        THEN housepoints.quantity 
-                    ELSE 0
-                END
-            ) AS housePointCount
+            id,
+            name,
+            description,
+            UNIX_TIMESTAMP(time) as time
             
-        FROM events, users
-        LEFT JOIN housepoints
-            ON housepoints.student = users.id
-        
+        FROM events
         WHERE
-            housepoints.event = events.id
+            ((id = ${id})          OR ${!id})
+            AND ((time >= ${from}) OR ${!from})
+            AND ((time <= ${to})   OR ${!to})
             
-            AND ((events.id = ${id})  OR ${!id})
-            AND ((created >= ${from}) OR ${!from})
-            AND ((created <= ${to})   OR ${!to})
-            AND (users.id = ${userID} OR ${!userID})
-        GROUP BY events.id, events.name, events.description, events.time
+        ORDER BY time DESC
     `;
 
     const admin = await isAdmin(cookies, query);
@@ -46,8 +34,8 @@ route('get/events?id&userID&from&to', async ({ query, params, cookies }) => {
     if (!user) return AUTH_ERR;
     if (!user['id']) return AUTH_ERR;
 
-    for (let i = 0; i < res.length; i++) {
-        res[i]['housePoints'] = await query`
+    for (let i = 0; i < data.length; i++) {
+        data[i]['housePoints'] = await query`
             SELECT
                 housepoints.id,
                 housepoints.quantity,
@@ -55,7 +43,7 @@ route('get/events?id&userID&from&to', async ({ query, params, cookies }) => {
                 
                 users.id as userID,
                 users.email as studentEmail,
-                users.year as studentYear,
+                users.year as studentYear
                 
             FROM users, housepoints
             
@@ -65,26 +53,39 @@ route('get/events?id&userID&from&to', async ({ query, params, cookies }) => {
                 AND ((housepoints.event = ${id}) OR ${!id})
                 AND ((users.id = ${userID})      OR ${!userID})
                 
-            ORDER BY
-                time DESC
+            ORDER BY users.year DESC, users.email
         `;
 
+        data[i]['housePointCount'] = data[i]['housePoints'].length;
+
         if (!admin) {
-            for (let j = 0; j < res[i]['housePoints'].length; j++) {
-                if (res[i]['housePoints'][j]['userID'] === user['id']) {
+            for (let j = 0; j < data[i]['housePoints'].length; j++) {
+                if (data[i]['housePoints'][j]['userID'] === user['id']) {
                     continue;
                 }
 
                 // if the house point does not belong to the user, censor it
-                delete res[i]['housePoints'][j]['userID'];
-                delete res[i]['housePoints'][j]['studentEmail'];
-                delete res[i]['housePoints'][j]['rejectMessage'];
-                delete res[i]['housePoints'][j]['description'];
+                delete data[i]['housePoints'][j]['userID'];
+                delete data[i]['housePoints'][j]['studentEmail'];
+                delete data[i]['housePoints'][j]['rejectMessage'];
+                delete data[i]['housePoints'][j]['description'];
             }
         }
     }
 
-    return { data: res };
+    // filter by user ID
+    if (userID) {
+        data = data.filter((evt: Record<string, any>) => {
+            for (let hp of evt['housePoints']) {
+                if (hp['userID'] === userID) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    return { data };
 });
 
 route('create/events/:name/:timestamp?description', async ({ query, cookies, params }) => {

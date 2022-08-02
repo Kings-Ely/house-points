@@ -263,7 +263,7 @@ Test.test('HPs | Making sure hps are deleted when event is deleted', async (api)
     // create event
     await api(`create/events/doing+something+2022/${now}`);
 
-    let res = await api(`get/events/all`);
+    let res = await api(`get/events`);
     const { id: eventID } = res.data?.[0];
 
     // create hps and associate with event

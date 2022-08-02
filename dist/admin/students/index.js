@@ -1,5 +1,4 @@
-let selected = [];
-let students = [];
+
 
 const $searchFilterInput = document.getElementById('search');
 
@@ -11,41 +10,49 @@ const $students = document.querySelector(`#students`);
 (async () => {
     await init('../..', true, true);
 
-    insertComponent('#').selectableList('Students', `
-        <button
-            onclick="deleteSelected()"
-            class="icon"
-            aria-label="delete selected"
-            label="Delete"
-            svg="bin.svg"
-        ></button>
-        
-        <button
-            onclick="ageSelected(1)"
-            class="icon"
-            aria-label="move selected up a year"
-            label="Move Up 1 Year"
-            svg="circle-up-arrow.svg"
-        ></button>
-        
-        <button
-            onclick="ageSelected(-1)"
-            class="icon"
-            aria-label="move selected down a year"
-            label="Move Down 1 Year"
-            svg="circle-down-arrow.svg"
-        ></button>
-        
-        <button
-            onclick="giveHPToSelected()"
-            class="icon"
-            aria-label="give all selected a house point"
-            label="Give House Point"
-            svg="plus.svg"
-        ></button>
-    `);
+    let selected = [];
 
-    await main();
+    insertComponent('#students').selectableList({
+        name: 'Students',
+        items: (await api`get/users`)['data'],
+        uniqueKey: 'id',
+        searchKey: 'email',
+        selected,
+        titleBar: `
+            <button
+                onclick="deleteSelected()"
+                class="icon"
+                aria-label="delete selected"
+                label="Delete"
+                svg="bin.svg"
+            ></button>
+            
+            <button
+                onclick="ageSelected(1)"
+                class="icon"
+                aria-label="move selected up a year"
+                label="Move Up 1 Year"
+                svg="circle-up-arrow.svg"
+            ></button>
+            
+            <button
+                onclick="ageSelected(-1)"
+                class="icon"
+                aria-label="move selected down a year"
+                label="Move Down 1 Year"
+                svg="circle-down-arrow.svg"
+            ></button>
+            
+            <button
+                onclick="giveHPToSelected()"
+                class="icon"
+                aria-label="give all selected a house point"
+                label="Give House Point"
+                svg="plus.svg"
+            ></button>
+        `,
+        itemGenerator: showStudent
+    });
 })();
 
 
@@ -56,70 +63,62 @@ async function showStudent (student, selected) {
     const isMe = (id === (await userInfo())['id']);
 
     return `
-        <div class="student">
-            <div>
+        <div>
+            ${isAdmin ? `
                 <button 
-                    onclick="select('${id}', ${!selected})"
-                    class="icon no-scale"
-                    svg="${selected ? 'selected-checkbox' : 'unselected-checkbox'}.svg"
-                    aria-label="${selected ? 'Unselect' : 'Select'}"
-                ></button>
-                ${isAdmin ? `
-                    <button 
-                        class="icon ${isStudent ? 'icon-accent' : ''}" 
-                        onclick="revokeAdmin('${id}', '${email}')"
-                        label="${isStudent ? '' : '(Non-Student)'} Admin"
-                        svg="star-filled.svg"
-                        aria-label="Revoke Admin"
-                    >
-                    </button>
-                ` : `
-                    <button
-                        class="icon ${isStudent ? 'icon-accent' : ''}" 
-                        onclick="makeAdmin('${id}', '${email}')"
-                        aria-label="Make ${email} an admin"
-                        label="Make Admin"
-                        svg="star-empty.svg"
-                    ></button>                
-                `}
-            </div>
-            <div>
-                ${year || ''}
-            </div>
-            
-            <div style="min-width: 150px">
-                ${isMe ? `
-                    <span 
-                        class="student-link"
-                        label="Me"
-                    >
-                        <b>${email}</b>
-                    </span>
-                ` : `
-                    <button 
-                        onclick="signInAs('${id}', '${email}')" 
-                        class="student-link"
-                        label="Sign in as ${email}"
-                        aria-label="Sign in as ${email}"
-                    >
-                        ${email}
-                    </button>
-                `}
-            </div>
-           
-            <div>
-                ${isStudent ? student['accepted'] : ''}
-            </div>
-            
-            <div>
+                    class="icon ${isStudent ? 'icon-accent' : ''}" 
+                    onclick="revokeAdmin('${id}', '${email}')"
+                    label="${isStudent ? '' : '(Non-Student)'} Admin"
+                    svg="star-filled.svg"
+                    aria-label="Revoke Admin"
+                >
+                </button>
+            ` : `
                 <button
-                    onclick="deleteUser('${id}', '${email}')"
-                    class="icon"
-                    svg="bin.svg"
-                    label="Delete ${email}"
-                    aria-label="Delete ${email}"
-                ></button>
-            </div>
+                    class="icon ${isStudent ? 'icon-accent' : ''}" 
+                    onclick="makeAdmin('${id}', '${email}')"
+                    aria-label="Make ${email} an admin"
+                    label="Make Admin"
+                    svg="star-empty.svg"
+                ></button>                
+            `}
+        </div>
+        <div>
+            ${year || ''}
+        </div>
+        
+        <div style="min-width: 150px">
+            ${isMe ? `
+                <span 
+                    class="student-link"
+                    label="Me"
+                >
+                    <b>${email}</b>
+                </span>
+            ` : `
+                <button 
+                    onclick="signInAs('${id}', '${email}')" 
+                    class="student-link"
+                    label="Sign in as ${email}"
+                    aria-label="Sign in as ${email}"
+                >
+                    ${email}
+                </button>
+            `}
+        </div>
+       
+        <div>
+            ${isStudent ? student['accepted'] : ''}
+        </div>
+        
+        <div>
+            <button
+                onclick="deleteUser('${id}', '${email}')"
+                class="icon"
+                svg="bin.svg"
+                label="Delete ${email}"
+                aria-label="Delete ${email}"
+            ></button>
         </div>
     `;
 }
@@ -162,24 +161,6 @@ async function signInAs (id, email) {
     setAltSessionCookie(getSession());
     setSessionCookie(sessionID);
     await navigate(`/user`);
-}
-
-async function select (id, select) {
-    if (select) {
-        if (selected.indexOf(id) !== -1) {
-            console.error('cannot reselect student with id ' + id);
-            return;
-        }
-        selected.push(id);
-    } else {
-        const index = selected.indexOf(id);
-        if (index !== -1) {
-            selected.splice(index, 1);
-        } else {
-            console.error('Cannot unselect student with id ' + id);
-        }
-    }
-    await main(false);
 }
 
 async function ageSelected (amount) {
@@ -227,11 +208,7 @@ async function makeAdmin (id, email) {
     await main();
 }
 
-async function main (reload=true) {
-
-    if (reload || !students) {
-        students = (await api`get/users/all`)['data'];
-    }
+async function main () {
 
     $students.innerHTML = `
         <div class="student">

@@ -769,3 +769,16 @@ function show (el, display = 'block') {
 function fullPagePopup (content) {
     insertComponent(document.body).fullPagePopUp(content);
 }
+
+/**
+ * Limits the length of a string by cutting it and adding '...' to the end if it's too long
+ * @param {string} str
+ * @param {number} [maxLength=50]
+ * @returns {string}
+ */
+function limitStrLength (str, maxLength=50) {
+    if (str.length > maxLength-3) {
+        return str.substring(0, maxLength-3) + '...';
+    }
+    return str;
+}

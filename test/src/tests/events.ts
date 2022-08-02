@@ -5,9 +5,9 @@ import { generateUser } from "../util";
 Test.test('Events | Creating, getting and deleting events', async (api) => {
 
     // check no events at start
-    let res = await api(`get/events/all`);
+    let res = await api(`get/events`);
     if (res.ok !== true) {
-        return `get/events/all failed: ${JSON.stringify(res)}`;
+        return `get/events failed: ${JSON.stringify(res)}`;
     }
     if (res?.data?.length !== 0) {
         return `Expected no events ${JSON.stringify(res)}`;
@@ -24,7 +24,7 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
         return `create/events/doing+something+2022 failed: ${JSON.stringify(res)}`;
     }
     // get event
-    res = await api(`get/events/all`);
+    res = await api(`get/events`);
     if (res?.data?.length !== 1) {
         return `Expected 1 event, got ${JSON.stringify(res)}`;
     }
@@ -40,7 +40,7 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
     }
 
     // everyone logged in can see the events though
-    res = await api(`get/events/all`, sessionID);
+    res = await api(`get/events`, sessionID);
     if (res?.data?.length !== 1) {
         return `Expected 1 events, got ${JSON.stringify(res)}`;
     }
@@ -57,7 +57,7 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
     }
 
     // check that the event is still there
-    res = await api(`get/events/all`);
+    res = await api(`get/events`);
     if (res?.data?.length !== 1) {
         return `Expected 1 event, got ${JSON.stringify(res)}`;
     }
@@ -69,7 +69,7 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
     }
 
     // check that the event is gone
-    res = await api(`get/events/all`);
+    res = await api(`get/events`);
     if (res?.data?.length !== 0) {
         return `Expected no events, got ${JSON.stringify(res)}`;
     }
@@ -90,7 +90,7 @@ Test.test('Events | Updating event name', async (api) => {
         return `create/events/doing+something+2022 failed: ${JSON.stringify(res)}`;
     }
 
-    res = await api(`get/events/all`);
+    res = await api(`get/events`);
     if (res?.data?.length !== 1) {
         return `Expected 1 event, got ${JSON.stringify(res)}`;
     }
@@ -105,7 +105,7 @@ Test.test('Events | Updating event name', async (api) => {
         return `update/events/change-name/${id}/name/doing+something+else+2022 failed: ${JSON.stringify(res)}`;
     }
 
-    res = await api(`get/events/all`);
+    res = await api(`get/events`);
     if (res?.data?.length !== 1) {
         return `Expected 1 event, got ${JSON.stringify(res)}`;
     }
@@ -123,7 +123,7 @@ Test.test('Events | Updating event name', async (api) => {
         return `Expected 401 from 'update/events/${id}/name/not+doing+anything', got '${JSON.stringify(res)}'`;
     }
 
-    res = await api(`get/events/all`);
+    res = await api(`get/events`);
     if (res?.data?.length !== 1) {
         return `Expected 1 event, got ${JSON.stringify(res)}`;
     }
@@ -155,7 +155,7 @@ Test.test('Events | Updating event timestamp', async (api) => {
         return `create/events/doing+something+2022 failed: ${JSON.stringify(res)}`;
     }
 
-    res = await api(`get/events/all`);
+    res = await api(`get/events`);
     if (res?.data?.length !== 1) {
         return `Expected 1 event, got ${JSON.stringify(res)}`;
     }
@@ -173,7 +173,7 @@ Test.test('Events | Updating event timestamp', async (api) => {
         return `update/events/change-time/id/then failed: ${JSON.stringify(res)}`;
     }
 
-    res = await api(`get/events/all`);
+    res = await api(`get/events`);
     if (res?.data?.length !== 1) {
         return `Expected 1 event, got ${JSON.stringify(res)}`;
     }
@@ -188,7 +188,7 @@ Test.test('Events | Updating event timestamp', async (api) => {
         return `Expected 401 from 'update/events/change-time/id/now', got '${JSON.stringify(res)}'`;
     }
 
-    res = await api(`get/events/all`);
+    res = await api(`get/events`);
     if (res?.data?.length !== 1) {
         return `Expected 1 event, got ${JSON.stringify(res)}`;
     }
@@ -213,7 +213,7 @@ Test.test('Events | Events are gotten in order of time', async (api) => {
     await api(`create/events/now/${now}`);
     await api(`create/events/then/${then}`);
 
-    let res = await api(`get/events/all`);
+    let res = await api(`get/events`);
     if (res?.data?.length !== 2) {
         return `Expected 2 events, got ${JSON.stringify(res)}`;
     }
@@ -238,7 +238,7 @@ Test.test('Events | Events are gotten in order of time', async (api) => {
     await api(`create/events/then/${then}`);
     await api(`create/events/now/${now}`);
 
-    res = await api(`get/events/all`);
+    res = await api(`get/events`);
     if (res?.data?.length !== 2) {
         return `Expected 2 events, got ${JSON.stringify(res)}`;
     }

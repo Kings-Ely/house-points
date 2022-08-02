@@ -21,6 +21,7 @@ function insertComponent ($el=document.body) {
                             type="text"
                             class="student-email-input"
                             placeholder="Email"
+                            autocomplete="off"
                             aria-label="student email"
                             id="student-email-input-${id}"
                         >
@@ -43,7 +44,7 @@ function insertComponent ($el=document.body) {
                 $dropdown.classList.remove('student-email-input-show-dropdown');
             });
 
-            api`get/users/all`.then(({data}) => {
+            api`get/users`.then(({data}) => {
 
                 const studentNames = data.map(student => student['email']);
 
@@ -82,6 +83,7 @@ function insertComponent ($el=document.body) {
         },
 
         cookiePopUp: () => {
+            currentComponentID++;
 
             /**
              * The user has either allowed or not allowed cookies
@@ -121,6 +123,8 @@ function insertComponent ($el=document.body) {
         },
 
         fullPagePopUp: (content) => {
+            currentComponentID++;
+
             if (document.getElementById('full-page-popup')) {
                 // remove any current popups
                 const $p = document.getElementById('full-page-popup');
@@ -153,7 +157,8 @@ function insertComponent ($el=document.body) {
             return hide;
         },
 
-        addEventPopUp: () => {
+        addEventPopUp: (reload) => {
+            currentComponentID++;
 
             let studentsInEvent = {};
 
@@ -183,17 +188,20 @@ function insertComponent ($el=document.body) {
                 $addEventAddStudent.value = '';
 
                 await window.showStudentsInAddEvent();
+                reload();
             }
 
             window.removeStudentFromEvent = async (id) => {
                 delete studentsInEvent[id];
                 await window.showStudentsInAddEvent();
+                reload();
             }
 
             window.updateStudentPoints = async (id, points) => {
                 // can't go below 1 hp
                 studentsInEvent[id] = Math.max(points, 1);
                 await window.showStudentsInAddEvent();
+                reload();
             }
 
             window.showStudentsInAddEvent = async () => {
@@ -281,8 +289,8 @@ function insertComponent ($el=document.body) {
                 </div>
                 <div style="text-align: center; width: 100%; margin: 20px 0;">
                     <button
-                            id="add-event-submit"
-                            aria-label="add event"
+                        id="add-event-submit"
+                        aria-label="add event"
                     >
                         Create Event
                     </button>
@@ -303,7 +311,8 @@ function insertComponent ($el=document.body) {
                 }
 
                 const time = new Date($timeInp.value).getTime();
-                const { id: eventID } = await api`create/events/${$nameInp.value}/${time}?description=${$descInp.value}`;
+                const { id: eventID } =
+                    await api`create/events/${$nameInp.value}/${time}?description=${$descInp.value}`;
 
                 $nameInp.value = '';
                 $descInp.value = '';
@@ -315,6 +324,7 @@ function insertComponent ($el=document.body) {
                 studentsInEvent = {};
 
                 hide();
+                reload();
             };
 
             $nameInp = document.querySelector('#add-event-name');
@@ -324,19 +334,20 @@ function insertComponent ($el=document.body) {
             $addEventAddStudent = insertComponent(document.querySelector('#add-event-student-inp'))
                 .studentEmailInputWithIntellisense();
 
-            reloadDOM();
+            reload();
         },
 
         selectableList: ({
             name,
             items,
-            uniqueKey,
+            uniqueKey='id',
             searchKey,
-            titleBar,
-            withAllMenu,
+            titleBar='',
+            withAllMenu='',
             itemGenerator,
             selected
         }) => {
+            currentComponentID++;
 
             window[`${name}selectableList_selectAll`] = (select) => {
                 selected.splice(0, selected.length);
@@ -401,7 +412,7 @@ function insertComponent ($el=document.body) {
                             <label>
                                 <input
                                     placeholder="search for name..."
-                                    oninput="${name}selectableList_reloadItems();"
+                                    oninput="${name}selectableList_reloadItems()"
                                     class="search"
                                     autocomplete="off"
                                     aria-label="search"
@@ -417,7 +428,7 @@ function insertComponent ($el=document.body) {
             const $items = document.querySelector(`#selectable-list-${name} .items`);
             const $search = document.querySelector(`#selectable-list-${name} .search`);
 
-            function reload (newItems=null) {
+            async function reload (newItems=null) {
                 if (newItems) {
                     items = newItems;
                 }
@@ -431,19 +442,21 @@ function insertComponent ($el=document.body) {
                         continue;
                     }
 
-                    const isSelected = selected.includes(item[uniqueKey]);
+                    const id = item[uniqueKey];
+
+                    const isSelected = selected.includes(id);
 
                     $items.innerHTML += `
-                        <div
-                            class="item"
-                            onclick="${name}selectableList_select('${item[uniqueKey]}', ${!isSelected})"
-                        >
-                            <button 
+                        <div class="item">
+                            <button
                                 class="icon no-scale"
                                 svg="${isSelected ? 'selected-checkbox' : 'unselected-checkbox'}.svg"
                                 aria-label="${isSelected ? 'Unselect' : 'Select'}"
+                                onclick="${name}selectableList_select('${id}', ${isSelected ? 'false' : 'true'})"
                             ></button>
-                            ${itemGenerator(item, isSelected)}
+                            <div class="item-content">
+                                  ${await itemGenerator(item, isSelected)}
+                            </div>
                         </div>
                     `;
                 }
@@ -456,6 +469,81 @@ function insertComponent ($el=document.body) {
             reload();
 
              return { reload };
+        },
+
+        eventCard: (event, admin, reload) => {
+            const id = currentComponentID++;
+
+            let $addStudentToEvent;
+
+            const ago = getRelativeTime(event['time'] * 1000);
+            const date = new Date(event['time'] * 1000).toLocaleDateString();
+
+            window[`eventCard${id}_deleteStudent`] = async (id) => {
+                await api`delete/house-points/with-id/${id}`;
+                reload();
+            };
+
+            window[`eventCard${id}_addStudent`] = async () => {
+                const email = $addStudentToEvent.value;
+
+                const { id: userID } = await api`get/users/from-email/${email}`;
+
+                await api`create/house-points/give/${userID}/1/?event=${event['id']}`;
+
+                reload();
+            };
+
+            $el.innerHTML = `
+                <div class="event-card" id="event-card-${id}">
+                    <h1>${event['name']}</h1>
+                    <p>
+                        ${ago} (${date})
+                    </p>
+                    <p style="font-size: 1.2em">
+                        ${event['description']}
+                    </p>
+                    <div>
+                        <h2>
+                            ${event['housePointCount']} House Points Awarded
+                        </h2>
+                        ${event['housePoints'].map(point => `
+                            <div class="hp">
+                                <div>${point['studentEmail']}</div>
+                                <div>${point['quantity']}</div>
+                                
+                                ${admin ? `
+                                    <button
+                                        label="Delete house points"
+                                        onclick="eventCard${id}_deleteStudent('${point['id']}')"
+                                        svg="bin.svg"
+                                        class="icon small"
+                                    ></button>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                        
+                        ${admin ? `
+                            <div class="hp">
+                                 <span class="add-student-to-event"></span>
+                                 <button
+                                    svg="plus.svg"
+                                    label="Add Student"
+                                    aria-label="add student"
+                                    onclick="eventCard${id}_addStudent(this)"
+                                    class="icon"
+                                    style="border: none"
+                                 ></button>
+                            <div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
+            $addStudentToEvent = insertComponent(`#event-card-${id} .add-student-to-event`)
+                .studentEmailInputWithIntellisense();
+
+            reloadDOM();
         }
     };
 }

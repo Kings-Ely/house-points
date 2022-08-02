@@ -1,49 +1,45 @@
-const $eventList = document.querySelector('#events');
-
 (async () => {
 	await init('..', true);
 
-	const user = await userInfo();
+	await showAllEvents();
 
-	if (!GETParam['id']) {
-		await showAllEvents();
-	} else {
-		await showEvent(GETParam['id']);
+	if (GETParam('id')) {
+		await showEvent();
 	}
 
 })();
 
 async function showAllEvents () {
-	if (user['admin']) {
-		show('add-event-button');
+	const user = await userInfo();
 
-		document.getElementById('add-event-button').addEventListener('click', () => {
-			insertComponent().addEventPopUp();
-		});
+	if (user['admin']) {
+		show('add-event-button', 'flex');
+
+		document.getElementById('add-event-button')
+			.addEventListener('click', () => {
+				insertComponent().addEventPopUp(showAllEvents)
+			});
 	}
 
 	const selected = [];
 
-	const { data: items } = await api`get/events/all`;
+	const { data: items } = await api`get/events`;
 
 	window.deleteEvents = async () => {
 		await Promise.all(selected.map(async id => {
 			await api`delete/events/with-id/${id}`;
 		}));
+		showAllEvents();
 	};
 
-	const { reload } = insertComponent('#events').selectableList({
+	insertComponent('#events').selectableList({
 		name: 'Events',
 		items,
 		searchKey: 'name',
 		uniqueKey: 'id',
 		selected,
 		titleBar: `
-			<div class="list-title">
-				<div></div>
-				<div>name</div>
-				<div>description</div>
-			</div>
+			<div class="list-title"></div>
 		`,
 		withAllMenu: `
 			<button
@@ -56,24 +52,36 @@ async function showAllEvents () {
 		`,
 		itemGenerator: (event) => `
 			<div>
-				<a
-					href="?id=${event['id']}"
+				<button
+					onclick="showEvent('${event.id}')"
 					style="text-decoration: none; font-weight: bold"
-					label="Go to ${event['name']}"
-					label-offset="20px"
+					label="View ${event['name']}"
+					label-offset="50px"
 				>
 					${event.name}
-				</a>
-				
+					<span style="font-size: 0.6em; color: var(--text-light)">
+						(${new Date(event.time*1000).toLocaleDateString()})
+					</span>
+				</button>
 			</div>
-			<div>${event.description}</div>
+			<div>${limitStrLength(event.description)}</div>
 		`
 	});
+
+	reloadDOM();
 }
 
-async function showEvent (id) {
-	const { data: event } = await api`get/events/with-id/${id}`;
+async function showEvent (id=GETParam('id')) {
+	const { data: [ event ] } = await api`get/events?id=${id}`;
 
+	if (!event) {
+		await showError('Event not found');
+		return;
+	}
 
+	insertComponent().fullPagePopUp(`
+		<div id="event-popup"></div>
+	`);
+
+	insertComponent('#event-popup').eventCard(event, (await userInfo())['admin'], showEvent);
 }
-

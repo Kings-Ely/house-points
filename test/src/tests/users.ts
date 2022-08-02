@@ -23,9 +23,9 @@ Test.test('Users | user auth', async (api) => {
     }
 
     // checks that the total number of users is correct
-    res = await api(`get/users/all`);
+    res = await api(`get/users`);
     if (res.ok !== true) {
-        return `Expected 'ok' from get/users/all, got '${JSON.stringify(res)}'`;
+        return `Expected 'ok' from get/users, got '${JSON.stringify(res)}'`;
     }
     // 2 due to the user we just created and the default admin user
     if (res?.data?.length !== 2) {
@@ -45,7 +45,7 @@ Test.test('Users | user auth', async (api) => {
     }
 
     // check we can access restricted data with our code
-    res = await api(`get/users/all`, sessionID);
+    res = await api(`get/users`, sessionID);
     if (res?.data?.length !== 2) {
         return `Expected 2 users, got '${JSON.stringify(res)}'`;
     }
@@ -95,9 +95,9 @@ Test.test('Users | auth with 2', async (api) => {
     }
 
     // checks that the total number of users is correct
-    res = await api(`get/users/all`);
+    res = await api(`get/users`);
     if (res.ok !== true) {
-        return `Expected 'ok' from get/users/all, got '${JSON.stringify(res)}'`;
+        return `Expected 'ok' from get/users, got '${JSON.stringify(res)}'`;
     }
     // 3 due to the 2 we just created and the default admin user
     if (res?.data?.length !== 3) {
@@ -193,11 +193,11 @@ Test.test('Users | Getting all', async (api) => {
     const { userID: userID1, sessionID: sessionID1 } = await generateUser(api, 0);
     const { userID: userID2, sessionID: sessionID2 } = await generateUser(api);
 
-    let res = await api(`get/users/all`, sessionID2);
+    let res = await api(`get/users`, sessionID2);
     if (res.ok || res.status !== 401 || res.data) {
-        return `Expected 401 from 'get/users/all', got '${JSON.stringify(res)}'`;
+        return `Expected 401 from 'get/users', got '${JSON.stringify(res)}'`;
     }
-    res = await api(`get/users/all`, sessionID1);
+    res = await api(`get/users`, sessionID1);
     if (res?.data?.length !== 3) {
         return `Expected 3 users, got ${res?.data?.length}: '${JSON.stringify(res)}'`;
     }

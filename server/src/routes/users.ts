@@ -168,7 +168,7 @@ route('get/users/batch-info/:userIDs', async ({ query, params, cookies }) => {
 });
 
 
-route('get/users/all', async ({ query, cookies }) => {
+route('get/users', async ({ query, cookies }) => {
     if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
     const data = await query`
