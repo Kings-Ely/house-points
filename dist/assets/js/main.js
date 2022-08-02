@@ -6,7 +6,8 @@ const API_ROOT = 'https://josephcoppin.com/school/house-points/api',
       COOKIE_KEY = 'hpnea_SessionID',
       COOKIE_ALLOW_COOKIES_KEY = 'hpnea_AllowedCookies',
       ALT_COOKIE_KEY = 'hpnea_AltSessionID',
-      HOUSE_NAME = 'Osmond';
+      HOUSE_NAME = 'Osmond',
+      svgCache = {};
 
 let ROOT_PATH = '',
     $nav, $footer, $error,
@@ -22,6 +23,7 @@ let ROOT_PATH = '',
     documentLoaded = false;
 
 
+// for making relative dates
 /** @type {{[ k: 'month'|'hour'|'year'|'day'|'minute'|'second' ]: number}} */
 const timeUnits = {
     year  : 24 * 60 * 60 * 1000 * 365,
@@ -32,12 +34,10 @@ const timeUnits = {
     second: 1000
 };
 
+// for making relative dates
 const relativeTimeFormat = new Intl.RelativeTimeFormat('en', {
     numeric: 'auto'
 });
-
-const svgCache = {};
-
 (async () => {
 
     if (document.readyState === 'complete') {
@@ -47,17 +47,6 @@ const svgCache = {};
     }
 
     await testApiCon();
-
-    if (getSession()) {
-        rawAPI(`get/users/from-session/${getSession()}`)
-            .then(handleUserInfo)
-    } else {
-        isSignedIn = false;
-        userInfoIsLoaded = true;
-        for (const cb of userInfoCallbacks) {
-            cb({});
-        }
-    }
 
     async function documentIsLoaded () {
         reloadDOM();
@@ -73,9 +62,39 @@ const svgCache = {};
 /**
  * Must be called first
  * @param {string} rootPath
+ * @param {boolean} requireLoggedIn
+ * @param {boolean} requireAdmin
  */
-async function init (rootPath) {
+async function init (rootPath, requireLoggedIn=false, requireAdmin=false) {
     ROOT_PATH = rootPath;
+
+    if (requireAdmin && getAltSession()) {
+        await setSessionCookie(getAltSession());
+        await setAltSessionCookie('');
+    }
+
+    if (getSession()) {
+        rawAPI(`get/users/from-session/${getSession()}`)
+            .then(handleUserInfo)
+    } else {
+        isSignedIn = false;
+        userInfoIsLoaded = true;
+        for (const cb of userInfoCallbacks) {
+            cb({});
+        }
+    }
+
+    const user = await userInfo();
+    if (requireLoggedIn && (!user || !user['id'])) {
+        console.log('1', user);
+        //await navigate('/?error=auth');
+        return;
+    }
+    if (requireAdmin && !user['admin']) {
+        console.log('2', user);
+        //await navigate('/?error=auth');
+        return;
+    }
 
     // load footer and nav bar
     $nav = document.querySelector(`nav`);
@@ -102,7 +121,7 @@ async function handleUserInfo (info) {
         if (altInfo['ok'] && altInfo['admin']) {
             // if we are already an admin with the main code, just delete the alt code
             if (info['admin']) {
-                eraseCookie(ALT_COOKIE_KEY);
+                await eraseCookie(ALT_COOKIE_KEY);
             } else {
                 altUserInfoJSON = altInfo;
             }
@@ -127,16 +146,16 @@ function getSession () {
     return getCookie(COOKIE_KEY);
 }
 
-function setSessionCookie (code) {
-    setCookie(COOKIE_KEY, code);
+async function setSessionCookie (id) {
+    await setCookie(COOKIE_KEY, id);
 }
 
 function getAltSession () {
     return getCookie(ALT_COOKIE_KEY);
 }
 
-function setAltSessionCookie (code) {
-    setCookie(ALT_COOKIE_KEY, code);
+async function setAltSessionCookie (id) {
+    await setCookie(ALT_COOKIE_KEY, id);
 }
 
 
@@ -240,10 +259,10 @@ async function loadScript (url) {
  * @param {string} value
  * @param {number} days
  */
-function setCookie (name, value='', days=1) {
+async function setCookie (name, value='', days=1) {
 
     if (getCookie(COOKIE_ALLOW_COOKIES_KEY) !== '1' && name !== COOKIE_ALLOW_COOKIES_KEY) {
-        showError('Cookies are disabled');
+        await navigate('/?error=cookies');
         return;
     }
 
@@ -278,9 +297,9 @@ function getCookie (name) {
 /**
  * @param {string} name
  */
-function eraseCookie (name) {
+async function eraseCookie (name) {
     if (getCookie(COOKIE_ALLOW_COOKIES_KEY) !== '1') {
-        showError('Cookies are disabled');
+        await navigate('/?error=cookies');
         return;
     }
 
@@ -398,7 +417,7 @@ async function rawAPI (path) {
     let res;
     let asJSON;
     try {
-        res = await fetch(`${API_ROOT}/?${encodeURI(path)}`, {
+        res = await fetch(`${API_ROOT}/?${path}`, {
             method: 'GET',
             mode: 'cors',
             cache: 'no-cache',
@@ -459,14 +478,14 @@ async function api (path, ...args) {
 
     // fetch
     // include '/' in request as otherwise you get redirected, which takes lots of time
-    const res = await fetch(`${API_ROOT}/?${encodeURI(path)}`, {
+    const res = await fetch(`${API_ROOT}/?${path}`, {
         method: 'GET',
         mode: 'cors',
         cache: 'no-cache',
         redirect: 'follow',
         credentials: 'include'
     }).catch(err => {
-        console.error('Error with API request: ', err);
+        console.error(`Error with API request (${path}): `, err);
         if (shouldHideAtEnd) {
             stopSpinner(loader);
         }
@@ -641,6 +660,8 @@ function showErrorFromCode (code) {
     return showError({
 
         'auth': 'You are not authorized for this action',
+        'api-con': 'Lost connection to server',
+        'cookies': 'You have not accepted cookies'
 
     }[code] || 'An Unknown Error has Occurred');
 }
@@ -671,8 +692,8 @@ async function logout () {
         return;
     }
 
-    eraseCookie(COOKIE_KEY);
-    eraseCookie(ALT_COOKIE_KEY);
+    await eraseCookie(COOKIE_KEY);
+    await eraseCookie(ALT_COOKIE_KEY);
     await navigate(ROOT_PATH);
 }
 
@@ -680,16 +701,15 @@ async function testApiCon () {
 
     const res = await api`get/server/ping`
         .catch(err => {
-            showError(`Can't connect to the server!`);
             console.error(err);
+            navigate('/?error=api-con');
         });
 
     if (!res.ok || res.status === 200) {
         console.log('API connection OK');
     } else {
         console.error(res);
-        showError(`Can't connect to the server!`)
-            .then();
+        await navigate('/?error=api-con')
     }
 }
 

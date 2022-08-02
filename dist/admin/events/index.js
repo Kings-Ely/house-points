@@ -13,13 +13,9 @@ let $addEventAddStudent = document.querySelector('#add-event-student-inp');
 let $addEventAddStudentsHTML = document.querySelector('#add-event-students');
 
 (async () => {
-    await init('../..');
+    await init('../..', true, true);
 
     $addEventAddStudent = insertComponent($addEventAddStudent).studentEmailInputWithIntellisense();
-
-    if (!await signedIn() || !(await userInfo())['admin']) {
-        await navigate(`/?error=auth`);
-    }
 
     await main();
 })();

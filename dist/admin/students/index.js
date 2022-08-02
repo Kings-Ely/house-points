@@ -9,11 +9,7 @@ const $yearInp = document.querySelector('#add-student-year');
 const $students = document.querySelector(`#students`);
 
 (async () => {
-    await init('../..');
-
-    if (!await signedIn() || !(await userInfo())['admin']) {
-        await navigate(`/?error=auth`);
-    }
+    await init('../..', true, true);
 
     await main();
 })();

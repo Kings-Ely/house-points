@@ -12,14 +12,9 @@ let showYears = [9, 10, 11, 12, 13];
 let leaderboardData;
 
 (async () => {
-    await init('..');
+    await init('..', true);
 
     hideWithID('leaderboard-link');
-
-    if (!await signedIn()) {
-        await navigate(ROOT_PATH);
-        return;
-    }
 
     const { admin, year } = await userInfo();
 

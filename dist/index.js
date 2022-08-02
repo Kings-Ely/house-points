@@ -47,7 +47,6 @@ $go.onclick = async () => {
 		return;
 	}
 
-	setSessionCookie(sessionID);
+	await setSessionCookie(sessionID);
 	await navigate(`./user`);
-	// error shown automatically
 };

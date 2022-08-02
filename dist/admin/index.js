@@ -6,23 +6,11 @@ let $addHPName = document.getElementById('add-hp-name-inp');
 const $addHPSubmit = document.getElementById('add-hp-submit');
 
 (async () => {
-    await init('..');
+    await init('..', true, true);
 
     $addHPName = insertComponent($addHPName).studentEmailInputWithIntellisense();
 
     hideWithID('admin-link');
-
-    const isSignedIn = await signedIn();
-
-    if (!isSignedIn) {
-        await navigate(`/?error=auth`);
-    }
-
-    const { admin } = await userInfo();
-
-    if (!admin) {
-        await navigate(`/?error=auth`);
-    }
 
     await main();
 })();

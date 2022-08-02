@@ -3,7 +3,7 @@ const $hps = document.getElementById('hps');
 const $hpReasonInp = document.getElementById('hp-reason');
 
 (async () => {
-    await init('..');
+    await init('..', true);
 
     if (!await signedIn()) {
         await navigate(`/?error=auth`);

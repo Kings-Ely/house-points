@@ -78,19 +78,21 @@ function insertComponent ($el) {
 
             return $studentNameInput;
         },
+
         cookiePopUp: () => {
 
             /**
-             * The user has allowed cookies
+             * The user has either allowed or not allowed cookies
+             * @param {boolean} value
              */
-            window.allowedCookies = value => {
-                hideWithID('cookie-popup');
+            window.allowedCookies = async value => {
+                hide($el);
                 if (!value) {
-                    navigate('/');
                     return;
                 }
-                setCookie(COOKIE_ALLOW_COOKIES_KEY, value.toString(), 365);
-            }
+                await setCookie(COOKIE_ALLOW_COOKIES_KEY, value.toString(), 365);
+            };
+
             $el.innerHTML += `
                 <h2>Cookies</h2>
                 <p>
@@ -115,6 +117,7 @@ function insertComponent ($el) {
                 </button>
             `;
         },
+
         fullPagePopUp: (content) => {
             if (document.getElementById('full-page-popup')) {
                 // remove any current popups
