@@ -1,7 +1,12 @@
 import route from '../index';
 import { error } from '../log';
-import {authLvl, generateUUID} from '../util';
+import { AUTH_ERR, authLvl, generateUUID, getSessionID, isAdmin, isLoggedIn } from '../util';
 
+/**
+ * Gets the authorisation level of a session ID
+ * Note that this is one of the few routes which does not require logged in or admin.
+ * @returns 0 for invalid/expired, >= 1 for logged in, 2 for admin user
+ */
 route('get/sessions/auth-level/:sessionID', async ({ query, params }) => {
     const { sessionID } = params;
 
@@ -10,6 +15,13 @@ route('get/sessions/auth-level/:sessionID', async ({ query, params }) => {
     };
 });
 
+/**
+ * Creates a session from login details
+ * Note that the password is sent in cleartext to the server before being hashed in the database,
+ * which could pose a security threat.
+ *
+ * @param {number} [expires=86400] - the number of seconds the session should be valid for
+ */
 route('create/sessions/:email/:password?expires=86400', async ({ query, params }) => {
 
     // password in plaintext
@@ -47,7 +59,19 @@ route('create/sessions/:email/:password?expires=86400', async ({ query, params }
     return { sessionID, userID: res[0].id };
 });
 
-route('create/sessions/:userID?expires=86400', async ({ query, params }) => {
+/**
+ * @admin
+ * Creates a session from a user ID.
+ * This is an admin route because you should only be able to create a session from a
+ * user ID if you already have a valid session.
+ * This means the root of all sessions is valid login details.
+ * Otherwise, if someone's userID was leaked, it could be used to continually generate sessions,
+ * removing the benefits of sessions entirely over simply using the userID as the auth token.
+ *
+ * @param {number} [expires=86400] - the number of seconds the session should be valid for
+ */
+route('create/sessions/:userID?expires=86400', async ({ query, params, cookies }) => {
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
     const { userID } = params;
 
@@ -72,15 +96,32 @@ route('create/sessions/:userID?expires=86400', async ({ query, params }) => {
     return { sessionID, userID };
 });
 
-route('delete/sessions/:sessionID', async ({ query, params }) => {
+/**
+ * Removes the session from the database
+ */
+route('delete/sessions/with-id/:sessionID', async ({ query, params }) => {
     const { sessionID } = params;
 
     const queryRes = await query`
         DELETE FROM sessions
         WHERE id = ${sessionID}
     `;
+    if (queryRes.affectedRows === 0) return {
+        status: 406,
+        error: `Session not found`
+    };
+});
 
-    if (!queryRes.affectedRows) {
-        return 'Session not found';
-    }
+/**
+ * @account
+ * Deletes the session from the cookie sent with the request.
+ * Checks that the session is valid first.
+ */
+route('delete/sessions/mine', async ({ query, cookies }) => {
+    if (!await isLoggedIn(cookies, query)) return AUTH_ERR;
+
+    await query`
+        DELETE FROM sessions
+        WHERE id = ${getSessionID(cookies)}
+    `;
 })

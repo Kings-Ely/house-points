@@ -8,52 +8,19 @@
     <meta name="robots" content="noindex">
 
     <script src="../../assets/js/main.js"></script>
-    <link rel="preload" href="../../assets/css/main.css" as="style" onload="asyncCSS(this)">
-    <link rel="preload" href="./index.css" as="style" onload="asyncCSS(this)">
-    <link rel="preload" href="../../assets/css/darkmode.css" as="style" onload="asyncCSS(this)">
     <script src="index.js" defer></script>
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/darkmode.css">
+    <link rel="stylesheet" href="./index.css">
 </head>
 <body>
 <nav></nav>
 <main>
-    <section>
-        <h2>Add Student</h2>
-        <div>
-            <label>
-                <input
-                    type="text"
-                    id="add-student-email"
-                    placeholder="Email"
-                    aria-label="email"
-                >
-            </label>
-            <label>
-                <input
-                    type="text"
-                    id="add-student-password"
-                    value="changeme"
-                    placeholder="Password"
-                    aria-label="password"
-                >
-            </label>
-            <label>
-                <input
-                    type="number"
-                    id="add-student-year"
-                    max="13"
-                    min="9"
-                    placeholder="Year"
-                    aria-label="year"
-                >
-            </label>
-            <button
-                    id="add-student-submit"
-                    class="icon"
-                    svg="plus.svg"
-                    aria-label="add student"
-            ></button>
-        </div>
-    </section>
+    <button
+        id="add-student"
+        class="big-link icon"
+        svg="plus.svg"
+    >New User</button>
     <section id="students"></section>
 </main>
 <footer></footer>

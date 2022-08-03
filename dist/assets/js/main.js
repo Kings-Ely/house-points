@@ -2,14 +2,17 @@
 
 
 // Global constants and variables
-const API_ROOT = 'https://josephcoppin.com/school/house-points/api',
-      COOKIE_KEY = 'hpnea_SessionID',
-      COOKIE_ALLOW_COOKIES_KEY = 'hpnea_AllowedCookies',
-      ALT_COOKIE_KEY = 'hpnea_AltSessionID',
-      HOUSE_NAME = 'Osmond',
-      svgCache = {};
+const
+    API_ROOT = 'https://josephcoppin.com/school/house-points/api',
+    COOKIE_KEY = 'hpnea_SessionID',
+    COOKIE_ALLOW_COOKIES_KEY = 'hpnea_AllowedCookies',
+    ALT_COOKIE_KEY = 'hpnea_AltSessionID',
+    HOUSE_NAME = 'Osmond',
+    DEFAULT_PASSWORD = 'changeme',
+    svgCache = {};
 
-let ROOT_PATH = '',
+let
+    ROOT_PATH = '',
     $nav, $footer, $error,
     currentErrorMessageID = 0,
     currentlyShowingErrorMessageIDs = [],
@@ -86,13 +89,11 @@ async function init (rootPath, requireLoggedIn=false, requireAdmin=false) {
 
     const user = await userInfo();
     if (requireLoggedIn && (!user || !user['id'])) {
-        console.log('1', user);
-        //await navigate('/?error=auth');
+        await navigate('/?error=auth');
         return;
     }
     if (requireAdmin && !user['admin']) {
-        console.log('2', user);
-        //await navigate('/?error=auth');
+        await navigate('/?error=auth');
         return;
     }
 
@@ -182,6 +183,16 @@ async function userID () {
         throw 'no user ID found';
     }
     return user['id'];
+}
+
+async function isAdmin () {
+    return (await userInfo())['admin'];
+}
+
+function asAdmin (cb) {
+    isAdmin().then((value) => {
+        if (value) cb();
+    });
 }
 
 /**
@@ -389,10 +400,13 @@ async function showSpinner () {
     await waitForReady();
 
     document.body.style.cursor = 'progress';
+
     const loader = document.createElement('div');
+    loader.classList.add('spinner');
+    loader.innerHTML = `<div><div></div><div></div><div></div><div></div></div>`;
+
     document.body.appendChild(loader);
-    loader.classList.add('lds-ripple');
-    loader.innerHTML = `<div></div><div></div>`;
+
     return loader;
 }
 
@@ -691,7 +705,10 @@ async function logout () {
     if (!confirm(`Are you sure you want to sign out?`)) {
         return;
     }
+    await logoutAction();
+}
 
+async function logoutAction () {
     await eraseCookie(COOKIE_KEY);
     await eraseCookie(ALT_COOKIE_KEY);
     await navigate(ROOT_PATH);
@@ -736,38 +753,35 @@ function scrollToTop () {
     document.body.scrollTop = document.documentElement.scrollTop = 0;
 }
 
+/**
+ * Hides an element by setting its display to 'none'
+ * @param {string|HTMLElement} el
+ */
 function hide (el) {
     if (typeof el === 'string') {
-        el = document.getElementById(el);
+        el = document.querySelector(el);
     }
     if (el) {
         el.style.display = 'none';
     } else {
-        console.error(`hideWithID: no element with id '${id}'`);
+        console.error(`hide: no element with id '${el?.id}'`);
     }
 }
 
 /**
- * Hides an element by setting its display to 'none'
- * @param {string} id
+ * Shows an element by setting its display to not 'none'
+ * @param {string|HTMLElement} el
+ * @param {string} [display='block']
  */
-function hideWithID (id) {
-    hide(document.getElementById(id));
-}
-
 function show (el, display = 'block') {
     if (typeof el === 'string') {
-        el = document.getElementById(el);
+        el = document.querySelector(el);
     }
     if (el) {
         el.style.display = display;
     } else {
         console.error(`showWithID: no element with id '${id}'`);
     }
-}
-
-function fullPagePopup (content) {
-    insertComponent(document.body).fullPagePopUp(content);
 }
 
 /**
@@ -781,4 +795,118 @@ function limitStrLength (str, maxLength=50) {
         return str.substring(0, maxLength-3) + '...';
     }
     return str;
+}
+
+/**
+ * Gets the contents of the file as a string
+ * @param {string|HTMLInputElement} $el
+ * @param {string} encoding
+ * @returns {Promise<string>}
+ */
+async function getFileContent ($el, encoding='UTF-8') {
+    if (typeof $el === 'string') {
+        $el = document.querySelector($el);
+    }
+
+    const file = $el.files[0];
+
+    if (!file) return '';
+
+    return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsText(file, encoding);
+
+        reader.onload = evt => {
+            resolve(evt.target.result);
+        }
+        reader.onerror = async () => {
+            await showError("Error reading file, please try again");
+            reject("Error reading file");
+        }
+    });
+}
+
+/**
+ * ref: http://stackoverflow.com/a/1293163/2343
+ * This will parse a delimited string into an array of arrays.
+ * The default delimiter is the comma, but this can be overriden
+ * with the second argument.
+ * @param {string} strData
+ * @param {string} [strDelimiter=undefined]
+ * @returns {*[][]}
+ */
+function CSVToArray (strData, strDelimiter) {
+    // Check to see if the delimiter is defined. If not,
+    // then default to comma.
+    strDelimiter = (strDelimiter || ",");
+
+    // Create a regular expression to parse the CSV values.
+    const objPattern = new RegExp(
+        (
+            // Delimiters.
+            "(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
+
+            // Quoted fields.
+            "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
+
+            // Standard fields.
+            "([^\"\\" + strDelimiter + "\\r\\n]*))"
+        ),
+        "gi"
+    );
+
+    // Create an array to hold our data. Give the array
+    // a default empty first row.
+    let arrData = [[]];
+
+    // Create an array to hold our individual pattern
+    // matching groups.
+    let arrMatches = null;
+
+    // Keep looping over the regular expression matches
+    // until we can no longer find a match.
+    while (arrMatches = objPattern.exec( strData )){
+        // Get the delimiter that was found.
+        let strMatchedDelimiter = arrMatches[ 1 ];
+
+        // Check to see if the given delimiter has a length
+        // (is not the start of string) and if it matches
+        // field delimiter. If id does not, then we know
+        // that this delimiter is a row delimiter.
+        if (
+            strMatchedDelimiter.length &&
+            strMatchedDelimiter !== strDelimiter
+        ){
+
+            // Since we have reached a new row of data,
+            // add an empty row to our data array.
+            arrData.push( [] );
+        }
+
+        let strMatchedValue;
+
+        // Now that we have our delimiter out of the way,
+        // let's check to see which kind of value we
+        // captured (quoted or unquoted).
+        if (arrMatches[ 2 ]){
+
+            // We found a quoted value. When we capture
+            // this value, unescape any double quotes.
+            strMatchedValue = arrMatches[ 2 ].replace(
+                new RegExp( "\"\"", "g" ),
+                "\""
+            );
+
+        } else {
+            // We found a non-quoted value.
+            strMatchedValue = arrMatches[ 3 ];
+        }
+
+        // Now that we have our value string, let's add
+        // it to the data array.
+        arrData[arrData.length - 1].push( strMatchedValue );
+    }
+
+    // Return the parsed data.
+    return arrData;
 }

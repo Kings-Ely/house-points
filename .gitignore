@@ -11,6 +11,7 @@ sshPass.txt
 
 *.txt
 *.log
+*.csv
 *.js.map
 
 /server/index.js

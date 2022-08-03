@@ -1,24 +1,22 @@
+const
+    $addStudentButton = document.getElementById('add-student'),
 
-
-const $searchFilterInput = document.getElementById('search');
-
-const $emailInp = document.querySelector('#add-student-email');
-const $passwordInp = document.querySelector('#add-student-password');
-const $yearInp = document.querySelector('#add-student-year');
-const $students = document.querySelector(`#students`);
+    selected = [];
 
 (async () => {
     await init('../..', true, true);
 
-    let selected = [];
+    await showStudentsList();
+})();
 
+async function showStudentsList () {
     insertComponent('#students').selectableList({
         name: 'Students',
         items: (await api`get/users`)['data'],
         uniqueKey: 'id',
         searchKey: 'email',
         selected,
-        titleBar: `
+        withAllMenu: `
             <button
                 onclick="deleteSelected()"
                 class="icon"
@@ -53,10 +51,10 @@ const $students = document.querySelector(`#students`);
         `,
         itemGenerator: showStudent
     });
-})();
+}
 
 
-async function showStudent (student, selected) {
+async function showStudent (student) {
 
     const { id, email, year, student: isStudent, admin: isAdmin } = student;
 
@@ -83,17 +81,12 @@ async function showStudent (student, selected) {
                 ></button>                
             `}
         </div>
-        <div>
-            ${year || ''}
-        </div>
         
         <div style="min-width: 150px">
             ${isMe ? `
-                <span 
-                    class="student-link"
-                    label="Me"
-                >
-                    <b>${email}</b>
+                <span class="student-link">
+                   ${email}
+                   (You${isStudent ? `, Y${year || ''}` : ''})
                 </span>
             ` : `
                 <button 
@@ -104,11 +97,17 @@ async function showStudent (student, selected) {
                 >
                     ${email}
                 </button>
+                
+                ${isStudent ? `
+                    (Y${year || ''})
+                ` : ''}
             `}
         </div>
        
         <div>
-            ${isStudent ? student['accepted'] : ''}
+            ${isStudent ? `
+                ${student['accepted']} House Points
+            ` : ''}
         </div>
         
         <div>
@@ -123,6 +122,98 @@ async function showStudent (student, selected) {
     `;
 }
 
+$addStudentButton.addEventListener('click', () => {
+    const hide = insertComponent().fullPagePopUp(`
+    
+        <h2 style="padding: 0">Add Student</h2>
+        <div id="add-student-by-email">
+            <label>
+                <input
+                    type="text"
+                    id="add-student-email"
+                    placeholder="Email"
+                    aria-label="email"
+                >
+            </label>
+            <br>
+            <br>
+            <div class="flex-center" style="justify-content: space-around">
+                <label>
+                    <input
+                        type="number"
+                        id="add-student-year"
+                        max="13"
+                        min="9"
+                        placeholder="Year"
+                        aria-label="year"
+                    >
+                </label>
+                <button
+                    id="add-student-submit"
+                    class="icon"
+                    svg="plus.svg"
+                    aria-label="add student"
+                ></button>
+            </div>
+        </div>
+        
+        <h1>or</h1>
+        
+        <div
+            class="bordered"
+            id="drop-file-zone"
+        >
+            <h3>Drop CSV here</h3>
+            <input
+                type="file"
+                id="drop-file-inp"
+                accept=".csv"
+                onchange="uploadAddStudentsFile()"
+            >
+            <div id="loading-bar-container">
+                <div id="loading-bar"></div>
+            </div>
+        </div>
+    
+    `);
+
+    const
+        $emailInp = document.querySelector('#add-student-email'),
+        $yearInp = document.querySelector('#add-student-year');
+
+    document.getElementById(`add-student-submit`).onclick = async () => {
+
+        if (!$emailInp.value) {
+            await showError('Email Required');
+            return;
+        }
+
+        let studentYear = parseInt($yearInp.value || '0');
+
+        if ((studentYear > 13 || studentYear < 9) && studentYear !== 0) {
+            await showError('Year must be between 9 and 13 or blank for non-students');
+            return;
+        }
+
+        if (studentYear === 0) {
+            if (!confirm(
+                'Are you sure you want this to be an non-student, admin account? If not, please provide a year.')) {
+                return;
+            }
+        }
+
+        const res = await api`create/users/${$emailInp.value}/${DEFAULT_PASSWORD}?year=${$yearInp.value}`;
+
+        if (res.ok) {
+            $emailInp.value = '';
+            hide();
+            await showStudentsList();
+        }
+    };
+
+    reloadDOM();
+});
+
 async function deleteUser (id, email) {
     if (!confirm(`Are you sure you want to delete ${email} and all their house points?`)) {
         return;
@@ -130,7 +221,11 @@ async function deleteUser (id, email) {
 
     await api`delete/users/${id}`;
 
-    await main();
+    if (selected.includes(id)) {
+        selected.splice(selected.indexOf(id), 1);
+    }
+
+    await showStudentsList();
 }
 
 async function deleteSelected () {
@@ -144,7 +239,9 @@ async function deleteSelected () {
         await api`delete/users/${id}`;
     }));
 
-    await main();
+    selected.splice(0, selected.length);
+
+    await showStudentsList();
 }
 
 async function signInAs (id, email) {
@@ -158,8 +255,8 @@ async function signInAs (id, email) {
         return;
     }
 
-    setAltSessionCookie(getSession());
-    setSessionCookie(sessionID);
+    await setAltSessionCookie(getSession());
+    await setSessionCookie(sessionID);
     await navigate(`/user`);
 }
 
@@ -172,7 +269,7 @@ async function ageSelected (amount) {
         await api`update/users/year/${id}/${amount}`;
     }));
 
-    await main();
+    await showStudentsList();
 }
 
 async function giveHPToSelected () {
@@ -185,7 +282,7 @@ async function giveHPToSelected () {
         await api`create/house-points/give/${id}/1?description=${reason}`;
     }));
 
-    await main();
+    await showStudentsList();
 }
 
 async function revokeAdmin (id, email) {
@@ -195,7 +292,7 @@ async function revokeAdmin (id, email) {
 
     await api`update/users/admin/${id}?admin=0`;
 
-    await main();
+    await showStudentsList();
 }
 
 async function makeAdmin (id, email) {
@@ -205,70 +302,103 @@ async function makeAdmin (id, email) {
 
     await api`update/users/admin/${id}?admin=1`;
 
-    await main();
+    await showStudentsList();
 }
 
-async function main () {
 
-    $students.innerHTML = `
-        <div class="student">
-            <div style="width: 50px"></div>
-            
-            <div> <b>Year</b> </div>
-            
-            <div style="min-width: 150px"> <b>Email</b> </div>
-            
-            <div> <b>House Points</b> </div>
-            
-            <div style="width: 100px"></div>
-        </div>
-    `;
+async function uploadAddStudentsFile () {
+    const fileContent = await getFileContent('#drop-file-inp');
 
-    const searchValue = $searchFilterInput.value;
+    hide('#drop-file-inp');
 
-    let html = '';
+    const csv = CSVToArray(fileContent);
 
-    for (let student of students) {
-        if (searchValue && !student['email'].toLowerCase().includes(searchValue.toLowerCase())) {
-            continue;
-        }
-        html += await showStudent(student, selected.indexOf(student['id']) !== -1);
-    }
+    let errors = [];
 
-    $students.innerHTML += html;
+    let numPromisesResolve = csv.length;
+    let resolved = 0;
 
-    await reloadDOM();
-}
+    const $loadBar = document.getElementById('loading-bar');
+    $loadBar.style.width = `${100/numPromisesResolve}%`;
 
-document.getElementById(`add-student-submit`).onclick = async () => {
+    // called at the end of each student being done
+    function finishedOne () {
+        resolved++;
 
-    if (!$emailInp.value) {
-        showError('Email Required');
-        return;
-    }
+        let percentDone = (resolved / numPromisesResolve) * 100;
+        $loadBar.style.width = `${percentDone}%`;
 
-    if ($passwordInp.value.length < 4) {
-        showError('Password too short');
-        return;
-    }
+        if (resolved === numPromisesResolve) {
+            hide('#loading-bar');
+            show('#drop-file-zone');
+            document.getElementById('drop-file-zone').innerHTML = `
+                <p>
+                    Finished adding 
+                    ${csv.length}
+                    students with
+                    <span style="color: ${errors.length ? 'rgb(206,70,70)' : 'rgb(118,255,103)'}">
+                        ${errors.length}
+                    </span>
+                    errors.
+                </p>
+                ${errors.length ? `
+                    <br>Errors:<br>
+                    <p style="color: var(--text-warning)">
+                        ${errors.join('<br>')}
+                    </p>
+                ` : ''}
+            `;
 
-    let studentYear = parseInt($yearInp.value || '0');
-
-    if ((studentYear > 13 || studentYear < 9) && studentYear !== 0) {
-        showError('Year must be between 9 and 13 or blank for non-students');
-        return;
-    }
-
-    if (studentYear === 0) {
-        if (!confirm(
-            'Are you sure you want this to be an non-student, admin account? If not, please provide a year.')) {
-            return;
+            reloadHousePoints();
         }
     }
 
-    await api`create/users/${$emailInp.value}/${$passwordInp.value}?year=${$yearInp.value}`;
+    for (let i = 0; i < csv.length; i++) {
+        (async () => {
 
-    $emailInp.value = '';
+            if (csv[i].length !== 3 && csv[i].length !== 2) {
+                errors.push(`Row ${i+1}: wrong length. Expected 2 or 3 columns, got ${csv[i].length}`);
+                finishedOne();
+                return;
+            }
 
-    await main();
-};
+            const [ email, year, hpsRaw = '0' ] = csv[i];
+
+            const hps = parseInt(hpsRaw);
+            if (isNaN(hps)) {
+                errors.push(`Row ${i+1}: invalid house point count (col 3)`);
+                finishedOne();
+                return;
+            }
+
+            let res = await api`create/users/${email}/${DEFAULT_PASSWORD}?year=${year}`;
+            if (res['error']) {
+                errors.push(`Error on row ${i+1}: ${res['error']}`);
+                finishedOne();
+                return;
+            }
+
+            const { userID } = res;
+
+            if (!userID) {
+                errors.push(`Error on row ${i+1}: Not sure what went wrong :/. User wasn't created - I don't think?`);
+                finishedOne();
+                return;
+            }
+
+            if (hps > 0) {
+                res = await api`create/house-points/give/${userID}/${hps}?description=Random+Stuff`;
+                if (res['error']) {
+                    errors.push(`Error on row ${i+1}: ${res['error']}`);
+                    finishedOne();
+                    return;
+                }
+            }
+
+            finishedOne();
+        })().catch(err => {
+            errors.push(`Something went wrong on row ${i+1}: ${err}`);
+            finishedOne();
+        });
+    }
+}

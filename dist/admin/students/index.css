@@ -6,12 +6,54 @@
     max-width: 350px;
     width: 95%;
 }
-#selectable-list .student-link {
+
+.student-link {
     border: none;
     text-underline: #575757;
-    font-size: 16px
+    font-size: 25px;
 }
 
-#selectable-list .student-link:hover {
+.student-link:hover {
     cursor: pointer;
+}
+
+#add-student-by-email input {
+    margin-top: 20px;
+}
+
+#add-student-by-email {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+}
+
+#drop-file-zone {
+    min-height: 100px;
+    margin: 50px 20px 20px 20px;
+    padding: 20px;
+    background: var(--bg-accent);
+    text-align: center;
+}
+
+#drop-file-zone:hover {
+    background: var(--bg);
+    border: 2px dashed var(--border-light);
+}
+
+#drop-file-inp {
+    font-size: 15px;
+    border: none;
+}
+
+#loading-bar-container {
+    width: 100%;
+    background: var(--bg);
+    height: 20px;
+    border-radius: 10px;
+}
+
+#loading-bar {
+    background: var(--accent);
+    height: 20px;
+    border-radius: 10px;
+    width: 0;
 }

@@ -10,7 +10,7 @@ const $addHPSubmit = document.getElementById('add-hp-submit');
 
     $addHPName = insertComponent($addHPName).studentEmailInputWithIntellisense();
 
-    hideWithID('admin-link');
+    hide('#admin-link');
 
     await main();
 })();

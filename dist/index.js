@@ -6,8 +6,8 @@ const $password = document.getElementById('password');
 	await init('.');
 
 	if (GETParam('error')) {
-		showErrorFromCode(GETParam('error'));
-		await sleep(3000);
+		await showErrorFromCode(GETParam('error'));
+		await sleep(1000);
 	}
 
 	if (await signedIn()) {

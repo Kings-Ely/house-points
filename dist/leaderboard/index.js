@@ -14,7 +14,7 @@ let leaderboardData;
 (async () => {
     await init('..', true);
 
-    hideWithID('leaderboard-link');
+    hide('#leaderboard-link');
 
     const { admin, year } = await userInfo();
 

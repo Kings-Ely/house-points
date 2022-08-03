@@ -351,8 +351,8 @@ Test.test('Users | Deleting', async (api) => {
 
     // Deleting self
     res = await api(`delete/users/${userID1}`, sessionID1);
-    if (res.ok || res.status !== 401 || res.code) {
-        return `Expected 'ok' from 'delete/users/code1', got '${JSON.stringify(res)}'`;
+    if (res.ok || res.status !== 403 || res.code) {
+        return `Expected 403' from 'delete/users/code1', got '${JSON.stringify(res)}'`;
     }
     res = await api(`get/sessions/auth-level/${sessionID1}`);
     if (res.level !== 2) {

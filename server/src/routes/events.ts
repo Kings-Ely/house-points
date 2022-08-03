@@ -1,8 +1,17 @@
 import route from "../";
 import { AUTH_ERR, generateUUID, getSessionID, isAdmin, isLoggedIn, userFromSession } from '../util';
 
+/**
+ * @account
+ * Single route for getting house points with some filters
+ *
+ * @param {number} from - events which have a time after this timestamp
+ * @param {number} to - events which have a time before this timestamp
+ * @param {string} id - events which have this ID
+ * @param {string} userID - events which have house points which belong to this user
+ */
 route('get/events?id&userID&from&to', async ({ query, params, cookies }) => {
-    // Single route for getting house points with filters
+    if (!await isLoggedIn(cookies, query)) return AUTH_ERR;
 
     let { id, userID, from: fromRaw, to: toRaw } = params;
 
@@ -88,6 +97,11 @@ route('get/events?id&userID&from&to', async ({ query, params, cookies }) => {
     return { data };
 });
 
+/**
+ * @admin
+ * Creates an event
+ * Does not add house points, this must be done separately
+ */
 route('create/events/:name/:timestamp?description', async ({ query, cookies, params }) => {
     if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
@@ -120,6 +134,10 @@ route('create/events/:name/:timestamp?description', async ({ query, cookies, par
     return { status: 201, id };
 });
 
+/**
+ * @admin
+ * Updates the name of an event from an event ID
+ */
 route('update/events/change-name/:id/:name', async ({ query, cookies, params }) => {
     if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
@@ -131,14 +149,16 @@ route('update/events/change-name/:id/:name', async ({ query, cookies, params }) 
         WHERE id = ${id}
    `;
 
-    if (queryRes.affectedRows === 0) {
-        return {
-            status: 406,
-            error: `Event with ID '${id}' not found`
-        };
-    }
+    if (queryRes.affectedRows === 0) return {
+        status: 406,
+        error: `Event not found`
+    };
 });
 
+/**
+ * @admin
+ * Updates the timestamp of an event from an event ID
+ */
 route('update/events/change-time/:id/:time', async ({ query, cookies, params }) => {
     if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
@@ -161,6 +181,11 @@ route('update/events/change-time/:id/:time', async ({ query, cookies, params }) 
     };
 });
 
+/**
+ * @admin
+ * Deletes an event from an event ID
+ * @param {1|0} deleteHps - if true, also deletes all house points with an event ID of this event
+ */
 route('delete/events/with-id/:id?deleteHps=1', async ({ query, cookies, params }) => {
     if (!await isAdmin(cookies, query)) return AUTH_ERR;
 

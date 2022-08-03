@@ -2,10 +2,9 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { v4 as UUIDv4 } from 'uuid';
+
 import { Cookies } from './route';
-
 import { queryFunc } from './sql';
-
 
 /**
  * Gets the session ID from the cookies using the given cookies object
@@ -15,7 +14,11 @@ export function getSessionID (cookies: Cookies): string {
     return cookies[process.env.COOKIE_SESSION_KEY || 'sessionID'] || '';
 }
 
-export const AUTH_ERR = Object.freeze({
+/**
+ * Object to return from a route if incorrect credentials were provided.
+ * Frozen (immutable) and constant.
+ * */
+export const AUTH_ERR: Readonly<{error: string, status: number}> = Object.freeze({
     error: 'You are not authorized for this action',
     status: 401
 });
@@ -129,7 +132,10 @@ export async function generateUUID (): Promise<string> {
     return UUIDv4();
 }
 
-export async function IDFromSession (query: queryFunc, sessionID: string): Promise<string | null> {
+/**
+ * Gets the userID from a session ID
+ */
+export async function IDFromSession (query: queryFunc, sessionID: string): Promise<string> {
     const res = await query`
         SELECT user
         FROM sessions
@@ -137,15 +143,21 @@ export async function IDFromSession (query: queryFunc, sessionID: string): Promi
         AND UNIX_TIMESTAMP(opened) + expires > UNIX_TIMESTAMP()
     `;
 
-    if (!res.length) return null;
+    if (!res.length) return '';
 
-    return res?.[0]?.['user'] || null;
+    return res?.[0]?.['user'] || '';
 }
 
+/**
+ * Gets the user ID from a cookies object
+ */
 export async function userID (cookies: Cookies, query: queryFunc) {
     return IDFromSession(query, getSessionID(cookies));
 }
 
+/**
+ * Gets the user details from a user ID
+ */
 export async function userFromID (query: queryFunc, id: string): Promise<Record<string, any> | null> {
     const res = await query`
         SELECT
@@ -160,9 +172,14 @@ export async function userFromID (query: queryFunc, id: string): Promise<Record<
 
     if (!res.length) return null;
 
+    await addHousePointsToUser(query, res[0]);
+
     return res[0];
 }
 
+/**
+ * Gets the user details from a session token
+ */
 export async function userFromSession (query: queryFunc, id: string): Promise<Record<string, any> | null> {
     const res = await query`
         SELECT
@@ -181,5 +198,58 @@ export async function userFromSession (query: queryFunc, id: string): Promise<Re
 
     if (!res.length) return null;
 
+    await addHousePointsToUser(query, res[0]);
+
     return res[0];
+}
+
+/**
+ * Adds house point details to a user
+ * Adds 'housePoints', 'accepted', 'rejected', 'pending' keys to the user object.
+ * Assumed admin level authentication, censor the data after if necessary.
+ */
+export async function addHousePointsToUser (query: queryFunc, user: any & { id: string }) {
+    user['housePoints'] = await query`
+        SELECT
+            housepoints.id,
+            housepoints.quantity,
+            housepoints.description,
+            housepoints.status,
+            UNIX_TIMESTAMP(housepoints.created) as created,
+            UNIX_TIMESTAMP(housepoints.completed) as completed,
+            housepoints.rejectMessage,
+            
+            users.id as userID,
+            users.email as studentEmail,
+            users.year as studentYear,
+            
+            housepoints.event as eventID,
+            events.name as eventName,
+            events.description as eventDescription,
+            UNIX_TIMESTAMP(events.time) as eventTime
+            
+        FROM users, housepoints
+        LEFT JOIN events
+        ON events.id = housepoints.event
+        
+        WHERE
+            housepoints.student = users.id
+            AND users.id = ${ user['id'] }
+       ORDER BY created DESC
+    `;
+
+    // add the quick count stats
+    user['accepted'] ??= user['housePoints']
+        .filter((hp: any) => hp['status'] === 'Accepted')
+        .length;
+
+    user['pending'] ??= user['housePoints']
+        .filter((hp: any) => hp['status'] === 'Pending')
+        .length;
+
+    user['rejected'] ??= user['housePoints']
+        .filter((hp: any) => hp['status'] === 'Rejected')
+        .length;
+
+    // user passed by reference as it's an object so don't need to return anything
 }

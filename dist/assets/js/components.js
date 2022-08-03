@@ -489,9 +489,13 @@ function insertComponent ($el=document.body) {
 
                 const { id: userID } = await api`get/users/from-email/${email}`;
 
-                await api`create/house-points/give/${userID}/1/?event=${event['id']}`;
+                await api`create/house-points/give/${userID}/1?event=${event['id']}`;
 
                 reload();
+            };
+
+            window[`eventCard${id}_changeHpQuantity`] = async (id, value) => {
+                await api`update/house-points/quantity/${id}/${value}`;
             };
 
             $el.innerHTML = `
@@ -509,17 +513,23 @@ function insertComponent ($el=document.body) {
                         </h2>
                         ${event['housePoints'].map(point => `
                             <div class="hp">
-                                <div>${point['studentEmail']}</div>
-                                <div>${point['quantity']}</div>
-                                
+                                <div>${point['studentEmail'] || '???'}</div>
                                 ${admin ? `
+                                    <input 
+                                        type="number"
+                                        onchange="eventCard${id}_changeHpQuantity('${point.id}', this.value)"
+                                        value="${point['quantity']}"
+                                        style="width: 40px; font-size: 15px"
+                                    >
                                     <button
                                         label="Delete house points"
                                         onclick="eventCard${id}_deleteStudent('${point['id']}')"
                                         svg="bin.svg"
                                         class="icon small"
                                     ></button>
-                                ` : ''}
+                                ` : `
+                                    (${point['quantity']})
+                                `}
                             </div>
                         `).join('')}
                         
@@ -540,8 +550,10 @@ function insertComponent ($el=document.body) {
                 </div>
             `;
 
-            $addStudentToEvent = insertComponent(`#event-card-${id} .add-student-to-event`)
-                .studentEmailInputWithIntellisense();
+            asAdmin(() => {
+                $addStudentToEvent = insertComponent(`#event-card-${id} .add-student-to-event`)
+                    .studentEmailInputWithIntellisense();
+            });
 
             reloadDOM();
         }

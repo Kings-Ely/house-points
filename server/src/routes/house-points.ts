@@ -10,9 +10,19 @@ import {
     userID
 } from '../util';
 
-
+/**
+ * @account
+ * Gets all house points and filters them based on the parameters
+ *
+ * @param {string} id - house points with this ID
+ * @param {string} userID - house points with a user=userID
+ * @param {13 >= number >= 9} yearGroup - house points earned by a student in this year group
+ * @param {'Accepted'|'Pending'|'Rejected'} status - house points with this status
+ * @param {number} from - house points created after this timestamp
+ * @param {number} to - house points created before this timestamp
+ */
 route('get/house-points?id&userID&yearGroup&status&from&to', async ({ query, params, cookies }) => {
-    // Single route for getting house points with filters
+    if (!await isLoggedIn(cookies, query)) return AUTH_ERR;
 
     let { id, userID, yearGroup: ygRaw, status, from: fromRaw, to: toRaw } = params;
 
@@ -52,6 +62,8 @@ route('get/house-points?id&userID&yearGroup&status&from&to', async ({ query, par
             AND ((users.year = ${yearGroup})      OR ${!yearGroup})
             AND ((created >= ${from})             OR ${!from})
             AND ((created <= ${to})               OR ${!to})
+            
+        ORDER BY created DESC
     `;
 
     // either require admin or the house point to belong to the user
@@ -76,6 +88,13 @@ route('get/house-points?id&userID&yearGroup&status&from&to', async ({ query, par
     return { data: res };
 });
 
+/**
+ * @admin
+ * Gives a house point to the student with that userID
+ *
+ * @param {string} description - description of house point
+ * @param {string} event - id of event house points should be associated with
+ */
 route(
     'create/house-points/give/:userID/:quantity?description&event',
 async ({ query, cookies, params }) => {
@@ -85,7 +104,7 @@ async ({ query, cookies, params }) => {
 
     let student = await userFromID(query, userID);
     if (!student) return `Student with ID '${userID}' not found`;
-    if (!student.student) return 'Can only give house points to students';
+    if (!student['student']) return 'Can only give house points to students';
 
     let quantity = parseInt(rawQuantity);
     if (isNaN(quantity) || !quantity) {
@@ -111,9 +130,17 @@ async ({ query, cookies, params }) => {
     return { status: 201 };
 });
 
+/**
+ * @account
+ * Creates a house points request.
+ * All users can do this.
+ * This house point can be GET but does not count towards any house points counts
+ */
 route(
     'create/house-points/request/:userID/:quantity?description&event',
-async ({ query, params }) => {
+async ({ query, params, cookies }) => {
+    if (!await isLoggedIn(cookies, query)) return AUTH_ERR;
+
     const { userID, description, event, quantity: rawQuantity } = params;
 
     let quantity = parseInt(rawQuantity);
@@ -121,7 +148,7 @@ async ({ query, params }) => {
         return 'Quantity must be an integer';
     }
     if (quantity < 1) {
-        return 'Quantity must be at least 1';
+        return 'Quantity must be greater than 0';
     }
 
     let student = await userFromID(query, userID);
@@ -143,7 +170,17 @@ async ({ query, params }) => {
     return { status: 201 };
 });
 
-
+/**
+ * @admin
+ * Updates the status of the house points.
+ * You cannot change a house point fron 'Accepted' or 'Rejected' to any other status,
+ * only from 'Pending'.
+ * This route is the only way to change the status of a house point.
+ * Takes a house point ID
+ *
+ * @param {string} reject - If present, rejects the house points instead of accepting it.
+ *                          This is the message shown to the student for why the HP was rejected.
+ */
 route(
     'update/house-points/accepted/:housePointID?reject',
 async ({ query, cookies, params }) => {
@@ -178,7 +215,36 @@ async ({ query, cookies, params }) => {
     }
 });
 
+/**
+ * @admin
+ * Updates the quantity of a house point
+ */
+route('update/house-points/quantity/:housePointID/:quantity', async ({ query, cookies, params }) => {
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
+    const { housePointID: id, quantity: rawQuantity } = params;
+
+    const quantity = parseInt(rawQuantity);
+    if (isNaN(quantity)) return 'Quantity must be an integer';
+    if (quantity < 1) return 'Quantity must be greater than 0';
+
+
+    const queryRes = await query`
+        UPDATE housepoints
+        SET quantity = ${quantity}
+        WHERE id = ${id}
+    `;
+
+    if (!queryRes.affectedRows) return {
+        status: 406,
+        error: `No house point found with ID '${id}'`
+    };
+});
+
+/**
+ * @admin
+ * Deletes a house point from a house point ID
+ */
 route('delete/house-points/with-id/:housePointID', async ({ query, cookies, params }) => {
     const { housePointID: id } = params;
 

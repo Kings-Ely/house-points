@@ -13,7 +13,7 @@ const $hpReasonInp = document.getElementById('hp-reason');
         await reloadHousePoints();
     } else {
         await title(await userInfo(), []);
-        hideWithID('submit-hp-request');
+        hide('#submit-hp-request');
         if ((await userInfo())['admin']) {
             $hps.innerHTML = `
                 <a 
@@ -22,7 +22,7 @@ const $hpReasonInp = document.getElementById('hp-reason');
                 >Admin Dashboard</a>
             `;
         } else {
-            hideWithID('hps');
+            hide('#hps');
         }
     }
 })();
@@ -100,6 +100,7 @@ function showHp (hp) {
 
     } else {
         acceptedHTML = 'Not Yet Accepted';
+        icon = 'pending.svg';
     }
 
     const submittedTime = hp['created'] * 1000;
@@ -109,11 +110,12 @@ function showHp (hp) {
             <div style="min-width: 50%">
                 ${hp['eventName'] ? `
                     <a
-                        label="${hp['eventName']}"
+                        label="View ${hp['eventName']}"
                         href="../events?id=${hp['eventID']}"
                         aria-label="${hp['eventName']}"
                         svg="event.svg"
                         class="icon small evt-link"
+                        label-offset="50px"
                     >
                         <b>${hp['eventName']}</b>
                     </a>
@@ -128,21 +130,14 @@ function showHp (hp) {
             </div>
             <div 
                 style="min-width: 50px"
-                ${icon ? `svg="${icon}"` : ''}
+                svg="${icon}"
+                label="${hp['status']}"
             >
-            </div>
-            <div style="min-width: 50px">
-                <button 
-                    onclick="deleteHousePoint('${hp['id']}', '${hp['description']}')"
-                    class="icon"
-                    aria-label="Delete House Point"
-                    svg="bin.svg"
-                ></button>
             </div>
         </div>
     `;
 }
-
+/*
 async function deleteHousePoint (id, desc) {
     if (!confirm(`Are you sure you want to delete the house point you got for '${desc}'?`)) {
         return;
@@ -150,6 +145,7 @@ async function deleteHousePoint (id, desc) {
     await api`delete/house-points/with-id/${id}`;
     await reloadHousePoints();
 }
+ */
 
 async function reloadHousePoints () {
     const { data: hps } = await api`get/house-points?userID=${await userID()}`;
