@@ -240,16 +240,13 @@ export async function addHousePointsToUser (query: queryFunc, user: any & { id: 
 
     // add the quick count stats
     user['accepted'] ??= user['housePoints']
-        .filter((hp: any) => hp['status'] === 'Accepted')
-        .length;
+        .reduce((acc: number, hp: any) => acc + (hp['status'] === 'Accepted' ? hp['quantity'] : 0), 0);
 
     user['pending'] ??= user['housePoints']
-        .filter((hp: any) => hp['status'] === 'Pending')
-        .length;
+        .reduce((acc: number, hp: any) => acc + (hp['status'] === 'Pending' ? hp['quantity'] : 0), 0);
 
     user['rejected'] ??= user['housePoints']
-        .filter((hp: any) => hp['status'] === 'Rejected')
-        .length;
+        .reduce((acc: number, hp: any) => acc + (hp['status'] === 'Rejected' ? hp['quantity'] : 0), 0);
 
     // user passed by reference as it's an object so don't need to return anything
 }

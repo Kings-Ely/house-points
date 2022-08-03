@@ -234,7 +234,7 @@ function insertComponent ($el=document.body) {
                             <div style="display: block">
                                 <button
                                     onclick="removeStudentFromEvent('${id}')"
-                                    label="Remove ${email} from new event"
+                                   data-label="Remove ${email} from new event"
                                     aria-label="Remove ${email} from new event"
                                     svg="bin.svg"
                                     class="icon"
@@ -345,8 +345,11 @@ function insertComponent ($el=document.body) {
             titleBar='',
             withAllMenu='',
             itemGenerator,
+            gridTemplateColsCSS = '1fr 1fr',
             selected
         }) => {
+            preloadSVGs('selected-checkbox.svg', 'unselected-checkbox.svg');
+
             currentComponentID++;
 
             window[`${name}selectableList_selectAll`] = (select) => {
@@ -392,7 +395,7 @@ function insertComponent ($el=document.body) {
                                     onclick="${name}selectableList_selectAll(true)"
                                     class="icon"
                                     svg="unselected-checkbox.svg"
-                                    label="Select All"
+                                   data-label="Select All"
                                     aria-label="select all"
                                 ></button>
                 
@@ -400,7 +403,7 @@ function insertComponent ($el=document.body) {
                                     onclick="${name}selectableList_selectAll(false)"
                                     class="icon"
                                     svg="unselect-checkbox.svg"
-                                    label="Unselect All"
+                                   data-label="Unselect All"
                                     aria-label="unselect all"
                                 ></button>
                             </span>
@@ -449,12 +452,12 @@ function insertComponent ($el=document.body) {
                     $items.innerHTML += `
                         <div class="item">
                             <button
-                                class="icon no-scale"
+                                class="icon medium no-scale"
                                 svg="${isSelected ? 'selected-checkbox' : 'unselected-checkbox'}.svg"
                                 aria-label="${isSelected ? 'Unselect' : 'Select'}"
                                 onclick="${name}selectableList_select('${id}', ${isSelected ? 'false' : 'true'})"
                             ></button>
-                            <div class="item-content">
+                            <div class="item-content" style="grid-template-columns: ${gridTemplateColsCSS}">
                                   ${await itemGenerator(item, isSelected)}
                             </div>
                         </div>
@@ -522,7 +525,7 @@ function insertComponent ($el=document.body) {
                                         style="width: 40px; font-size: 15px"
                                     >
                                     <button
-                                        label="Delete house points"
+                                       data-label="Delete house points"
                                         onclick="eventCard${id}_deleteStudent('${point['id']}')"
                                         svg="bin.svg"
                                         class="icon small"
@@ -538,7 +541,7 @@ function insertComponent ($el=document.body) {
                                  <span class="add-student-to-event"></span>
                                  <button
                                     svg="plus.svg"
-                                    label="Add Student"
+                                   data-label="Add Student"
                                     aria-label="add student"
                                     onclick="eventCard${id}_addStudent(this)"
                                     class="icon"

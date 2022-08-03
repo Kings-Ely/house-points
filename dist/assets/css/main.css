@@ -18,8 +18,6 @@
 
     --border: #c5c5c5;
     --border-light: #e8e8e8;
-
-    --hover-offset-y: 0px;
 }
 
 
@@ -107,9 +105,11 @@ textarea {
     height: fit-content;
     width: fit-content;
     padding: 10px;
-    display: flex;
+    display: grid;
+    /* assumed one svg icon and then text */
+    grid-template-columns: 55px 1fr;
     align-items: center;
-    justify-content: center;
+    align-content: center;
 }
 
 .big-link:hover {
@@ -371,6 +371,9 @@ svg {
     border: none;
     text-decoration: none;
     --hover-offset-y: 0px;
+    display: inline-grid;
+    justify-items: center;
+    align-items: center;
 }
 
 .icon svg, .icon img {
@@ -404,31 +407,50 @@ svg {
     width: 20px;
 }
 
-.icon.small {
-    --hover-offset-y: -20px;
+.icon.medium svg {
+    height: 35px;
+    width: 35px;
 }
 
-a {
-    --hover-offset-y: -20px;
+[data-label] {
+    position: relative;
+    text-align: center;
 }
 
-.label {
-    /* labels are not only for icons but normally are */
-    --hover-offset: 0px;
-    transform: scale(0);
+[data-label]::before {
+    content: attr(data-label);
     position: absolute;
-    display: inline-block;
-    transition: 0ms !important;
-    font-size: 15px;
-}
-
-:hover > .label {
-    transform: scale(1) translate(calc(-70% + var(--hover-offset)), calc(50px + var(--hover-offset-y)));
-    background: var(--bg-accent);
+    opacity: 0;
     border-radius: 5px;
     padding: 6px;
-    z-index: 1000;
+    background: var(--bg);
+    z-index: 2;
+    text-align: center;
+    font-size: 15px;
+    border: 1px solid var(--border);
+    width: fit-content;
+    top: 110%;
+    --offset-x: attr(data-label-offset);
+    left: calc(50% - 50px + var(--offset-x));
 }
+
+[data-label]:hover::before {
+    opacity: 1;
+}
+/* little arrow, but doesn't really work
+[data-label]:after {
+    content: "";
+    position: absolute;
+    top: calc(100% - 16px);
+    left: 50%;
+    border: 10px solid #000;
+    border-color: transparent transparent var(--border) transparent;
+    opacity: 0;
+}
+[data-label]:hover:before, [data-label]:hover:after {
+    opacity: 1;
+}
+ */
 
 @media only screen and (max-aspect-ratio: 6/5) {
     .label {
@@ -598,29 +620,27 @@ a {
     padding: 5px;
 }
 
-.selectable-list .item:hover {
-    background: var(--bg-accent);
-}
-
 .selectable-list .items {
     margin: 20px;
 }
 
 .selectable-list .item {
     border-bottom: 1px solid var(--border);
-    padding: 4px 20px;
+    padding: 0 20px;
     display: grid;
     grid-template-columns: 60px auto;
 }
 
-.selectable-list .item-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.selectable-list .item:hover {
+    background: var(--bg-accent);
 }
 
 .selectable-list .item:last-child {
     border: none;
+}
+
+.selectable-list .item-content {
+    display: grid;
 }
 
 .selectable-list .with-all-menu {

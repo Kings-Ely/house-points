@@ -5,6 +5,7 @@ const
 
 (async () => {
     await init('../..', true, true);
+    preloadSVGs('star-filled.svg', 'star-empty.svg', 'bin.svg', 'circle-up-arrow.svg', 'circle-down-arrow.svg', 'plus.svg');
 
     await showStudentsList();
 })();
@@ -21,7 +22,7 @@ async function showStudentsList () {
                 onclick="deleteSelected()"
                 class="icon"
                 aria-label="delete selected"
-                label="Delete"
+               data-label="Delete"
                 svg="bin.svg"
             ></button>
             
@@ -29,7 +30,7 @@ async function showStudentsList () {
                 onclick="ageSelected(1)"
                 class="icon"
                 aria-label="move selected up a year"
-                label="Move Up 1 Year"
+               data-label="Move Up 1 Year"
                 svg="circle-up-arrow.svg"
             ></button>
             
@@ -37,7 +38,7 @@ async function showStudentsList () {
                 onclick="ageSelected(-1)"
                 class="icon"
                 aria-label="move selected down a year"
-                label="Move Down 1 Year"
+               data-label="Move Down 1 Year"
                 svg="circle-down-arrow.svg"
             ></button>
             
@@ -45,11 +46,12 @@ async function showStudentsList () {
                 onclick="giveHPToSelected()"
                 class="icon"
                 aria-label="give all selected a house point"
-                label="Give House Point"
+               data-label="Give House Point"
                 svg="plus.svg"
             ></button>
         `,
-        itemGenerator: showStudent
+        itemGenerator: showStudent,
+        gridTemplateColsCSS: '50% 1fr 1fr',
     });
 }
 
@@ -61,38 +63,35 @@ async function showStudent (student) {
     const isMe = (id === (await userInfo())['id']);
 
     return `
-        <div>
+        <div class="flex-center" style="justify-content: left">
             ${isAdmin ? `
                 <button 
-                    class="icon ${isStudent ? 'icon-accent' : ''}" 
+                    class="icon medium ${isStudent ? 'icon-accent' : ''}"
                     onclick="revokeAdmin('${id}', '${email}')"
-                    label="${isStudent ? '' : '(Non-Student)'} Admin"
+                    data-label="${isStudent ? '' : '(Non-Student)'} Admin"
                     svg="star-filled.svg"
                     aria-label="Revoke Admin"
-                >
-                </button>
+                ></button>
             ` : `
                 <button
-                    class="icon ${isStudent ? 'icon-accent' : ''}" 
+                    class="icon medium ${isStudent ? 'icon-accent' : ''}" 
                     onclick="makeAdmin('${id}', '${email}')"
                     aria-label="Make ${email} an admin"
-                    label="Make Admin"
+                    data-label="Make Admin"
                     svg="star-empty.svg"
                 ></button>                
             `}
-        </div>
-        
-        <div style="min-width: 150px">
+            
             ${isMe ? `
                 <span class="student-link">
-                   ${email}
+                   <b>${email}</b>
                    (You${isStudent ? `, Y${year || ''}` : ''})
                 </span>
             ` : `
                 <button 
                     onclick="signInAs('${id}', '${email}')" 
                     class="student-link"
-                    label="Sign in as ${email}"
+                    data-label="Sign in as ${email}"
                     aria-label="Sign in as ${email}"
                 >
                     ${email}
@@ -104,18 +103,18 @@ async function showStudent (student) {
             `}
         </div>
        
-        <div>
+        <div class="flex-center">
             ${isStudent ? `
                 ${student['accepted']} House Points
             ` : ''}
         </div>
         
-        <div>
+        <div class="flex-center" style="justify-content: right">
             <button
                 onclick="deleteUser('${id}', '${email}')"
-                class="icon"
+                class="icon medium"
                 svg="bin.svg"
-                label="Delete ${email}"
+                data-label="Delete ${email}"
                 aria-label="Delete ${email}"
             ></button>
         </div>
@@ -285,6 +284,12 @@ async function giveHPToSelected () {
     await showStudentsList();
 }
 
+/**
+ * Makes the API request to make a user not an admin and refreshes the list of students.
+ * @param {string} id
+ * @param {string} email
+ * @returns {Promise<void>}
+ */
 async function revokeAdmin (id, email) {
     if (!confirm(`Are you sure you want to revoke '${email}'s admin access?`)) {
         return;
@@ -295,6 +300,12 @@ async function revokeAdmin (id, email) {
     await showStudentsList();
 }
 
+/**
+ * Makes the API request to make a user an admin and refreshes the list of students.
+ * @param {string} id
+ * @param {string} email
+ * @returns {Promise<void>}
+ */
 async function makeAdmin (id, email) {
     if (!confirm(`Are you sure you want to make '${email}' an admin?`)) {
         return;
@@ -305,11 +316,11 @@ async function makeAdmin (id, email) {
     await showStudentsList();
 }
 
-
 async function uploadAddStudentsFile () {
     const fileContent = await getFileContent('#drop-file-inp');
 
     hide('#drop-file-inp');
+    show('#loading-bar-container');
 
     const csv = CSVToArray(fileContent);
 
@@ -321,22 +332,15 @@ async function uploadAddStudentsFile () {
     const $loadBar = document.getElementById('loading-bar');
     $loadBar.style.width = `${100/numPromisesResolve}%`;
 
-    // called at the end of each student being done
-    function finishedOne () {
-        resolved++;
-
-        let percentDone = (resolved / numPromisesResolve) * 100;
-        $loadBar.style.width = `${percentDone}%`;
-
-        if (resolved === numPromisesResolve) {
-            hide('#loading-bar');
-            show('#drop-file-zone');
-            document.getElementById('drop-file-zone').innerHTML = `
+    function finishedAll () {
+        hide('#loading-bar');
+        show('#drop-file-zone');
+        document.getElementById('drop-file-zone').innerHTML = `
                 <p>
                     Finished adding 
                     ${csv.length}
                     students with
-                    <span style="color: ${errors.length ? 'rgb(206,70,70)' : 'rgb(118,255,103)'}">
+                    <span style="color: ${errors.length ? 'var(--text-warning)' : 'rgb(118,255,103)'}">
                         ${errors.length}
                     </span>
                     errors.
@@ -349,12 +353,29 @@ async function uploadAddStudentsFile () {
                 ` : ''}
             `;
 
-            reloadHousePoints();
+        showStudentsList();
+    }
+
+    // called at the end of each student being done
+    function finishedOne () {
+        resolved++;
+
+        let percentDone = (resolved / numPromisesResolve) * 100;
+        $loadBar.style.width = `${percentDone}%`;
+
+        if (resolved === numPromisesResolve) {
+            finishedAll();
         }
     }
 
     for (let i = 0; i < csv.length; i++) {
         (async () => {
+
+            if (csv[i][0].toLowerCase() === 'email') {
+                // skip header row
+                finishedOne();
+                return;
+            }
 
             if (csv[i].length !== 3 && csv[i].length !== 2) {
                 errors.push(`Row ${i+1}: wrong length. Expected 2 or 3 columns, got ${csv[i].length}`);
@@ -364,7 +385,7 @@ async function uploadAddStudentsFile () {
 
             const [ email, year, hpsRaw = '0' ] = csv[i];
 
-            const hps = parseInt(hpsRaw);
+            const hps = parseInt(hpsRaw || '0');
             if (isNaN(hps)) {
                 errors.push(`Row ${i+1}: invalid house point count (col 3)`);
                 finishedOne();

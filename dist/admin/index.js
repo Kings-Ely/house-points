@@ -58,8 +58,8 @@ function housePointHML (hp) {
             <button 
                 onclick="signInAs('${hp['userID']}', '${hp['studentEmail']}')"
                 svg="login.svg"
-                label="Sign in as ${hp['studentEmail']}"
-                label-offset="50%"
+               data-label="Sign in as ${hp['studentEmail']}"
+                data-label-offset="50%"
                 class="icon small"
                 aria-label="Sign in as ${hp['studentEmail']}"
             >
@@ -78,14 +78,14 @@ function housePointHML (hp) {
                     class="icon"
                     aria-label="Reject"
                     svg="red-cross.svg"
-                    label="Reject"
+                   data-label="Reject"
                 ></button>
                 <button
                     onclick="accept('${hp['id']}')"
                     class="icon"
                     svg="accent-tick.svg"
                     aria-label="Accept"
-                    label="Accept"
+                   data-label="Accept"
                 ></button>
             </div>
         </div>

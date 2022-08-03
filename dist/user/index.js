@@ -11,23 +11,28 @@ const $hpReasonInp = document.getElementById('hp-reason');
 
     if ((await userInfo())['student']) {
         await reloadHousePoints();
+
     } else {
-        await title(await userInfo(), []);
+        await title();
         hide('#submit-hp-request');
+
         if ((await userInfo())['admin']) {
             $hps.innerHTML = `
                 <a 
                     href="../admin/"
                     class="big-link"
+                    svg="admin.svg"
                 >Admin Dashboard</a>
             `;
+            reloadDOM();
         } else {
             hide('#hps');
         }
     }
 })();
 
-function housePoints (hps) {
+async function housePoints () {
+    const hps = (await userInfo())['housePoints'];
     if (hps.length === 0) {
         $hps.innerHTML = `
             <p style="font-size: 30px; margin: 50px; text-align: center">
@@ -45,7 +50,7 @@ function housePoints (hps) {
     $hps.innerHTML = html;
 }
 
-async function title (hps) {
+async function title () {
 
     const info = await userInfo();
 
@@ -63,7 +68,8 @@ async function title (hps) {
     `;
 
     if (info['student']) {
-        const numHps = hps.filter(c => c['status'] === 'Accepted').length;
+        const numHps = info['accepted'];
+
         if (numHps < 1) {
             $name.innerHTML = `
                 ${name} has No House Points
@@ -110,17 +116,20 @@ function showHp (hp) {
             <div style="min-width: 50%">
                 ${hp['eventName'] ? `
                     <a
-                        label="View ${hp['eventName']}"
+                       data-label="View ${hp['eventName']}"
                         href="../events?id=${hp['eventID']}"
                         aria-label="${hp['eventName']}"
                         svg="event.svg"
                         class="icon small evt-link"
-                        label-offset="50px"
+                        data-label-offset="50px"
                     >
                         <b>${hp['eventName']}</b>
                     </a>
                 ` : ''}
                 ${hp['description']}
+                ${hp['quantity'] > 1 ? `
+                    (${hp['quantity']} points)
+                ` : ''}
             </div>
             <div style="min-width: calc(40% - 60px)">
                 ${new Date(submittedTime).toDateString()}
@@ -131,28 +140,20 @@ function showHp (hp) {
             <div 
                 style="min-width: 50px"
                 svg="${icon}"
-                label="${hp['status']}"
+               data-label="${hp['status']}"
             >
             </div>
         </div>
     `;
 }
-/*
-async function deleteHousePoint (id, desc) {
-    if (!confirm(`Are you sure you want to delete the house point you got for '${desc}'?`)) {
-        return;
-    }
-    await api`delete/house-points/with-id/${id}`;
-    await reloadHousePoints();
-}
- */
 
 async function reloadHousePoints () {
-    const { data: hps } = await api`get/house-points?userID=${await userID()}`;
 
-    housePoints(hps);
+    await reloadUserInfo();
 
-    await title(hps);
+    await title();
+
+    await housePoints();
 
     reloadDOM();
 }

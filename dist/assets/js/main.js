@@ -142,6 +142,10 @@ async function handleUserInfo (info) {
     }
 }
 
+async function reloadUserInfo () {
+    await handleUserInfo(await rawAPI(`get/users/from-session/${getSession()}`));
+}
+
 // user auth cookie utilities
 function getSession () {
     return getCookie(COOKIE_KEY);
@@ -339,6 +343,34 @@ function GETParam (name) {
 }
 
 /**
+ * Gets the SVG file content as plain text by fetching it
+ * @param {string} uri
+ * @returns {Promise<string|void>}
+ */
+async function getSVGFromURI (uri) {
+    if (svgCache[uri]) {
+        return svgCache[uri];
+    }
+
+    // if not cached, then go get it
+    const raw = await fetch(uri);
+    if (!raw.ok) {
+        console.error(`Failed to load SVG at '${uri}' for `, self);
+        return;
+    }
+    let svg = await raw.text();
+
+    svgCache[uri] = svg;
+    return svg;
+}
+
+async function preloadSVGs (...uris) {
+    for (const uri of uris) {
+        await getSVGFromURI(ROOT_PATH + '/assets/img/' + uri);
+    }
+}
+
+/**
  * @param {HTMLElement} self
  * @returns {Promise<void>}
  */
@@ -352,46 +384,7 @@ async function loadSVG (self) {
 
     const uri = ROOT_PATH + '/assets/img/' + self.attributes['svg'].value;
 
-    let svg;
-
-    // check if the svg is cached
-    if (svgCache[uri]) {
-        svg = svgCache[uri];
-    } else {
-        // if not cached, then go get it
-        const raw = await fetch(uri);
-        if (!raw.ok) {
-            console.error(`Failed to load SVG at '${uri}' for `, self);
-            return;
-        }
-        svg = await raw.text();
-
-        svgCache[uri] = svg;
-    }
-
-    self.innerHTML = svg + self.innerHTML;
-}
-
-/**
- * @param {HTMLElement} self
- */
-function loadLabel (self) {
-    if (self.hasAttribute('label-loaded')) {
-        return;
-    }
-    self.setAttribute('label-loaded', '1');
-
-    let offset = '0px';
-    if (self.hasAttribute('label-offset')) {
-        offset = self.attributes['label-offset'].value;
-    }
-
-    self.innerHTML = `
-        <span class="label" style="--hover-offset: ${offset}">
-            ${self.attributes['label'].value}
-        </span> 
-        ${self.innerHTML}
-    `;
+    self.innerHTML = await getSVGFromURI(uri) + self.innerHTML;
 }
 
 // Spinner
@@ -550,10 +543,6 @@ function asyncCSS (self) {
 function loadSVGs () {
     const allInBody = document.querySelectorAll('*');
     for (const element of allInBody) {
-        if (element.attributes['label']) {
-            loadLabel(element);
-        }
-
         if (element.attributes['svg']) {
             // don't await, because we don't want to block the page load
             loadSVG(element).then();
@@ -780,7 +769,7 @@ function show (el, display = 'block') {
     if (el) {
         el.style.display = display;
     } else {
-        console.error(`showWithID: no element with id '${id}'`);
+        console.error(`showWithID: no element with id '${el.id}'`);
     }
 }
 
@@ -899,12 +888,12 @@ function CSVToArray (strData, strDelimiter) {
 
         } else {
             // We found a non-quoted value.
-            strMatchedValue = arrMatches[ 3 ];
+            strMatchedValue = arrMatches[3];
         }
 
         // Now that we have our value string, let's add
         // it to the data array.
-        arrData[arrData.length - 1].push( strMatchedValue );
+        arrData[arrData.length - 1].push(strMatchedValue);
     }
 
     // Return the parsed data.

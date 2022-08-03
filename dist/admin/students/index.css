@@ -10,7 +10,7 @@
 .student-link {
     border: none;
     text-underline: #575757;
-    font-size: 25px;
+    font-size: 18px;
 }
 
 .student-link:hover {
@@ -49,6 +49,7 @@
     background: var(--bg);
     height: 20px;
     border-radius: 10px;
+    display: none;
 }
 
 #loading-bar {
