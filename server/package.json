@@ -1,11 +1,11 @@
 {
     "scripts": {
-        "docker-build": "sudo docker image build -t house-points-api .",
-        "docker-start": "sudo docker container run --network=host --name=house-points-api-container --restart=on-failure -p 4464:4464 -d house-points-api",
-        "start": "sudo docker rm house-points-api-container; npm run docker-build; npm run docker-start",
-        "stop": "sudo docker stop house-points-api-container",
+        "docker-build": "docker image build -t house-points-api .",
+        "docker-start": "docker container run --network=host --name=house-points-api-container --restart=on-failure -p 4464:4464 -d house-points-api",
+        "start": "docker rm house-points-api-container; npm run docker-build; npm run docker-start",
+        "stop": "docker stop house-points-api-container",
         "restart": "npm run stop; npm run start",
-        "logs": "sudo docker logs house-points-api-container",
+        "logs": "docker logs house-points-api-container",
         "start-local": "cd ..; npm run build-server; cd server; npm run start"
     },
     "dependencies": {

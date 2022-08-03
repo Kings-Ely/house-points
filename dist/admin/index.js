@@ -59,7 +59,7 @@ function housePointHML (hp) {
                 onclick="signInAs('${hp['userID']}', '${hp['studentEmail']}')"
                 svg="login.svg"
                data-label="Sign in as ${hp['studentEmail']}"
-                data-label-offset="50%"
+                style="--offset-x: 50%"
                 class="icon small"
                 aria-label="Sign in as ${hp['studentEmail']}"
             >

@@ -1,0 +1,47 @@
+#status {
+    height: 20px;
+    display: block;
+    padding: 20px;
+    border-radius: 10px;
+    border: 3px solid yellow;
+    font-size: 20px;
+}
+
+#server-stats {
+    padding: 10px;
+}
+
+#server-stats * {
+    font-family: 'Space Mono', monospace
+}
+
+#server-stats > div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+#server-stats > div > div {
+    width: 50%;
+    margin: 0;
+}
+
+#kill {
+    border-color: var(--text-warning) !important;
+}
+
+#kill svg {
+    fill: var(--text-warning) !important;
+}
+
+#actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-light);
+}

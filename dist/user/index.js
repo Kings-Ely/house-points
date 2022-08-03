@@ -121,7 +121,7 @@ function showHp (hp) {
                         aria-label="${hp['eventName']}"
                         svg="event.svg"
                         class="icon small evt-link"
-                        data-label-offset="50px"
+                        style="--offset-x: 50px"
                     >
                         <b>${hp['eventName']}</b>
                     </a>

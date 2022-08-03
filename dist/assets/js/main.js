@@ -223,7 +223,7 @@ async function signedIn () {
  */
 function getRelativeTime (d1, d2) {
     if (isNaN(d1)) {
-        console.error('getRelativeTime: d1 is not a number');
+        console.error(`getRelativeTime: d1 '${d1}' is not a number`);
         return 'In the Past';
     }
     d2 ||= Date.now();

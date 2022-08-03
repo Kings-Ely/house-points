@@ -1,6 +1,9 @@
+import now from "performance-now";
+import { cpuUsage } from 'node:process';
+
 import route from "../";
 import { AUTH_ERR, isAdmin, isLoggedIn } from "../util";
-import now from "performance-now";
+
 
 /**
  * Hello World route
@@ -73,6 +76,24 @@ route('get/server/performance?iterations=100', async ({ query, params: { iterati
         time: time,
         iterations: n,
         avPerIteration: time / n
+    };
+});
+
+route('get/server/health', async ({ query, cookies }) => {
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+
+    return {
+        cpu: cpuUsage(),
+        memory: process.memoryUsage(),
+        resourceUsage: process.resourceUsage(),
+        pid: process.pid,
+        ppid: process.ppid,
+        uptime: process.uptime(),
+        platform: process.platform,
+        arch: process.arch,
+        versions: process.versions,
+        build: process.env.npm_package_version,
+        node: process.version,
     };
 });
 

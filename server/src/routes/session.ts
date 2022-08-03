@@ -16,6 +16,27 @@ route('get/sessions/auth-level/:sessionID', async ({ query, params }) => {
 });
 
 /**
+ * @admin
+ * Gets details about all sessions which have not yet expired.
+ * Not really any purpose other than monitoring the server.
+ */
+route('get/sessions/active', async ({ query, cookies }) => {
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+
+    return { data: await query`
+        SELECT 
+            users.email,
+            users.id as userID,
+            sessions.id,
+            UNIX_TIMESTAMP(sessions.opened) as opened
+        FROM sessions, users
+        WHERE
+            sessions.user = users.id
+            AND UNIX_TIMESTAMP(sessions.opened) + sessions.expires > UNIX_TIMESTAMP()
+    ` };
+});
+
+/**
  * Creates a session from login details
  * Note that the password is sent in cleartext to the server before being hashed in the database,
  * which could pose a security threat.

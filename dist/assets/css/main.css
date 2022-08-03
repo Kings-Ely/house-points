@@ -110,6 +110,7 @@ textarea {
     grid-template-columns: 55px 1fr;
     align-items: center;
     align-content: center;
+    cursor: pointer;
 }
 
 .big-link:hover {
@@ -192,7 +193,7 @@ nav {
 
 /* to stop the page expanding to the right when hovered */
 #nav-right > *:last-child {
-    transform: translateX(-2px);
+    transform: translate(-5px, -2px);
 }
 
 /* --- COMPONENTS --- */
@@ -430,27 +431,12 @@ svg {
     border: 1px solid var(--border);
     width: fit-content;
     top: 110%;
-    --offset-x: attr(data-label-offset);
     left: calc(50% - 50px + var(--offset-x));
 }
 
 [data-label]:hover::before {
     opacity: 1;
 }
-/* little arrow, but doesn't really work
-[data-label]:after {
-    content: "";
-    position: absolute;
-    top: calc(100% - 16px);
-    left: 50%;
-    border: 10px solid #000;
-    border-color: transparent transparent var(--border) transparent;
-    opacity: 0;
-}
-[data-label]:hover:before, [data-label]:hover:after {
-    opacity: 1;
-}
- */
 
 @media only screen and (max-aspect-ratio: 6/5) {
     .label {

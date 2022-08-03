@@ -352,7 +352,7 @@ function insertComponent ($el=document.body) {
 
             currentComponentID++;
 
-            window[`${name}selectableList_selectAll`] = (select) => {
+            window[`selectableList${currentComponentID}_selectAll`] = (select) => {
                 selected.splice(0, selected.length);
 
                 if (select) {
@@ -363,7 +363,7 @@ function insertComponent ($el=document.body) {
                 reload();
             };
 
-            window[`${name}selectableList_select`] = async (id, select) => {
+            window[`selectableList${currentComponentID}_select`] = async (id, select) => {
                 if (select) {
                     if (selected.indexOf(id) !== -1) {
                         console.error('Cannot reselect ' + id);
@@ -382,7 +382,7 @@ function insertComponent ($el=document.body) {
             }
 
             $el.innerHTML = `
-                <div class="selectable-list" id="selectable-list-${name}">
+                <div class="selectable-list" id="selectable-list-${currentComponentID}">
                     <h2>${name}</h2>
                     <div class="with-all-menu">
                         <div>
@@ -392,7 +392,7 @@ function insertComponent ($el=document.body) {
                                     svg="small-down-arrow.svg"
                                 ></span>
                                 <button
-                                    onclick="${name}selectableList_selectAll(true)"
+                                    onclick="selectableList${currentComponentID}_selectAll(true)"
                                     class="icon"
                                     svg="unselected-checkbox.svg"
                                    data-label="Select All"
@@ -400,7 +400,7 @@ function insertComponent ($el=document.body) {
                                 ></button>
                 
                                 <button
-                                    onclick="${name}selectableList_selectAll(false)"
+                                    onclick="selectableList${currentComponentID}_selectAll(false)"
                                     class="icon"
                                     svg="unselect-checkbox.svg"
                                    data-label="Unselect All"
@@ -414,8 +414,8 @@ function insertComponent ($el=document.body) {
                         <div>
                             <label>
                                 <input
-                                    placeholder="search for name..."
-                                    oninput="${name}selectableList_reloadItems()"
+                                    placeholder="search for ${searchKey}..."
+                                    oninput="selectableList${currentComponentID}_reloadItems()"
                                     class="search"
                                     autocomplete="off"
                                     aria-label="search"
@@ -428,8 +428,8 @@ function insertComponent ($el=document.body) {
                 </div>
             `;
 
-            const $items = document.querySelector(`#selectable-list-${name} .items`);
-            const $search = document.querySelector(`#selectable-list-${name} .search`);
+            const $items = document.querySelector(`#selectable-list-${currentComponentID} .items`);
+            const $search = document.querySelector(`#selectable-list-${currentComponentID} .search`);
 
             async function reload (newItems=null) {
                 if (newItems) {
@@ -455,7 +455,7 @@ function insertComponent ($el=document.body) {
                                 class="icon medium no-scale"
                                 svg="${isSelected ? 'selected-checkbox' : 'unselected-checkbox'}.svg"
                                 aria-label="${isSelected ? 'Unselect' : 'Select'}"
-                                onclick="${name}selectableList_select('${id}', ${isSelected ? 'false' : 'true'})"
+                                onclick="selectableList${currentComponentID}_select('${id}', ${isSelected ? 'false' : 'true'})"
                             ></button>
                             <div class="item-content" style="grid-template-columns: ${gridTemplateColsCSS}">
                                   ${await itemGenerator(item, isSelected)}
@@ -467,7 +467,7 @@ function insertComponent ($el=document.body) {
                 reloadDOM();
             }
 
-            window[`${name}selectableList_reloadItems`] = reload;
+            window[`selectableList${currentComponentID}_reloadItems`] = reload;
 
             reload();
 

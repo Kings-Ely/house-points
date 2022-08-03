@@ -2,9 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Server Control</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="robots" content="noindex">
+
+    <script src="../../assets/js/main.js"></script>
+    <script src="index.js" defer></script>
+    <link rel="stylesheet" href="./index.css">
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/darkmode.css">
 </head>
 <body>
-
+<nav></nav>
+<main>
+    <h1>Server Control</h1>
+    <p style="text-align: center; margin-bottom: 30px;">
+        This is a server control panel.
+        It allows you to control the server from the browser.
+        I would not advise messing about with this.
+    </p>
+    <section>
+        <div class="flex-center">
+            <span id="status" class="flex-center">Checking Server Status...</span>
+        </div>
+        <div id="actions">
+            <button
+                id="kill"
+                class="big-link"
+                onclick="killServer()"
+                svg="skull.svg"
+            >Kill Server</button>
+            <button
+                id="start"
+                class="big-link"
+                onclick="startServer()"
+                svg="play.svg"
+            >Start Server</button>
+        </div>
+        <p id="server-stats"></p>
+    </section>
+    <section id="sessions"></section>
+</main>
+<footer></footer>
 </body>
 </html>
