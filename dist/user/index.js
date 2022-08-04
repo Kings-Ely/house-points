@@ -10,11 +10,11 @@ const $hpReasonInp = document.getElementById('hp-reason');
     }
 
     if ((await userInfo())['student']) {
+        show('#submit-hp-request');
         await reloadHousePoints();
 
     } else {
         await title();
-        hide('#submit-hp-request');
 
         if ((await userInfo())['admin']) {
             $hps.innerHTML = `

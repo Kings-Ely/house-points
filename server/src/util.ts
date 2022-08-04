@@ -5,6 +5,7 @@ import { v4 as UUIDv4 } from 'uuid';
 
 import { Cookies } from './route';
 import { queryFunc } from './sql';
+import crypto from "crypto";
 
 /**
  * Gets the session ID from the cookies using the given cookies object
@@ -132,6 +133,27 @@ export async function generateUUID (): Promise<string> {
     return UUIDv4();
 }
 
+export function passwordHash (password: string) {
+    const salt = crypto
+        .randomBytes(16)
+        .toString('base64');
+
+    const passwordHash = crypto
+        .createHash('sha256')
+        .update(password + salt)
+        .digest('hex');
+
+    return [ passwordHash, salt ];
+}
+
+export function validPassword (password: string): true | string {
+    if (!password) return 'No password';
+    if (password.length < 5) return 'Password is too short, must be over 4 characters';
+    if (password.length > 64) return 'Password is too long, must be under 64 characters';
+
+    return true;
+}
+
 /**
  * Gets the userID from a session ID
  */
@@ -209,6 +231,10 @@ export async function userFromSession (query: queryFunc, id: string): Promise<Re
  * Assumed admin level authentication, censor the data after if necessary.
  */
 export async function addHousePointsToUser (query: queryFunc, user: any & { id: string }) {
+    if (!user['id']) {
+        throw new Error('User has no ID');
+    }
+
     user['housePoints'] = await query`
         SELECT
             housepoints.id,
@@ -234,7 +260,7 @@ export async function addHousePointsToUser (query: queryFunc, user: any & { id: 
         
         WHERE
             housepoints.student = users.id
-            AND users.id = ${ user['id'] }
+            AND users.id = ${user['id']}
        ORDER BY created DESC
     `;
 

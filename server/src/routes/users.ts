@@ -9,7 +9,7 @@ import {
     getSessionID,
     IDFromSession,
     isAdmin,
-    isLoggedIn
+    isLoggedIn, passwordHash, validPassword
 } from '../util';
 
 /**
@@ -184,26 +184,28 @@ route('get/users/batch-info/:userIDs',
 route('get/users/leaderboard', async ({ query, cookies }) => {
     if (!await isLoggedIn(cookies, query)) return AUTH_ERR;
 
-    return {
-        data: await query`
-            SELECT 
-                users.email, 
-                users.year,
-                SUM(
-                    CASE
-                        WHEN housepoints.status = 'Accepted'
-                            THEN housepoints.quantity
-                        ELSE 0
-                    END
-                ) AS housepoints
-            FROM users 
-            LEFT JOIN housepoints
-                ON housepoints.student = users.id
-            WHERE users.student = true
-            GROUP BY users.email, users.year
-            ORDER BY housepoints DESC, year DESC, email;
-        `
-    };
+    const data = (await query`
+        SELECT 
+            email,
+            year,
+            id
+        FROM users
+        WHERE student = true
+        ORDER BY year DESC, email
+    `)
+        .map((u: any) => {
+            addHousePointsToUser(query, u);
+            return u;
+        });
+
+    data.sort((a: any, b: any) => b['accepted'] - a['accepted']);
+
+    // remove id from each user
+    for (let i = 0; i < data.length; i++) {
+        delete data[i]['id'];
+    }
+
+    return { data };
 });
 
 /**
@@ -242,20 +244,15 @@ route('create/users/:email/:password?year=9',
         return `User with that email already exists`;
     }
 
-    // password requirements
-    if (!password) return 'No password';
-    if (password.length < 5) return 'Password is too short, must be over 4 characters';
-    if (password.length > 64) return 'Password is too long, must be under 64 characters';
+    const validPasswordRes = validPassword(password);
+    if (typeof validPasswordRes === 'string') {
+        return validPasswordRes;
+    }
 
     const admin = year === 0 ? 1 : 0;
     const student = year === 0 ? 0 : 1;
 
-    const salt = crypto.randomBytes(16).toString('base64');
-
-    const passwordHash = crypto
-        .createHash('sha256')
-        .update(password + salt)
-        .digest('hex');
+    const [ passHash, salt ] = passwordHash(password);
 
     const userID = await generateUUID();
 
@@ -263,7 +260,7 @@ route('create/users/:email/:password?year=9',
         INSERT INTO users
             (id,          email,    password,        salt,    year,    admin,    student)
         VALUES
-            (${userID}, ${email}, ${passwordHash}, ${salt}, ${year}, ${admin}, ${student})
+            (${userID}, ${email}, ${passHash}, ${salt}, ${year}, ${admin}, ${student})
     `;
 
     return { status: 201, userID };
@@ -341,6 +338,43 @@ route('update/users/year/:userID/:by',
         UPDATE users 
         SET year = ${newYear} 
         WHERE id = ${user}
+    `;
+
+    if (!queryRes.affectedRows) return {
+        status: 406,
+        error: 'User not found'
+    };
+});
+
+/**
+ * Updates the password from a session ID and new password.
+ * This is a high risk route, as you are updating the password of a user,
+ * and this must be able to be done by a user without login details
+ * if they are using the 'forgot password' feature.
+ */
+route('update/users/password/:sessionID/:password', async ({ query, params, cookies }) => {
+    const { sessionID, password } = params;
+
+    const userID = await IDFromSession(query, sessionID);
+
+    if (!userID) return {
+        status: 401,
+        error: 'Invalid session ID'
+    }
+
+    const validPasswordRes = validPassword(password);
+    if (typeof validPasswordRes === 'string') {
+        return validPasswordRes;
+    }
+
+    const [ passHash, salt ] = passwordHash(password);
+
+    const queryRes = await query`
+        UPDATE users
+        SET
+            password = ${passHash},
+            salt = ${salt}
+        WHERE id = ${userID}
     `;
 
     if (!queryRes.affectedRows) return {

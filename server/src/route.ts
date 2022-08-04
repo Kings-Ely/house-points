@@ -112,13 +112,15 @@ export class Route {
         let res: Record<any, any> | void | string | null | undefined;
 
         try {
-            res = await this.handler(args);
+            res = await this.handler(args).catch(e => {
+                error`Caught Error in Route '${this.asString()}':\n     ${e} \n    Traceback:\n${e.stack}`;
+            });
         } catch (e: any) {
             res = {
                 status: 500,
                 error: 'Internal server error',
             };
-            error`Internal server error in route '${this.asString()}':\n     ${e} \n    Traceback:\n${e.stack}`;
+            error`Caught Error in Route '${this.asString()}':\n     ${e} \n    Traceback:\n${e.stack}`;
         }
 
         if (typeof res === 'string') {

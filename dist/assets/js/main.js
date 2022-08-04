@@ -22,7 +22,7 @@ let
     altUserInfoJSON = null,
     isSignedIn = false,
     userInfoIsLoaded = false,
-    onLoadCBs = [ () => console.log('Document Loaded') ],
+    onLoadCBs = [],
     documentLoaded = false;
 
 
@@ -41,6 +41,7 @@ const timeUnits = {
 const relativeTimeFormat = new Intl.RelativeTimeFormat('en', {
     numeric: 'auto'
 });
+
 (async () => {
 
     if (document.readyState === 'complete') {
@@ -48,8 +49,6 @@ const relativeTimeFormat = new Intl.RelativeTimeFormat('en', {
     } else {
         window.onload = documentIsLoaded;
     }
-
-    await testApiCon();
 
     async function documentIsLoaded () {
         reloadDOM();
@@ -64,16 +63,21 @@ const relativeTimeFormat = new Intl.RelativeTimeFormat('en', {
 
 /**
  * Must be called first
- * @param {string} rootPath
- * @param {boolean} requireLoggedIn
- * @param {boolean} requireAdmin
+ * @param {string} rootPath path to root of site
+ * @param {boolean} [requireLoggedIn=false] session cookies must be valid
+ * @param {boolean} [requireAdmin=false] session cookies must be valid and admin
+ * @param {boolean} [noApiTest=false] don't test the API connection
  */
-async function init (rootPath, requireLoggedIn=false, requireAdmin=false) {
+async function init (rootPath, requireLoggedIn=false, requireAdmin=false, noApiTest=false) {
     ROOT_PATH = rootPath;
 
     if (requireAdmin && getAltSession()) {
         await setSessionCookie(getAltSession());
         await setAltSessionCookie('');
+    }
+
+    if (!noApiTest) {
+        await testApiCon();
     }
 
     if (getSession()) {
@@ -101,9 +105,9 @@ async function init (rootPath, requireLoggedIn=false, requireAdmin=false) {
     $nav = document.querySelector(`nav`);
     $footer = document.querySelector(`footer`);
 
-    $footer.innerHTML = await (await fetch(`${ROOT_PATH}/assets/html/footer.html`)).text();
+   loadFooter().then(reloadDOM);
     if ($nav) {
-        await loadNav();
+        loadNav().then(reloadDOM);
     }
 
     reloadDOM();
@@ -116,6 +120,11 @@ async function init (rootPath, requireLoggedIn=false, requireAdmin=false) {
     cookiePopUp();
 }
 
+/**
+ * Caches the user info
+ * @param info
+ * @returns {Promise<void>}
+ */
 async function handleUserInfo (info) {
     if (getAltSession()) {
         const altInfo = await rawAPI(`get/users/from-session/${getAltSession()}`);
@@ -140,9 +149,16 @@ async function handleUserInfo (info) {
     for (const cb of userInfoCallbacks) {
         cb(info);
     }
+
+    userInfoCallbacks = [];
 }
 
+/**
+ * Reloads the user info cache
+ * @returns {Promise<void>}
+ */
 async function reloadUserInfo () {
+    userInfoIsLoaded = false;
     await handleUserInfo(await rawAPI(`get/users/from-session/${getSession()}`));
 }
 
@@ -189,14 +205,24 @@ async function userID () {
     return user['id'];
 }
 
+/**
+ * @returns {Promise<boolean>}
+ */
 async function isAdmin () {
     return (await userInfo())['admin'];
 }
 
+/**
+ * Runs the callback when it is confirmed that the user is an admin
+ * @param {() => any} cb
+ */
 function asAdmin (cb) {
-    isAdmin().then((value) => {
-        if (value) cb();
-    });
+    isAdmin()
+        .then((value) => {
+            if (value) {
+                cb();
+            }
+        });
 }
 
 /**
@@ -270,11 +296,13 @@ async function loadScript (url) {
 
 // src: https://stackoverflow.com/questions/14573223/set-cookie-and-get-cookie-with-javascript
 /**
+ * Sets a cookie from a key and value.
+ * First checks that the user has allowed cookies, and will navigate away if they haven't.
  * @param {string} name
  * @param {string} value
- * @param {number} days
+ * @param {number} [days=1]
  */
-async function setCookie (name, value='', days=1) {
+async function setCookie (name, value, days=1) {
 
     if (getCookie(COOKIE_ALLOW_COOKIES_KEY) !== '1' && name !== COOKIE_ALLOW_COOKIES_KEY) {
         await navigate('/?error=cookies');
@@ -291,6 +319,7 @@ async function setCookie (name, value='', days=1) {
 }
 
 /**
+ * Gets a cookie from a key.
  * @param {string} name
  * @returns {string|null}
  */
@@ -310,6 +339,8 @@ function getCookie (name) {
 }
 
 /**
+ * Deletes a cookie with a given key.
+ * First checks that the user has allowed cookies, and will navigate away if they haven't.
  * @param {string} name
  */
 async function eraseCookie (name) {
@@ -364,31 +395,13 @@ async function getSVGFromURI (uri) {
     return svg;
 }
 
-async function preloadSVGs (...uris) {
-    for (const uri of uris) {
-        await getSVGFromURI(ROOT_PATH + '/assets/img/' + uri);
-    }
-}
-
-/**
- * @param {HTMLElement} self
- * @returns {Promise<void>}
- */
-async function loadSVG (self) {
-    // if the SVG has already been loaded then skip
-    if (self.hasAttribute('svg-loaded')) {
-        return;
-    }
-    // set before loading, so we don't load twice while waiting for the svg to load
-    self.setAttribute('svg-loaded', '1');
-
-    const uri = ROOT_PATH + '/assets/img/' + self.attributes['svg'].value;
-
-    self.innerHTML = await getSVGFromURI(uri) + self.innerHTML;
-}
-
 // Spinner
 
+/**
+ * Adds a spinner to the page.
+ * Must wait for the DOM to be ready first.
+ * @returns {Promise<HTMLElement>}
+ */
 async function showSpinner () {
     await waitForReady();
 
@@ -403,9 +416,13 @@ async function showSpinner () {
     return loader;
 }
 
-function stopSpinner (loader) {
+/**
+ * Hides the spinner by removing it from the DOM
+ * @param {HTMLElement} $spinner
+ */
+function stopSpinner ($spinner) {
     currentlyShowingLoadingAnim = false;
-    document.body.removeChild(loader);
+    document.body.removeChild($spinner);
     document.body.style.cursor = 'default';
 }
 
@@ -453,7 +470,7 @@ async function rawAPI (path) {
  * but only show the spinner if no other requests are still pending,
  * which would mean the spinner is already being shown.
 
- * @param {string | TemplateStringsArray} path
+ * @param {string|TemplateStringsArray} path
  * @param args
  * @returns {Promise<Record<string, any>>}
  */
@@ -535,23 +552,65 @@ async function api (path, ...args) {
 /**
  * Only to be called by async loaded css onload
  */
-function asyncCSS (self) {
-    self.onload = null;
-    self.rel = 'stylesheet';
+function asyncCSS ($self) {
+    $self.onload = null;
+    $self.rel = 'stylesheet';
 }
 
+/**
+ * Looks at all DOM elements with an 'svg' attribute and loads the SVG
+ * file into that element.
+ */
 function loadSVGs () {
-    const allInBody = document.querySelectorAll('*');
+    const allInBody = document.querySelectorAll('[svg]');
     for (const element of allInBody) {
-        if (element.attributes['svg']) {
-            // don't await, because we don't want to block the page load
-            loadSVG(element).then();
-        }
+        // don't await, because we don't want to block the page load
+        loadSVG(element)
+            .then();
     }
 }
 
+/**
+ * Caches the SVG file content
+ * @param {string} uris
+ * @returns {Promise<void>}
+ */
+async function preloadSVGs (...uris) {
+    for (const uri of uris) {
+        // don't await, because we want to load them all at the same time
+        getSVGFromURI(ROOT_PATH + '/assets/img/' + uri)
+            .then();
+    }
+}
+
+/**
+ * Loads the SVG file content into the element
+ * Adds the SVG HTML before the rest of the contents
+ * of the element.
+ * @param {HTMLElement} $el
+ * @returns {Promise<void>}
+ */
+async function loadSVG ($el) {
+    // if the SVG has already been loaded then skip
+    if ($el.hasAttribute('svg-loaded')) {
+        return;
+    }
+    // set before loading, so we don't load twice while waiting for the svg to load
+    $el.setAttribute('svg-loaded', '1');
+
+    const uri = ROOT_PATH + '/assets/img/' + $el.attributes['svg'].value;
+
+    $el.innerHTML = await getSVGFromURI(uri) + $el.innerHTML;
+}
+
+/**
+ * Loads the navbar into the <nav> element
+ * and updates it with the current user's info
+ * @returns {Promise<void>}
+ */
 async function loadNav () {
-    $nav.innerHTML = await (await fetch(`${ROOT_PATH}/assets/html/nav.html`)).text();
+    const navRes = await fetch(`${ROOT_PATH}/assets/html/nav.html`);
+    $nav.innerHTML = await navRes.text();
 
     const $adminLink = document.getElementById('admin-link');
     const $username = document.getElementById('nav-username');
@@ -582,9 +641,11 @@ async function loadNav () {
         $adminLink.onclick = () => {
             navigate(`/admin`);
         };
+
     } else if (altUserInfoJSON) {
 
-        const altUsername = altUserInfoJSON['email']?.split('@')?.[0] || 'Unknown Alt';
+        const altUsername = altUserInfoJSON['email']
+            .split('@')?.[0] || 'Unknown Alt';
 
         $adminLink.style.display = 'block';
         $adminLink.setAttribute('aria-hidden', 'false');
@@ -597,6 +658,19 @@ async function loadNav () {
     }
 }
 
+/**
+ * Loads the footer into the <footer> element
+ * @returns {Promise<void>}
+ */
+async function loadFooter () {
+    const footerHTMLRes = await fetch(`${ROOT_PATH}/assets/html/footer.html`);
+    $footer.innerHTML = await footerHTMLRes.text();
+}
+
+/**
+ * Traverses the DOM and runs some checks and stuff
+ * Actually only adds new SVGs at the moment but might do more later.
+ */
 function reloadDOM () {
     loadSVGs();
 }
@@ -649,7 +723,8 @@ async function showError (message) {
 
     setTimeout(() => {
         errorMessage.remove();
-        currentlyShowingErrorMessageIDs = currentlyShowingErrorMessageIDs.filter(id => id !== myErrId);
+        currentlyShowingErrorMessageIDs = currentlyShowingErrorMessageIDs
+            .filter(id => id !== myErrId);
     }, 5000);
 }
 
@@ -687,7 +762,9 @@ function cookiePopUp () {
 
 
 /**
- * Removes all authentication cookies and redirects to the login page
+ * Prompts the user with 'confirm' and then
+ * removes all authentication cookies and
+ * redirects to the login page
  * @returns {Promise<void>}
  */
 async function logout () {
@@ -697,25 +774,37 @@ async function logout () {
     await logoutAction();
 }
 
+/**
+ * Deletes all authentication cookies and
+ * redirects to the login page
+ * @returns {Promise<void>}
+ */
 async function logoutAction () {
     await eraseCookie(COOKIE_KEY);
     await eraseCookie(ALT_COOKIE_KEY);
     await navigate(ROOT_PATH);
 }
 
+/**
+ * Pings the server and if the ping fails
+ * navigates the user to the login page
+ * which will show that this error
+ * @returns {Promise<void>}
+ */
 async function testApiCon () {
-
     const res = await api`get/server/ping`
         .catch(err => {
             console.error(err);
-            navigate('/?error=api-con');
+            if (GETParam('error') !== 'api-con') {
+                navigate('/?error=api-con');
+            }
         });
 
-    if (!res.ok || res.status === 200) {
-        console.log('API connection OK');
-    } else {
+    if (!res.ok || res.status !== 200) {
         console.error(res);
-        await navigate('/?error=api-con')
+        if (GETParam('error') !== 'api-con') {
+            await navigate('/?error=api-con')
+        }
     }
 }
 
@@ -724,8 +813,8 @@ async function testApiCon () {
  * AND all necessary assets have been loaded from this script
  * @returns {Promise<void>}
  */
-function waitForReady () {
-    return new Promise(resolve => {
+async function waitForReady () {
+    return await new Promise(resolve => {
         if (documentLoaded) {
             resolve();
             return;
@@ -734,10 +823,18 @@ function waitForReady () {
     });
 }
 
+/**
+ * Returns a promise which resolves after a set amount of time
+ * @param {number} ms
+ * @returns {Promise<void>}
+ */
 async function sleep (ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/**
+ * Scrolls the viewport to the top of the page
+ */
 function scrollToTop () {
     document.body.scrollTop = document.documentElement.scrollTop = 0;
 }
@@ -750,6 +847,7 @@ function hide (el) {
     if (typeof el === 'string') {
         el = document.querySelector(el);
     }
+
     if (el) {
         el.style.display = 'none';
     } else {
@@ -766,6 +864,7 @@ function show (el, display = 'block') {
     if (typeof el === 'string') {
         el = document.querySelector(el);
     }
+
     if (el) {
         el.style.display = display;
     } else {
@@ -774,13 +873,14 @@ function show (el, display = 'block') {
 }
 
 /**
- * Limits the length of a string by cutting it and adding '...' to the end if it's too long
+ * Limits the length of a string by cutting it and adding '...'
+ * to the end if it's too long
  * @param {string} str
  * @param {number} [maxLength=50]
  * @returns {string}
  */
 function limitStrLength (str, maxLength=50) {
-    if (str.length > maxLength-3) {
+    if (str.length > maxLength - 3) {
         return str.substring(0, maxLength-3) + '...';
     }
     return str;
@@ -797,14 +897,15 @@ async function getFileContent ($el, encoding='UTF-8') {
         $el = document.querySelector($el);
     }
 
+    // assumed to be file input element
     const file = $el.files[0];
 
     if (!file) return '';
 
-    return await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsText(file, encoding);
+    const reader = new FileReader();
+    reader.readAsText(file, encoding);
 
+    return await new Promise((resolve, reject) => {
         reader.onload = evt => {
             resolve(evt.target.result);
         }
@@ -827,7 +928,7 @@ async function getFileContent ($el, encoding='UTF-8') {
 function CSVToArray (strData, strDelimiter) {
     // Check to see if the delimiter is defined. If not,
     // then default to comma.
-    strDelimiter = (strDelimiter || ",");
+    strDelimiter ||= ',';
 
     // Create a regular expression to parse the CSV values.
     const objPattern = new RegExp(
@@ -850,13 +951,13 @@ function CSVToArray (strData, strDelimiter) {
 
     // Create an array to hold our individual pattern
     // matching groups.
-    let arrMatches = null;
+    let arrMatches;
 
     // Keep looping over the regular expression matches
     // until we can no longer find a match.
-    while (arrMatches = objPattern.exec( strData )){
+    while (arrMatches = objPattern.exec(strData)) {
         // Get the delimiter that was found.
-        let strMatchedDelimiter = arrMatches[ 1 ];
+        let strMatchedDelimiter = arrMatches[1];
 
         // Check to see if the given delimiter has a length
         // (is not the start of string) and if it matches
@@ -865,11 +966,11 @@ function CSVToArray (strData, strDelimiter) {
         if (
             strMatchedDelimiter.length &&
             strMatchedDelimiter !== strDelimiter
-        ){
+        ) {
 
             // Since we have reached a new row of data,
             // add an empty row to our data array.
-            arrData.push( [] );
+            arrData.push([]);
         }
 
         let strMatchedValue;
@@ -877,11 +978,11 @@ function CSVToArray (strData, strDelimiter) {
         // Now that we have our delimiter out of the way,
         // let's check to see which kind of value we
         // captured (quoted or unquoted).
-        if (arrMatches[ 2 ]){
+        if (arrMatches[2]) {
 
             // We found a quoted value. When we capture
             // this value, unescape any double quotes.
-            strMatchedValue = arrMatches[ 2 ].replace(
+            strMatchedValue = arrMatches[2].replace(
                 new RegExp( "\"\"", "g" ),
                 "\""
             );

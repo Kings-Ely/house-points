@@ -5,6 +5,9 @@ const
 
 (async () => {
 	await init('..');
+	// note no auth requirements
+	// this is due to the fact that the user might not be logged in at all
+	// if they are using a 'forgot password' link
 
 	if (!GETParam('s')) {
 		await navigate(`?s=${encodeURIComponent(getSession())}`);

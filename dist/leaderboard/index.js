@@ -32,10 +32,10 @@ function showStudent (student) {
     return `
         <div class="student">
             <div>
-                ${student['name']} (Y${student['year']})
+                ${student['email']} (Y${student['year']})
             </div>
             <div>
-                ${student['housepoints']}
+                ${student['accepted']}
             </div>
         </div>
     `;
@@ -50,13 +50,13 @@ function resetPodium () {
     $podium3rd.innerHTML = ``;
 }
 
-function leaderboard (hps) {
+function leaderboard (users) {
 
-    hps = hps.filter(user => showYears.includes(parseInt(user['year'])));
+    users = users.filter(user => showYears.includes(parseInt(user['year'])));
 
     resetPodium();
 
-    if (hps.length === 0) {
+    if (users.length === 0) {
         $leaderboard.innerHTML = `
             <p style="font-size: 30px; margin: 50px; text-align: center">
                 Looks like no-one has any house points yet!
@@ -69,7 +69,7 @@ function leaderboard (hps) {
 
     let start = 3;
 
-    if (hps[0]['housepoints'] < 1 || hps.length < 3) {
+    if (users[0]['accepted'] < 1 || users.length < 3) {
         // if no-one has any house points, or there aren't any people,
         // then show empty podium and put everyone in '4th' place visually
         start = 0;
@@ -78,9 +78,9 @@ function leaderboard (hps) {
         function podiumHTMl (idx) {
             return `
                 <div>
-                    ${hps[idx]['name']} (Y${hps[idx]['year']}) 
+                    ${users[idx]['name']} (Y${users[idx]['year']}) 
                     <br>
-                    <b>${hps[idx]['housepoints']}</b>
+                    <b>${users[idx]['accepted']}</b>
                 </div>
             `;
         }
@@ -90,13 +90,13 @@ function leaderboard (hps) {
 
         // proportional heights
         const total =
-            parseInt(hps[0]['housepoints']) +
-            parseInt(hps[1]['housepoints']) +
-            parseInt(hps[2]['housepoints']);
+            parseInt(users[0]['accepted']) +
+            parseInt(users[1]['accepted']) +
+            parseInt(users[2]['accepted']);
 
-        const height1 = Math.max(parseInt(hps[0]['housepoints']) / total * 100, 10);
-        const height2 = Math.max(parseInt(hps[1]['housepoints']) / total * 100, 10);
-        const height3 = Math.max(parseInt(hps[2]['housepoints']) / total * 100, 10);
+        const height1 = Math.max(parseInt(users[0]['accepted']) / total * 100, 10);
+        const height2 = Math.max(parseInt(users[1]['accepted']) / total * 100, 10);
+        const height3 = Math.max(parseInt(users[2]['accepted']) / total * 100, 10);
 
         $podium1st.style.height = `${height1}%`;
         $podium2nd.style.height = `${height2}%`;
@@ -104,11 +104,11 @@ function leaderboard (hps) {
     }
 
     // handle lots of house points using promises
-    for (let i = start; i < hps.length; i++) {
-        if (!showYears.includes(hps[i]['year'])) {
+    for (let i = start; i < users.length; i++) {
+        if (!showYears.includes(users[i]['year'])) {
             continue;
         }
-        $leaderboard.innerHTML += showStudent(hps[i]);
+        $leaderboard.innerHTML += showStudent(users[i]);
     }
 }
 async function main (reload=true) {

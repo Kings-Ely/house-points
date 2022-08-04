@@ -7,7 +7,7 @@ const selectedSessions = [];
 const stats = {};
 
 (async () => {
-	await init('../..');
+	await init('../..', false, false, true);
 
 	await refresh();
 })();
