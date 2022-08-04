@@ -444,7 +444,7 @@ function insertComponent ($el=document.body) {
                                    data-label="Select All"
                                     aria-label="select all"
                                 ></button>
-                
+                                
                                 <button
                                     onclick="selectableList${currentComponentID}_selectAll(false)"
                                     class="icon"
