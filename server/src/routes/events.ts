@@ -65,7 +65,8 @@ route('get/events?id&userID&from&to', async ({ query, params, cookies }) => {
             ORDER BY users.year DESC, users.email
         `;
 
-        data[i]['housePointCount'] = data[i]['housePoints'].length;
+        data[i]['housePointCount'] = data[i]['housePoints']
+            .reduce((acc: any, cur: any) => acc + cur['quantity'], 0);
 
         if (!admin) {
             for (let j = 0; j < data[i]['housePoints'].length; j++) {
@@ -75,9 +76,7 @@ route('get/events?id&userID&from&to', async ({ query, params, cookies }) => {
 
                 // if the house point does not belong to the user, censor it
                 delete data[i]['housePoints'][j]['userID'];
-                delete data[i]['housePoints'][j]['studentEmail'];
                 delete data[i]['housePoints'][j]['rejectMessage'];
-                delete data[i]['housePoints'][j]['description'];
             }
         }
     }

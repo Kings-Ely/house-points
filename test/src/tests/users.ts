@@ -231,6 +231,42 @@ Test.test('Users | Getting leaderboard data', async (api) => {
     return true;
 });
 
+Test.test('Users | Getting batch data', async (api) => {
+    const { userID: userID1, email: email1 } = await generateUser(api);
+    const { userID: userID2, email: email2 } = await generateUser(api);
+
+    let { data: res } = await api(`get/users/batch-info/${userID1},${userID2}`);
+
+    if (res.length !== 2) {
+        return `Expected 2 users, got ${res.length}: '${JSON.stringify(res)}'`;
+    }
+
+    // comes back in arbitrary order, make sure its in the right order
+    if (res[0].id === userID2) {
+        [res[0], res[1]] = [res[1], res[0]];
+    }
+
+    // check details of two users that we got back
+    if (res[0].id !== userID1) {
+        return `Expected id '${userID1}' from 'get/users/batch-info', got '${res[0].id}'`;
+    }
+    if (res[0].email !== email1) {
+        return `Expected email '${email1}' from 'get/users/batch-info', got '${res[0].email}'`;
+    }
+
+    if (res[1].id !== userID2) {
+        return `Expected id '${userID2}' from 'get/users/batch-info', got '${res[1].id}'`;
+    }
+    if (res[1].email !== email2) {
+        return `Expected email '${email2}' from 'get/users/batch-info', got '${res[1].email}'`;
+    }
+
+    await api(`delete/users/${userID1}`);
+    await api(`delete/users/${userID2}`);
+
+    return true;
+});
+
 Test.test('Users | Creating', async (api) => {
     const { userID: userID1, sessionID: sessionID1 } = await generateUser(api, 0);
     const { userID: userID2, sessionID: sessionID2 } = await generateUser(api);

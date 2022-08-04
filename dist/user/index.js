@@ -32,7 +32,8 @@ const $hpReasonInp = document.getElementById('hp-reason');
 })();
 
 async function housePoints () {
-    const hps = (await userInfo())['housePoints'];
+    const { housePoints: hps } = await userInfo();
+
     if (hps.length === 0) {
         $hps.innerHTML = `
             <p style="font-size: 30px; margin: 50px; text-align: center">
@@ -111,12 +112,14 @@ function showHp (hp) {
 
     const submittedTime = hp['created'] * 1000;
 
+    console.log(hp);
+
     return `
         <div class="house-point">
             <div style="min-width: 50%">
                 ${hp['eventName'] ? `
                     <a
-                       data-label="View ${hp['eventName']}"
+                       data-label="View Event"
                         href="../events?id=${hp['eventID']}"
                         aria-label="${hp['eventName']}"
                         svg="event.svg"
@@ -140,7 +143,8 @@ function showHp (hp) {
             <div 
                 style="min-width: 50px"
                 svg="${icon}"
-               data-label="${hp['status']}"
+                data-label="${hp['status']}"
+                class="icon icon-info-only"
             >
             </div>
         </div>

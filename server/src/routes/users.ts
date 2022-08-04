@@ -159,6 +159,11 @@ route('get/users/batch-info/:userIDs',
 
     const IDs = userIDs.split(',').filter(Boolean);
 
+    if (!IDs.length) return {
+        status: 406,
+        error: 'No IDs'
+    }
+
     const data = await query`
         SELECT 
             id,

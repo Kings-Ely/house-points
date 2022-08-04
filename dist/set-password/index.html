@@ -18,9 +18,14 @@
 <main class="flex-center">
     <div id="content" class="bordered">
         <h1 style="padding-bottom: 20px">
-            Set Password for
-            <span id="email"></span>
+            Set password for &nbsp;
+            '<span id="email"></span>'
         </h1>
+        <p>
+            Your password is hashed before being stored for security.<br>
+            This means that you can't see your password after you set it.<br>
+            Use the 'suggest strong password' feature of your password manager for the best security.
+        </p>
         <label>
             <input
                 type="password"
@@ -43,9 +48,9 @@
         <br>
         <button
             id="submit"
-            class="icon"
+            class="icon big-link"
             svg="play.svg"
-        ></button>
+        >Change Password</button>
     </div>
 </main>
 <footer></footer>

@@ -10,6 +10,8 @@ import {
     userID
 } from '../util';
 
+const MAX_HOUSE_POINTS = 100;
+
 /**
  * @account
  * Gets all house points and filters them based on the parameters
@@ -113,6 +115,9 @@ async ({ query, cookies, params }) => {
     if (quantity < 1) {
         return 'Quantity must be at least 1';
     }
+    if (quantity > MAX_HOUSE_POINTS) {
+        return `Quantity must be at most ${MAX_HOUSE_POINTS}`;
+    }
 
     await query`
         INSERT INTO housepoints (id, student, quantity, event, description, status, completed)
@@ -149,6 +154,9 @@ async ({ query, params, cookies }) => {
     }
     if (quantity < 1) {
         return 'Quantity must be greater than 0';
+    }
+    if (quantity > MAX_HOUSE_POINTS) {
+        return `Quantity must be at most ${MAX_HOUSE_POINTS}`;
     }
 
     let student = await userFromID(query, userID);
@@ -225,8 +233,15 @@ route('update/house-points/quantity/:housePointID/:quantity', async ({ query, co
     const { housePointID: id, quantity: rawQuantity } = params;
 
     const quantity = parseInt(rawQuantity);
-    if (isNaN(quantity)) return 'Quantity must be an integer';
-    if (quantity < 1) return 'Quantity must be greater than 0';
+    if (isNaN(quantity)) {
+        return 'Quantity must be an integer';
+    }
+    if (quantity < 1) {
+        return 'Quantity must be greater than 0';
+    }
+    if (quantity > MAX_HOUSE_POINTS) {
+        return `Quantity must be at most ${MAX_HOUSE_POINTS}`;
+    }
 
 
     const queryRes = await query`

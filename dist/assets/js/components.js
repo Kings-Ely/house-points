@@ -1,3 +1,5 @@
+'use strict';
+
 let currentComponentID = 0;
 
 /**
@@ -12,7 +14,7 @@ function insertComponent ($el=document.body) {
         $el = document.querySelector($el);
     }
     return {
-        studentEmailInputWithIntellisense: () => {
+        studentEmailInputWithIntellisense: (placeholder='Email', allowNonStudents=false) => {
             const id = currentComponentID++;
             $el.innerHTML += `
                 <span>
@@ -20,7 +22,7 @@ function insertComponent ($el=document.body) {
                         <input
                             type="text"
                             class="student-email-input"
-                            placeholder="Email"
+                            placeholder="${placeholder}"
                             autocomplete="off"
                             aria-label="student email"
                             id="student-email-input-${id}"
@@ -41,22 +43,26 @@ function insertComponent ($el=document.body) {
             };
 
             window.addEventListener('click', () => {
-                $dropdown.classList.remove('student-email-input-show-dropdown');
+                $dropdown.classList.toggle('student-email-input-show-dropdown');
             });
 
             api`get/users`.then(({data}) => {
 
-                const studentNames = data.map(student => student['email']);
+                const studentNames = data
+                    .filter(user => user['student'] || allowNonStudents)
+                    .map(student => student['email']);
 
                 $studentNameInput.addEventListener('input', async () => {
                     const value = $studentNameInput.value;
 
+                    /* if uncommented will hide when there is no input
                     if (!value) {
                         $dropdown.classList.remove('student-email-input-show-dropdown');
                         return;
                     }
+                     */
 
-                    const users = studentNames.filter(name =>
+                    let users = studentNames.filter(name =>
                         name.toLowerCase().includes(value.toLowerCase())
                     );
 
@@ -65,15 +71,29 @@ function insertComponent ($el=document.body) {
                         return;
                     }
 
+                    let extra = 0;
+                    if (users.length > 10) {
+                        extra = users.length - 10;
+                        users = users.slice(0, 10);
+                    }
+
                     $dropdown.classList.add('student-email-input-show-dropdown');
 
                     $dropdown.innerHTML = '';
 
                     for (let name of users) {
                         $dropdown.innerHTML += `
-                            <div onclick="window['onClickStudentEmailInput${id}']('${name}')">
+                            <p onclick="window['onClickStudentEmailInput${id}']('${name}')">
                                 ${name} 
-                            </div>
+                            </p>
+                        `;
+                    }
+
+                    if (extra) {
+                        $dropdown.innerHTML += `
+                            <p class="no-hover">
+                                (and ${extra} more)
+                            </p>
                         `;
                     }
                 });
@@ -144,7 +164,8 @@ function insertComponent ($el=document.body) {
             $el.appendChild($p);
 
             function hide () {
-                $el.removeChild($p);
+                $p.remove();
+                removeEventListener('keydown', keyDownListener);
             }
 
             $p.addEventListener('click', (evt => {
@@ -153,6 +174,14 @@ function insertComponent ($el=document.body) {
                     hide();
                 }
             }));
+
+            const keyDownListener = evt => {
+                if (evt.key === 'Escape') {
+                    hide();
+                }
+            };
+
+            addEventListener('keydown', keyDownListener);
 
             return hide;
         },
@@ -164,7 +193,7 @@ function insertComponent ($el=document.body) {
 
             let $nameInp;
             let $descInp;
-            let $timeInp;
+            let $dateInp;
             let $addEventAddStudent;
             let $addEventAddStudentsHTML;
 
@@ -212,6 +241,8 @@ function insertComponent ($el=document.body) {
                 }
 
                 const { data } = await api`get/users/batch-info/${Object.keys(studentsInEvent).join(',')}`;
+                console.log(`get/users/batch-info/${Object.keys(studentsInEvent).join(',')}`,
+                    await api`get/users/batch-info/${Object.keys(studentsInEvent).join(',')}`)
 
                 let html = '';
                 for (let user of data) {
@@ -234,10 +265,10 @@ function insertComponent ($el=document.body) {
                             <div style="display: block">
                                 <button
                                     onclick="removeStudentFromEvent('${id}')"
-                                   data-label="Remove ${email} from new event"
-                                    aria-label="Remove ${email} from new event"
+                                   data-label="Remove from new event"
+                                    aria-label="Remove from new event"
                                     svg="bin.svg"
-                                    class="icon"
+                                    class="icon small"
                                 ></button>
                             </div>
                         </div>
@@ -255,15 +286,15 @@ function insertComponent ($el=document.body) {
                         <input
                             type="text"
                             id="add-event-name"
-                            placeholder="Name"
+                            placeholder="Event Name"
                             aria-label="name"
                         >
                     </label>
                     <label>
                         <input
-                            type="datetime-local"
-                            id="add-event-time"
-                            aria-label="event time"
+                            type="date"
+                            id="add-event-date"
+                            aria-label="event date"
                         >
                     </label>
                     <label>
@@ -301,16 +332,28 @@ function insertComponent ($el=document.body) {
             document.getElementById(`add-event-submit`).onclick = async () => {
 
                 if ($nameInp.value.length < 3) {
-                    showError('Event name is too short').then();
+                    await showError('Event name is too short');
                     return;
                 }
 
-                if (!$timeInp.value) {
-                    showError('Event time is required').then();
+                if ($nameInp.value.length > 30) {
+                    await showError('Event name too long - keep it simple!');
                     return;
                 }
 
-                const time = new Date($timeInp.value).getTime();
+                if (!$dateInp.value) {
+                    await showError('Event time is required');
+                    return;
+                }
+
+                const time = new Date($dateInp.value).getTime();
+
+                // event before the year 2000 is not allowed
+                if (time <= 946684800) {
+                    await showError('Event time is before the year 2000');
+                    return;
+                }
+
                 const { id: eventID } =
                     await api`create/events/${$nameInp.value}/${time}?description=${$descInp.value}`;
 
@@ -329,12 +372,15 @@ function insertComponent ($el=document.body) {
 
             $nameInp = document.querySelector('#add-event-name');
             $descInp = document.querySelector('#add-event-description');
-            $timeInp = document.querySelector('#add-event-time');
+            $dateInp = document.querySelector('#add-event-date');
             $addEventAddStudentsHTML = document.querySelector('#add-event-students');
             $addEventAddStudent = insertComponent(document.querySelector('#add-event-student-inp'))
                 .studentEmailInputWithIntellisense();
 
-            reload();
+            $dateInp.valueAsDate = new Date();
+
+            window.showStudentsInAddEvent()
+                .then(reload);
         },
 
         selectableList: ({
@@ -407,8 +453,7 @@ function insertComponent ($el=document.body) {
                                     aria-label="unselect all"
                                 ></button>
                             </span>
-                        </div>
-                        <div>
+                            
                             ${withAllMenu}
                         </div>
                         <div>
@@ -474,91 +519,118 @@ function insertComponent ($el=document.body) {
              return { reload };
         },
 
-        eventCard: (event, admin, reload) => {
+        eventCard: (getEvent, admin) => {
             const id = currentComponentID++;
+
+            let event;
 
             let $addStudentToEvent;
 
-            const ago = getRelativeTime(event['time'] * 1000);
-            const date = new Date(event['time'] * 1000).toLocaleDateString();
-
             window[`eventCard${id}_deleteStudent`] = async (id) => {
                 await api`delete/house-points/with-id/${id}`;
-                reload();
+                hardReload();
             };
 
             window[`eventCard${id}_addStudent`] = async () => {
                 const email = $addStudentToEvent.value;
 
+                if (!email) {
+                    await showError('Please enter an email');
+                    return;
+                }
+
+                if (email.length < 5) {
+                    await showError('Please enter a valid email');
+                    return;
+                }
+
                 const { id: userID } = await api`get/users/from-email/${email}`;
 
                 await api`create/house-points/give/${userID}/1?event=${event['id']}`;
 
-                reload();
+                hardReload();
             };
 
             window[`eventCard${id}_changeHpQuantity`] = async (id, value) => {
                 await api`update/house-points/quantity/${id}/${value}`;
+                render();
             };
 
-            $el.innerHTML = `
-                <div class="event-card" id="event-card-${id}">
-                    <h1>${event['name']}</h1>
-                    <p>
-                        ${ago} (${date})
-                    </p>
-                    <p style="font-size: 1.2em">
-                        ${event['description']}
-                    </p>
-                    <div>
-                        <h2>
-                            ${event['housePointCount']} House Points Awarded
-                        </h2>
-                        ${event['housePoints'].map(point => `
-                            <div class="hp">
-                                <div>${point['studentEmail'] || '???'}</div>
-                                ${admin ? `
-                                    <input 
-                                        type="number"
-                                        onchange="eventCard${id}_changeHpQuantity('${point.id}', this.value)"
-                                        value="${point['quantity']}"
-                                        style="width: 40px; font-size: 15px"
-                                    >
-                                    <button
-                                       data-label="Delete house points"
-                                        onclick="eventCard${id}_deleteStudent('${point['id']}')"
-                                        svg="bin.svg"
-                                        class="icon small"
-                                    ></button>
-                                ` : `
-                                    (${point['quantity']})
-                                `}
-                            </div>
-                        `).join('')}
-                        
-                        ${admin ? `
-                            <div class="hp">
-                                 <span class="add-student-to-event"></span>
-                                 <button
-                                    svg="plus.svg"
-                                   data-label="Add Student"
-                                    aria-label="add student"
-                                    onclick="eventCard${id}_addStudent(this)"
-                                    class="icon"
-                                    style="border: none"
-                                 ></button>
-                            <div>
-                        ` : ''}
+            function render () {
+
+                const ago = getRelativeTime(event['time'] * 1000);
+                const date = new Date(event['time'] * 1000).toLocaleDateString();
+
+                $el.innerHTML = `
+                    <div class="event-card" id="event-card-${id}">
+                        <h1>${event['name']}</h1>
+                        <p>
+                            ${ago} (${date})
+                        </p>
+                        <p style="font-size: 1.2em">
+                            ${event['description']}
+                        </p>
+                        <div>
+                            <h2>
+                                ${event['housePointCount']} House Points Awarded
+                            </h2>
+                            ${event['housePoints'].map(point => `
+                                <div class="hp">
+                                    <div>${point['studentEmail'] || '???'}</div>
+                                    ${admin ? `
+                                        <input 
+                                            type="number"
+                                            onchange="eventCard${id}_changeHpQuantity('${point.id}', this.value)"
+                                            value="${point['quantity']}"
+                                            style="width: 40px; font-size: 15px"
+                                        >
+                                        <button
+                                           data-label="Delete house points"
+                                            onclick="eventCard${id}_deleteStudent('${point['id']}')"
+                                            svg="bin.svg"
+                                            class="icon small"
+                                        ></button>
+                                    ` : `
+                                        (${point['quantity']})
+                                    `}
+                                </div>
+                            `).join('')}
+                            
+                            ${admin ? `
+                                <div style="margin: 20px 0">
+                                     <span class="add-student-to-event"></span>
+                                     <button
+                                        svg="plus.svg"
+                                        data-label="Add Student"
+                                        aria-label="add student"
+                                        onclick="eventCard${id}_addStudent(this)"
+                                        class="icon medium"
+                                        style="border: none"
+                                     ></button>
+                                <div>
+                            ` : ''}
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
 
-            asAdmin(() => {
-                $addStudentToEvent = insertComponent(`#event-card-${id} .add-student-to-event`)
-                    .studentEmailInputWithIntellisense();
-            });
+            async function hardReload () {
+                const newEvent = await getEvent();
+                if (!newEvent) {
+                    await showError('Event not found');
+                    return;
+                }
+                event = newEvent;
+                render();
+                reloadDOM();
 
-            reloadDOM();
+                asAdmin(() => {
+                    $addStudentToEvent = insertComponent(`#event-card-${id} .add-student-to-event`)
+                        .studentEmailInputWithIntellisense('Add student by email...');
+                });
+            }
+
+            hardReload();
         }
     };
 }

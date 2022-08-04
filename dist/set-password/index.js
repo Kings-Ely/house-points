@@ -36,7 +36,12 @@ const
 
 function showChangePassword (user) {
 	document.getElementById('content').style.display = 'block';
-	document.getElementById('email').innerText = user.email;
+	document.getElementById('email').innerHTML = `
+		${user.email.split('@')[0]}
+		<span style="color: var(--text-v-light)">
+			@${user.email.split('@')[1]}
+		</span>
+	`;
 }
 
 $submit.addEventListener('click', async () => {

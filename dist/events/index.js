@@ -72,11 +72,13 @@ async function showAllEvents () {
 
 function eventHTML (event) {
 	return `
-		<div class="flex-center" style="justify-content: left">
+		<div 
+			class="flex-center" 
+			style="justify-content: left"
+			onclick="eventPopup('${event.id}')"
+		>
 			<button
-				onclick="eventPopup('${event.id}')"
 				style="text-decoration: none; font-weight: bold"
-				data-label="View ${event['name']}"
 			>
 				${event.name}
 				<span style="font-size: 0.6em; color: var(--text-light)">
@@ -84,9 +86,13 @@ function eventHTML (event) {
 				</span>
 			</button>
 		</div>
-		<div class="flex-center" style="justify-content: right">
+		<p 
+			class="flex-center" 
+			style="justify-content: right"
+			onclick="eventPopup('${event.id}')"
+		>
 			${limitStrLength(event.description)}
-		</div>
+		</p>
 	`;
 }
 
@@ -103,8 +109,7 @@ async function eventPopup (id=GETParam('id')) {
 	`);
 
 	insertComponent('#event-popup').eventCard(
-		event,
+		async () => ((await api`get/events?id=${id}`)?.['data']?.[0]),
 		(await userInfo())['admin'],
-		() => eventPopup(id)
 	);
 }

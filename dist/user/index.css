@@ -39,6 +39,7 @@
 
 #evt-link {
     font-size: 1.2em;
+    width: fit-content;
 }
 
 .icon:hover #evt-link {

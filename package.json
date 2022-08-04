@@ -2,7 +2,7 @@
     "scripts": {
         "start-server": "cd server; webpack; node --enable-source-maps index.js -cv",
         "stop-server": "cd server; npm run stop",
-        "test": "cd test; webpack; cd ..; node --enable-source-maps test",
+        "test": "cd server; webpack; cd ../test; webpack; cd ..; node --enable-source-maps test",
         "deploy-no-test": "node --enable-source-maps ./build",
         "test-and-deploy": "cd server; webpack; cd ../test; webpack; cd ..; node --enable-source-maps test -v --deploy",
         "deploy": "time npm run test-and-deploy",

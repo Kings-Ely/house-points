@@ -1,4 +1,4 @@
-@import "fonts.css";
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300&family=Quicksand&family=Raleway:wght@200&family=Roboto:wght@300&family=Saira:wght@200&display=swap');
 
 /* --- GENERAL --- */
 
@@ -22,8 +22,6 @@
 
 
 * {
-    color: var(--text);
-    font-family: 'Raleway', sans-serif;
     transition: 200ms;
 }
 
@@ -80,7 +78,7 @@ input {
 }
 
 input:hover {
-    border-bottom: 2px solid black;
+    border-bottom: 2px solid var(--accent);
 }
 
 input:focus {
@@ -120,9 +118,18 @@ textarea {
 
 /* --- FONTS --- */
 
+* {
+    color: var(--text);
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+}
+
 h1 {
     font-size: 30px;
     text-align: center;
+    font-family: 'Saira', sans-serif;
 }
 
 h2 {
@@ -130,6 +137,25 @@ h2 {
     padding-top: 50px;
     font-size: 25px;
     color: var(--text-light);
+}
+
+h2, h3 {
+    font-family: 'Raleway', sans-serif;
+}
+
+input, button, textarea {
+    font-family: 'Quicksand', sans-serif;
+}
+
+a:hover, a:focus,
+button:hover, button:focus,
+input:hover, input:focus,
+textarea:hover, textarea:focus {
+    color: var(--text-light);
+}
+
+input, textarea {
+    font-size: 18px;
 }
 
 @media only screen and (max-aspect-ratio: 6/5) {
@@ -209,39 +235,40 @@ nav {
     width: var(--width);
 }
 
-.student-email-input-dropdown {
+.student-email-input-wrapper .student-email-input-dropdown {
     display: none;
     position: absolute;
     background-color: var(--bg-accent);
     width: calc(var(--width) + 12px);
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.4);
     z-index: 1;
-    max-height: 400px;
+    max-height: 80px;
     overflow-y: scroll;
     overflow-x: hidden;
     border-radius: 0 0 10px 10px;
 }
 
-.student-email-input-dropdown::-webkit-scrollbar {
+.student-email-input-wrapper .student-email-input-dropdown::-webkit-scrollbar {
     display: none;
 }
 
-.student-email-input-dropdown > div {
-    padding: 12px 16px;
+.student-email-input-wrapper .student-email-input-dropdown > * {
+    padding: 4px 0;
     text-decoration: none;
     display: block;
+    margin: 0;
 }
 
-.student-email-input-dropdown > div:hover {
+.student-email-input-wrapper .student-email-input-dropdown > :hover:not(.no-hover) {
     background-color: var(--bg);
     color: var(--text-light);
 }
 
-.student-email-input-show-dropdown {
+.student-email-input-wrapper .student-email-input-show-dropdown {
     display: block;
 }
 
-.student-email-input {
+.student-email-input-wrapper .student-email-input {
     width: var(--width);
 }
 
@@ -364,7 +391,7 @@ nav {
 /* icons and labels */
 
 svg {
-    fill: var(--text-light);
+    fill: var(--text);
 }
 
 .icon {
@@ -372,8 +399,8 @@ svg {
     border: none;
     text-decoration: none;
     --hover-offset-y: 0px;
-    display: inline-grid;
-    justify-items: center;
+    display: inline-flex;
+    justify-content: center;
     align-items: center;
 }
 
@@ -381,10 +408,12 @@ svg {
     height: 50px;
     width: 50px;
     border: none;
+    transition: 0.1s;
 }
 
 .icon:hover svg {
     cursor: pointer;
+    fill: var(--accent);
     transform: scale(1.1);
 }
 
@@ -436,6 +465,10 @@ svg {
 
 [data-label]:hover::before {
     opacity: 1;
+}
+
+[data-label]::before:hover {
+    opacity: 0;
 }
 
 @media only screen and (max-aspect-ratio: 6/5) {
@@ -656,7 +689,8 @@ svg {
 .event-card {
     text-align: center;
     max-width: 95vw;
-    padding: 10px 10px 10px 50px;
+    padding: 10px 20px 50px 20px;
+    height: fit-content;
 }
 
 .event-card .hp {

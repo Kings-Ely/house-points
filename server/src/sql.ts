@@ -49,6 +49,7 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
 
     handleDisconnect();
 
+    // returns query function
     return (queryParts: TemplateStringsArray, ...params: any[]): Promise<any> => {
         return new Promise((resolve, fail) => {
             if (!hasConnectedSQL) {
@@ -59,8 +60,11 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
                 let str = acc + cur;
                 if (params[i] === undefined) {
                     return str;
+
                 } else if (Array.isArray(params[i])) {
-                    return str + '?'.repeat(params[i].length);
+                    // so you have ?,?,...?,? in your query for each array element
+                    return str + '?,'.repeat(params[i].length-1) + '?';
+
                 } else {
                     return str + '?';
                 }
