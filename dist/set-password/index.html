@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Set Password</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="robots" content="noindex">
+
+    <script src="../assets/js/main.js"></script>
+    <script src="./index.js" defer></script>
+
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+<nav></nav>
+<main class="flex-center">
+    <div id="content" class="bordered">
+        <h1 style="padding-bottom: 20px">
+            Set Password for
+            <span id="email"></span>
+        </h1>
+        <label>
+            <input
+                type="password"
+                id="password"
+                placeholder="New Password"
+                autocomplete="new-password"
+                autofocus
+            >
+        </label>
+        <br>
+        <label>
+            <input
+                type="password"
+                id="password-repeat"
+                placeholder="Repeat New Password"
+                autocomplete="new-password"
+                autofocus
+            >
+        </label>
+        <br>
+        <button
+            id="submit"
+            class="icon"
+            svg="play.svg"
+        ></button>
+    </div>
+</main>
+<footer></footer>
+</body>
+</html>

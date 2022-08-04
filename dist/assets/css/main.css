@@ -3,7 +3,7 @@
 /* --- GENERAL --- */
 
 :root {
-    --nav-height: 50px;
+    --nav-height: 70px;
     --nav-colour: #d5d5d5;
 
     --text: #000000;
@@ -36,7 +36,7 @@ html, body {
 }
 
 main {
-    min-height: 100vh;
+    min-height: calc(100vh - var(--nav-height));
     padding: 10px;
 }
 
@@ -149,7 +149,7 @@ h2 {
     }
 
     html, body {
-        height: 100vh;
+        min-height: 100vh;
     }
 }
 
@@ -170,7 +170,7 @@ nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
+    padding: 0;
     background: var(--nav-colour);
     height: var(--nav-height);
     width: 100%;
