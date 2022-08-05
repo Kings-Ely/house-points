@@ -36,6 +36,7 @@ route('get/sessions/active', async ({ query, cookies }) => {
         WHERE
             sessions.user = users.id
             AND UNIX_TIMESTAMP(sessions.opened) + sessions.expires > UNIX_TIMESTAMP()
+        ORDER BY opened DESC
     ` };
 });
 

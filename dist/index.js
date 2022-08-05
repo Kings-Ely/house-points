@@ -1,20 +1,24 @@
+'use strict';
+import * as core from "./assets/js/main.js";
+import insertComponent from "./assets/js/components.js";
+
 const $go = document.getElementById('go');
 const $email = document.getElementById('email');
 const $password = document.getElementById('password');
 
 (async () => {
-	await init('.');
+	await core.init('.');
 
-	if (GETParam('error')) {
-		await showErrorFromCode(GETParam('error'));
-		await sleep(1000);
+	if (core.GETParam('error')) {
+		await core.showErrorFromCode(core.GETParam('error'));
+		await core.sleep(1000);
 	}
 
-	if (await signedIn()) {
-		if ((await userInfo())['admin']) {
-			await navigate(`/admin`);
+	if (await core.signedIn()) {
+		if ((await core.userInfo())['admin']) {
+			await core.navigate(`/admin`);
 		} else {
-			await navigate(`/user`);
+			await core.navigate(`/user`);
 		}
 	}
 })();
@@ -23,18 +27,18 @@ $go.onclick = async () => {
 	const email = $email.value;
 
 	if (!email) {
-		showError`You need to enter a valid email first!`;
+		core.showError`You need to enter a valid email first!`;
 		return;
 	}
 
 	const password = $password.value;
 
 	if (!password) {
-		showError`You need to enter a password first!`;
+		core.showError`You need to enter a password first!`;
 		return;
 	}
 
-	const res = await api`create/sessions/from-login/${email}/${password}`;
+	const res = await core.api`create/sessions/from-login/${email}/${password}`;
 
 	if (res.error) {
 		return;
@@ -43,18 +47,18 @@ $go.onclick = async () => {
 	const { sessionID } = res;
 
 	if (!sessionID) {
-		showError`Something went wrong!`;
+		core.showError`Something went wrong!`;
 		return;
 	}
 
-	await setSessionCookie(sessionID);
-	await navigate(`./user`);
+	await core.setSessionCookie(sessionID);
+	await core.navigate(`./user`);
 };
 
 document.getElementById('forgotten-password').onclick = async () => {
 	const email = $email.value;
 	if (email.length < 4) {
-		showError`You need to enter a valid email first!`;
+		core.showError`You need to enter a valid email first!`;
 		return;
 	}
 
@@ -62,7 +66,7 @@ document.getElementById('forgotten-password').onclick = async () => {
 		return;
 	}
 
-	const res = await api`create/sessions/for-forgotten-password/${email}`;
+	const res = await core.api`create/sessions/for-forgotten-password/${email}`;
 
 	if (!res.ok || res.error) {
 		return;

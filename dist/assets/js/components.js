@@ -1,4 +1,5 @@
 'use strict';
+import * as core from "./main.js";
 
 let currentComponentID = 0;
 
@@ -7,9 +8,8 @@ let currentComponentID = 0;
  *  Call function on return value of this function to actually add the element.
  *
  * @param {HTMLElement|string|undefined} [$el=document.body]
- * @returns {{[key: string]: (...args: any[]) => any}}
  */
-function insertComponent ($el=document.body) {
+export default function insertComponent ($el=document.body) {
     if (typeof $el === 'string') {
         $el = document.querySelector($el);
     }
@@ -46,7 +46,7 @@ function insertComponent ($el=document.body) {
                 $dropdown.classList.toggle('student-email-input-show-dropdown');
             });
 
-            api`get/users`.then(({data}) => {
+            core.api`get/users`.then(({data}) => {
 
                 const studentNames = data
                     .filter(user => user['student'] || allowNonStudents)
@@ -110,11 +110,11 @@ function insertComponent ($el=document.body) {
              * @param {boolean} value
              */
             window.allowedCookies = async value => {
-                hide($el);
+                core.hide($el);
                 if (!value) {
                     return;
                 }
-                await setCookie(COOKIE_ALLOW_COOKIES_KEY, '1', 365);
+                await core.setCookie(core.COOKIE_ALLOW_COOKIES_KEY, '1', 365);
             };
 
             $el.innerHTML += `
@@ -201,11 +201,11 @@ function insertComponent ($el=document.body) {
                 const email = $addEventAddStudent.value;
 
                 if (!email) {
-                    showError('Need an email to add student to event').then();
+                    core.showError('Need an email to add student to event').then();
                     return;
                 }
 
-                const user = await api`get/users/from-email/${email}`;
+                const user = await core.api`get/users/from-email/${email}`;
 
                 if (!user.ok) {
                     // error automatically shown
@@ -240,9 +240,7 @@ function insertComponent ($el=document.body) {
                     return;
                 }
 
-                const { data } = await api`get/users/batch-info/${Object.keys(studentsInEvent).join(',')}`;
-                console.log(`get/users/batch-info/${Object.keys(studentsInEvent).join(',')}`,
-                    await api`get/users/batch-info/${Object.keys(studentsInEvent).join(',')}`)
+                const { data } = await core.api`get/users/batch-info/${Object.keys(studentsInEvent).join(',')}`;
 
                 let html = '';
                 for (let user of data) {
@@ -276,7 +274,7 @@ function insertComponent ($el=document.body) {
                 }
 
                 $addEventAddStudentsHTML.innerHTML = html;
-                reloadDOM();
+                core.reloadDOM();
             }
 
             const hide = insertComponent($el).fullPagePopUp(`
@@ -332,17 +330,17 @@ function insertComponent ($el=document.body) {
             document.getElementById(`add-event-submit`).onclick = async () => {
 
                 if ($nameInp.value.length < 3) {
-                    await showError('Event name is too short');
+                    await core.showError('Event name is too short');
                     return;
                 }
 
                 if ($nameInp.value.length > 30) {
-                    await showError('Event name too long - keep it simple!');
+                    await core.showError('Event name too long - keep it simple!');
                     return;
                 }
 
                 if (!$dateInp.value) {
-                    await showError('Event time is required');
+                    await core.showError('Event time is required');
                     return;
                 }
 
@@ -350,18 +348,18 @@ function insertComponent ($el=document.body) {
 
                 // event before the year 2000 is not allowed
                 if (time <= 946684800) {
-                    await showError('Event time is before the year 2000');
+                    await core.showError('Event time is before the year 2000');
                     return;
                 }
 
                 const { id: eventID } =
-                    await api`create/events/${$nameInp.value}/${time}?description=${$descInp.value}`;
+                    await core.api`create/events/${$nameInp.value}/${time}?description=${$descInp.value}`;
 
                 $nameInp.value = '';
                 $descInp.value = '';
 
                 await Promise.all(Object.keys(studentsInEvent).map(async userID => {
-                    await api`create/house-points/give/${userID}/${studentsInEvent[userID]}?event=${eventID}`;
+                    await core.api`create/house-points/give/${userID}/${studentsInEvent[userID]}?event=${eventID}`;
                 }));
 
                 studentsInEvent = {};
@@ -394,7 +392,7 @@ function insertComponent ($el=document.body) {
             gridTemplateColsCSS = '1fr 1fr',
             selected
         }) => {
-            preloadSVGs('selected-checkbox.svg', 'unselected-checkbox.svg');
+            core.preloadSVGs('selected-checkbox.svg', 'unselected-checkbox.svg');
 
             currentComponentID++;
 
@@ -509,14 +507,14 @@ function insertComponent ($el=document.body) {
                     `;
                 }
 
-                reloadDOM();
+                core.reloadDOM();
             }
 
             window[`selectableList${currentComponentID}_reloadItems`] = reload;
 
-            reload();
+            reload().then();
 
-             return { reload };
+            return { reload };
         },
 
         eventCard: (getEvent, admin) => {
@@ -527,38 +525,38 @@ function insertComponent ($el=document.body) {
             let $addStudentToEvent;
 
             window[`eventCard${id}_deleteStudent`] = async (id) => {
-                await api`delete/house-points/with-id/${id}`;
-                hardReload();
+                await core.api`delete/house-points/with-id/${id}`;
+                await hardReload();
             };
 
             window[`eventCard${id}_addStudent`] = async () => {
                 const email = $addStudentToEvent.value;
 
                 if (!email) {
-                    await showError('Please enter an email');
+                    await core.showError('Please enter an email');
                     return;
                 }
 
                 if (email.length < 5) {
-                    await showError('Please enter a valid email');
+                    await core.showError('Please enter a valid email');
                     return;
                 }
 
-                const { id: userID } = await api`get/users/from-email/${email}`;
+                const { id: userID } = await core.api`get/users/from-email/${email}`;
 
-                await api`create/house-points/give/${userID}/1?event=${event['id']}`;
+                await core.api`create/house-points/give/${userID}/1?event=${event['id']}`;
 
-                hardReload();
+                core.hardReload();
             };
 
             window[`eventCard${id}_changeHpQuantity`] = async (id, value) => {
-                await api`update/house-points/quantity/${id}/${value}`;
+                await core.api`update/house-points/quantity/${id}/${value}`;
                 render();
             };
 
             function render () {
 
-                const ago = getRelativeTime(event['time'] * 1000);
+                const ago = core.getRelativeTime(event['time'] * 1000);
                 const date = new Date(event['time'] * 1000).toLocaleDateString();
 
                 $el.innerHTML = `
@@ -617,20 +615,20 @@ function insertComponent ($el=document.body) {
             async function hardReload () {
                 const newEvent = await getEvent();
                 if (!newEvent) {
-                    await showError('Event not found');
+                    await core.showError('Event not found');
                     return;
                 }
                 event = newEvent;
                 render();
-                reloadDOM();
+                core.reloadDOM();
 
-                asAdmin(() => {
+                core.asAdmin(() => {
                     $addStudentToEvent = insertComponent(`#event-card-${id} .add-student-to-event`)
                         .studentEmailInputWithIntellisense('Add student by email...');
                 });
             }
 
-            hardReload();
+            hardReload().then();
         }
     };
 }

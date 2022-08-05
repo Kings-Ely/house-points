@@ -18,6 +18,8 @@ export const flags = commandLineArgs([
     { name: 'port', alias: 'p', type: Number, defaultValue: 0 }
 ]);
 
+fs.writeFileSync(flags.logTo, 'Testing 123');
+
 const handlers: Route[] = [];
 
 /**

@@ -10,6 +10,7 @@ import {
     userID
 } from '../util';
 import mysql from "mysql2";
+import * as notifications from '../notifications';
 
 const MAX_HOUSE_POINTS = 100;
 
@@ -93,6 +94,7 @@ route('get/house-points?id&userID&yearGroup&status&from&to', async ({ query, par
 
 /**
  * @admin
+ * @notification
  * Gives a house point to the student with that userID
  *
  * @param {string} description - description of house point
@@ -132,6 +134,9 @@ async ({ query, cookies, params }) => {
             CURRENT_TIMESTAMP
         )
     `;
+
+    let notifRes = await notifications.receivedHousePoint(query, userID, quantity);
+    if (notifRes !== true) return notifRes;
 
     return { status: 201 };
 });
@@ -181,6 +186,7 @@ async ({ query, params, cookies }) => {
 
 /**
  * @admin
+ * @notification
  * Updates the status of the house points.
  * You cannot change a house point fron 'Accepted' or 'Rejected' to any other status,
  * only from 'Pending'.
@@ -197,12 +203,28 @@ async ({ query, cookies, params }) => {
 
     const { housePointID: id, reject } = params;
 
-    if (!(await query`SELECT * FROM housepoints WHERE id = ${id}`).length) {
-        return {
-            status: 406,
-            error: `No house point found with ID '${id}'`
-        };
-    }
+    const hps = await query`
+        SELECT
+            housepoints.status,
+            housepoints.description,
+            users.email,
+            users.id as userID
+        FROM housepoints, users
+        WHERE housepoints.id = ${id}
+            AND housepoints.student = users.id
+    `;
+
+    if (!hps.length) return {
+        status: 406,
+        error: `No house point found with that ID`
+    };
+
+    const hp = hps[0];
+
+    if (hp.status !== 'Pending') return {
+        status: 406,
+        error: `House point with is not 'Pending', is '${hp.status}'`
+    };
 
     if (reject) {
         await query`
@@ -210,18 +232,21 @@ async ({ query, cookies, params }) => {
             SET 
                 rejectMessage = ${reject},
                 completed = CURRENT_TIMESTAMP,
-                status='Rejected' 
+                status = 'Rejected'
             WHERE id = ${id}
         `;
     } else {
         await query`
-            UPDATE housepoints 
-            SET 
+            UPDATE housepoints
+            SET
                 completed = CURRENT_TIMESTAMP,
-                status='Accepted' 
+                status = 'Accepted'
             WHERE id = ${id}
         `;
     }
+
+    let notifRes = await notifications.housePointRequestAcceptedOrRejected(query, hp['userID'], hp['description'], reject);
+    if (notifRes !== true) return notifRes;
 });
 
 /**

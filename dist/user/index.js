@@ -1,22 +1,24 @@
+import * as core from "../assets/js/main.js";
+
 const $name = document.getElementById('name');
 const $hps = document.getElementById('hps');
 const $hpReasonInp = document.getElementById('hp-reason');
 
 (async () => {
-    await init('..', true);
+    await core.init('..', true);
 
-    if (!await signedIn()) {
-        await navigate(`/?error=auth`);
+    if (!await core.signedIn()) {
+        await core.navigate(`/?error=auth`);
     }
 
-    if ((await userInfo())['student']) {
-        show('#submit-hp-request');
+    if ((await core.userInfo())['student']) {
+        core.show('#submit-hp-request');
         await reloadHousePoints();
 
     } else {
         await title();
 
-        if ((await userInfo())['admin']) {
+        if ((await core.userInfo())['admin']) {
             $hps.innerHTML = `
                 <a 
                     href="../admin/"
@@ -24,15 +26,15 @@ const $hpReasonInp = document.getElementById('hp-reason');
                     svg="admin.svg"
                 >Admin Dashboard</a>
             `;
-            reloadDOM();
+            core.reloadDOM();
         } else {
-            hide('#hps');
+            core.hide('#hps');
         }
     }
 })();
 
 async function housePoints () {
-    const { housePoints: hps } = await userInfo();
+    const { housePoints: hps } = await core.userInfo();
 
     if (hps.length === 0) {
         $hps.innerHTML = `
@@ -53,7 +55,7 @@ async function housePoints () {
 
 async function title () {
 
-    const info = await userInfo();
+    const info = await core.userInfo();
 
     const [ username, emailExt ] = info['email'].split('@');
 
@@ -93,7 +95,7 @@ function showHp (hp) {
 
     if (hp['status'] === 'Rejected') {
         acceptedHTML = `
-            Rejected ${getRelativeTime(hp['completed'] * 1000)}
+            Rejected ${core.getRelativeTime(hp['completed'] * 1000)}
             <br>
             <b>"${hp['rejectMessage']}"</b>
         `;
@@ -101,7 +103,7 @@ function showHp (hp) {
 
     } else if (hp['status'] === 'Accepted') {
         acceptedHTML = `
-            Accepted ${getRelativeTime(hp['completed'] * 1000)}
+            Accepted ${core.getRelativeTime(hp['completed'] * 1000)}
         `;
         icon = 'accent-tick.svg';
 
@@ -111,8 +113,6 @@ function showHp (hp) {
     }
 
     const submittedTime = hp['created'] * 1000;
-
-    console.log(hp);
 
     return `
         <div class="house-point">
@@ -136,7 +136,7 @@ function showHp (hp) {
             </div>
             <div style="min-width: calc(40% - 60px)">
                 ${new Date(submittedTime).toDateString()}
-                (${getRelativeTime(submittedTime)})
+                (${core.getRelativeTime(submittedTime)})
                 <br>
                 ${acceptedHTML}
             </div>
@@ -153,13 +153,13 @@ function showHp (hp) {
 
 async function reloadHousePoints () {
 
-    await reloadUserInfo();
+    await core.reloadUserInfo();
 
     await title();
 
     await housePoints();
 
-    reloadDOM();
+    core.reloadDOM();
 }
 
 
@@ -169,7 +169,7 @@ document.getElementById('submit-hp').onclick = async () => {
 
     for (let reason of $hpReasonInp.value.split('\n')) {
         if (!reason) continue;
-        await api`create/house-points/request/${await userID()}/1?description=${reason}`;
+        await core.api`create/house-points/request/${await core.userID()}/1?description=${reason}`;
     }
     await reloadHousePoints();
     $hpReasonInp.value = '';

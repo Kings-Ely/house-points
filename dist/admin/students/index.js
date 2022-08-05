@@ -1,11 +1,23 @@
+import * as core from "../../assets/js/main.js";
+import insertComponent from "../../assets/js/components.js";
+
 const
     $addStudentButton = document.getElementById('add-student'),
 
     selected = [];
 
+window.deleteSelected = deleteSelected;
+window.ageSelected = ageSelected;
+window.giveHPToSelected = giveHPToSelected;
+window.revokeAdmin = revokeAdmin;
+window.makeAdmin = makeAdmin;
+window.signInAs = signInAs;
+window.deleteUser = deleteUser;
+window.uploadAddStudentsFile = uploadAddStudentsFile;
+
 (async () => {
-    await init('../..', true, true);
-    preloadSVGs('star-filled.svg', 'star-empty.svg', 'bin.svg', 'circle-up-arrow.svg', 'circle-down-arrow.svg', 'plus.svg');
+    await core.init('../..', true, true);
+    await core.preloadSVGs('star-filled.svg', 'star-empty.svg', 'bin.svg', 'circle-up-arrow.svg', 'circle-down-arrow.svg', 'plus.svg');
 
     await showStudentsList();
 })();
@@ -13,7 +25,7 @@ const
 async function showStudentsList () {
     insertComponent('#students').selectableList({
         name: 'Students',
-        items: (await api`get/users`)['data'],
+        items: (await core.api`get/users`)['data'],
         uniqueKey: 'id',
         searchKey: 'email',
         selected,
@@ -60,7 +72,7 @@ async function showStudent (student) {
 
     const { id, email, year, student: isStudent, admin: isAdmin } = student;
 
-    const isMe = (id === (await userInfo())['id']);
+    const isMe = (id === (await core.userInfo())['id']);
 
     return `
         <div class="flex-center" style="justify-content: left">
@@ -183,14 +195,14 @@ $addStudentButton.addEventListener('click', () => {
     document.getElementById(`add-student-submit`).onclick = async () => {
 
         if (!$emailInp.value) {
-            await showError('Email Required');
+            await core.showError('Email Required');
             return;
         }
 
         let studentYear = parseInt($yearInp.value || '0');
 
         if ((studentYear > 13 || studentYear < 9) && studentYear !== 0) {
-            await showError('Year must be between 9 and 13 or blank for non-students');
+            await core.showError('Year must be between 9 and 13 or blank for non-students');
             return;
         }
 
@@ -201,7 +213,7 @@ $addStudentButton.addEventListener('click', () => {
             }
         }
 
-        const res = await api`create/users/${$emailInp.value}/${DEFAULT_PASSWORD}?year=${$yearInp.value}`;
+        const res = await core.api`create/users/${$emailInp.value}/${core.DEFAULT_PASSWORD}?year=${$yearInp.value}`;
 
         if (res.ok) {
             $emailInp.value = '';
@@ -210,7 +222,7 @@ $addStudentButton.addEventListener('click', () => {
         }
     };
 
-    reloadDOM();
+    core.reloadDOM();
 });
 
 async function deleteUser (id, email) {
@@ -218,7 +230,7 @@ async function deleteUser (id, email) {
         return;
     }
 
-    await api`delete/users/${id}`;
+    await core.api`delete/users/${id}`;
 
     if (selected.includes(id)) {
         selected.splice(selected.indexOf(id), 1);
@@ -235,7 +247,7 @@ async function deleteSelected () {
 
     // send API requests at the same time and wait for all to finish
     await Promise.all(selected.map(async id => {
-        await api`delete/users/${id}`;
+        await core.api`delete/users/${id}`;
     }));
 
     selected.splice(0, selected.length);
@@ -248,15 +260,15 @@ async function signInAs (id, email) {
         return;
     }
 
-    const { sessionID } = await api`create/sessions/from-user-id/${id}`;
+    const { sessionID } = await core.api`create/sessions/from-user-id/${id}`;
 
     if (!sessionID) {
         return;
     }
 
-    await setAltSessionCookie(getSession());
-    await setSessionCookie(sessionID);
-    await navigate(`/user`);
+    await core.setAltSessionCookie(core.getSession());
+    await core.setSessionCookie(sessionID);
+    await core.navigate(`/user`);
 }
 
 async function ageSelected (amount) {
@@ -265,7 +277,7 @@ async function ageSelected (amount) {
     }
 
     await Promise.all(selected.map(async id => {
-        await api`update/users/year/${id}/${amount}`;
+        await core.api`update/users/year/${id}/${amount}`;
     }));
 
     await showStudentsList();
@@ -278,7 +290,7 @@ async function giveHPToSelected () {
     if (!reason) return;
 
     await Promise.all(selected.map(async id => {
-        await api`create/house-points/give/${id}/1?description=${reason}`;
+        await core.api`create/house-points/give/${id}/1?description=${reason}`;
     }));
 
     await showStudentsList();
@@ -295,7 +307,7 @@ async function revokeAdmin (id, email) {
         return;
     }
 
-    await api`update/users/admin/${id}?admin=0`;
+    await core.api`update/users/admin/${id}?admin=0`;
 
     await showStudentsList();
 }
@@ -311,18 +323,18 @@ async function makeAdmin (id, email) {
         return;
     }
 
-    await api`update/users/admin/${id}?admin=1`;
+    await core.api`update/users/admin/${id}?admin=1`;
 
     await showStudentsList();
 }
 
 async function uploadAddStudentsFile () {
-    const fileContent = await getFileContent('#drop-file-inp');
+    const fileContent = await core.getFileContent('#drop-file-inp');
 
-    hide('#drop-file-inp');
-    show('#loading-bar-container');
+    core.hide('#drop-file-inp');
+    core.show('#loading-bar-container');
 
-    const csv = CSVToArray(fileContent);
+    const csv = core.CSVToArray(fileContent);
 
     let errors = [];
 
@@ -333,8 +345,8 @@ async function uploadAddStudentsFile () {
     $loadBar.style.width = `${100/numPromisesResolve}%`;
 
     function finishedAll () {
-        hide('#loading-bar');
-        show('#drop-file-zone');
+        core.hide('#loading-bar');
+        core.show('#drop-file-zone');
         document.getElementById('drop-file-zone').innerHTML = `
                 <p>
                     Finished adding 
@@ -392,7 +404,7 @@ async function uploadAddStudentsFile () {
                 return;
             }
 
-            let res = await api`create/users/${email}/${DEFAULT_PASSWORD}?year=${year}`;
+            let res = await core.api`create/users/${email}/${core.DEFAULT_PASSWORD}?year=${year}`;
             if (res['error']) {
                 errors.push(`Error on row ${i+1}: ${res['error']}`);
                 finishedOne();
@@ -408,7 +420,7 @@ async function uploadAddStudentsFile () {
             }
 
             if (hps > 0) {
-                res = await api`create/house-points/give/${userID}/${hps}?description=Random+Stuff`;
+                res = await core.api`create/house-points/give/${userID}/${hps}?description=Random+Stuff`;
                 if (res['error']) {
                     errors.push(`Error on row ${i+1}: ${res['error']}`);
                     finishedOne();

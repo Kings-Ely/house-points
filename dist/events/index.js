@@ -1,9 +1,12 @@
+import * as core from "../assets/js/main.js";
+import insertComponent from "../assets/js/components.js";
+
 (async () => {
-	await init('..', true);
+	await core.init('..', true);
 
 	await showAllEvents();
 
-	if (GETParam('id')) {
+	if (core.GETParam('id')) {
 		await eventPopup();
 	}
 
@@ -11,8 +14,8 @@
 
 async function showAllEvents () {
 
-	if (await isAdmin()) {
-		show('#add-event-button', 'flex');
+	if (await core.isAdmin()) {
+		core.show('#add-event-button', 'flex');
 
 		document.getElementById('add-event-button')
 			.addEventListener('click', () => {
@@ -22,16 +25,16 @@ async function showAllEvents () {
 
 	const selected = [];
 
-	const { data: items } = await api`get/events`;
+	const { data: items } = await core.api`get/events`;
 
 	window.deleteEvents = async () => {
 		await Promise.all(selected.map(async id => {
-			await api`delete/events/with-id/${id}`;
+			await core.api`delete/events/with-id/${id}`;
 		}));
 		await showAllEvents();
 	};
 
-	if (await isAdmin()) {
+	if (await core.isAdmin()) {
 
 		insertComponent('#events').selectableList({
 			name: 'Events',
@@ -67,7 +70,7 @@ async function showAllEvents () {
 		`;
 	}
 
-	reloadDOM();
+	core.reloadDOM();
 }
 
 function eventHTML (event) {
@@ -91,16 +94,16 @@ function eventHTML (event) {
 			style="justify-content: right"
 			onclick="eventPopup('${event.id}')"
 		>
-			${limitStrLength(event.description)}
+			${core.limitStrLength(event.description)}
 		</p>
 	`;
 }
 
-async function eventPopup (id=GETParam('id')) {
-	const { data: [ event ] } = await api`get/events?id=${id}`;
+async function eventPopup (id=core.GETParam('id')) {
+	const { data: [ event ] } = await core.api`get/events?id=${id}`;
 
 	if (!event) {
-		await showError('Event not found');
+		await core.showError('Event not found');
 		return;
 	}
 
@@ -109,7 +112,7 @@ async function eventPopup (id=GETParam('id')) {
 	`);
 
 	insertComponent('#event-popup').eventCard(
-		async () => ((await api`get/events?id=${id}`)?.['data']?.[0]),
-		(await userInfo())['admin'],
+		async () => ((await core.api`get/events?id=${id}`)?.['data']?.[0]),
+		(await core.userInfo())['admin'],
 	);
 }

@@ -1,3 +1,5 @@
+import * as core from "../assets/js/main.js";
+
 // Slightly horrible with 1st, 2nd and 3rd place on the leaderboard...
 // could do an array or something but with always exactly 3 it's a bit pointless.
 
@@ -12,16 +14,13 @@ let showYears = [9, 10, 11, 12, 13];
 let leaderboardData;
 
 (async () => {
-    await init('..', true);
+    await core.init('..', true);
 
-    hide('#leaderboard-link');
+    const { year } = await core.userInfo();
 
-    const { admin, year } = await userInfo();
-
-    if (admin) {
-        showYears = [year];
+    if (year) {
+        showYears = [ year ];
         $whichYears.value = year.toString();
-        await main(false);
     }
 
     await main();
@@ -78,7 +77,7 @@ function leaderboard (users) {
         function podiumHTMl (idx) {
             return `
                 <div>
-                    ${users[idx]['name']} (Y${users[idx]['year']}) 
+                    ${users[idx]['email'].split('@')[0]} (Y${users[idx]['year']}) 
                     <br>
                     <b>${users[idx]['accepted']}</b>
                 </div>
@@ -89,16 +88,11 @@ function leaderboard (users) {
         $podium3rd.innerHTML = podiumHTMl(2);
 
         // proportional heights
-        const total =
-            parseInt(users[0]['accepted']) +
-            parseInt(users[1]['accepted']) +
-            parseInt(users[2]['accepted']);
 
-        const height1 = Math.max(parseInt(users[0]['accepted']) / total * 100, 10);
-        const height2 = Math.max(parseInt(users[1]['accepted']) / total * 100, 10);
-        const height3 = Math.max(parseInt(users[2]['accepted']) / total * 100, 10);
+        const height2 = Math.max(parseInt(users[1]['accepted']) / users[0]['accepted'] * 100, 10);
+        const height3 = Math.max(parseInt(users[2]['accepted']) / users[0]['accepted'] * 100, 10);
 
-        $podium1st.style.height = `${height1}%`;
+        $podium1st.style.height = `100%`;
         $podium2nd.style.height = `${height2}%`;
         $podium3rd.style.height = `${height3}%`;
     }
@@ -113,7 +107,7 @@ function leaderboard (users) {
 }
 async function main (reload=true) {
     if (reload || !leaderboardData) {
-        leaderboardData = (await api`get/users/leaderboard`)['data'];
+        leaderboardData = (await core.api`get/users/leaderboard`)['data'];
     }
     leaderboard(leaderboardData);
 }

@@ -7,8 +7,8 @@
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="robots" content="noindex">
 
-    <script src="../../assets/js/main.js"></script>
-    <script src="index.js" defer></script>
+    <script type="module" src="../../assets/js/main.js"></script>
+    <script type="module" src="index.js" defer></script>
 
     <link rel="stylesheet" href="../../assets/css/main.css">
     <link rel="stylesheet" href="../../assets/css/darkmode.css">
@@ -34,6 +34,12 @@
                 onclick="killServer()"
                 svg="skull.svg"
             >Kill Server</button>
+            <button
+                id="restart"
+                class="big-link"
+                onclick="restartServer()"
+                svg="restart.svg"
+            >Restart Server</button>
             <button
                 id="start"
                 class="big-link"

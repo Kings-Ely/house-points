@@ -1,32 +1,34 @@
+import * as core from "../assets/js/main.js";
+
 const
 	$password = document.getElementById('password'),
 	$passwordConfirm = document.getElementById('password-repeat'),
 	$submit = document.getElementById('submit');
 
 (async () => {
-	await init('..');
+	await core.init('..');
 	// note no auth requirements
 	// this is due to the fact that the user might not be logged in at all
 	// if they are using a 'forgot password' link
 
-	if (!GETParam('s')) {
-		await navigate(`?s=${encodeURIComponent(getSession())}`);
+	if (!core.GETParam('s')) {
+		await core.navigate(`?s=${encodeURIComponent(core.getSession())}`);
 		return;
 	}
 
-	const s = decodeURIComponent(GETParam('s'));
+	const s = decodeURIComponent(core.GETParam('s'));
 
-	if (getSession()) {
-		if (s !== getSession()) {
-			await navigate(`../?error=auth`);
+	if (core.getSession()) {
+		if (s !== core.getSession()) {
+			await core.navigate(`../?error=auth`);
 			return;
 		}
 	}
 
-	const user = await api`get/users/from-session/${s}`;
+	const user = await core.api`get/users/from-session/${s}`;
 
 	if (!user.ok) {
-		await navigate(`../?error=auth`);
+		await core.navigate(`../?error=auth`);
 		return;
 	}
 
@@ -45,7 +47,7 @@ function showChangePassword (user) {
 }
 
 $submit.addEventListener('click', async () => {
-	const s = decodeURIComponent(GETParam('s'));
+	const s = decodeURIComponent(core.GETParam('s'));
 
 	if (!s) {
 		return;
@@ -55,18 +57,18 @@ $submit.addEventListener('click', async () => {
 	const passwordConfirm = $passwordConfirm.value;
 
 	if (password.length < 3) {
-		await showError('Password too short');
+		await core.showError('Password too short');
 		return;
 	}
 
 	if (password !== passwordConfirm) {
-		await showError('Passwords do not match');
+		await core.showError('Passwords do not match');
 		return;
 	}
 
-	const res = await api`update/users/password/${s}/${password}`;
+	const res = await core.api`update/users/password/${s}/${password}`;
 
 	if (res.ok) {
-		await logoutAction();
+		await core.logoutAction();
 	}
 });

@@ -1,3 +1,6 @@
+import * as core from "../assets/js/main.js";
+import insertComponent from "../assets/js/components.js";
+
 const $addHpReason = document.getElementById('add-hp-reason');
 const $pendingHPs = document.getElementById('pending');
 const $numPendingHPs = document.getElementById('num-pending');
@@ -6,17 +9,17 @@ let $addHPName = document.getElementById('add-hp-name-inp');
 const $addHPSubmit = document.getElementById('add-hp-submit');
 
 (async () => {
-    await init('..', true, true);
+    await core.init('..', true, true);
 
     $addHPName = insertComponent($addHPName).studentEmailInputWithIntellisense();
 
-    hide('#admin-link');
+    core.hide('#admin-link');
 
     await main();
 })();
 
 async function main () {
-    const { data: pending } = await api`get/house-points?status=Pending`;
+    const { data: pending } = await core.api`get/house-points?status=Pending`;
 
     $numPendingHPs.innerText = pending.length;
 
@@ -46,7 +49,7 @@ async function main () {
         `;
     }
 
-    reloadDOM();
+    core.reloadDOM();
 }
 
 
@@ -70,7 +73,7 @@ function housePointHML (hp) {
             </div>
             <div>
                 ${new Date(submittedTime).toDateString()}
-                (${getRelativeTime(submittedTime)})
+                (${core.getRelativeTime(submittedTime)})
             </div>
             <div>
                 <button 
@@ -97,46 +100,46 @@ async function signInAs (id, email) {
         return;
     }
 
-    const { sessionID } = await api`create/sessions/from-user-id/${id}`;
+    const { sessionID } = await core.api`create/sessions/from-user-id/${id}`;
 
     if (!sessionID) return;
 
-    setAltSessionCookie(getSession());
-    setSessionCookie(sessionID);
-    await navigate(`/user`);
+    await core.setAltSessionCookie(core.getSession());
+    await core.setSessionCookie(sessionID);
+    await core.navigate(`/user`);
 }
 
 async function accept (id) {
-    await api`update/house-points/accepted/${id}`;
+    await core.api`update/house-points/accepted/${id}`;
     await main();
 }
 
 async function reject (id, reject) {
     if (!reject) return;
-    await api`update/house-points/accepted/${id}?reject=${reject}`;
+    await core.api`update/house-points/accepted/${id}?reject=${reject}`;
     await main();
 }
 
 $addHPSubmit.onclick = async () => {
 
     if (!$addHpReason.value) {
-        showError('Reason required');
+        await core.showError('Reason required');
         return;
     }
 
     if (!$addHPName.value) {
-        showError('Name required');
+        await core.showError('Name required');
         return;
     }
 
-    const codeRes = await api`get/users/code-from-name/${$addHPName.value}`;
+    const codeRes = await core.api`get/users/code-from-name/${$addHPName.value}`;
 
     if (!codeRes.ok || !codeRes.code) {
         // error automatically shown
         return;
     }
 
-    await api`create/house-points/give/${codeRes.code}/1?description=${$addHpReason.value}`;
+    await core.api`create/house-points/give/${codeRes.code}/1?description=${$addHpReason.value}`;
 
     $addHpReason.value = '';
 

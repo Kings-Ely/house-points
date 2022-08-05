@@ -25,6 +25,17 @@ export const AUTH_ERR: Readonly<{error: string, status: number}> = Object.freeze
 });
 
 /**
+ * Limits the length of a string by cutting it and adding '...'
+ * to the end if it's too long
+ */
+export function limitStr (str:string, maxLength=50) {
+    if (str.length > maxLength - 3) {
+        return str.substring(0, maxLength-3) + '...';
+    }
+    return str;
+}
+
+/**
  * Checks to see if an object is JSON-parsable.
  * Note that this is expensive for large JSON strings
  */

@@ -190,7 +190,7 @@ route('get/users/batch-info/:userIDs',
 route('get/users/leaderboard', async ({ query, cookies }) => {
     if (!await isLoggedIn(cookies, query)) return AUTH_ERR;
 
-    const data = (await query`
+    let data = (await query`
         SELECT 
             email,
             year,
@@ -198,18 +198,18 @@ route('get/users/leaderboard', async ({ query, cookies }) => {
         FROM users
         WHERE student = true
         ORDER BY year DESC, email
-    `)
-        .map((u: any) => {
-            addHousePointsToUser(query, u);
-            return u;
-        });
+    `);
 
-    data.sort((a: any, b: any) => b['accepted'] - a['accepted']);
+    data.forEach((u: any) => addHousePointsToUser(query, u));
 
-    // remove id from each user
-    for (let i = 0; i < data.length; i++) {
-        delete data[i]['id'];
+    if (!await isAdmin(cookies, query)) {
+        // remove id from each user
+        for (let i = 0; i < data.length; i++) {
+            delete data[i]['id'];
+        }
     }
+
+    data = data.sort((a, b) => b['accepted'] - a['accepted']);
 
     return { data };
 });

@@ -3,7 +3,7 @@
 const PORT = 4464;
 const HOST = 'https://localhost';
 
-//* For debugging:
+/* For debugging:
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 ini_set('display_errors', true);
 error_reporting(E_ALL);
