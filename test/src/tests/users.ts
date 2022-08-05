@@ -119,9 +119,9 @@ Test.test('Users | auth with 2', async (api) => {
 Test.test('Users | sign in with user ID', async (api) => {
     const { userID, sessionID } = await generateUser(api, 0);
 
-    let res = await api(`create/sessions/${userID}`);
+    let res = await api(`create/sessions/from-user-id/${userID}`);
     if (res.ok !== true) {
-        return `Expected 'ok' from create/sessions/from-id, got '${JSON.stringify(res)}'`;
+        return `Expected 'ok' from create/sessions/from-user-id, got '${JSON.stringify(res)}'`;
     }
     if (res.sessionID === sessionID) {
         return `Expected different sessionID, both were '${res.sessionID}'`;
@@ -296,9 +296,9 @@ Test.test('Users | Creating', async (api) => {
         return `Unexpected result from 'create/users/#6': '${JSON.stringify(res)}'`;
     }
 
-    res = await api(`create/sessions/fake@example.com/mypassword`, '');
+    res = await api(`create/sessions/from-login/fake@example.com/mypassword`, '');
     if (!res.ok || res.status !== 200 || !res.sessionID || !res.userID) {
-        return `Unexpected result from 'create/sessions/fake@example.com/...', got '${JSON.stringify(res)}'`;
+        return `Unexpected result from 'create/sessions/from-login/fake@example.com/...', got '${JSON.stringify(res)}'`;
     }
 
     const { sessionID: sessionID3, userID: userID3 } = res;
@@ -340,7 +340,7 @@ Test.test('Users | Updating admin status', async (api) => {
     if (res['admin'] !== 1) {
         return `Expected {..., admin: 1} from 'get/users/from-id/code2', got '${JSON.stringify(res)}'`;
     }
-    
+
     // TODO updating own
     // TODO Demoting other admins
     // TODO Promoting other admins

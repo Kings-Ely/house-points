@@ -34,7 +34,7 @@ $go.onclick = async () => {
 		return;
 	}
 
-	const res = await api`create/sessions/${email}/${password}`;
+	const res = await api`create/sessions/from-login/${email}/${password}`;
 
 	if (res.error) {
 		return;

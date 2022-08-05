@@ -97,7 +97,7 @@ async function signInAs (id, email) {
         return;
     }
 
-    const { sessionID } = await api`create/sessions/${id}`;
+    const { sessionID } = await api`create/sessions/from-user-id/${id}`;
 
     if (!sessionID) return;
 

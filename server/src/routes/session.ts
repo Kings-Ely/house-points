@@ -1,6 +1,8 @@
 import route from '../index';
 import { error } from '../log';
 import { AUTH_ERR, authLvl, generateUUID, getSessionID, isAdmin, isLoggedIn } from '../util';
+import emailValidator from "email-validator";
+import * as notifications from '../notifications';
 
 /**
  * Gets the authorisation level of a session ID
@@ -43,13 +45,24 @@ route('get/sessions/active', async ({ query, cookies }) => {
  *
  * @param {number} [expires=86400] - the number of seconds the session should be valid for
  */
-route('create/sessions/:email/:password?expires=86400', async ({ query, params }) => {
+route('create/sessions/from-login/:email/:password?expires=86400', async ({ query, params }) => {
 
     // password in plaintext
-    const { email, password } = params;
+    const { email, password, expires: expiresRaw } = params;
 
     if (!email || !password) {
         return 'Missing email or password';
+    }
+
+    const expires = parseInt(expiresRaw);
+    if (isNaN(expires)) {
+        return 'Invalid expires parameter';
+    }
+    if (expires > 86400 * 365) {
+        return 'Session must expire within a year';
+    }
+    if (expires < 1) {
+        return 'Session must not have already expired';
     }
 
     // don't bother validating email here,
@@ -73,8 +86,8 @@ route('create/sessions/:email/:password?expires=86400', async ({ query, params }
     const sessionID = await generateUUID();
 
     await query`
-        INSERT INTO sessions (id, user)
-        VALUES (${sessionID}, ${res[0].id})
+        INSERT INTO sessions (id, user, expires)
+        VALUES (${sessionID}, ${res[0].id}, ${expires});
     `;
 
     return { sessionID, userID: res[0].id };
@@ -91,13 +104,23 @@ route('create/sessions/:email/:password?expires=86400', async ({ query, params }
  *
  * @param {number} [expires=86400] - the number of seconds the session should be valid for
  */
-route('create/sessions/:userID?expires=86400', async ({ query, params, cookies }) => {
+route('create/sessions/from-user-id/:userID?expires=86400', async ({ query, params, cookies }) => {
     if (!await isAdmin(cookies, query)) return AUTH_ERR;
 
-    const { userID } = params;
+    const { userID, expires: expiresRaw } = params;
 
     if (!userID) {
         return 'UserID not specified';
+    }
+    const expires = parseInt(expiresRaw);
+    if (isNaN(expires)) {
+        return 'Invalid expires parameter';
+    }
+    if (expires > 86400 * 365) {
+        return 'Session must expire within a year';
+    }
+    if (expires < 1) {
+        return 'Session must not have already expired';
     }
 
     const res = await query`
@@ -110,11 +133,43 @@ route('create/sessions/:userID?expires=86400', async ({ query, params, cookies }
     const sessionID = await generateUUID();
 
     await query`
-        INSERT INTO sessions (id, user)
-        VALUES (${sessionID}, ${userID})
+        INSERT INTO sessions (id, user, expires)
+        VALUES (${sessionID}, ${userID}, ${expires});
     `;
 
     return { sessionID, userID };
+});
+
+route('create/sessions/for-forgotten-password/:email', async ({ query, params, cookies }) => {
+    const { email } = params;
+
+    if (!email) {
+        return 'Email not specified';
+    }
+    if (!emailValidator.validate(email)) {
+        return 'Invalid email';
+    }
+
+    const res = await query`
+        SELECT userID
+        FROM users
+        WHERE email = ${email}
+    `;
+    if (!res.length) return 'Invalid email';
+    if (res.length > 1) {
+        // don't tell the user about this, it's a security issue
+        error`Multiple users found with email ${email}`;
+        return 'Invalid email';
+    }
+    const userID = res[0].userID;
+    const sessionID = await generateUUID();
+    await query`
+        INSERT INTO sessions (id, user, expires)
+        VALUES (${sessionID}, ${userID}, ${60*60});
+    `;
+
+    await notifications.forgottenPassword();
+
 });
 
 /**
