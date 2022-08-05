@@ -3,6 +3,7 @@ import { error } from '../log';
 import { AUTH_ERR, authLvl, generateUUID, getSessionID, isAdmin, isLoggedIn } from '../util';
 import emailValidator from "email-validator";
 import * as notifications from '../notifications';
+import type mysql from "mysql2";
 
 /**
  * Gets the authorisation level of a session ID
@@ -140,6 +141,11 @@ route('create/sessions/from-user-id/:userID?expires=86400', async ({ query, para
     return { sessionID, userID };
 });
 
+/**
+ * Runs the 'forgotten password' flow.
+ * Takes an email and sends a link to their email with a new session
+ * which expires in 1 hour.
+ */
 route('create/sessions/for-forgotten-password/:email', async ({ query, params, cookies }) => {
     const { email } = params;
 
@@ -151,25 +157,25 @@ route('create/sessions/for-forgotten-password/:email', async ({ query, params, c
     }
 
     const res = await query`
-        SELECT userID
+        SELECT id
         FROM users
         WHERE email = ${email}
     `;
     if (!res.length) return 'Invalid email';
     if (res.length > 1) {
         // don't tell the user about this, it's a security issue
-        error`Multiple users found with email ${email}`;
+        error`Multiple users found with email '${email}'`;
         return 'Invalid email';
     }
-    const userID = res[0].userID;
+    const userID = res[0].id;
     const sessionID = await generateUUID();
+
     await query`
         INSERT INTO sessions (id, user, expires)
         VALUES (${sessionID}, ${userID}, ${60*60});
     `;
 
-    await notifications.forgottenPassword();
-
+    await notifications.forgottenPasswordEmail(query, userID, sessionID);
 });
 
 /**
@@ -178,7 +184,7 @@ route('create/sessions/for-forgotten-password/:email', async ({ query, params, c
 route('delete/sessions/with-id/:sessionID', async ({ query, params }) => {
     const { sessionID } = params;
 
-    const queryRes = await query`
+    const queryRes = await query<mysql.OkPacket>`
         DELETE FROM sessions
         WHERE id = ${sessionID}
     `;

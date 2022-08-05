@@ -1,5 +1,5 @@
 import emailValidator from 'email-validator';
-import * as crypto from "crypto";
+import mysql from "mysql2";
 
 import route from '../';
 import {
@@ -11,6 +11,7 @@ import {
     isAdmin,
     isLoggedIn, passwordHash, validPassword
 } from '../util';
+
 
 /**
  * @admin
@@ -295,7 +296,7 @@ route('update/users/admin/:userID?admin',
         error: 'You cannot change your own admin status'
     };
 
-    const queryRes = await query`
+    const queryRes = await query<mysql.OkPacket>`
         UPDATE users
         SET admin = ${admin === '1'}
         WHERE id = ${userID}
@@ -339,8 +340,8 @@ route('update/users/year/:userID/:by',
 
     const newYear = currentYear[0].year + yearChange;
 
-    const queryRes = await query`
-        UPDATE users 
+    const queryRes = await query<mysql.OkPacket>`
+        UPDATE users
         SET year = ${newYear} 
         WHERE id = ${user}
     `;
@@ -357,7 +358,7 @@ route('update/users/year/:userID/:by',
  * and this must be able to be done by a user without login details
  * if they are using the 'forgot password' feature.
  */
-route('update/users/password/:sessionID/:password', async ({ query, params, cookies }) => {
+route('update/users/password/:sessionID/:password', async ({ query, params }) => {
     const { sessionID, password } = params;
 
     const userID = await IDFromSession(query, sessionID);
@@ -374,7 +375,7 @@ route('update/users/password/:sessionID/:password', async ({ query, params, cook
 
     const [ passHash, salt ] = passwordHash(password);
 
-    const queryRes = await query`
+    const queryRes = await query<mysql.OkPacket>`
         UPDATE users
         SET
             password = ${passHash},
@@ -404,7 +405,10 @@ route('delete/users/:userID', async ({ query, params, cookies }) => {
 
     await query`DELETE FROM housepoints WHERE student = ${userID}`;
 
-    const queryRes = await query`DELETE FROM users WHERE id = ${userID}`;
+    const queryRes = await query<mysql.OkPacket>`
+        DELETE FROM users 
+        WHERE id = ${userID}
+    `;
     if (!queryRes.affectedRows) return {
         status: 406,
         error: 'User not found'

@@ -4,7 +4,8 @@ import c from 'chalk';
 import log, { error, warning } from "./log";
 import { flags } from "./index";
 
-export type queryFunc = (queryParts: TemplateStringsArray, ...params: any[]) => Promise<any>;
+export type queryRes = mysql.RowDataPacket[] | mysql.RowDataPacket[][] | mysql.OkPacket | mysql.OkPacket[] | mysql.ResultSetHeader;
+export type queryFunc = <Res extends queryRes = mysql.RowDataPacket[]>(queryParts: TemplateStringsArray, ...params: any[]) => Promise<Res>;
 
 export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
 

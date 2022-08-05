@@ -1,6 +1,7 @@
 import mailer from 'nodemailer';
 import { queryFunc } from "./sql";
 import log, { error } from "./log";
+import c from 'chalk';
 
 let transporter:  mailer.Transporter | undefined;
 
@@ -8,10 +9,16 @@ function setUpTransporter () {
     transporter = mailer.createTransport({
         service: 'gmail',
         auth: {
+            type: 'OAuth2',
             user: process.env.GMAIL_USER,
-            pass: process.env.GMAIL_PASSWORD,
+            clientId: process.env.GMAIL_CLIENT_ID,
+            clientSecret: process.env.GMAIL_CLIENT_SECRET,
+            refreshToken: process.env.GMAIL_REFRESH_TOKEN
         }
     });
+
+    log(c.green(`Set up Gmail mailer`));
+    log`Gmail user: ${process.env.GMAIL_USER}`;
 }
 
 function mail ({
@@ -28,7 +35,7 @@ function mail ({
         content: string,
         contentType: string,
     }>,
-}) {
+}): Promise<any> {
 
     if (!process.env.PROD) {
         error`Cannot send emails in non-prod environment`;
@@ -41,13 +48,14 @@ function mail ({
 
     return new Promise((resolve, reject) => {
         transporter?.sendMail({
-            from: '',
+            from: process.env.GMAIL_USER,
             to,
             subject,
             html,
             attachments
         }, (err, info) => {
             if (err) {
+                error`Error sending email: ${JSON.stringify(err)}`;
                 reject(err);
             } else {
                 log`Email sent: ${JSON.stringify(info)}`;
@@ -76,13 +84,13 @@ async function sendEmailToUser (query: queryFunc, userID: string, subject: strin
 
 // Exposed
 
-export function forgottenPassword (query: queryFunc, userID: string, newSessionID: string) {
-    return sendEmailToUser(query, userID, 'Forgotten Password', `
-        <h1>
+export async function forgottenPasswordEmail (query: queryFunc, userID: string, newSessionID: string) {
+    return await sendEmailToUser(query, userID, 'Forgotten Password', `
+        <h3>
             You have requested to reset your password.
-        </h1>
-        <p>
-            <a href="${process.env.SITE_ROOT}/reset-password?id=${newSessionID}">
+        </h3>
+        <p style="text-align: center">
+            <a href="${process.env.SITE_ROOT}/set-password?s=${newSessionID}">
                 Reset Password
             </a>
         </p>

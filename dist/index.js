@@ -50,3 +50,26 @@ $go.onclick = async () => {
 	await setSessionCookie(sessionID);
 	await navigate(`./user`);
 };
+
+document.getElementById('forgotten-password').onclick = async () => {
+	const email = $email.value;
+	if (email.length < 4) {
+		showError`You need to enter a valid email first!`;
+		return;
+	}
+
+	if (!confirm(`Are you sure you want to reset the password for '${email}'?`)) {
+		return;
+	}
+
+	const res = await api`create/sessions/for-forgotten-password/${email}`;
+
+	if (!res.ok || res.error) {
+		return;
+	}
+
+	insertComponent().fullPagePopUp(`
+		An email has been sent to '${email}' with a link to reset your password.
+	`);
+
+};

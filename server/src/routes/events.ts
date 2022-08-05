@@ -1,5 +1,6 @@
 import route from "../";
 import { AUTH_ERR, generateUUID, getSessionID, isAdmin, isLoggedIn, userFromSession } from '../util';
+import mysql from "mysql2";
 
 /**
  * @account
@@ -142,7 +143,7 @@ route('update/events/change-name/:id/:name', async ({ query, cookies, params }) 
 
     const { id, name: newName } = params;
 
-    let queryRes = await query`
+    let queryRes = await query<mysql.OkPacket>`
         UPDATE events
         SET name = ${newName}
         WHERE id = ${id}
@@ -168,7 +169,7 @@ route('update/events/change-time/:id/:time', async ({ query, cookies, params }) 
         return `Invalid event time '${rawTime}', must be an integer (UNIX timestamp)`;
     }
 
-    let queryRes = await query`
+    let queryRes = await query<mysql.OkPacket>`
         UPDATE events
         SET time = FROM_UNIXTIME(${time})
         WHERE id = ${id}
@@ -194,7 +195,10 @@ route('delete/events/with-id/:id?deleteHps=1', async ({ query, cookies, params }
         await query`DELETE FROM housepoints WHERE event = ${id}`;
     }
 
-    const res = await query`DELETE FROM events WHERE id = ${id}`;
+    const res = await query<mysql.OkPacket>`
+        DELETE FROM events 
+        WHERE id = ${id}
+    `;
     if (!res.affectedRows) return {
         status: 406,
         error: `No events to delete with ID '${id}'`

@@ -9,6 +9,7 @@ import {
     userFromSession,
     userID
 } from '../util';
+import mysql from "mysql2";
 
 const MAX_HOUSE_POINTS = 100;
 
@@ -244,7 +245,7 @@ route('update/house-points/quantity/:housePointID/:quantity', async ({ query, co
     }
 
 
-    const queryRes = await query`
+    const queryRes = await query<mysql.OkPacket>`
         UPDATE housepoints
         SET quantity = ${quantity}
         WHERE id = ${id}
@@ -282,7 +283,10 @@ route('delete/house-points/with-id/:housePointID', async ({ query, cookies, para
         }
     }
 
-    const res = await query`DELETE FROM housepoints WHERE id = ${id}`;
+    const res = await query<mysql.OkPacket>`
+        DELETE FROM housepoints 
+        WHERE id = ${id}
+    `;
     if (!res.affectedRows) return {
         status: 406,
         error: `No house points to delete with ID '${id}'`

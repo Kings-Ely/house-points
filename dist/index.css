@@ -12,11 +12,17 @@
     margin: 50px 0;
     background: var(--bg-accent);
     border-radius: 5px;
-    box-shadow: 2px 2px 3px 3px var(--border-light);
+    box-shadow: 0 0 3px 3px var(--border-light);
     cursor: pointer;
     width: 50%;
     min-width: 300px;
     max-width: 500px;
+    transition: 300ms ease-in-out;
+}
+
+#go:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 5px 5px rgb(150, 150, 150, 0.15);
 }
 
 input {
@@ -25,6 +31,18 @@ input {
     min-width: 300px;
     max-width: 500px;
     margin: 10px;
+}
+
+#forgotten-password {
+    cursor: pointer;
+    text-align: right;
+    font-size: 0.8em;
+    width: 50%;
+    min-width: 300px;
+    max-width: 500px;
+    margin: 0;
+    text-decoration: underline;
+    padding: 0;
 }
 
 @media only screen and (max-aspect-ratio: 6/5) {
