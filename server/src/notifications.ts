@@ -44,8 +44,9 @@ async function mail ({
         return true;
     }
 
-    if (process.env.PROD !== '1') {
-        return `Cannot send emails in non-prod environment`;
+    if (process.env.REROUTE_MAIL) {
+        html = `<p>This email was rerouted from '${to}' (REROUTE_MAIL is set)</p>` + html;
+        to = process.env.REROUTE_MAIL;
     }
 
     if (!transporter) {
@@ -112,7 +113,9 @@ async function sendEmailToUser (query: queryFunc, userID: string, subject: strin
 export async function forgottenPasswordEmail (query: queryFunc, userID: string, newSessionID: string): Promise <string | true> {
     return await sendEmailToUser(query, userID, 'Forgotten Password', `
         <h3>You have requested to reset your password.</h3>
-        <p style="text-align: center">
+        <p style="padding: 20px;">
+            To reset your password, click the link, which will expire in 1 hour.
+            <b>
             <a href="${process.env.SITE_ROOT}/set-password?s=${newSessionID}">
                 Reset Password
             </a>

@@ -2,6 +2,18 @@
 import * as core from "./main.js";
 
 let currentComponentID = 0;
+export function registerComponent ($el) {
+    if (typeof $el === 'string') {
+        $el = document.querySelector($el);
+    }
+    currentComponentID++;
+    return [ currentComponentID, $el];
+}
+
+/**
+ *  Reusable function for inserting components into the DOM.
+ * @typedef {($el: HTMLElement|string, ...args: any[]) => any} Component
+ */
 
 /**
  *  Wrapper for inserting a component into the DOM.
@@ -10,97 +22,8 @@ let currentComponentID = 0;
  * @param {HTMLElement|string|undefined} [$el=document.body]
  */
 export default function insertComponent ($el=document.body) {
-    if (typeof $el === 'string') {
-        $el = document.querySelector($el);
-    }
+
     return {
-        studentEmailInputWithIntellisense: (placeholder='Email', allowNonStudents=false) => {
-            const id = currentComponentID++;
-            $el.innerHTML += `
-                <span>
-                    <span class="student-email-input-wrapper">
-                        <input
-                            type="text"
-                            class="student-email-input"
-                            placeholder="${placeholder}"
-                            autocomplete="off"
-                            aria-label="student email"
-                            id="student-email-input-${id}"
-                        >
-                        <div
-                            class="student-email-input-dropdown" 
-                            id="student-email-input-dropdown-${id}"
-                        ></div>
-                    </span>
-                </span>
-            `;
-
-            const $studentNameInput = document.getElementById(`student-email-input-${id}`);
-            const $dropdown = document.getElementById(`student-email-input-dropdown-${id}`);
-
-            window[`onClickStudentEmailInput${id}`] = (value) => {
-                $studentNameInput.value = value;
-            };
-
-            addEventListener('click', evt => {
-                if ($dropdown.contains(evt.target)) return;
-
-                if ($dropdown.classList.contains('student-email-input-show-dropdown')) {
-                    $dropdown.classList.remove('student-email-input-show-dropdown');
-
-                } else if (evt.target.id === `student-email-input-${id}`) {
-                    $dropdown.classList.add('student-email-input-show-dropdown');
-                }
-            });
-
-            core.api `get/users` .then(({ data }) => {
-
-                const studentNames = data
-                    .filter(user => user['student'] || allowNonStudents)
-                    .map(student => student['email']);
-
-                $studentNameInput.addEventListener('input', async () => {
-                    const value = $studentNameInput.value;
-
-                    let users = studentNames.filter(name =>
-                        name.toLowerCase().includes(value.toLowerCase())
-                    );
-
-                    if (users.length === 0) {
-                        $dropdown.classList.remove('student-email-input-show-dropdown');
-                        return;
-                    }
-
-                    let extra = 0;
-                    if (users.length > 10) {
-                        extra = users.length - 10;
-                        users = users.slice(0, 10);
-                    }
-
-                    $dropdown.classList.add('student-email-input-show-dropdown');
-
-                    $dropdown.innerHTML = '';
-
-                    for (let name of users) {
-                        $dropdown.innerHTML += `
-                            <p onclick="window['onClickStudentEmailInput${id}']('${name}')">
-                                ${name} 
-                            </p>
-                        `;
-                    }
-
-                    if (extra) {
-                        $dropdown.innerHTML += `
-                            <p class="no-hover">
-                                (and ${extra} more)
-                            </p>
-                        `;
-                    }
-                });
-            });
-
-            return $studentNameInput;
-        },
 
         cookiePopUp: () => {
             currentComponentID++;
@@ -129,13 +52,15 @@ export default function insertComponent ($el=document.body) {
         
                 <button 
                     onclick="allowedCookies(true)"
-                    class="big-link"
+                    class="bordered"
+                    style="margin: 10px; padding: 10px"
                 >
                     Accept
                 </button>
                 <button 
                     onclick="allowedCookies(false)"
-                    class="big-link"
+                    class="bordered"
+                    style="margin: 10px; padding: 10px"
                 >
                     Reject
                 </button>
@@ -390,7 +315,8 @@ export default function insertComponent ($el=document.body) {
             withAllMenu='',
             itemGenerator,
             gridTemplateColsCSS = '1fr 1fr',
-            selected
+            selected,
+            filter = () => true,
         }) => {
             core.preloadSVGs('selected-checkbox.svg', 'unselected-checkbox.svg');
 
@@ -485,6 +411,9 @@ export default function insertComponent ($el=document.body) {
 
                 for (let item of items) {
                     if (searchValue && !item[searchKey].toLowerCase().includes(searchValue)) {
+                        continue;
+                    }
+                    if (!filter(item)) {
                         continue;
                     }
 

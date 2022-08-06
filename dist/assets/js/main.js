@@ -1,8 +1,10 @@
 'use strict';
+import insertComponent from "./components.js";
 
 // Utility script imported by all pages
 
 // Global constants and variables
+
 export const
     API_ROOT = 'https://josephcoppin.com/school/house-points/api',
     COOKIE_KEY = 'hpnea_SessionID',
@@ -10,7 +12,12 @@ export const
     ALT_COOKIE_KEY = 'hpnea_AltSessionID',
     HOUSE_NAME = 'Osmond',
     DEFAULT_PASSWORD = 'changeme',
-    svgCache = {};
+    svgCache = {},
+    AWARD_TYPES = [
+        { name: 'Tie', required: 18 },
+        { name: 'Cuff-links', required: 36 },
+        { name: 'Hip-flask', required: 54 },
+    ];
 
 export let
     ROOT_PATH = '',
@@ -307,7 +314,7 @@ export async function loadScript (url) {
 export async function setCookie (name, value, days=1) {
 
     if (getCookie(COOKIE_ALLOW_COOKIES_KEY) !== '1' && name !== COOKIE_ALLOW_COOKIES_KEY) {
-        await navigate('/?error=cookies');
+        await showError('You must allow cookies to use this site.');
         return;
     }
 
@@ -347,7 +354,7 @@ export function getCookie (name) {
  */
 export async function eraseCookie (name) {
     if (getCookie(COOKIE_ALLOW_COOKIES_KEY) !== '1') {
-        await navigate('/?error=cookies');
+        await showError('You must allow cookies to use this site.');
         return;
     }
 
@@ -569,7 +576,7 @@ export function loadSVGs () {
  * @param {string} uris
  * @returns {Promise<void>}
  */
-export async function preloadSVGs (...uris) {
+export function preloadSVGs (...uris) {
     for (const uri of uris) {
         // don't await, because we want to load them all at the same time
         getSVGFromURI(ROOT_PATH + '/assets/img/' + uri)
@@ -624,6 +631,10 @@ export async function loadNav () {
     `;
 
     const user = await userInfo();
+
+    if (!user) {
+        return;
+    }
 
     const username = user['email']?.split('@')?.[0] || 'Unknown Name';
 
@@ -889,7 +900,7 @@ export function show (el, display = 'block') {
     if (el) {
         el.style.display = display;
     } else {
-        console.error(`showWithID: no element with id '${el.id}'`);
+        console.error(`show: no element`);
     }
 }
 

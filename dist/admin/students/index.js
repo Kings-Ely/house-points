@@ -3,7 +3,10 @@ import insertComponent from "../../assets/js/components.js";
 
 const
     $addStudentButton = document.getElementById('add-student'),
-
+    filters = {
+        years: [0, 9, 10, 11, 12, 13],
+        admin: false
+    },
     selected = [];
 
 window.deleteSelected = deleteSelected;
@@ -13,6 +16,8 @@ window.revokeAdmin = revokeAdmin;
 window.makeAdmin = makeAdmin;
 window.deleteUser = deleteUser;
 window.uploadAddStudentsFile = uploadAddStudentsFile;
+window.toggleYearGroup = toggleYearGroup;
+window.toggleAdmin = toggleAdmin;
 
 (async () => {
     await core.init('../..', true, true);
@@ -29,11 +34,38 @@ async function showStudentsList () {
         searchKey: 'email',
         selected,
         withAllMenu: `
+            <span id="filters-container">
+                <span style="display: inline-block">
+                    <span
+                        class="bordered big-link" 
+                        id="filters-button"
+                        svg="filter.svg"
+                    >
+                        Filters
+                    </span>
+                </span>
+                <div id="filters-dropdown">
+                    <button onclick="toggleYearGroup(0)">
+                        Show ${!filters.years.includes(0) ? 'teachers and students' : 'only students'}
+                    </button>
+                    <br>
+                    <button onclick="toggleAdmin()">
+                        Show ${filters.admin ? 'non-admins too' : 'only admins'}
+                    </button>
+                    <hr>
+                    ${[9, 10, 11, 12, 13].map(year => `
+                        <button onclick="toggleYearGroup(${year})"> 
+                            ${filters.years.includes(year) ? 'Hide' : 'Show'} 
+                            Y${year}
+                        </button>
+                    `).join('')}
+                </div>
+            </span>
             <button
                 onclick="deleteSelected()"
                 class="icon"
                 aria-label="delete selected"
-               data-label="Delete"
+                data-label="Delete"
                 svg="bin.svg"
             ></button>
             
@@ -41,7 +73,7 @@ async function showStudentsList () {
                 onclick="ageSelected(1)"
                 class="icon"
                 aria-label="move selected up a year"
-               data-label="Move Up 1 Year"
+                data-label="Move Up 1 Year"
                 svg="circle-up-arrow.svg"
             ></button>
             
@@ -49,7 +81,7 @@ async function showStudentsList () {
                 onclick="ageSelected(-1)"
                 class="icon"
                 aria-label="move selected down a year"
-               data-label="Move Down 1 Year"
+                data-label="Move Down 1 Year"
                 svg="circle-down-arrow.svg"
             ></button>
             
@@ -57,12 +89,16 @@ async function showStudentsList () {
                 onclick="giveHPToSelected()"
                 class="icon"
                 aria-label="give all selected a house point"
-               data-label="Give House Point"
+                data-label="Give House Point"
                 svg="plus.svg"
             ></button>
         `,
         itemGenerator: showStudent,
         gridTemplateColsCSS: '50% 1fr 1fr',
+        filter: (item) => {
+            return filters.years.includes(item['year']) &&
+                (filters.admin ? item['admin'] : true);
+        }
     });
 }
 
@@ -130,6 +166,21 @@ async function showStudent (student) {
             ></button>
         </div>
     `;
+}
+
+// Filters
+function toggleYearGroup (age) {
+    if (filters.years.includes(age)) {
+        filters.years.splice(filters.years.indexOf(age), 1);
+    } else {
+        filters.years.push(age);
+    }
+    showStudentsList();
+}
+
+function toggleAdmin () {
+    filters.admin = !filters.admin;
+    showStudentsList();
 }
 
 $addStudentButton.addEventListener('click', () => {

@@ -3,6 +3,7 @@ import * as core from "../assets/js/main.js";
 const $name = document.getElementById('name');
 const $hps = document.getElementById('hps');
 const $hpReasonInp = document.getElementById('hp-reason');
+const $info = document.getElementById('info');
 
 (async () => {
     await core.init('..', true);
@@ -31,6 +32,8 @@ const $hpReasonInp = document.getElementById('hp-reason');
             core.hide('#hps');
         }
     }
+
+    await showInfo();
 })();
 
 async function housePoints () {
@@ -59,7 +62,7 @@ async function title () {
 
     const [ username, emailExt ] = info['email'].split('@');
 
-    const name = `
+    $name.innerHTML = `
         <p style="font-size: 3em">
             <span>
                 ${username}
@@ -69,22 +72,47 @@ async function title () {
             </span>
         </p>
     `;
+}
 
-    if (info['student']) {
-        const numHps = info['accepted'];
+async function showInfo () {
+    const info = await core.userInfo();
 
-        if (numHps < 1) {
-            $name.innerHTML = `
-                ${name} has No House Points
+    const hpCount = info['accepted'];
+
+    $info.innerHTML = `
+        <p>
+            You have <b>${hpCount}</b> accepted, 
+            <b>${info['pending']}</b> pending and 
+            <b>${info['rejected']}</b> rejected house points.
+        </p>
+    `;
+
+    let goalsLeft = 0;
+
+    for (let goal of core.AWARD_TYPES) {
+        if (hpCount >= goal['points']) {
+            $info.innerHTML += `
+                <p>
+                    You reached 'House ${goal['name']}' (${goal['required']})!
+                </p>
             `;
         } else {
-            $name.innerHTML = `    
-                ${name} has ${numHps} House Point${numHps < 2 ? '' :'s'}
+            $info.innerHTML += `
+                <p>
+                    You need 
+                    <b>${goal['required'] - hpCount}</b>
+                    more house points to reach 'House ${goal['name']}'.
+                </p>
             `;
+            goalsLeft++;
         }
-    } else {
-        $name.innerHTML = `
-            ${name}
+    }
+
+    if (goalsLeft === 0) {
+        $info.innerHTML += `
+            <p>
+                You have reached all house goals!
+            </p>
         `;
     }
 }

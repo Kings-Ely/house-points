@@ -23,6 +23,7 @@
 
 * {
     transition: 200ms;
+    max-width: 100%;
 }
 
 /* --- STRUCTURE --- */
@@ -31,11 +32,17 @@ html, body {
     padding: 0;
     margin: 0;
     background: var(--bg);
+    width: 100%;
 }
 
 main {
     min-height: calc(100vh - var(--nav-height));
     padding: 10px;
+}
+
+html, body, main {
+    width: 100%;
+    margin: 0;
 }
 
 .flex-center {
@@ -45,7 +52,7 @@ main {
 }
 
 .fill-screen {
-    width: 100vw;
+    width: 100%;
     height: 100vh;
 }
 
@@ -61,6 +68,11 @@ section {
 
 section:last-child {
     border-bottom: none;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid var(--border);
 }
 
 /* --- INPUT --- */
@@ -158,6 +170,14 @@ input, textarea {
     font-size: 18px;
 }
 
+button, a {
+    cursor: pointer;
+}
+
+input, textarea {
+    cursor: text;
+}
+
 @media only screen and (max-aspect-ratio: 6/5) {
     * {
         transition: 0ms;
@@ -171,7 +191,7 @@ input, textarea {
     html, body, main {
         padding: 0;
         margin: 0;
-        width: 100vw;
+        width: 100%;
     }
 
     html, body {
@@ -411,10 +431,10 @@ svg {
     width: 50px;
     border: none;
     transition: 0.1s;
+    cursor: pointer;
 }
 
 .icon:hover svg {
-    cursor: pointer;
     fill: var(--accent);
     transform: scale(1.1);
 }
@@ -422,11 +442,10 @@ svg {
 .icon-info-only:hover svg {
     cursor: auto;
     transform: scale(1);
+    fill: var(--text);
 }
 
 .icon.no-scale:hover svg {
-    cursor: pointer;
-    fill: var(--text);
     transform: scale(1);
 }
 
@@ -543,7 +562,7 @@ svg {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: 100%;
     backdrop-filter: blur(5px);
     background: rgba(125, 125, 125, 0.2);

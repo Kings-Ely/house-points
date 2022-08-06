@@ -18,12 +18,8 @@ const
 
 	const s = decodeURIComponent(core.GETParam('s'));
 
-	if (core.getSession()) {
-		if (s !== core.getSession()) {
-			await core.navigate(`../?error=auth`);
-			return;
-		}
-	}
+	await core.eraseCookie(core.COOKIE_KEY);
+	await core.eraseCookie(core.ALT_COOKIE_KEY);
 
 	const user = await core.api`get/users/from-session/${s}`;
 
