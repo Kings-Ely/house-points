@@ -463,6 +463,7 @@ svg {
     width: fit-content;
     top: 110%;
     left: calc(50% - 50px + var(--offset-x));
+    pointer-events: none;
 }
 
 [data-label]:hover::before {

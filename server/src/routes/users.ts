@@ -131,6 +131,7 @@ route('get/users/from-session/:session', async ({ query, params }) => {
         WHERE sessions.id = ${session}
             AND sessions.user = users.id
             AND UNIX_TIMESTAMP(sessions.opened) + sessions.expires > UNIX_TIMESTAMP()
+            AND sessions.active = 1
     `;
 
     if (!data.length) return {
@@ -358,8 +359,8 @@ route('update/users/year/:userID/:by',
  * and this must be able to be done by a user without login details
  * if they are using the 'forgot password' feature.
  */
-route('update/users/password/:sessionID/:password', async ({ query, params }) => {
-    const { sessionID, password } = params;
+route('update/users/password/:sessionID/:newPassword', async ({ query, params }) => {
+    const { sessionID, newPassword } = params;
 
     const userID = await IDFromSession(query, sessionID);
 
@@ -368,12 +369,12 @@ route('update/users/password/:sessionID/:password', async ({ query, params }) =>
         error: 'Invalid session ID'
     }
 
-    const validPasswordRes = validPassword(password);
+    const validPasswordRes = validPassword(newPassword);
     if (typeof validPasswordRes === 'string') {
         return validPasswordRes;
     }
 
-    const [ passHash, salt ] = passwordHash(password);
+    const [ passHash, salt ] = passwordHash(newPassword);
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE users
@@ -387,6 +388,14 @@ route('update/users/password/:sessionID/:password', async ({ query, params }) =>
         status: 406,
         error: 'User not found'
     };
+
+    await query`
+        UPDATE sessions
+        SET active = 0
+        WHERE
+            id = ${sessionID}
+            OR UNIX_TIMESTAMP(opened) + expires > UNIX_TIMESTAMP()
+    `;
 });
 
 /**

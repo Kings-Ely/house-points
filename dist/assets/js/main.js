@@ -27,6 +27,7 @@ export let
     documentLoaded = false;
 
 window.logout = logout;
+window.signInAs = signInAs;
 
 
 // for making relative dates
@@ -649,6 +650,33 @@ export async function loadNav () {
 
         $username.innerHTML = `${username} (${altUsername})`;
     }
+}
+
+
+/**
+ * Tries to sign you in as the user with the given ID.
+ * @param {string} id
+ * @param {string} email
+ * @returns {Promise<void>}
+ */
+async function signInAs (id, email) {
+    if (!await isAdmin()) {
+        return;
+    }
+
+    if (!confirm(`Sign in as ${email}?`)) {
+        return;
+    }
+
+    const { sessionID } = await api`create/sessions/from-user-id/${id}`;
+
+    if (!sessionID) {
+        return;
+    }
+
+    await setAltSessionCookie(getSession());
+    await setSessionCookie(sessionID);
+    await navigate(`/user`);
 }
 
 /**

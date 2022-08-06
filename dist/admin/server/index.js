@@ -150,7 +150,11 @@ async function activeSessions () {
 				${session['id'] === core.getSession() ? `
 					<b>${session['email']}</b> (Your current session)
 				` : `
-					${session['email']}
+					<button
+						onclick="signInAs('${session['userID']}', '${session['email']}')"
+						data-label="Sign in as"
+						style="font-size: 1em; cursor: pointer;"
+					>${session['email']}</button>
 				`}
 			</p>
 			<p>

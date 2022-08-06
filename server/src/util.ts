@@ -104,7 +104,7 @@ export async function authLvl (sessionID: string, query: queryFunc) {
         WHERE sessions.id = ${sessionID}
             AND sessions.user = users.id
             AND UNIX_TIMESTAMP(sessions.opened) + sessions.expires > UNIX_TIMESTAMP()
-           
+            AND sessions.active = 1
     `;
 
     if (!res.length) return 0;

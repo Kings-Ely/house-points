@@ -36,6 +36,7 @@ route('get/sessions/active', async ({ query, cookies }) => {
         WHERE
             sessions.user = users.id
             AND UNIX_TIMESTAMP(sessions.opened) + sessions.expires > UNIX_TIMESTAMP()
+            AND sessions.active = 1
         ORDER BY opened DESC
     ` };
 });
@@ -185,8 +186,11 @@ route('create/sessions/for-forgotten-password/:email', async ({ query, params, c
 route('delete/sessions/with-id/:sessionID', async ({ query, params }) => {
     const { sessionID } = params;
 
+    if (!sessionID) return 'Session ID not specified';
+
     const queryRes = await query<mysql.OkPacket>`
-        DELETE FROM sessions
+        UPDATE sessions
+        SET active = 0
         WHERE id = ${sessionID}
     `;
     if (queryRes.affectedRows === 0) return {
@@ -194,17 +198,3 @@ route('delete/sessions/with-id/:sessionID', async ({ query, params }) => {
         error: `Session not found`
     };
 });
-
-/**
- * @account
- * Deletes the session from the cookie sent with the request.
- * Checks that the session is valid first.
- */
-route('delete/sessions/mine', async ({ query, cookies }) => {
-    if (!await isLoggedIn(cookies, query)) return AUTH_ERR;
-
-    await query`
-        DELETE FROM sessions
-        WHERE id = ${getSessionID(cookies)}
-    `;
-})

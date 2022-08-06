@@ -11,7 +11,6 @@ window.ageSelected = ageSelected;
 window.giveHPToSelected = giveHPToSelected;
 window.revokeAdmin = revokeAdmin;
 window.makeAdmin = makeAdmin;
-window.signInAs = signInAs;
 window.deleteUser = deleteUser;
 window.uploadAddStudentsFile = uploadAddStudentsFile;
 
@@ -253,22 +252,6 @@ async function deleteSelected () {
     selected.splice(0, selected.length);
 
     await showStudentsList();
-}
-
-async function signInAs (id, email) {
-    if (!confirm(`Sign in as ${email}?`)) {
-        return;
-    }
-
-    const { sessionID } = await core.api`create/sessions/from-user-id/${id}`;
-
-    if (!sessionID) {
-        return;
-    }
-
-    await core.setAltSessionCookie(core.getSession());
-    await core.setSessionCookie(sessionID);
-    await core.navigate(`/user`);
 }
 
 async function ageSelected (amount) {

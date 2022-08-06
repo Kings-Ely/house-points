@@ -42,11 +42,18 @@ export default function insertComponent ($el=document.body) {
                 $studentNameInput.value = value;
             };
 
-            window.addEventListener('click', () => {
-                $dropdown.classList.toggle('student-email-input-show-dropdown');
+            addEventListener('click', evt => {
+                if ($dropdown.contains(evt.target)) return;
+
+                if ($dropdown.classList.contains('student-email-input-show-dropdown')) {
+                    $dropdown.classList.remove('student-email-input-show-dropdown');
+
+                } else if (evt.target.id === `student-email-input-${id}`) {
+                    $dropdown.classList.add('student-email-input-show-dropdown');
+                }
             });
 
-            core.api`get/users`.then(({data}) => {
+            core.api `get/users` .then(({ data }) => {
 
                 const studentNames = data
                     .filter(user => user['student'] || allowNonStudents)
@@ -54,13 +61,6 @@ export default function insertComponent ($el=document.body) {
 
                 $studentNameInput.addEventListener('input', async () => {
                     const value = $studentNameInput.value;
-
-                    /* if uncommented will hide when there is no input
-                    if (!value) {
-                        $dropdown.classList.remove('student-email-input-show-dropdown');
-                        return;
-                    }
-                     */
 
                     let users = studentNames.filter(name =>
                         name.toLowerCase().includes(value.toLowerCase())

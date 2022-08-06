@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 30, 2022 at 08:09 PM
+-- Generation Time: Aug 06, 2022 at 10:09 AM
 -- Server version: 5.7.39
 -- PHP Version: 7.4.30
 
@@ -89,7 +89,8 @@ CREATE TABLE `sessions` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `user` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `opened` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `expires` int(128) NOT NULL DEFAULT '86400' COMMENT '86400 is 1 day in seconds'
+  `expires` int(128) NOT NULL DEFAULT '86400' COMMENT '86400 is 1 day in seconds',
+  `active` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -114,9 +115,6 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `email`, `password`, `salt`, `year`, `admin`, `student`) VALUES
 ('admin', 'admin@example.com', SHA2('passwordabc', 256), 'abc', 0, 1, 0);
---
--- ('admin', 'admin@example.com', '6733b7ffeace4887c3b31258079c780d8db3018db9cbc05c500df3521f968df8', 'abc', 0, 1, 0);
---
 
 --
 -- Indexes for dumped tables
@@ -144,6 +142,12 @@ ALTER TABLE `events`
 -- Indexes for table `housepoints`
 --
 ALTER TABLE `housepoints`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `sessions`
+--
+ALTER TABLE `sessions`
   ADD PRIMARY KEY (`id`);
 
 --
