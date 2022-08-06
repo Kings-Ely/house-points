@@ -22,7 +22,9 @@ export function registerComponent ($el) {
  * @param {HTMLElement|string|undefined} [$el=document.body]
  */
 export default function insertComponent ($el=document.body) {
-
+    if (typeof $el === 'string') {
+        $el = document.querySelector($el);
+    }
     return {
 
         cookiePopUp: () => {

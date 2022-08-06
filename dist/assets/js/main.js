@@ -416,6 +416,9 @@ export async function showSpinner () {
 
     document.body.style.cursor = 'progress';
 
+    const current = document.querySelector('.spinner');
+    if (current) current.remove();
+
     const loader = document.createElement('div');
     loader.classList.add('spinner');
     loader.innerHTML = `<div><div></div><div></div><div></div><div></div></div>`;

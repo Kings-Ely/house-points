@@ -6,39 +6,47 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 
-    <script type="module" src="../assets/js/main.js"></script>
     <script type="module" src="index.js" defer></script>
+    <script src="../assets/lib/chartist/chartist.min.js"></script>
 
     <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="./index.css">
+    <link rel="stylesheet" href="../assets/lib/chartist/chartist.min.css">
 </head>
 <body>
+<div class="spinner"><div><div></div><div></div><div></div><div></div></div></div>
 <nav></nav>
 <main>
-    <div>
+    <div id="split">
         <div>
-            <label>
-                Only show for
-                <select id="show-year" aria-label="what years to show">
-                    <option value="9,10,11,12,13">All</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                    <option value="11">11</option>
-                    <option value="12">12</option>
-                    <option value="13">13</option>
-                    <option value="12,13">6th Form</option>
-                </select>
-            </label>
-        </div>
-        <div id="podium">
-            <div id="podium-2nd"></div>
-            <div id="podium-1st"></div>
-            <div id="podium-3rd"></div>
-        </div>
+            <div>
+                <label>
+                    Only show for
+                    <select id="show-year" aria-label="what years to show">
+                        <option value="9,10,11,12,13">All</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                        <option value="12,13">6th Form</option>
+                    </select>
+                </label>
+            </div>
+            <div id="podium">
+                <div id="podium-2nd"></div>
+                <div id="podium-1st"></div>
+                <div id="podium-3rd"></div>
+            </div>
 
-        <div id="leaderboard"></div>
+            <div id="leaderboard"></div>
+        </div>
+        <div>
+            <div id="year-group-comparison">
+                <div class="ct-chart"></div>
+            </div>
+        </div>
     </div>
-
 </main>
 <footer></footer>
 </body>

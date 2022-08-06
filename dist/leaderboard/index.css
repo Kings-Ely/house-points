@@ -54,3 +54,21 @@ main {
 #show-year {
     width: 40px;
 }
+
+
+#split {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 10px;
+    margin: 10px;
+}
+
+#year-group-comparison {
+    aspect-ratio: 1/1;
+    width: 100%;
+}
+
+.ct-chart {
+    width: 100%;
+    height: 100%;
+}

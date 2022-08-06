@@ -8,6 +8,7 @@ const $podium1st = document.getElementById('podium-1st');
 const $podium2nd = document.getElementById('podium-2nd');
 const $podium3rd = document.getElementById('podium-3rd');
 const $whichYears = document.getElementById('show-year');
+const yearGroupComparison = document.getElementById('year-group-comparison');
 
 // show all by default
 let showYears = [9, 10, 11, 12, 13];
@@ -105,11 +106,46 @@ function leaderboard (users) {
         $leaderboard.innerHTML += showStudent(users[i]);
     }
 }
+
+async function yearGroups (users) {
+
+    const data = {
+        series: [0, 0, 0, 0, 0],
+        labels: [9, 10, 11, 12, 13]
+    };
+
+    for (let i = 0; i < data.labels.length; i++) {
+        const year = data.labels[i];
+        data.series[i] = users
+            .filter(user => user['year'] === year)
+            .reduce((acc, user) => acc + user['accepted'], 0);
+    }
+
+    const totalHps = data.series.reduce((a, b) => a + b, 0);
+
+    const options = {
+        donut: true,
+        showLabel: true,
+        low: 0,
+        onlyInteger: true,
+        labelDirection: 'explode',
+        chartPadding: 100,
+        labelOffset: 50,
+        labelInterpolationFnc: value => {
+            const proportion = data.series[data.labels.indexOf(value)] / totalHps;
+            return 'Y' + value + ': ' + Math.round(proportion * 100) + '%';
+        }
+    };
+
+    new Chartist.Pie('.ct-chart', data, options);
+}
+
 async function main (reload=true) {
     if (reload || !leaderboardData) {
         leaderboardData = (await core.api`get/users/leaderboard`)['data'];
     }
     leaderboard(leaderboardData);
+    await yearGroups(leaderboardData);
 }
 
 $whichYears.onchange = async () => {
