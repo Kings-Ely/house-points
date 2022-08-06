@@ -113,7 +113,10 @@ async function main (reload=true) {
 }
 
 $whichYears.onchange = async () => {
-    showYears = $whichYears.value.split(',').map(parseInt);
+    showYears = $whichYears.value
+        .split(',')
+        .filter(Boolean)
+        .map(y => parseInt(y));
     await main(false);
 };
 
