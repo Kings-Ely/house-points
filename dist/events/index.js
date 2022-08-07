@@ -4,6 +4,11 @@ import FullPagePopup from "../assets/js/components/FullPagePopup.js";
 import EventCard from "../assets/js/components/EventCard.js";
 import SelectableList from "../assets/js/components/SelectableList.js";
 
+const selected = [];
+
+window.eventPopup = eventPopup;
+window.deleteEvents = deleteEvents;
+
 (async () => {
 	await core.init('..', true);
 
@@ -12,7 +17,6 @@ import SelectableList from "../assets/js/components/SelectableList.js";
 	if (core.GETParam('id')) {
 		await eventPopup();
 	}
-
 })();
 
 async function showAllEvents () {
@@ -22,20 +26,11 @@ async function showAllEvents () {
 
 		document.getElementById('add-event-button')
 			.addEventListener('click', () => {
-				AddEventPopup(showAllEvents)
+				AddEventPopup(document.body, showAllEvents)
 			});
 	}
 
-	const selected = [];
-
 	const { data: items } = await core.api`get/events`;
-
-	window.deleteEvents = async () => {
-		await Promise.all(selected.map(async id => {
-			await core.api`delete/events/with-id/${id}`;
-		}));
-		await showAllEvents();
-	};
 
 	if (await core.isAdmin()) {
 
@@ -69,7 +64,6 @@ async function showAllEvents () {
 					</div>
 				`).join('')}
 			</div>
-
 		`;
 	}
 
@@ -79,7 +73,7 @@ async function showAllEvents () {
 function eventHTML (event) {
 	return `
 		<div 
-			class="flex-center" 
+			class="flex-center"
 			style="justify-content: left"
 			onclick="eventPopup('${event.id}')"
 		>
@@ -100,6 +94,21 @@ function eventHTML (event) {
 			${core.limitStrLength(event.description)}
 		</p>
 	`;
+}
+
+async function deleteEvents () {
+	if (!selected.length) {
+		await core.showError('No events selected');
+		return;
+	}
+	if (!confirm(
+		`Are you sure you want to delete ${selected.length} event${selected.length > 1 ? 's' : ''}?`)) {
+		return;
+	}
+	await Promise.all(selected.map(async id => {
+		await core.api`delete/events/with-id/${id}`;
+	}));
+	await showAllEvents();
 }
 
 async function eventPopup (id=core.GETParam('id')) {

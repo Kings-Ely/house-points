@@ -3,7 +3,6 @@ import { registerComponent } from "../components.js";
 import * as core from "../main.js";
 
 /**
- * @type Component
  * A list of elements with select icons next to them.
  *
  * @template T
@@ -132,9 +131,9 @@ const SelectableList = registerComponent(($el, id, {
 				continue;
 			}
 
-			const id = item[uniqueKey];
+			const itemID = item[uniqueKey];
 
-			const isSelected = selected.includes(id);
+			const isSelected = selected.includes(itemID);
 
 			$items.innerHTML += `
 				<div class="item">
@@ -142,7 +141,7 @@ const SelectableList = registerComponent(($el, id, {
 						class="icon medium no-scale"
 						svg="${isSelected ? 'selected-checkbox' : 'unselected-checkbox'}.svg"
 						aria-label="${isSelected ? 'Unselect' : 'Select'}"
-						onclick="_SelectableList${id}__select('${id}', ${isSelected ? 'false' : 'true'})"
+						onclick="_SelectableList${id}__select('${itemID}', ${isSelected ? 'false' : 'true'})"
 					></button>
 					<div class="item-content" style="grid-template-columns: ${gridTemplateColsCSS}">
 						  ${await itemGenerator(item, isSelected)}

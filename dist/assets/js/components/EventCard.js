@@ -12,8 +12,6 @@ import StudentEmailInputWithIntellisense from "./StudentEmailInputWithIntellisen
  * }} Event */
 
 /**
- * @type Component
- *
  * @param {El} $el
  * @param {() => Event} getEvent getter for event data
  * @param {boolean} admin should be admin options be shown

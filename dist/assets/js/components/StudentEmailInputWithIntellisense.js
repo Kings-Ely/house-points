@@ -3,7 +3,6 @@ import { registerComponent } from "../components.js";
 import * as core from "../main.js";
 
 /**
- * @type Component
  * Component for student email input with dropdown for autocompletion of emails in the DB.
  *
  * @param {El} $el

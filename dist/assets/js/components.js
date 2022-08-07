@@ -1,11 +1,23 @@
 'use strict';
 
+/** @typedef {HTMLElement|string} El */
+
+/**
+ *  Reusable function for inserting components into the DOM.
+ *  @typedef {($el: El, ...args: *) => *} Component
+ */
+
+/**
+ *  Reusable function for inserting components into the DOM.
+ *  @typedef {($el: El, id: number, ...args: *) => *} ComponentDefinition
+ */
+
 let currentComponentID = 0;
 
 /**
- * @template Returns
- * @param {($el: HTMLElement|string, id: number, ...args: *) => Returns} cb
- * @returns {($el: HTMLElement|string, ...args: *) => Returns}
+ * Turns a ComponentDefinition into a Component.
+ * @param {ComponentDefinition} cb
+ * @returns {Component}
  */
 export function registerComponent (cb) {
     return ($el, ...args) => {
@@ -15,17 +27,9 @@ export function registerComponent (cb) {
         if (!($el instanceof HTMLElement)) {
             throw new Error('Trying to insert component into not-HTMLElement');
         }
-        cb($el, currentComponentID++, ...args);
+        return cb($el, currentComponentID++, ...args);
     };
 }
-
-/** @typedef {HTMLElement|string} El */
-
-/**
- *  Reusable function for inserting components into the DOM.
- * @typedef {($el: El, ...args: *) => *} Component
- */
-
 
 /**
  * Kind of ew way of doing it. But it works.
@@ -38,15 +42,19 @@ export function registerComponent (cb) {
  */
 export function insert (cb, ...args) {
 
-    const id = `insertComponentPlaceHolder${currentComponentID}Element`;
+    const id = `insertComponentPlaceHolder${currentComponentID++}Element`;
 
     const interval = setInterval(() => {
-        const $el = document.getElementById(id);
-        if ($el) {
-            return;
+        try {
+            const $el = document.getElementById(id);
+            if ($el?.id !== id) return;
+
+            cb(`#${id}`, ...args);
+            clearInterval(interval);
+        } catch (e) {
+            console.error(e);
+            clearInterval(interval);
         }
-        cb(`#${id}`, ...args);
-        clearInterval(interval);
     }, 10);
 
     return `<span id="${id}"></span>`;

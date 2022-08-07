@@ -7,8 +7,11 @@ import FullPagePopup from "./FullPagePopup.js";
 /**
  * The popup showing 'allow' and 'reject' options for cookies.
  * Only allowed one in DOM at a time, so no need for unique namespace.
+ *
+ * @param {El} $el
+ * @param {() => *} reload
  */
-const AddEventPopup = registerComponent(($el) => {
+const AddEventPopup = registerComponent(($el, id, reload) => {
 
 	let studentsInEvent = {};
 
@@ -147,7 +150,6 @@ const AddEventPopup = registerComponent(($el) => {
 		</div>
 	`);
 
-
 	document.getElementById(`add-event-submit`).onclick = async () => {
 
 		if ($nameInp.value.length < 3) {
@@ -155,9 +157,15 @@ const AddEventPopup = registerComponent(($el) => {
 			return;
 		}
 
-		if ($nameInp.value.length > 30) {
+		if ($nameInp.value.length > 50) {
 			await core.showError('Event name too long - keep it simple!');
 			return;
+		}
+
+		if ($nameInp.value.length > 25) {
+			if (!confirm(`That's quite a long name, remember to keep it short!`)) {
+				return;
+			}
 		}
 
 		if (!$dateInp.value) {
@@ -198,7 +206,7 @@ const AddEventPopup = registerComponent(($el) => {
 	$dateInp.valueAsDate = new Date();
 
 	window._AddEventPopup__showStudentsInAddEvent()
-		.then(reload);
+		.then(() => reload());
 });
 
 export default AddEventPopup;

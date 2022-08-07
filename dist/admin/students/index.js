@@ -1,5 +1,8 @@
 import * as core from "../../assets/js/main.js";
 import SelectableList from "../../assets/js/components/SelectableList.js";
+import { insert } from "../../assets/js/components.js";
+import FullPagePopup from "../../assets/js/components/FullPagePopup.js";
+import UserCard from "../../assets/js/components/UserCard.js";
 
 const
     $addStudentButton = document.getElementById('add-student'),
@@ -18,6 +21,7 @@ window.deleteUser = deleteUser;
 window.uploadAddStudentsFile = uploadAddStudentsFile;
 window.toggleYearGroup = toggleYearGroup;
 window.toggleAdmin = toggleAdmin;
+window.userPopup = userPopup;
 
 (async () => {
     await core.init('../..', true, true);
@@ -129,6 +133,15 @@ async function showStudent (student) {
                 ></button>                
             `}
             
+            <button 
+                svg="account.svg"
+                onclick="signInAs('${id}', '${email}')"
+                class="icon medium"
+                style="opacity: ${isMe ? '0' : '1'}"
+                ${isMe ? 'disabled' : ''}
+                ${!isMe ? `data-label="Sign in as ${email}"` : ''}
+            ></button>
+            
             ${isMe ? `
                 <span class="student-link">
                    <b>${email}</b>
@@ -136,10 +149,10 @@ async function showStudent (student) {
                 </span>
             ` : `
                 <button 
-                    onclick="signInAs('${id}', '${email}')" 
+                    onclick="userPopup('${id}')" 
                     class="student-link"
-                    data-label="Sign in as ${email}"
-                    aria-label="Sign in as ${email}"
+                    data-label="View"
+                    aria-label="View"
                 >
                     ${email}
                 </button>
@@ -166,6 +179,13 @@ async function showStudent (student) {
             ></button>
         </div>
     `;
+}
+
+async function userPopup (id) {
+    FullPagePopup(document.body, insert(UserCard,
+        async () => (await core.api`get/users/from-id/${id}`),
+        true,
+    ));
 }
 
 // Filters

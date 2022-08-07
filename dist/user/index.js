@@ -1,5 +1,6 @@
 import * as core from "../assets/js/main.js";
 
+
 const $name = document.getElementById('name');
 const $hps = document.getElementById('hps');
 const $hpReasonInp = document.getElementById('hp-reason');
@@ -24,9 +25,10 @@ let me = false;
 
     if ((await core.userInfo())['student']) {
 
-        if (me) {
+        if (me || myUserInfo['admin']) {
             core.show('#submit-hp-request');
         }
+
         await reloadHousePoints();
 
     } else {

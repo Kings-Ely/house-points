@@ -9,7 +9,7 @@ let popupStack = [];
  * @param {El} $el
  * @param {string} content
  */
-const CookiePopUp = registerComponent(($el, id, content) => {
+const FullPagePopup = registerComponent(($el, id, content) => {
 
 	if (document.getElementById('full-page-popup')) {
 		// remove any current popups
@@ -57,4 +57,4 @@ const CookiePopUp = registerComponent(($el, id, content) => {
 	return hide;
 });
 
-export default CookiePopUp;
+export default FullPagePopup;

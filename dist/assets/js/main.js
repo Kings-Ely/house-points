@@ -590,6 +590,8 @@ export async function loadNav () {
 
     const $adminLink = document.getElementById('admin-link');
     const $username = document.getElementById('nav-username');
+    const $homeLink = document.getElementById('home-link');
+
 
     // replace links in nav relative to this page
     document.querySelectorAll('nav a').forEach(a => {
@@ -607,9 +609,9 @@ export async function loadNav () {
 
     const user = await userInfo();
 
-    if (!user) {
-        return;
-    }
+    if (!user) return;
+
+    $homeLink.href += `?email=${user.email}`;
 
     const username = user['email']?.split('@')?.[0] || 'Unknown Name';
 
@@ -662,7 +664,7 @@ async function signInAs (id, email) {
 
     await setAltSessionCookie(getSession());
     await setSessionCookie(sessionID);
-    await navigate(`/user`);
+    await navigate(`/user/?email=${email}`);
 }
 
 /**
