@@ -170,17 +170,46 @@ Test.test('Users | Getting info from email', async (api) => {
     const { userID: userID2, sessionID: sessionID2, email: email2 } = await generateUser(api);
 
     let res = await api(`get/users/from-email/${email2}`);
-    if (res.id !== userID2) {
+    if (res?.id !== userID2) {
         return `Expected id '${userID2}' from 'get/users/from-email', got '${res.id}'`;
     }
+    if (res?.email !== email2) {
+        return `Expected email '${email2}' from 'get/users/from-email', got '${res.email}'`;
+    }
+    if (!res?.student) {
+        return `Expected student to be true from 'get/users/from-email', got '${res.student}'`;
+    }
+    if (res?.admin !== 0) {
+        return `Expected admin to be false from 'get/users/from-email', got '${res.admin}'`;
+    }
+    if (res?.year !== 10) {
+        return `Expected year to be 10 from 'get/users/from-email', got '${res.year}'`;
+    }
+    if (res?.accepted !== 0) {
+        return `Expected accepted to be 0 from 'get/users/from-email', got '${res.accepted}'`;
+    }
+    if (res?.rejected !== 0) {
+        return `Expected rejected to be 0 from 'get/users/from-email', got '${res.rejected}'`;
+    }
+    if (res?.pending !== 0) {
+        return `Expected pending to be 0 from 'get/users/from-email', got '${res.pending}'`;
+    }
+    if (res?.housePoints?.length !== 0) {
+        return `Expected housePoints to be empty from 'get/users/from-email', got '${res.housePoints}'`;
+    }
+
     // check that we can do that again but using the newly created admin code
     res = await api(`get/users/from-email/${email2}`, sessionID1);
     if (res.id !== userID2) {
         return `Expected code '${userID2}' from 'get/users/from-email', got '${res.id}'`;
     }
+
     res = await api(`get/users/from-email/${email1}`, sessionID2);
-    if (res.ok || res.status !== 401 || res.code) {
-        return `Expected 401 from 'get/users/from-email', got '${JSON.stringify(res)}'`;
+    if (res.id) {
+        return `Expected no id from 'get/users/from-email', got '${JSON.stringify(res)}'`;
+    }
+    if (res.email !== email1) {
+        return `Expected email '${email1}' from 'get/users/from-email', got '${res.email}'`;
     }
 
     await api(`delete/users/${userID1}`);

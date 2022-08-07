@@ -8,7 +8,6 @@ const $podium1st = document.getElementById('podium-1st');
 const $podium2nd = document.getElementById('podium-2nd');
 const $podium3rd = document.getElementById('podium-3rd');
 const $whichYears = document.getElementById('show-year');
-const yearGroupComparison = document.getElementById('year-group-comparison');
 
 // show all by default
 let showYears = [9, 10, 11, 12, 13];

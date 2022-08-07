@@ -5,15 +5,28 @@ const $hps = document.getElementById('hps');
 const $hpReasonInp = document.getElementById('hp-reason');
 const $info = document.getElementById('info');
 
+let myUserInfo;
+let me = false;
+
 (async () => {
     await core.init('..', true);
 
-    if (!await core.signedIn()) {
-        await core.navigate(`/?error=auth`);
+    if (!core.GETParam('email')) {
+        await core.navigate(`?email=${(await core.userInfo())['email']}`);
+        return;
     }
 
+    myUserInfo = await core.userInfo();
+
+    await reloadUserInfoFromEmail();
+
+    me = myUserInfo['email'] === core.GETParam('email');
+
     if ((await core.userInfo())['student']) {
-        core.show('#submit-hp-request');
+
+        if (me) {
+            core.show('#submit-hp-request');
+        }
         await reloadHousePoints();
 
     } else {
@@ -33,16 +46,32 @@ const $info = document.getElementById('info');
         }
     }
 
-    await showInfo();
+    if (!(await core.userInfo()).admin) {
+        await showInfo();
+    } else {
+        core.hide('#info');
+    }
 })();
 
+async function reloadUserInfoFromEmail () {
+    const email = core.GETParam('email');
+
+    const info = await core.api`get/users/from-email/${email}`;
+
+    await core.handleUserInfo(info);
+}
+
 async function housePoints () {
-    const { housePoints: hps } = await core.userInfo();
+    const { housePoints: hps, accepted } = await core.userInfo();
+
+    $hps.innerHTML = `
+        <h2>House Points (${accepted})</h2>
+    `;
 
     if (hps.length === 0) {
-        $hps.innerHTML = `
+        $hps.innerHTML += `
             <p style="font-size: 30px; margin: 50px; text-align: center">
-                Looks like you haven't got any house point yet!
+                No house point yet!
             </p>
         `;
         return;
@@ -53,7 +82,7 @@ async function housePoints () {
     for (let hp of hps) {
         html += showHp(hp);
     }
-    $hps.innerHTML = html;
+    $hps.innerHTML += html;
 }
 
 async function title () {
@@ -81,7 +110,7 @@ async function showInfo () {
 
     $info.innerHTML = `
         <p>
-            You have <b>${hpCount}</b> accepted, 
+             <b>${hpCount}</b> accepted, 
             <b>${info['pending']}</b> pending and 
             <b>${info['rejected']}</b> rejected house points.
         </p>
@@ -93,13 +122,13 @@ async function showInfo () {
         if (hpCount >= goal['points']) {
             $info.innerHTML += `
                 <p>
-                    You reached 'House ${goal['name']}' (${goal['required']})!
+                    Reached 'House ${goal['name']}' (${goal['required']})!
                 </p>
             `;
         } else {
             $info.innerHTML += `
                 <p>
-                    You need 
+                    Need 
                     <b>${goal['required'] - hpCount}</b>
                     more house points to reach 'House ${goal['name']}'.
                 </p>
@@ -111,7 +140,7 @@ async function showInfo () {
     if (goalsLeft === 0) {
         $info.innerHTML += `
             <p>
-                You have reached all house goals!
+                Reached all house goals!
             </p>
         `;
     }
@@ -181,7 +210,7 @@ function showHp (hp) {
 
 async function reloadHousePoints () {
 
-    await core.reloadUserInfo();
+    await reloadUserInfoFromEmail();
 
     await title();
 

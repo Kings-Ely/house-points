@@ -1,5 +1,5 @@
 import * as core from "../assets/js/main.js";
-import insertComponent from "../assets/js/components.js";
+import StudentEmailInputWithIntellisense from "../assets/js/components/StudentEmailInputWithIntellisense.js";
 
 const $addHpReason = document.getElementById('add-hp-reason');
 const $pendingHPs = document.getElementById('pending');
@@ -11,7 +11,7 @@ const $addHPSubmit = document.getElementById('add-hp-submit');
 (async () => {
     await core.init('..', true, true);
 
-    $addHPName = insertComponent($addHPName).studentEmailInputWithIntellisense();
+    $addHPName = StudentEmailInputWithIntellisense($addHPName);
 
     core.hide('#admin-link');
 

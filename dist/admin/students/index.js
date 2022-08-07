@@ -1,5 +1,5 @@
 import * as core from "../../assets/js/main.js";
-import insertComponent from "../../assets/js/components.js";
+import SelectableList from "../../assets/js/components/SelectableList.js";
 
 const
     $addStudentButton = document.getElementById('add-student'),
@@ -27,7 +27,7 @@ window.toggleAdmin = toggleAdmin;
 })();
 
 async function showStudentsList () {
-    insertComponent('#students').selectableList({
+    SelectableList('#students', {
         name: 'Students',
         items: (await core.api`get/users`)['data'],
         uniqueKey: 'id',

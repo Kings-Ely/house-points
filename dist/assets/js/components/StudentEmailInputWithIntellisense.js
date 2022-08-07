@@ -1,3 +1,4 @@
+'use strict';
 import { registerComponent } from "../components.js";
 import * as core from "../main.js";
 
@@ -5,36 +6,41 @@ import * as core from "../main.js";
  * @type Component
  * Component for student email input with dropdown for autocompletion of emails in the DB.
  *
- * @param placeholder placeholder text for the input field
- * @param allowNonStudents
- * @returns {HTMLElement}
+ * @param {El} $el
+ * @param {string} [placeholder='Email'] placeholder text for the input field
+ * @param {boolean} [allowNonStudents=false] filters on 'student' property of  users
+ * @returns {HTMLElement} the HTMLInputElement
  */
-const studentEmailInputWithIntellisense = ($el, placeholder='Email', allowNonStudents=false) => {
-	const [ id, $el ] = registerComponent($el);
+const StudentEmailInputWithIntellisense = registerComponent((
+	$el,
+	id,
+	placeholder='Email',
+	allowNonStudents=false
+) => {
 
 	$el.innerHTML += `
-                <span>
-                    <span class="student-email-input-wrapper">
-                        <input
-                            type="text"
-                            class="student-email-input"
-                            placeholder="${placeholder}"
-                            autocomplete="off"
-                            aria-label="student email"
-                            id="student-email-input-${id}"
-                        >
-                        <div
-                            class="student-email-input-dropdown" 
-                            id="student-email-input-dropdown-${id}"
-                        ></div>
-                    </span>
-                </span>
-            `;
+		<span>
+			<span class="student-email-input-wrapper">
+				<input
+					type="text"
+					class="student-email-input"
+					placeholder="${placeholder}"
+					autocomplete="off"
+					aria-label="student email"
+					id="student-email-input-${id}"
+				>
+				<div
+					class="student-email-input-dropdown" 
+					id="student-email-input-dropdown-${id}"
+				></div>
+			</span>
+		</span>
+	`;
 
 	const $studentNameInput = document.getElementById(`student-email-input-${id}`);
 	const $dropdown = document.getElementById(`student-email-input-dropdown-${id}`);
 
-	window[`onClickStudentEmailInput${id}`] = (value) => {
+	window[`_StudentEmailInputWithIntellisense${id}__onClick`] = (value) => {
 		$studentNameInput.value = value;
 	};
 
@@ -79,23 +85,23 @@ const studentEmailInputWithIntellisense = ($el, placeholder='Email', allowNonStu
 
 			for (let name of users) {
 				$dropdown.innerHTML += `
-                            <p onclick="window['onClickStudentEmailInput${id}']('${name}')">
-                                ${name} 
-                            </p>
-                        `;
+					<p onclick="window['_StudentEmailInputWithIntellisense${id}__onClick']('${name}')">
+						${name} 
+					</p>
+				`;
 			}
 
 			if (extra) {
 				$dropdown.innerHTML += `
-                            <p class="no-hover">
-                                (and ${extra} more)
-                            </p>
-                        `;
+					<p class="no-hover">
+						(and ${extra} more)
+					</p>
+				`;
 			}
 		});
 	});
 
 	return $studentNameInput;
-}
+});
 
-export default studentEmailInputWithIntellisense;
+export default StudentEmailInputWithIntellisense;

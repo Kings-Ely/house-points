@@ -1,5 +1,5 @@
 import * as core from "../../assets/js/main.js";
-import insertComponent from "../../assets/js/components.js";
+import SelectableList from "../../assets/js/components/SelectableList.js";
 
 const $status = document.getElementById('status');
 const $stats = document.getElementById('server-stats');
@@ -30,6 +30,7 @@ function serverDown () {
 	$status.innerHTML = 'Server is down!';
 	$status.style.borderColor = 'red';
 	lastPingOk = false;
+	$startServerButton.style.opacity = '1';
 	setTimeout(serverStatusAndPing, 3000);
 }
 
@@ -112,6 +113,9 @@ async function serverStatusAndPing () {
 
 	lastPingOk = true;
 
+	$restartServerButton.style.opacity = '1';
+	$killServerButton.style.opacity = '1';
+
 	setTimeout(serverStatusAndPing, 5000);
 	return true;
 }
@@ -130,7 +134,7 @@ function showServerStats () {
 }
 
 async function activeSessions () {
-	insertComponent('#sessions').selectableList({
+	SelectableList('#sessions', {
 		name: 'Active Sessions (Users currently logged in)',
 		items: (await core.rawAPI`get/sessions/active`)['data'],
 		uniqueKey: 'id',
@@ -223,7 +227,16 @@ $restartServerButton.onclick = async () => {
 		return;
 	}
 
-	await fetch(core.ROOT_PATH + '/api/start-server');
+	await core.showSpinner();
+
+	await core.sleep(100);
+
+	res = await fetch(core.ROOT_PATH + '/api/start-server');
+
+	if (await res.text() !== '1') {
+		await core.showError('Failed to start server');
+		await core.sleep(2000);
+	}
 
 	location.reload();
 }

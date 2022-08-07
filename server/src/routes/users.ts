@@ -84,7 +84,7 @@ route('get/users/from-id/:id', async ({ query, params, cookies }) => {
  */
 route('get/users/from-email/:email',
     async ({ query, params, cookies }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+    if (!await isLoggedIn(cookies, query)) return AUTH_ERR;
 
     const { email } = params;
 
@@ -109,6 +109,19 @@ route('get/users/from-email/:email',
     const user = data[0];
 
     await addHousePointsToUser(query, user);
+
+    if (!await isAdmin(cookies, query)) {
+        const id = await IDFromSession(query, getSessionID(cookies));
+        if (id !== user.id) {
+            delete user.id;
+
+            for (let hp of user['housePoints']) {
+                delete hp.id;
+                delete hp.userID;
+                delete hp.rejectMessage;
+            }
+        }
+    }
 
     return user;
 });

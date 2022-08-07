@@ -1,6 +1,6 @@
 'use strict';
 import * as core from "./assets/js/main.js";
-import insertComponent from "./assets/js/components.js";
+import FullPagePopup from "./assets/js/components/FullPagePopup.js";
 
 const $go = document.getElementById('go');
 const $email = document.getElementById('email');
@@ -72,7 +72,7 @@ document.getElementById('forgotten-password').onclick = async () => {
 		return;
 	}
 
-	insertComponent().fullPagePopUp(`
+	FullPagePopup(document.body, `
 		An email has been sent to '${email}' with a link to reset your password.
 	`);
 

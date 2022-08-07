@@ -1,10 +1,9 @@
 'use strict';
-import insertComponent from "./components.js";
+import CookiePopUp from "./components/CookiePopup.js";
 
 // Utility script imported by all pages
 
 // Global constants and variables
-
 export const
     API_ROOT = 'https://josephcoppin.com/school/house-points/api',
     COOKIE_KEY = 'hpnea_SessionID',
@@ -270,35 +269,6 @@ export function getRelativeTime (d1, d2) {
             return relativeTimeFormat.format(Math.round(elapsed/timeUnits[u]), u);
         }
     }
-}
-
-/**
- * Loads a JS script from an url.
- * If the url starts with '/', imports relative to ROOT_PATH.
- * Resolves the promise once the script has been loaded.
- * @param {string} url
- * @returns {Promise<unknown>}
- */
-export async function loadScript (url) {
-
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-
-    if (url[0] === '/') {
-        url = ROOT_PATH + url;
-    }
-
-    script.src = url;
-
-    return await new Promise(resolve => {
-        // Then bind the event to the callback function.
-        // There are several events for cross browser compatibility.
-        script.onreadystatechange = resolve;
-        script.onload = resolve;
-
-        // Fire the loading
-        document.head.appendChild(script);
-    });
 }
 
 // Cookie Utilities
@@ -577,10 +547,12 @@ export function loadSVGs () {
 /**
  * Caches the SVG file content
  * @param {string} uris
- * @returns {Promise<void>}
  */
 export function preloadSVGs (...uris) {
     for (const uri of uris) {
+        if (svgCache[uri]) {
+            continue;
+        }
         // don't await, because we want to load them all at the same time
         getSVGFromURI(ROOT_PATH + '/assets/img/' + uri)
             .then();
@@ -790,7 +762,7 @@ export function cookiePopUp () {
 
     const $cookiePopUp = document.createElement('div');
     $cookiePopUp.id = 'cookie-popup';
-    insertComponent($cookiePopUp).cookiePopUp();
+    CookiePopUp($cookiePopUp);
     document.body.appendChild($cookiePopUp);
 }
 
@@ -887,6 +859,22 @@ export function hide (el) {
         el.style.display = 'none';
     } else {
         console.error(`hide: no element`);
+    }
+}
+
+/**
+ * Hides an element by setting its opacity to '0'
+ * @param {string|HTMLElement} el
+ */
+export function makeTransparent (el) {
+    if (typeof el === 'string') {
+        el = document.querySelector(el);
+    }
+
+    if (el) {
+        el.style.opacity = '0';
+    } else {
+        console.error(`makeTransparent: no element`);
     }
 }
 

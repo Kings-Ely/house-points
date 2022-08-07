@@ -1,5 +1,8 @@
 import * as core from "../assets/js/main.js";
-import insertComponent from "../assets/js/components.js";
+import AddEventPopup from "../assets/js/components/AddEventPopup.js";
+import FullPagePopup from "../assets/js/components/FullPagePopup.js";
+import EventCard from "../assets/js/components/EventCard.js";
+import SelectableList from "../assets/js/components/SelectableList.js";
 
 (async () => {
 	await core.init('..', true);
@@ -19,7 +22,7 @@ async function showAllEvents () {
 
 		document.getElementById('add-event-button')
 			.addEventListener('click', () => {
-				insertComponent().addEventPopUp(showAllEvents)
+				AddEventPopup(showAllEvents)
 			});
 	}
 
@@ -36,7 +39,7 @@ async function showAllEvents () {
 
 	if (await core.isAdmin()) {
 
-		insertComponent('#events').selectableList({
+		SelectableList('#events', {
 			name: 'Events',
 			items,
 			searchKey: 'name',
@@ -107,11 +110,11 @@ async function eventPopup (id=core.GETParam('id')) {
 		return;
 	}
 
-	insertComponent().fullPagePopUp(`
+	FullPagePopup(document.body, `
 		<div id="event-popup"></div>
 	`);
 
-	insertComponent('#event-popup').eventCard(
+	EventCard('#event-popup',
 		async () => ((await core.api`get/events?id=${id}`)?.['data']?.[0]),
 		(await core.userInfo())['admin'],
 	);
