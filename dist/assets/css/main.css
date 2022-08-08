@@ -18,8 +18,23 @@
 
     --border: #c5c5c5;
     --border-light: #e8e8e8;
+
+    --label-bg: #c0c0c0;
+    --label-text: #000000;
+    --label-border: #e0e0e0;
 }
 
+[data-dark-mode] {
+    --text: #ffffff;
+    --nav-colour: #494949;
+    --text-light: #efefef;
+    --bg: #343434;
+    --bg-accent: #505050;
+    --accent: #0b700b;
+    --text-warning: #ff8d8d;
+    --border: #646464;
+    --border-light: #545454;
+}
 
 * {
     transition: 200ms;
@@ -322,7 +337,11 @@ nav {
     z-index: 100;
 }
 
-#error > span {
+[data-dark-mode] .error {
+    background: rgb(86, 33, 33);
+}
+
+.error > span {
     margin: 0 15px;
     color: var(--text);
     font-weight: bold;
@@ -471,11 +490,12 @@ svg {
     opacity: 0;
     border-radius: 5px;
     padding: 6px;
-    background: var(--bg);
+    color: var(--label-text);
+    background: var(--label-bg);
     z-index: 2;
     text-align: center;
     font-size: 15px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--label-border);
     width: fit-content;
     top: 110%;
     left: calc(50% - 50px + var(--offset-x));
@@ -497,7 +517,7 @@ svg {
 }
 
 
-/* Cookie popup */
+/* CookieCard */
 
 #cookie-popup {
     position: fixed;
@@ -553,9 +573,9 @@ svg {
 }
 
 
-/* Full page popup */
+/* FullPagePopup */
 
-#full-page-popup {
+.full-page-popup {
     position: fixed;
     top: 0;
     left: 0;
@@ -577,7 +597,16 @@ svg {
     animation: full-page-popup-fadeIn 0.3s ease;
 }
 
-#full-page-popup-content {
+.full-page-popup .popup-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.full-page-popup .popup-content {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -596,7 +625,7 @@ svg {
     overflow-y: scroll;
 }
 
-#full-page-popup-content::-webkit-scrollbar {
+.full-page-popup .popup-content::-webkit-scrollbar {
     display: none;
 }
 
@@ -610,7 +639,7 @@ svg {
 }
 
 
-/* Add event popup */
+/* AddEventPopup */
 
 #add-event-description {
     width: 90%;
@@ -648,7 +677,7 @@ svg {
     align-items: center;
 }
 
-/* selectable list */
+/* SelectableList */
 
 .selectable-list .select-all-outline {
     border: 1px solid var(--border);
@@ -703,7 +732,7 @@ svg {
     border-bottom: 2px solid var(--border);
 }
 
-/* event card */
+/* EventCard */
 
 .event-card {
     text-align: center;
@@ -727,4 +756,30 @@ svg {
 .event-card .add-student-to-event .student-email-input:hover,
 .event-card .add-student-to-event .student-email-input:focus {
     background: none;
+}
+
+.event-card button, .event-card input {
+    font-size: 16px;
+}
+
+/* UserCard */
+
+.user-card {
+    text-align: center;
+    max-width: 95vw;
+    padding: 10px 20px 50px 20px;
+    height: fit-content;
+}
+
+.user-card h2 {
+    padding-top: 10px;
+}
+
+.user-card .user-card-housepoints {
+    max-height: 50vh;
+    overflow-y: scroll;
+}
+
+.user-card .user-card-housepoints::-webkit-scrollbar {
+    display: none;
 }

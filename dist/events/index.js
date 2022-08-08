@@ -3,6 +3,7 @@ import AddEventPopup from "../assets/js/components/AddEventPopup.js";
 import FullPagePopup from "../assets/js/components/FullPagePopup.js";
 import EventCard from "../assets/js/components/EventCard.js";
 import SelectableList from "../assets/js/components/SelectableList.js";
+import {inlineComponent} from "../assets/js/main.js";
 
 const selected = [];
 
@@ -119,12 +120,8 @@ async function eventPopup (id=core.GETParam('id')) {
 		return;
 	}
 
-	FullPagePopup(document.body, `
-		<div id="event-popup"></div>
-	`);
-
-	EventCard('#event-popup',
+	FullPagePopup(document.body, inlineComponent(EventCard,
 		async () => ((await core.api`get/events?id=${id}`)?.['data']?.[0]),
 		(await core.userInfo())['admin'],
-	);
+	));
 }

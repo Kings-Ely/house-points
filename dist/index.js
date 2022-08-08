@@ -23,7 +23,7 @@ const $password = document.getElementById('password');
 	}
 })();
 
-$go.onclick = async () => {
+async function doLogIn () {
 	const email = $email.value;
 
 	if (!email) {
@@ -52,7 +52,18 @@ $go.onclick = async () => {
 	}
 
 	await core.setSessionCookie(sessionID);
-	await core.navigate(`./user`);
+
+	let newPage = './user/?email=' + encodeURIComponent(email);
+
+	if (core.GETParam('cb')) {
+		newPage = decodeURIComponent(core.GETParam('cb'));
+	}
+
+	await core.navigate(newPage);
+}
+
+$go.onclick = async () => {
+	doLogIn();
 };
 
 document.getElementById('forgotten-password').onclick = async () => {

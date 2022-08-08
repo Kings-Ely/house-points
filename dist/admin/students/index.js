@@ -1,8 +1,8 @@
 import * as core from "../../assets/js/main.js";
 import SelectableList from "../../assets/js/components/SelectableList.js";
-import { insert } from "../../assets/js/components.js";
 import FullPagePopup from "../../assets/js/components/FullPagePopup.js";
 import UserCard from "../../assets/js/components/UserCard.js";
+import {inlineComponent} from "../../assets/js/main.js";
 
 const
     $addStudentButton = document.getElementById('add-student'),
@@ -182,7 +182,7 @@ async function showStudent (student) {
 }
 
 async function userPopup (id) {
-    FullPagePopup(document.body, insert(UserCard,
+    FullPagePopup(document.body, inlineComponent(UserCard,
         async () => (await core.api`get/users/from-id/${id}`),
         true,
     ));

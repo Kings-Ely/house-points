@@ -169,6 +169,28 @@ async ({ query, params, cookies }) => {
     if (!student) return `Student with ID '${userID}' not found`;
     if (!student.student) return 'Can only give house points to students';
 
+    if (event) {
+        // check event exists
+        let eventData = await query`
+            SELECT id
+            FROM events
+            WHERE events.id = ${event}
+        `;
+        if (!eventData.length) return 'Event not found';
+
+        // check that they are not already in the event.
+        const usersInEvent = await query`
+            SELECT users.id
+            FROM users
+            LEFT JOIN housepoints
+            ON housepoints.student = users.id
+            WHERE housepoints.event = ${event}
+        `;
+        if (usersInEvent.filter(u => u.id === userID).length) {
+            return 'User is already in event';
+        }
+    }
+
     await query`
         INSERT INTO housepoints (id, student, quantity, event, description, status)
         VALUES (

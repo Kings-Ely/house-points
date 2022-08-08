@@ -1,9 +1,9 @@
 import type {IncomingMessage, ServerResponse} from "http";
 
-import type {queryFunc} from "./sql";
+import type { queryFunc } from "./sql";
 import Path from "./path";
-import {error, warning} from "./log";
-import {decodeParam} from "./util";
+import { error, warning } from "./log";
+import { decodeParam } from "./util";
 
 export interface IHandlerArgs {
     url: string;
@@ -143,6 +143,7 @@ export class Route {
 
         return {
             ok: !res.error,
+            // status is overridden if present in 'res'
             status: res.error ? 400 : 200,
             ...res
         };

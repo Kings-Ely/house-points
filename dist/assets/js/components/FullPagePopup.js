@@ -1,28 +1,36 @@
 'use strict';
-import { registerComponent } from "../components.js";
-
-let popupStack = [];
+import { registerComponent } from "./components.js";
 
 /**
  * Makes a full page popup which can be closed by clicking on the background.
  *
  * @param {El} $el
  * @param {string} content
+ * @param {boolean} showHeader
  */
-const FullPagePopup = registerComponent(($el, id, content) => {
-
-	if (document.getElementById('full-page-popup')) {
-		// remove any current popups
-		const $p = document.getElementById('full-page-popup');
-		popupStack.push($p.innerHTML);
-		$p.parentElement.removeChild($p);
-	}
-
+const FullPagePopup = registerComponent(($el, id, content, showHeader=true) => {
 	const $p = document.createElement('div');
-	$p.id = 'full-page-popup';
+	$p.classList.add('full-page-popup');
+	$p.id = `full-page-popup-${id}`;
 
 	$p.innerHTML = `
-		<div id="full-page-popup-content">
+		<div class="popup-content">
+			<div class="popup-header" style="display: ${showHeader ? 'flex' : 'none'}">
+				<div>
+					<!-- left -->
+					<button
+						class="icon"
+						svg="back-arrow.svg"
+						onclick="_FullPagePopup${id}__hide()"
+					></button>
+				</div>				
+				<div>
+					<!-- center -->
+				</div>				
+				<div>
+					<!-- right -->
+				</div>
+			</div>
 			${content}
 		</div>
 	`;
@@ -31,26 +39,27 @@ const FullPagePopup = registerComponent(($el, id, content) => {
 	$el.appendChild($p);
 
 	function hide () {
-		if (popupStack.length) {
-			$p.innerHTML = popupStack.pop();
-			return;
-		}
 		$p.remove();
 		removeEventListener('keydown', keyDownListener);
 	}
 
+	window[`_FullPagePopup${id}__hide`] = hide;
+
 	$p.addEventListener('click', (evt => {
 		// check that we clicked on the background not the popup content
-		if (evt.target.id === 'full-page-popup') {
+		if (evt.target.classList.contains('full-page-popup')) {
 			hide();
 		}
 	}));
 
-	const keyDownListener = evt => {
+	function keyDownListener (evt) {
+		console.log(evt.target);
 		if (evt.key === 'Escape') {
 			hide();
 		}
-	};
+	}
+
+	$p.addEventListener('keydown', keyDownListener);
 
 	addEventListener('keydown', keyDownListener);
 

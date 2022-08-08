@@ -26,8 +26,8 @@ async function refresh () {
 	await activeSessions();
 }
 
-function serverDown () {
-	$status.innerHTML = 'Server is down!';
+function serverDown (message = 'Server is down!') {
+	$status.innerText = message;
 	$status.style.borderColor = 'red';
 	lastPingOk = false;
 	$startServerButton.style.opacity = '1';
@@ -39,8 +39,13 @@ async function serverStatusAndPing () {
 	let start = performance.now();
 
 	let res = await core.rawAPI`get/server/ping`;
-	if (res.status !== 200 || !res.ok) {
+	if (res.status === 502) {
 		serverDown();
+		console.error('get/server/check: ', res);
+		return;
+	}
+	if (res.status !== 200 || !res.ok) {
+		serverDown('Something went wrong with the server');
 		console.error('get/server/ping: ', res);
 		return;
 	}
@@ -49,6 +54,10 @@ async function serverStatusAndPing () {
 	start = performance.now();
 
 	res = await core.rawAPI`get/server/check`;
+	if (res.status === 401) {
+		await core.navigate(`/?error=auth&cb=${location.href}`);
+		return;
+	}
 	if (res.status !== 200 || !res.ok) {
 		serverDown();
 		console.error('get/server/check: ', res);

@@ -8,7 +8,6 @@ class Logger {
     public level: LogLvl = 3;
     public useConsole = true;
     public active = true;
-    public useColour = true;
 
     get path () {
         return this.path_;
@@ -68,7 +67,10 @@ export function setLogOptions (options: any) {
     if ('level' in options) logger.level = options.level;
     if ('useConsole' in options) logger.useConsole = options.useConsole;
     if ('logTo' in options) logger.path = options.logTo;
-    if ('colour' in options) logger.useColour = options.colour;
+
+    if (options.verbose) {
+        logger.level = LogLvl.VERBOSE;
+    }
 }
 
 /**
@@ -89,6 +91,22 @@ function reduceToMsg (msg: TemplateStringsArray, params: any[]) {
  */
 export default function (msg: string | TemplateStringsArray, ...params: any[]) {
     if (logger.level < LogLvl.ALL) {
+        return;
+    }
+
+    if (typeof msg === 'string') {
+        logger.log(c.grey`LOG`, msg, ...params);
+        return;
+    }
+
+    logger.log(c.grey`LOG`, reduceToMsg(msg, params));
+}
+
+/**
+ * Logs a message but only if the 'verbose' flag is set
+ */
+export function verbose (msg: string | TemplateStringsArray, ...params: any[]) {
+    if (logger.level < LogLvl.VERBOSE) {
         return;
     }
 

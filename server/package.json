@@ -6,6 +6,9 @@
         "stop": "docker stop house-points-api-container",
         "restart": "npm run stop; npm run start",
         "logs": "docker logs house-points-api-container",
+        "dump-logs": "npm run logs | tee --append server.log",
+        "clear-logs": "truncate -s 0 $(docker inspect --format='{{.LogPath}}' house-points-api-container)",
+        "clear-log-file": "> server.log",
         "start-local": "cd ..; npm run build-server; cd server; npm run start"
     },
     "dependencies": {

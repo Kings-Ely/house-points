@@ -1,11 +1,11 @@
 'use strict';
-import { registerComponent } from "../components.js";
+import { registerComponent } from "./components.js";
 import * as core from "../main.js";
 
 /**
  * The popup showing 'allow' and 'reject' options for cookies
  */
-const CookiePopUp = registerComponent(($el) => {
+const CookieCard = registerComponent(($el) => {
 
 	/**
 	 * The user has either allowed or not allowed cookies
@@ -46,4 +46,4 @@ const CookiePopUp = registerComponent(($el) => {
 	`;
 });
 
-export default CookiePopUp;
+export default CookieCard;

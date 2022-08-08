@@ -31,31 +31,3 @@ export function registerComponent (cb) {
     };
 }
 
-/**
- * Kind of ew way of doing it. But it works.
- * Allows components to be inserted inline.
- * Works by repeatedly checking until it finds
- * the element and then inserting the component.
- * @param {Component} cb
- * @param {*} args
- * @returns {string}
- */
-export function insert (cb, ...args) {
-
-    const id = `insertComponentPlaceHolder${currentComponentID++}Element`;
-
-    const interval = setInterval(() => {
-        try {
-            const $el = document.getElementById(id);
-            if ($el?.id !== id) return;
-
-            cb(`#${id}`, ...args);
-            clearInterval(interval);
-        } catch (e) {
-            console.error(e);
-            clearInterval(interval);
-        }
-    }, 10);
-
-    return `<span id="${id}"></span>`;
-}

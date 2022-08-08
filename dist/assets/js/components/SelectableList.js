@@ -1,5 +1,5 @@
 'use strict';
-import { registerComponent } from "../components.js";
+import { registerComponent } from "./components.js";
 import * as core from "../main.js";
 
 /**

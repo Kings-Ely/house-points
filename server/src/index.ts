@@ -4,10 +4,11 @@ import fs from "fs";
 import type { IncomingMessage, ServerResponse } from "http";
 import commandLineArgs from 'command-line-args';
 import c from 'chalk';
+import now from 'performance-now';
 
 import { Handler, Route } from "./route";
 import connectSQL, { queryFunc } from './sql';
-import log, { error, LogLvl, setLogOptions, warning, close as stopLogger } from "./log";
+import log, { error, LogLvl, setLogOptions, warning, close as stopLogger, verbose } from "./log";
 import { loadEnv, parseCookies } from "./util";
 
 export const flags = commandLineArgs([
@@ -18,8 +19,6 @@ export const flags = commandLineArgs([
     { name: 'port', alias: 'p', type: Number, defaultValue: 0 }
 ]);
 
-fs.writeFileSync(flags.logTo, 'Testing 123');
-
 const handlers: Route[] = [];
 
 /**
@@ -27,6 +26,7 @@ const handlers: Route[] = [];
  */
 let query: queryFunc = () => new Promise(() => {
     error`SQL server not connected`;
+    return null;
 });
 
 /**
@@ -48,9 +48,8 @@ import './routes/session';
 
 async function serverResponse (req: IncomingMessage, res: ServerResponse) {
 
-    if (flags.verbose) {
-        log`Dealing with request: ${req.method} ${req.url}`;
-    }
+    verbose`Incoming: ${req.method} ${req.url}`;
+    const start = now();
 
     // set response headers
     res.setHeader("Access-Control-Allow-Origin", req.headers.origin || '*');
@@ -93,12 +92,13 @@ async function serverResponse (req: IncomingMessage, res: ServerResponse) {
 
     const strResponse = JSON.stringify(finalResponse);
 
-    if (flags.verbose) {
-        log`${req.method} '${req.url}' => '${strResponse}'`;
-    }
 
     res.writeHead(finalResponse.status);
     res.end(strResponse);
+
+    let time = now() - start;
+
+    verbose`[${req.method}] ${time.toPrecision(2)}ms '${req.url}' => '${strResponse}'`;
 }
 
 function startServer () {

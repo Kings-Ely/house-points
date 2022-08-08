@@ -1,5 +1,5 @@
 'use strict';
-import { registerComponent } from "../components.js";
+import { registerComponent } from "./components.js";
 import * as core from "../main.js";
 
 /** @typedef {{
@@ -36,37 +36,41 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 	function render () {
 		$el.innerHTML = `
 			<div class="user-card">
-				<a href="${core.ROOT_PATH}/user/?email=${user.email}">
-					${user.email}
-				</a>
+				<h2>
+					<a href="${core.ROOT_PATH}/user/?email=${user.email}">
+						${user.email}
+					</a>
+				</h2>
 				<div>
-					<h2>
+					<h3>
 						${user['accepted']} House Points Awarded
-					</h2>
-					${user['housePoints'].map(point => `
-						<div class="hp">
-							${admin ? `
-								<input 
-									type="number"
-									onchange="_UserCard${id}__changeHpQuantity('${point.id}', this.value)"
-									value="${point['quantity']}"
-									style="width: 40px; font-size: 15px"
-								>
-								<button
-								   data-label="Delete house point"
-									onclick="_UserCard${id}__deleteHousePoint('${point['id']}')"
-									svg="bin.svg"
-									class="icon small"
-								></button>
-							` : `
-								(${point['quantity']})
-							`}
-							
-							${core.getRelativeTime(point['created']*1000)}
-							
-							${point['eventName'] || point['description']}
-						</div>
-					`).join('')}
+					</h3>
+					<div class="user-card-housepoints">
+						${user['housePoints'].map(point => `
+							<div class="hp">
+								${admin ? `
+									<input 
+										type="number"
+										onchange="_UserCard${id}__changeHpQuantity('${point.id}', this.value)"
+										value="${point['quantity']}"
+										style="width: 40px; font-size: 15px"
+									>
+									<button
+									   data-label="Delete house point"
+										onclick="_UserCard${id}__deleteHousePoint('${point['id']}')"
+										svg="bin.svg"
+										class="icon small"
+									></button>
+								` : `
+									(${point['quantity']})
+								`}
+								
+								${core.getRelativeTime(point['created']*1000)}
+								
+								${point['eventName'] || point['description']}
+							</div>
+						`).join('')}
+					</div>
 				</div>
 			</div>
 		`;

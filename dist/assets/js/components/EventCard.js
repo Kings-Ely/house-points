@@ -1,7 +1,10 @@
 'use strict';
-import { registerComponent } from "../components.js";
+import {registerComponent} from "./components.js";
 import * as core from "../main.js";
 import StudentEmailInputWithIntellisense from "./StudentEmailInputWithIntellisense.js";
+import FullPagePopup from "./FullPagePopup.js";
+import UserCard from "./UserCard.js";
+import {inlineComponent} from "../main.js";
 
 /** @typedef {{
  * 		id: string,
@@ -41,7 +44,12 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 			return;
 		}
 
-		const { id: userID } = await core.api`get/users/from-email/${email}`;
+		const { id: userID } = await core.rawAPI`get/users/from-email/${email}`;
+
+		if (!userID) {
+			await core.showError('That user does not exist');
+			return;
+		}
 
 		await core.api`create/house-points/give/${userID}/1?event=${event['id']}`;
 
@@ -51,6 +59,20 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 	window[`_EventCard${id}__changeHpQuantity`] = async (id, value) => {
 		await core.api`update/house-points/quantity/${id}/${value}`;
 		render();
+	};
+
+	window._EventCard__studentPopup ||= async (email) => {
+		const user = await core.api`get/users/from-email/${email}`;
+
+		if (!user.ok) {
+			await core.showError('User not found');
+			return;
+		}
+
+		FullPagePopup(document.body, inlineComponent(UserCard,
+			async () => (await core.api`get/users/from-email/${email}`),
+			(await core.userInfo())['admin'],
+		));
 	};
 
 	function render () {
@@ -73,7 +95,11 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 					</h2>
 					${event['housePoints'].map(point => `
 						<div class="hp">
-							<div>${point.studentEmail || '???'}</div>
+							<button
+								onclick="window._EventCard__studentPopup('${point.studentEmail}')"
+							>
+								${point.studentEmail || '???'}
+							</button>
 							${admin ? `
 								<input 
 									type="number"

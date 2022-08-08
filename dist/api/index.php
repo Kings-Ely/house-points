@@ -56,7 +56,7 @@ curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 $response = curl_exec($ch);
 
 if ($response === false)  {
-	die(json_encode(array('error' => curl_error($ch))));
+	die(json_encode(array('error' => curl_error($ch), 'status' => 502)));
 }
 
 $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
