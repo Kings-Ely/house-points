@@ -3,7 +3,7 @@ import {
 	HOUSE_NAME,
 	navigate,
 	ROOT_PATH,
-	userInfo
+	userInfo, getCookie, COOKIE_THEME
 } from "./main.js";
 import { loadSVGs } from "./svg.js";
 
@@ -217,10 +217,15 @@ export function reloadDOM () {
 	loadSVGs();
 }
 
+export function setThemeFromCookie () {
+	document.body.setAttribute('data-theme', getCookie(COOKIE_THEME));
+}
+
 export async function domIsLoaded () {
 	reloadDOM();
 
 	state.documentLoaded = true;
+	setThemeFromCookie();
 
 	for (const cb of state.onLoadCBs) {
 		cb();

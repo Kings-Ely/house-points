@@ -1,6 +1,7 @@
 'use strict';
 import * as core from "./assets/js/main.js";
 import FullPagePopup from "./assets/js/components/FullPagePopup.js";
+import { getSession, logoutAction, showError, showErrorFromCode } from "./assets/js/main.js";
 
 const $go = document.getElementById('go');
 const $email = document.getElementById('email');
@@ -15,11 +16,7 @@ const $password = document.getElementById('password');
 	}
 
 	if (await core.signedIn()) {
-		if ((await core.userInfo())['admin']) {
-			await core.navigate(`/admin`);
-		} else {
-			await core.navigate(`/user`);
-		}
+		await logoutAction();
 	}
 })();
 
@@ -51,7 +48,10 @@ async function doLogIn () {
 		return;
 	}
 
-	await core.setSessionCookie(sessionID);
+	if (await core.setSessionCookie(sessionID) instanceof Error) {
+		// cookies error is now shown
+		return;
+	}
 
 	let newPage = './user/?email=' + encodeURIComponent(email);
 

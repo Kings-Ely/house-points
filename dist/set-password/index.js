@@ -18,7 +18,7 @@ const
 
 	const s = decodeURIComponent(core.GETParam('s'));
 
-	await core.eraseCookie(core.COOKIE_KEY);
+	await core.eraseCookie(core.COOKIE_SESSION);
 	await core.eraseCookie(core.ALT_COOKIE_KEY);
 
 	const user = await core.api`get/users/from-session/${s}`;

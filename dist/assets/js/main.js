@@ -1,7 +1,7 @@
 'use strict';
 import { getSession, handleUserInfo, testApiCon, userInfo, signInAs, logout } from "./auth.js";
 import { rawAPI } from "./backendAPI.js";
-import { cookiePopUp } from "./cookies.js";
+import { cookiePopUp, cookiesAllowed, getCookie, setCookie } from "./cookies.js";
 import { domIsLoaded, loadFooter, loadNav, reloadDOM, scrollToTop, showError, waitForReady } from "./dom.js";
 
 export * from './auth.js';
@@ -15,8 +15,9 @@ export * from './svg.js';
 // Global constants and variables
 export const
     API_ROOT = 'https://josephcoppin.com/school/house-points/api',
-    COOKIE_KEY = 'hpnea_SessionID',
+    COOKIE_SESSION = 'hpnea_SessionID',
     COOKIE_ALLOW_COOKIES_KEY = 'hpnea_AllowedCookies',
+    COOKIE_THEME = 'hpnea_ColourScheme',
     HOUSE_NAME = 'Osmond',
     DEFAULT_PASSWORD = 'changeme',
     svgCache = {},
@@ -91,30 +92,31 @@ export async function init (rootPath, requireLoggedIn=false, requireAdmin=false,
     }
 
     if (getSession()) {
-        rawAPI(`get/users/from-session/${getSession()}`)
-            .then(handleUserInfo)
+        await handleUserInfo (await rawAPI(`get/users/from-session/${getSession ()}`));
     } else {
-        state.isSignedIn = false;
-        state.userInfoIsLoaded = true;
-        for (const cb of state.userInfoCallbacks) {
-            cb({});
-        }
+        await handleUserInfo({});
     }
 
     const user = await userInfo();
     if (requireLoggedIn && (!user || !user['id'])) {
-        await navigate('/?error=auth');
+        console.error(`Required signed in, got user:`, user);
+        console.log(`Session Token: `, getSession());
+        await navigate(`/?error=auth&cb=${encodeURIComponent(location.href)}`);
         return;
     }
     if (requireAdmin && !user.admin) {
-        await navigate('/?error=auth');
+        console.error(`Required admin, got user: ${user}`);
+        console.log(`Session Token: `, getSession());
+        await navigate(`/?error=auth&cb=${encodeURIComponent(location.href)}`);
         return;
     }
 
     await waitForReady();
 
-    if (user && user.admin) {
-        document.body.setAttribute('data-dark-mode', '1');
+    if (!getCookie(COOKIE_THEME) && user?.admin) {
+        if (cookiesAllowed()) {
+            await setCookie(COOKIE_THEME, 'dark', 365);
+        }
     }
 
     // load footer and nav bar

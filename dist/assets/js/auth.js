@@ -1,5 +1,5 @@
 import {
-	COOKIE_KEY,
+	COOKIE_SESSION,
 	getCookie, GETParam,
 	navigate, rawAPI,
 	ROOT_PATH, setCookie,
@@ -40,11 +40,11 @@ export async function reloadUserInfo () {
 
 // user auth cookie utilities
 export function getSession () {
-	return getCookie(COOKIE_KEY);
+	return getCookie(COOKIE_SESSION);
 }
 
 export async function setSessionCookie (id) {
-	return await setCookie(COOKIE_KEY, id);
+	return await setCookie(COOKIE_SESSION, id);
 }
 
 /**
@@ -126,7 +126,7 @@ export async function logout () {
  * @returns {Promise<void>}
  */
 export async function logoutAction () {
-	await eraseCookie(COOKIE_KEY);
+	await eraseCookie(COOKIE_SESSION);
 	await navigate(ROOT_PATH);
 }
 

@@ -12,8 +12,7 @@ import CookieCard from "./components/CookieCard.js";
  * @param {number} [days=1]
  */
 export async function setCookie (name, value, days=1) {
-
-	if (getCookie(COOKIE_ALLOW_COOKIES_KEY) !== '1' && name !== COOKIE_ALLOW_COOKIES_KEY) {
+	if (!cookiesAllowed() && name !== COOKIE_ALLOW_COOKIES_KEY) {
 		await showError('You must allow cookies to use this site.');
 		return new Error('Cookies not allowed');
 	}
@@ -37,7 +36,7 @@ export function getCookie (name) {
 	const ca = document.cookie.split(';');
 	for (let i = 0; i < ca.length; i++) {
 		let c = ca[i];
-		while (c.charAt(0) === ' '){
+		while (c.charAt(0) === ' ') {
 			c = c.substring(1, c.length);
 		}
 		if (c.indexOf(nameEQ) === 0) {
@@ -53,7 +52,7 @@ export function getCookie (name) {
  * @param {string} name
  */
 export async function eraseCookie (name) {
-	if (getCookie(COOKIE_ALLOW_COOKIES_KEY) !== '1') {
+	if (!cookiesAllowed()) {
 		await showError('You must allow cookies to use this site.');
 		return new Error('Cookies not allowed');
 	}
@@ -66,7 +65,7 @@ export async function eraseCookie (name) {
  * and if not then shows a popup to get them to allow them
  */
 export function cookiePopUp () {
-	if (getCookie(COOKIE_ALLOW_COOKIES_KEY)) {
+	if (cookiesAllowed()) {
 		return;
 	}
 
@@ -74,4 +73,8 @@ export function cookiePopUp () {
 	$cookiePopUp.id = 'cookie-popup';
 	CookieCard($cookiePopUp);
 	document.body.appendChild($cookiePopUp);
+}
+
+export function cookiesAllowed () {
+	return getCookie(COOKIE_ALLOW_COOKIES_KEY) === '1';
 }

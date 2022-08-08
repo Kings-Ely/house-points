@@ -24,7 +24,7 @@
     --label-border: #e0e0e0;
 }
 
-[data-dark-mode] {
+[data-theme='dark'] {
     --text: #ffffff;
     --nav-colour: #494949;
     --text-light: #efefef;
