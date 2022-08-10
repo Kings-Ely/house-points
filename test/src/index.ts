@@ -8,10 +8,13 @@ import setup from './setup';
 import Test from './framework';
 
 import './tests/smoke';
+
 import './tests/self';
 import './tests/users';
 import './tests/events';
 import './tests/house-points';
+import './tests/awardTypes';
+import './tests/awards';
 
 const flags = commandLineArgs([
 	{ name: 'verbose', alias: 'v', type: Boolean, defaultValue: false },

@@ -114,7 +114,7 @@ Test.test('Award  Types | Updating name', async (api) => {
         return `get/award-types failed: ${JSON.stringify(res)}`;
     }
     if (res.data?.[0]?.name !== 'House Tie 2') {
-        return `1Expected award type name to be 'House Tie 2', got '${res?.data?.[0]?.name}'`;
+        return `2Expected award type name to be 'House Tie 2', got '${res?.data?.[0]?.name}'`;
     }
 
     await api(`delete/award-types/with-id/${res.data?.[0]?.id}`);
@@ -145,21 +145,20 @@ Test.test('Award  Types | Updating quantity', async (api) => {
     if (res.ok !== true) {
         return `get/award-types failed: ${JSON.stringify(res)}`;
     }
-    // TODO: finish
-    if (res.data?.[0]?.hpsRequired !== 18) {
-        return `1Expected award type name to be 'House Tie 2', got '${res?.data?.[0]?.name}'`;
+    if (res.data?.[0]?.hpsRequired !== 20) {
+        return `1Expected award requirement to be 20, got '${JSON.stringify(res)}'`;
     }
 
-    res = await api(`update/award-types/name/${res.data?.[0]?.id}/House+Tie`, sessionID);
+    res = await api(`update/award-types/hps-required/${res.data?.[0]?.id}/18`, sessionID);
     if (res.ok || res.status !== 403) {
-        return `update/award-types/name/${res.data?.[0]?.id}/House+Tie failed: ${JSON.stringify(res)}`;
+        return `expected 403 from update/award-types/hps-required/${res.data?.[0]?.id}/18: ${JSON.stringify(res)}`;
     }
     res = await api(`get/award-types`, sessionID);
     if (res.ok !== true) {
         return `get/award-types failed: ${JSON.stringify(res)}`;
     }
-    if (res.data?.[0]?.name !== 'House Tie 2') {
-        return `1Expected award type name to be 'House Tie 2', got '${res?.data?.[0]?.name}'`;
+    if (res.data?.[0]?.hpsRequired !== 20) {
+        return `2Expected award requirement to be 20, got '${JSON.stringify(res)}'`;
     }
 
     await api(`delete/award-types/with-id/${res.data?.[0]?.id}`);
