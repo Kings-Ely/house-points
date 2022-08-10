@@ -58,7 +58,7 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 
 	window[`_EventCard${id}__changeHpQuantity`] = async (id, value) => {
 		await core.api`update/house-points/quantity/${id}/${value}`;
-		render();
+		await hardReload();
 	};
 
 	window._EventCard__studentPopup ||= async (email) => {

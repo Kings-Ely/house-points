@@ -1,7 +1,7 @@
 'use strict';
 import { getSession, handleUserInfo, testApiCon, userInfo, signInAs, logout } from "./auth.js";
 import { rawAPI } from "./backendAPI.js";
-import { cookiePopUp, cookiesAllowed, getCookie, setCookie } from "./cookies.js";
+import { cookiePopUp } from "./cookies.js";
 import { domIsLoaded, loadFooter, loadNav, reloadDOM, scrollToTop, showError, waitForReady } from "./dom.js";
 
 export * from './auth.js';
@@ -17,9 +17,8 @@ export const
     API_ROOT = 'https://josephcoppin.com/school/house-points/api',
     COOKIE_SESSION = 'hpnea_SessionID',
     COOKIE_ALLOW_COOKIES_KEY = 'hpnea_AllowedCookies',
-    COOKIE_THEME = 'hpnea_ColourScheme',
+    LS_THEME = 'hpnea_Theme',
     HOUSE_NAME = 'Osmond',
-    DEFAULT_PASSWORD = 'changeme',
     svgCache = {},
     AWARD_TYPES = [
         { name: 'Tie', required: 18 },
@@ -112,12 +111,6 @@ export async function init (rootPath, requireLoggedIn=false, requireAdmin=false,
     }
 
     await waitForReady();
-
-    if (!getCookie(COOKIE_THEME) && user?.admin) {
-        if (cookiesAllowed()) {
-            await setCookie(COOKIE_THEME, 'dark', 365);
-        }
-    }
 
     // load footer and nav bar
     state.$nav = document.querySelector(`nav`);

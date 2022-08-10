@@ -46,6 +46,7 @@ html, body {
     padding: 0;
     margin: 0;
     background: var(--bg);
+    overflow-x: hidden;
 }
 
 main {
@@ -778,8 +779,5 @@ svg {
 .user-card .user-card-housepoints {
     max-height: 50vh;
     overflow-y: scroll;
-}
-
-.user-card .user-card-housepoints::-webkit-scrollbar {
-    display: none;
+    height: fit-content;
 }

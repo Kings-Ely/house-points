@@ -25,7 +25,7 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 
 	window[`_UserCard${id}__changeHpQuantity`] = async (id, value) => {
 		await core.api`update/house-points/quantity/${id}/${value}`;
-		render();
+		await hardReload();
 	};
 
 	window[`_UserCard${id}__deleteHousePoint`] = async (id) => {

@@ -3,7 +3,7 @@ import {
 	HOUSE_NAME,
 	navigate,
 	ROOT_PATH,
-	userInfo, getCookie, COOKIE_THEME
+	userInfo, getCookie, LS_THEME, setCookie
 } from "./main.js";
 import { loadSVGs } from "./svg.js";
 
@@ -217,15 +217,11 @@ export function reloadDOM () {
 	loadSVGs();
 }
 
-export function setThemeFromCookie () {
-	document.body.setAttribute('data-theme', getCookie(COOKIE_THEME));
-}
-
 export async function domIsLoaded () {
 	reloadDOM();
 
 	state.documentLoaded = true;
-	setThemeFromCookie();
+	await setTheme();
 
 	for (const cb of state.onLoadCBs) {
 		cb();
@@ -237,4 +233,22 @@ export async function domIsLoaded () {
  */
 export function scrollToTop () {
 	document.body.scrollTop = document.documentElement.scrollTop = 0;
+}
+
+/**
+ * Sets the data-theme attribute of the document body from the value stored in localStorage or the theme preference
+ * @returns {Promise<void>}
+ */
+export async function updateTheme () {
+	const theme = localStorage.getItem(LS_THEME) || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+	document.body.setAttribute('data-theme', theme);
+}
+
+/**
+ * Sets the localStorage theme value and then updates the theme
+ * @param value
+ */
+export function setTheme (value='light') {
+	localStorage.setItem(LS_THEME, value);
+	document.body.setAttribute('data-theme', value);
 }
