@@ -45,7 +45,14 @@ export async function loadSVG ($el) {
 
 	const uri = ROOT_PATH + '/assets/img/' + $el.attributes['svg'].value;
 
-	$el.innerHTML = await getSVGFromURI(uri) + $el.innerHTML;
+	let svgContent = await getSVGFromURI(uri);
+
+	if (!svgContent) {
+		console.error(`Could not load SVG from ${uri}`);
+		svgContent = '';
+	}
+
+	$el.innerHTML = svgContent + $el.innerHTML;
 }
 
 /**
