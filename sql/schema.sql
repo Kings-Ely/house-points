@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 06, 2022 at 10:09 AM
+-- Generation Time: Aug 11, 2022 at 06:17 PM
 -- Server version: 5.7.39
 -- PHP Version: 7.4.30
 
@@ -32,8 +32,7 @@ CREATE TABLE `awards` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `student` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `type` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `reached` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `awarded` timestamp NULL DEFAULT NULL
+  `awarded` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -45,6 +44,7 @@ CREATE TABLE `awards` (
 CREATE TABLE `awardTypes` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `name` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `hpsRequired` int(32) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -114,7 +114,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `email`, `password`, `salt`, `year`, `admin`, `student`) VALUES
-('admin', 'admin@example.com', SHA2('passwordabc', 256), 'abc', 0, 1, 0);
+('admin', 'admin@example.com', '6733b7ffeace4887c3b31258079c780d8db3018db9cbc05c500df3521f968df8', 'abc', 0, 1, 0);
 
 --
 -- Indexes for dumped tables

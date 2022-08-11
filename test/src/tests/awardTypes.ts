@@ -21,6 +21,9 @@ Test.test('Award  Types | Creating, getting and deleting', async (api) => {
     if (res.data?.[0]?.name !== 'House Tie') {
         return `1Expected award type name to be 'House Tie', got '${res?.data?.[0]?.name}'`;
     }
+    if (res.data?.[0]?.description !== '') {
+        return `1Expected award type description to be '', got '${res?.data?.[0]?.name}'`;
+    }
     if (res.data?.[0]?.hpsRequired !== 18) {
         return `1Expected award type points to be 18, got '${res?.data?.[0]?.points}'`;
     }
@@ -29,7 +32,7 @@ Test.test('Award  Types | Creating, getting and deleting', async (api) => {
         return `1Expected award type id to be set, got '${JSON.stringify(res)}'`;
     }
     res = await api(`delete/award-types/with-id/${id}`);
-    if (res.ok !== true || res.status !== 204) {
+    if (res.ok !== true || res.status !== 200) {
         return `delete/award-types/with-id/${id} failed: ${JSON.stringify(res)}`;
     }
 
@@ -53,7 +56,7 @@ Test.test('Award  Types | Creating, getting and deleting auth', async (api) => {
     }
 
     res = await api(`create/award-types/House+Tie/18`, sessionID);
-    if (res.ok || res.status !== 403) {
+    if (res.ok || res.status !== 401) {
         return `expected 403 from create/award-types/House+Tie/18: ${JSON.stringify(res)}`;
     }
 
@@ -69,7 +72,7 @@ Test.test('Award  Types | Creating, getting and deleting auth', async (api) => {
     }
 
     res = await api(`delete/award-types/with-id/${res.data?.[0]?.id}`, sessionID);
-    if (res.ok || res.status !== 403) {
+    if (res.ok || res.status !== 401) {
         return `expected 403 from delete/award-types/with-id/${res.data?.[0]?.id}: ${JSON.stringify(res)}`;
     }
 
@@ -106,7 +109,7 @@ Test.test('Award  Types | Updating name', async (api) => {
     }
 
     res = await api(`update/award-types/name/${res.data?.[0]?.id}/House+Tie`, sessionID);
-    if (res.ok || res.status !== 403) {
+    if (res.ok || res.status !== 401) {
         return `update/award-types/name/${res.data?.[0]?.id}/House+Tie failed: ${JSON.stringify(res)}`;
     }
     res = await api(`get/award-types`, sessionID);
@@ -150,7 +153,7 @@ Test.test('Award  Types | Updating quantity', async (api) => {
     }
 
     res = await api(`update/award-types/hps-required/${res.data?.[0]?.id}/18`, sessionID);
-    if (res.ok || res.status !== 403) {
+    if (res.ok || res.status !== 401) {
         return `expected 403 from update/award-types/hps-required/${res.data?.[0]?.id}/18: ${JSON.stringify(res)}`;
     }
     res = await api(`get/award-types`, sessionID);

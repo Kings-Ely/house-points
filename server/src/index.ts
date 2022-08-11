@@ -45,6 +45,8 @@ import './routes/server';
 import './routes/house-points';
 import './routes/events';
 import './routes/session';
+import './routes/awardTypes';
+import './routes/awards';
 
 async function serverResponse (req: IncomingMessage, res: ServerResponse) {
 

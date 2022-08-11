@@ -111,42 +111,50 @@ export class Route {
     public async handle (args: IHandlerArgs): Promise<IJSONResponse & Record<any, any>> {
         let res: Record<any, any> | void | string | null | undefined;
 
-        try {
-            res = await this.handler(args).catch(e => {
+        return await new Promise(async (resolve) => {
+
+            try {
+                res = await this.handler(args).catch(e => {
+                    error`Caught Error in Route '${this.asString()}':\n     ${e} \n    Traceback:\n${e.stack}`;
+                    resolve({
+                        ok: false,
+                        status: 500,
+                        error: 'Internal server error',
+                    });
+                });
+            } catch (e: any) {
+                res = {
+                    status: 500,
+                    error: 'Internal server error',
+                };
                 error`Caught Error in Route '${this.asString()}':\n     ${e} \n    Traceback:\n${e.stack}`;
+            }
+
+            if (typeof res === 'string') {
+                res = { error: res };
+            }
+
+            res ||= {};
+
+            if (Array.isArray(res)) {
+                error`Arrays not allowed from handlers`;
+                res = { status: 500 };
+            }
+
+            if (typeof res !== 'object') {
+                res = {
+                    error: 'Handler returned non-object',
+                    value: res
+                };
+            }
+
+            resolve({
+                ok: !res.error,
+                // status is overridden if present in 'res'
+                status: res.error ? 400 : 200,
+                ...res
             });
-        } catch (e: any) {
-            res = {
-                status: 500,
-                error: 'Internal server error',
-            };
-            error`Caught Error in Route '${this.asString()}':\n     ${e} \n    Traceback:\n${e.stack}`;
-        }
-
-        if (typeof res === 'string') {
-            res = { error: res };
-        }
-
-        res ||= {};
-
-        if (Array.isArray(res)) {
-            error`Arrays not allowed from handlers`;
-            res = { status: 500 };
-        }
-
-        if (typeof res !== 'object') {
-            res = {
-                error: 'Handler returned non-object',
-                value: res
-            };
-        }
-
-        return {
-            ok: !res.error,
-            // status is overridden if present in 'res'
-            status: res.error ? 400 : 200,
-            ...res
-        };
+        });
     }
 
     /**
