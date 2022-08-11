@@ -48,8 +48,7 @@ export async function loadSVG ($el) {
 	let svgContent = await getSVGFromURI(uri);
 
 	if (!svgContent) {
-		console.error(`Could not load SVG from ${uri}`);
-		svgContent = '';
+		return;
 	}
 
 	$el.innerHTML = svgContent + $el.innerHTML;

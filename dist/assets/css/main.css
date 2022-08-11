@@ -3,9 +3,6 @@
 /* --- GENERAL --- */
 
 :root {
-    --nav-height: 70px;
-    --nav-colour: #d5d5d5;
-
     --text: #000000;
     --text-light: #575757;
     --text-v-light: #909090;
@@ -22,6 +19,10 @@
     --label-bg: #c0c0c0;
     --label-text: #000000;
     --label-border: #e0e0e0;
+
+    --nav-height: 70px;
+    --nav-colour: var(--bg);
+    --nav-border-bottom: var(--accent);
 }
 
 [data-theme='dark'] {
@@ -233,6 +234,7 @@ nav {
     background: var(--nav-colour);
     height: var(--nav-height);
     width: 100%;
+    border-bottom: 1px solid var(--nav-border-bottom);
 }
 
 #nav-left, #nav-right {

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Award Types</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="robots" content="noindex">
+
+    <script type="module" src="../../assets/js/main.js"></script>
+    <script type="module" src="./index.js" defer></script>
+
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+<nav></nav>
+<main>
+    <section>
+        <h2>New Award Type</h2>
+        <div id="add-award-type">
+            <div>
+                <label>
+                    <input
+                        type="text"
+                        id="award-type-name"
+                        placeholder="House Tie"
+                    >
+                </label>
+            </div>
+            <div>
+                <label>
+                    <input
+                        type="number"
+                        id="award-type-required"
+                        placeholder="18"
+                        min="0"
+                    >
+                </label>
+            </div>
+            <div>
+                <label>
+                    <input
+                        type="text"
+                        id="award-type-description"
+                        placeholder="Generally got in year 10, ..."
+                    >
+                </label>
+            </div>
+            <div>
+                <button
+                    id="award-type-submit"
+                    svg="plus.svg"
+                    class="icon"
+                    data-label="Add Award Type"
+                ></button>
+            </div>
+        </div>
+
+    </section>
+    <section id="award-types"></section>
+</main>
+<footer></footer>
+</body>
+</html>
