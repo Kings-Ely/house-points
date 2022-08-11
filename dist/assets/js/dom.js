@@ -3,7 +3,7 @@ import {
 	HOUSE_NAME,
 	navigate,
 	ROOT_PATH,
-	userInfo, getCookie, LS_THEME, setCookie
+	userInfo, LS_THEME
 } from "./main.js";
 import { loadSVGs } from "./svg.js";
 
@@ -50,22 +50,6 @@ export function hide (el) {
 		el.style.display = 'none';
 	} else {
 		console.error(`hide: no element`);
-	}
-}
-
-/**
- * Hides an element by setting its opacity to '0'
- * @param {string|HTMLElement} el
- */
-export function makeTransparent (el) {
-	if (typeof el === 'string') {
-		el = document.querySelector(el);
-	}
-
-	if (el) {
-		el.style.opacity = '0';
-	} else {
-		console.error(`makeTransparent: no element`);
 	}
 }
 
