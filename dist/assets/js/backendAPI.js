@@ -131,17 +131,16 @@ export async function api (path, ...args) {
 		cache: 'no-cache',
 		redirect: 'follow',
 		credentials: 'include'
-	}).catch(err => {
+	}).catch(async err => {
 		console.error(`Error with API request (${path}): `, err);
 		if (shouldHideAtEnd) {
 			stopSpinner(loader);
 		}
-		showError('Something went wrong!');
+		await showError('Something went wrong!');
 	});
 
 	if (res.status === 404) {
-		showError('Something went wrong! (404 in API)')
-			.then();
+		await showError('Something went wrong! (404)');
 		if (shouldHideAtEnd) {
 			stopSpinner(loader);
 		}
@@ -155,14 +154,16 @@ export async function api (path, ...args) {
 
 		// don't try to show error in response if there is no response, so also in try block
 		if (asJSON.error) {
-			showError(asJSON.error)
-				.then();
+			if (asJSON.status === 502) {
+				await showError(`Looks like the server is down. Please try again later.`);
+			} else {
+				await showError(asJSON.error);
+			}
 		}
 
 	} catch (err) {
 		console.error('Error with API request: ', err);
-		showError('Something went wrong!')
-			.then();
+		await showError('Something went wrong!');
 	}
 
 	if (shouldHideAtEnd) {
