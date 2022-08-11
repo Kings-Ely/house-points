@@ -59,24 +59,6 @@ route('create/award-types/:name/:required?description', async ({ query, params, 
     };
 });
 
-/**
- * @admin
- */
-route('delete/award-types/with-id/:id', async ({ query, params, cookies }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
-
-    const { id } = params;
-
-    if (!id) return 'Missing parameter id';
-
-    const queryRes = await query<mysql.OkPacket>`
-        DELETE FROM awardTypes
-        WHERE id = ${id}
-    `;
-
-    if (queryRes.affectedRows === 0) return 'Award type not found';
-});
-
 
 /**
  * @admin
@@ -139,4 +121,22 @@ route('update/award-types/description/:id/:newDescription', async ({ query, cook
     `;
 
     if (queryRes.affectedRows === 0) return 'Award type not found with that ID';
+});
+
+/**
+ * @admin
+ */
+route('delete/award-types/with-id/:id', async ({ query, params, cookies }) => {
+    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+
+    const { id } = params;
+
+    if (!id) return 'Missing parameter id';
+
+    const queryRes = await query<mysql.OkPacket>`
+        DELETE FROM awardTypes
+        WHERE id = ${id}
+    `;
+
+    if (queryRes.affectedRows === 0) return 'Award type not found';
 });

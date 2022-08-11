@@ -1,18 +1,21 @@
 import * as core from "../../assets/js/main.js";
-import SelectableList from "../../assets/js/components/SelectableList.js";
-import { showError } from "../../assets/js/main.js";
+import { preloadSVGs, reloadDOM, showError } from "../../assets/js/main.js";
 
 const
 	$awardTypeRequired = document.querySelector('#award-type-required'),
 	$awardTypeName = document.querySelector('#award-type-name'),
 	$awardTypeDescription = document.querySelector('#award-type-description'),
-	$awardTypeSubmit = document.querySelector('#award-type-submit');
+	$awardTypeSubmit = document.querySelector('#award-type-submit'),
+    $awardTypes = document.querySelector('#award-types');
 
-
-const selected = [];
+window.awardTypeUpdateName = awardTypeUpdateName;
+window.awardTypeUpdateDesc = awardTypeUpdateDesc;
+window.awardTypeUpdateRequired = awardTypeUpdateRequired;
+window.awardTypeDelete = awardTypeDelete;
 
 (async () => {
 	await core.init('../..', false, false, true);
+	preloadSVGs('bin.svg');
 
 	await refresh();
 })();
@@ -21,22 +24,79 @@ async function refresh () {
 	await awardTypeList();
 }
 
-async function awardTypeList () {
-	const { data: awardTypes } = await core.api`get/award-types`;
+async function awardTypeUpdateName (id, name) {
+	await core.api`update/award-types/name/${id}/${name}`;
+	await refresh();
+}
 
-	SelectableList('#award-types', {
-		name: 'Award Types',
-		items: awardTypes,
-		uniqueKey: 'id',
-		searchKey: 'name',
-		itemGenerator: (awardType) => {
-			return `
-				<p>${awardType.name}</p>
-				<p>${core.limitStrLength(awardType.description)}</p>
-			`;
-		},
-		selected
-	});
+async function awardTypeUpdateDesc (id, name) {
+	await core.api`update/award-types/description/${id}/${name}`;
+	await refresh();
+}
+
+async function awardTypeUpdateRequired (id, value) {
+	await core.api`update/award-types/hps-required/${id}/${value}`;
+	await refresh();
+}
+
+async function awardTypeDelete (id) {
+	if (!confirm('Are you sure you want to delete this award type?')) {
+		return;
+	}
+	await core.api`delete/award-types/with-id/${id}`;
+	await refresh();
+}
+
+async function awardTypeList () {
+	const { data } = await core.api`get/award-types`;
+
+	// No SelectableList as there are going to be so few it's not worth it
+	$awardTypes.innerHTML = `
+		<h2>Award Types</h2>
+	`;
+
+	for (let awardType of data) {
+		$awardTypes.innerHTML += `
+			<div class="item">
+				<div>
+					<label>
+						<input
+							value="${awardType.name}"
+							onchange="awardTypeUpdateName('${awardType.id}', this.value)"
+						>
+					</label>
+				</div>
+				<div>
+					<label>
+						<input
+							value="${awardType.hpsRequired}"
+							onchange="awardTypeUpdateRequired('${awardType.id}', this.value)"
+							data-label="House Points Required"
+						>
+					</label>
+				</div>
+				<div>
+					<label>
+						<input
+							value="${awardType.description}"
+							onchange="awardTypeUpdateDesc('${awardType.id}', this.value)"
+						>
+					</label>
+				</div>
+				<div>
+					<button
+						onclick="awardTypeDelete('${awardType.id}')"
+						data-label="delete"
+						svg="bin.svg"
+						class="icon medium"
+						aria-label="delete"
+					></button>
+				</div>
+			</div>
+		`;
+	}
+
+	reloadDOM();
 }
 
 $awardTypeSubmit.addEventListener('click', async () => {
