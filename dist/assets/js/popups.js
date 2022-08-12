@@ -28,14 +28,14 @@ export async function eventPopup (id) {
  * @returns {Promise<void>}
  */
 export async function userPopupFromID (id) {
-	if (!(await core.rawAPI`get/users/from-id${id}`).ok) {
+	if (!(await core.rawAPI`get/users/from-id/${id}`).ok) {
 		console.error(`User not found: ${id}`);
 		await core.showError('User not found with that ID');
 		return;
 	}
 
-	FullPagePopup(document.body, inlineComponent(EventCard,
-		async () => ((await core.api`get/events?id=${id}`)?.['data']?.[0]),
+	FullPagePopup(document.body, inlineComponent(UserCard,
+		async () => (await core.api`get/users/from-id/${id}`),
 		(await core.userInfo())['admin'],
 	));
 }
@@ -46,9 +46,7 @@ export async function userPopupFromID (id) {
  * @returns {Promise<void>}
  */
 export async function userPopup (email) {
-	const user = await core.api`get/users/from-email/${email}`;
-
-	if (!user.ok) {
+	if (!(await core.api`get/users/from-email/${email}`).ok) {
 		await core.showError('User not found');
 		return;
 	}

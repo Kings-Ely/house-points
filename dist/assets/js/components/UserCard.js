@@ -10,7 +10,7 @@ import { showError } from "../main.js";
  * 		accepted: number,
  * 		rejected: number,
  * 		pending: number,
- * 		housePoints: *[],
+ * 		housePoints: HP[],
  * }} User */
 
 /**
@@ -38,6 +38,8 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 		await core.api`delete/house-points/with-id/${id}`;
 		await hardReload();
 	};
+
+	window[`_UserCard${id}__eventPopup`] = core.eventPopup;
 
 	let userCard = document.createElement('div');
 	userCard.classList.add('user-card');
@@ -84,7 +86,16 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 								(${core.getRelativeTime(point['created']*1000)})
 							</p>
 							
-							${point['eventName'] || (admin ? `
+							${point.eventName ? `
+								<button
+									svg="event.svg"
+									class="icon small"
+									onclick="_UserCard${id}__eventPopup('${point.eventID}')"
+								>
+									${point.eventName}
+								</button>
+								
+							` : (admin ? `
 								<input 
 									class="editable-text"
 									value="${point.description}"

@@ -8,6 +8,10 @@ const $numPendingHPs = document.getElementById('num-pending');
 let $addHPName = document.getElementById('add-hp-name-inp');
 const $addHPSubmit = document.getElementById('add-hp-submit');
 
+window.reject = reject;
+window.accept = accept;
+window.userPopup = core.userPopupFromID;
+
 (async () => {
     await core.init('..', true, true);
 
@@ -52,19 +56,22 @@ async function main () {
     core.reloadDOM();
 }
 
-
+/**
+ *
+ * @param {HP} hp
+ * @returns {string}
+ */
 function housePointHML (hp) {
     const submittedTime = hp['created'] * 1000;
 
     return `
         <div class="house-point">
             <button 
-                onclick="signInAs('${hp['userID']}', '${hp['studentEmail']}')"
-                svg="login.svg"
-               data-label="Sign in as ${hp['studentEmail']}"
+                onclick="userPopup('${hp['userID']}')"
+                data-label="View"
                 style="--offset-x: 50%"
                 class="icon small"
-                aria-label="Sign in as ${hp['studentEmail']}"
+                aria-label="View ${hp['studentEmail']}"
             >
                 ${hp['studentEmail'].split('@')[0]}
             </button>
@@ -93,20 +100,6 @@ function housePointHML (hp) {
             </div>
         </div>
     `;
-}
-
-async function signInAs (id, email) {
-    if (!confirm(`Sign in as ${email}?`)) {
-        return;
-    }
-
-    const { sessionID } = await core.api`create/sessions/from-user-id/${id}`;
-
-    if (!sessionID) return;
-
-    await core.setAltSessionCookie(core.getSession());
-    await core.setSessionCookie(sessionID);
-    await core.navigate(`/user`);
 }
 
 async function accept (id) {
