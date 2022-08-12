@@ -3,6 +3,7 @@ import SelectableList from "../../assets/js/components/SelectableList.js";
 import FullPagePopup from "../../assets/js/components/FullPagePopup.js";
 import UserCard from "../../assets/js/components/UserCard.js";
 import {inlineComponent} from "../../assets/js/main.js";
+import fullPagePopup from "../../assets/js/components/FullPagePopup.js";
 
 const
     $addStudentButton = document.getElementById('add-student'),
@@ -204,7 +205,7 @@ function toggleAdmin () {
 }
 
 $addStudentButton.addEventListener('click', () => {
-    const hide = insertComponent().fullPagePopUp(`
+    const hide = fullPagePopup(document.body, `
     
         <h2 style="padding: 0">Add Student</h2>
         <div id="add-student-by-email">
@@ -283,7 +284,8 @@ $addStudentButton.addEventListener('click', () => {
             }
         }
 
-        const res = await core.api`create/users/${$emailInp.value}/${core.DEFAULT_PASSWORD}?year=${$yearInp.value}`;
+        //const res = await core.api`create/users/${$emailInp.value}/${core.genRandomString(10)}?year=${$yearInp.value}`;
+        const res = await core.api`create/users/${$emailInp.value}/changeme?year=${$yearInp.value}`;
 
         if (res.ok) {
             $emailInp.value = '';
@@ -458,7 +460,7 @@ async function uploadAddStudentsFile () {
                 return;
             }
 
-            let res = await core.api`create/users/${email}/${core.DEFAULT_PASSWORD}?year=${year}`;
+            let res = await core.api`create/users/${email}/changeme?year=${year}`;
             if (res['error']) {
                 errors.push(`Error on row ${i+1}: ${res['error']}`);
                 finishedOne();

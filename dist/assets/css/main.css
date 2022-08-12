@@ -259,9 +259,10 @@ nav {
 
 /* --- COMPONENTS --- */
 
-/* studentEmailInputWithIntellisense */
+/* InputWithDropdown */
 
-.student-email-input-wrapper {
+.dropdowninp-wrapper {
+    /* use variable so it is accessible to child elements */
     --width: min(350px, 90vw);
 
     position: relative;
@@ -270,7 +271,7 @@ nav {
     width: var(--width);
 }
 
-.student-email-input-wrapper .student-email-input-dropdown {
+.dropdowninp-wrapper .dropdowninp-dropdown {
     display: none;
     position: absolute;
     background-color: var(--bg-accent);
@@ -283,28 +284,28 @@ nav {
     border-radius: 0 0 10px 10px;
 }
 
-.student-email-input-wrapper .student-email-input-dropdown::-webkit-scrollbar {
+.dropdowninp-wrapper .dropdowninp-dropdown::-webkit-scrollbar {
     display: none;
 }
 
-.student-email-input-wrapper .student-email-input-dropdown > * {
+.dropdowninp-wrapper .dropdowninp-dropdown > * {
     padding: 4px 0;
     text-decoration: none;
     display: block;
     margin: 0;
 }
 
-.student-email-input-wrapper .student-email-input-dropdown > :hover:not(.no-hover) {
+.dropdowninp-wrapper .dropdowninp-dropdown > :hover:not(.no-hover) {
     background-color: var(--bg);
     color: var(--text-light);
 }
 
-.student-email-input-wrapper .student-email-input-show-dropdown {
+.dropdowninp-wrapper .dropdowninp-show-dropdown {
     display: block;
 }
 
-.student-email-input-wrapper .student-email-input {
-    width: var(--width);
+.dropdowninp-wrapper .dropdowninp-input {
+    width: 100%;
 }
 
 /* pop-up error */
@@ -752,12 +753,12 @@ svg {
     width: 400px;
 }
 
-.event-card .add-student-to-event .student-email-input {
+.event-card .add-student-to-event .dropdowninp {
     font-size: 15px;
 }
 
-.event-card .add-student-to-event .student-email-input:hover,
-.event-card .add-student-to-event .student-email-input:focus {
+.event-card .add-student-to-event .dropdowninp:hover,
+.event-card .add-student-to-event .dropdowninp:focus {
     background: none;
 }
 

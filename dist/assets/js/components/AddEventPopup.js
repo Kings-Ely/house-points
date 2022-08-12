@@ -21,7 +21,7 @@ const AddEventPopup = registerComponent(($el, id, reload) => {
 	let $addEventAddStudent;
 	let $addEventAddStudentsHTML;
 
-	window._AddEventPopup__addStudentToEvent = async () =>{
+	window._AddEventPopup__addStudentToEvent = async () => {
 		const email = $addEventAddStudent.value;
 
 		if (!email) {

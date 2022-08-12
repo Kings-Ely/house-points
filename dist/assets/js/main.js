@@ -9,6 +9,7 @@ export * from './backendAPI.js';
 export * from './cookies.js';
 export * from './dom.js';
 export * from './svg.js';
+export * from './popups.js';
 
 // Utility script imported by all pages
 
@@ -342,4 +343,12 @@ export function CSVToArray (strData, strDelimiter) {
 
     // Return the parsed data.
     return arrData;
+}
+
+export function genRandomString(len=10, charset="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") {
+    let text = "";
+    for (let _ = 0; _ < len; _++) {
+        text += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    return text;
 }

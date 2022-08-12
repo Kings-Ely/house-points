@@ -9,6 +9,8 @@ const $info = document.getElementById('info');
 let myUserInfo;
 let me = false;
 
+window.eventPopup = core.eventPopup;
+
 (async () => {
     await core.init('..', true);
 
@@ -177,16 +179,16 @@ function showHp (hp) {
         <div class="house-point">
             <div style="min-width: 50%">
                 ${hp['eventName'] ? `
-                    <a
-                       data-label="View Event"
-                        href="../events?id=${hp['eventID']}"
+                    <button
+                        data-label="View Event"
+                        onclick="eventPopup('${hp['eventID']}')"
                         aria-label="${hp['eventName']}"
                         svg="event.svg"
                         class="icon small evt-link"
                         style="--offset-x: 50px"
                     >
                         <b>${hp['eventName']}</b>
-                    </a>
+                    </button>
                 ` : ''}
                 ${hp['description']}
                 ${hp['quantity'] > 1 ? `
@@ -233,4 +235,3 @@ document.getElementById('submit-hp').onclick = async () => {
     await reloadHousePoints();
     $hpReasonInp.value = '';
 };
-

@@ -1,13 +1,10 @@
 import * as core from "../assets/js/main.js";
 import AddEventPopup from "../assets/js/components/AddEventPopup.js";
-import FullPagePopup from "../assets/js/components/FullPagePopup.js";
-import EventCard from "../assets/js/components/EventCard.js";
 import SelectableList from "../assets/js/components/SelectableList.js";
-import {inlineComponent} from "../assets/js/main.js";
 
 const selected = [];
 
-window.eventPopup = eventPopup;
+window.eventPopup = core.eventPopup;
 window.deleteEvents = deleteEvents;
 
 (async () => {
@@ -16,7 +13,7 @@ window.deleteEvents = deleteEvents;
 	await showAllEvents();
 
 	if (core.GETParam('id')) {
-		await eventPopup();
+		await eventPopup(core.GETParam('id'));
 	}
 })();
 
@@ -110,18 +107,4 @@ async function deleteEvents () {
 		await core.api`delete/events/with-id/${id}`;
 	}));
 	await showAllEvents();
-}
-
-async function eventPopup (id=core.GETParam('id')) {
-	const { data: [ event ] } = await core.api`get/events?id=${id}`;
-
-	if (!event) {
-		await core.showError('Event not found');
-		return;
-	}
-
-	FullPagePopup(document.body, inlineComponent(EventCard,
-		async () => ((await core.api`get/events?id=${id}`)?.['data']?.[0]),
-		(await core.userInfo())['admin'],
-	));
 }

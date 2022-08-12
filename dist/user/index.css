@@ -37,14 +37,9 @@
     right: 10px;
 }
 
-#evt-link {
+.evt-link {
     font-size: 1.2em;
     width: fit-content;
-}
-
-.icon:hover #evt-link {
-    text-decoration: underline;
-    color: var(--text-light);
 }
 
 #submit-hp-request {
