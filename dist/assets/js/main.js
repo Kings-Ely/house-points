@@ -2,7 +2,16 @@
 import { getSession, handleUserInfo, testApiCon, userInfo, signInAs, logout } from "./auth.js";
 import { rawAPI } from "./backendAPI.js";
 import { cookiePopUp } from "./cookies.js";
-import { domIsLoaded, loadFooter, loadNav, reloadDOM, scrollToTop, showError, waitForReady } from "./dom.js";
+import {
+    domIsLoaded,
+    loadFooter,
+    loadNav,
+    reloadDOM,
+    scrollToTop,
+    showError,
+    updateTheme,
+    waitForReady
+} from "./dom.js";
 
 export * from './auth.js';
 export * from './backendAPI.js';

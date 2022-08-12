@@ -1,10 +1,11 @@
 import * as core from "../assets/js/main.js";
-
+import HousePoint from "../assets/js/components/HousePoint.js";
 
 const $name = document.getElementById('name');
 const $hps = document.getElementById('hps');
 const $hpReasonInp = document.getElementById('hp-reason');
 const $info = document.getElementById('info');
+const $themeButton = document.getElementById('switch-theme');
 
 let myUserInfo;
 let me = false;
@@ -13,6 +14,8 @@ window.eventPopup = core.eventPopup;
 
 (async () => {
     await core.init('..', true);
+
+    reloadThemeButton();
 
     if (!core.GETParam('email')) {
         await core.navigate(`?email=${(await core.userInfo())['email']}`);
@@ -55,6 +58,8 @@ window.eventPopup = core.eventPopup;
     } else {
         core.hide('#info');
     }
+
+    core.reloadDOM();
 })();
 
 async function reloadUserInfoFromEmail () {
@@ -84,7 +89,8 @@ async function housePoints () {
     let html = '';
 
     for (let hp of hps) {
-        html += showHp(hp);
+        html += core.inlineComponent(HousePoint,
+            hp, await core.isAdmin(), true, reloadUserInfoFromEmail, hp === hps[hps.length-1], true);
     }
     $hps.innerHTML += html;
 }
@@ -150,80 +156,19 @@ async function showInfo () {
     }
 }
 
-function showHp (hp) {
-    let acceptedHTML;
-    let icon = '';
-
-    if (hp['status'] === 'Rejected') {
-        acceptedHTML = `
-            Rejected ${core.getRelativeTime(hp['completed'] * 1000)}
-            <br>
-            <b>"${hp['rejectMessage']}"</b>
-        `;
-        icon = 'red-cross.svg';
-
-    } else if (hp['status'] === 'Accepted') {
-        acceptedHTML = `
-            Accepted ${core.getRelativeTime(hp['completed'] * 1000)}
-        `;
-        icon = 'accent-tick.svg';
-
-    } else {
-        acceptedHTML = 'Not Yet Accepted';
-        icon = 'pending.svg';
-    }
-
-    const submittedTime = hp['created'] * 1000;
-
-    return `
-        <div class="house-point">
-            <div style="min-width: 50%">
-                ${hp['eventName'] ? `
-                    <button
-                        data-label="View Event"
-                        onclick="eventPopup('${hp['eventID']}')"
-                        aria-label="${hp['eventName']}"
-                        svg="event.svg"
-                        class="icon small evt-link"
-                        style="--offset-x: 50px"
-                    >
-                        <b>${hp['eventName']}</b>
-                    </button>
-                ` : ''}
-                ${hp['description']}
-                ${hp['quantity'] > 1 ? `
-                    (${hp['quantity']} points)
-                ` : ''}
-            </div>
-            <div style="min-width: calc(40% - 60px)">
-                ${new Date(submittedTime).toDateString()}
-                (${core.getRelativeTime(submittedTime)})
-                <br>
-                ${acceptedHTML}
-            </div>
-            <div 
-                style="min-width: 50px"
-                svg="${icon}"
-                data-label="${hp['status']}"
-                class="icon icon-info-only"
-            >
-            </div>
-        </div>
-    `;
-}
-
 async function reloadHousePoints () {
 
     await reloadUserInfoFromEmail();
-
     await title();
-
     await housePoints();
 
     core.reloadDOM();
 }
 
-
+function reloadThemeButton () {
+    const svg = core.getTheme() === 'dark' ? 'light-theme.svg' : 'dark-theme.svg'
+    $themeButton.setAttribute('svg', svg);
+}
 
 document.getElementById('submit-hp').onclick = async () => {
     if (!$hpReasonInp.value) return;
@@ -234,4 +179,12 @@ document.getElementById('submit-hp').onclick = async () => {
     }
     await reloadHousePoints();
     $hpReasonInp.value = '';
+};
+
+
+$themeButton.onclick = async () => {
+    console.log(core.getInverseTheme());
+    core.setTheme(core.getInverseTheme());
+    reloadThemeButton();
+    core.reloadDOM();
 };

@@ -205,7 +205,8 @@ export async function domIsLoaded () {
 	reloadDOM();
 
 	state.documentLoaded = true;
-	await setTheme();
+
+	updateTheme();
 
 	for (const cb of state.onLoadCBs) {
 		cb();
@@ -221,10 +222,10 @@ export function scrollToTop () {
 
 /**
  * Sets the data-theme attribute of the document body from the value stored in localStorage or the theme preference
- * @returns {Promise<void>}
  */
-export async function updateTheme () {
-	const theme = localStorage.getItem(LS_THEME) || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+export function updateTheme () {
+	const theme =
+		getTheme() || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 	document.body.setAttribute('data-theme', theme);
 }
 
@@ -234,5 +235,18 @@ export async function updateTheme () {
  */
 export function setTheme (value='light') {
 	localStorage.setItem(LS_THEME, value);
-	document.body.setAttribute('data-theme', value);
+	updateTheme();
+}
+/**
+ * Gets the localStorage theme value
+ */
+export function getTheme () {
+	return localStorage.getItem(LS_THEME);
+}
+
+/**
+ * Gets the localStorage theme value
+ */
+export function getInverseTheme () {
+	return getTheme() === 'dark' ? 'light' : 'dark';
 }

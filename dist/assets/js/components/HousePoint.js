@@ -41,7 +41,7 @@ const HousePoint = registerComponent((
         `;
 	} else {
 		acceptedHTML = `
-			<span data-label="">Not Yet Accepted</span>
+			<span data-label="Waiting for approval">Not Yet Accepted</span>
 		`;
 		icon = 'pending.svg';
 	}
@@ -81,8 +81,23 @@ const HousePoint = registerComponent((
 		reload();
 	}
 
+	showPendingOptions = hp.status === 'Pending' && showPendingOptions && admin;
+
+	const gridTemplateColumn = `
+		${showEmail ? '250px' : '0'} 
+		auto 
+		100px 
+		auto
+		30px 
+		30px 
+		${showPendingOptions ? '100px' : '0'}
+	`;
+
 	$el.innerHTML = `
-		<div class="house-point ${showEmail ? 'hp-with-email' : ''} ${isLast ? 'last' : ''}">
+		<div 
+			class="house-point ${isLast ? 'last' : ''}"
+			style="grid-template-columns: ${gridTemplateColumn}"
+		>
 			<div>
 				${showEmail ? `
 					<button
@@ -142,25 +157,6 @@ const HousePoint = registerComponent((
 	                data-label="${hp['status']}"
 	                class="icon medium icon-info-only"
             	>
-            	
-            	${hp.status === 'Pending' ? `
-					<div style="${showPendingOptions && admin ? '' : 'visibility: hidden'}">
-		                <button 
-		                    onclick="_HousePoint${id}__reject()"
-		                    class="icon icon-hover-warning"
-		                    aria-label="Reject"
-		                    svg="red-cross.svg"
-		                    data-label="Reject"
-		                ></button>
-		                <button
-		                    onclick="_HousePoint${id}__accept()"
-		                    class="icon icon-accent"
-		                    svg="accent-tick.svg"
-		                    aria-label="Accept"
-		                    data-label="Accept"
-		                ></button>
-		            </div>
-            	` : ''}
 			</span>
             </div>
 			<div>
@@ -172,6 +168,24 @@ const HousePoint = registerComponent((
 						class="icon small"
 					></button>
 				` : ''}
+			</div>
+			<div>
+				${showPendingOptions ? `
+	                <button 
+	                    onclick="_HousePoint${id}__reject()"
+	                    class="icon icon-hover-warning"
+	                    aria-label="Reject"
+	                    svg="red-cross.svg"
+	                    data-label="Reject"
+	                ></button>
+	                <button
+	                    onclick="_HousePoint${id}__accept()"
+	                    class="icon icon-accent"
+	                    svg="accent-tick.svg"
+	                    aria-label="Accept"
+	                    data-label="Accept"
+	                ></button>
+	            ` : ''}
 			</div>
 		</div>
 	`;

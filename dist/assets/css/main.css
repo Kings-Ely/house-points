@@ -497,6 +497,7 @@ svg {
 .icon.bordered {
     border: 1px solid var(--border);
     border-radius: 50%;
+    aspect-ratio: 1/1;
 }
 
 .icon.icon-accent svg {
@@ -839,7 +840,6 @@ svg {
 
 .house-point {
     display: grid;
-    grid-template-columns: 0 1fr 100px 1fr 60px 60px;
     border-bottom: 1px solid var(--border);
     grid-gap: 10px;
     padding: 0;
@@ -847,10 +847,6 @@ svg {
 
 .house-point.last {
     border-bottom: none;
-}
-
-.house-point.hp-with-email {
-    grid-template-columns: 1fr 1fr 100px 1fr 60px 60px;
 }
 
 .house-point > * {

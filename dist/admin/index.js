@@ -1,7 +1,5 @@
 import * as core from "../assets/js/main.js";
 import StudentEmailInputWithIntellisense from "../assets/js/components/StudentEmailInputWithIntellisense.js";
-import { inlineComponent } from "../assets/js/main.js";
-import Name from "../assets/js/components/Name.js";
 import HousePoint from "../assets/js/components/HousePoint.js";
 
 const $addHpReason = document.getElementById('add-hp-reason');
@@ -31,7 +29,8 @@ async function main () {
 
     let i = 0;
     for (let hp of pending) {
-        $pendingHPs.innerHTML += inlineComponent(HousePoint, hp, admin, true, main, i === pending.length-1);
+        $pendingHPs.innerHTML += core.inlineComponent(HousePoint,
+            hp, admin, true, main, i === pending.length-1, true);
 
         if (i === 4) {
             $pendingHPs.innerHTML += `
