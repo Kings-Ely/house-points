@@ -46,6 +46,14 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 	function render () {
 		userCard.innerHTML = `
 			<h2>
+				${admin ? `
+					<button 
+						class="icon medium"
+						svg="account.svg"
+						onclick="signInAs('${user.id}', '${user.email}')"
+						data-label="Sign in as"
+					></button>
+				` : ''}
 				<a href="${core.ROOT_PATH}/user/?email=${user.email}">
 					${user.email}
 				</a>
@@ -54,6 +62,7 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 				<h3>
 					${user['accepted']} House Points Awarded
 				</h3>
+				<p>(${user.pending} pending, ${user.rejected} rejected)</p>
 				<div class="user-card-housepoints">
 					${user['housePoints'].map(point => `
 						<div class="hp">

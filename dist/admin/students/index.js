@@ -1,8 +1,5 @@
 import * as core from "../../assets/js/main.js";
 import SelectableList from "../../assets/js/components/SelectableList.js";
-import FullPagePopup from "../../assets/js/components/FullPagePopup.js";
-import UserCard from "../../assets/js/components/UserCard.js";
-import {inlineComponent} from "../../assets/js/main.js";
 import fullPagePopup from "../../assets/js/components/FullPagePopup.js";
 
 const
@@ -22,7 +19,7 @@ window.deleteUser = deleteUser;
 window.uploadAddStudentsFile = uploadAddStudentsFile;
 window.toggleYearGroup = toggleYearGroup;
 window.toggleAdmin = toggleAdmin;
-window.userPopup = userPopup;
+window.userPopup = core.userPopupFromID;
 
 (async () => {
     await core.init('../..', true, true);
@@ -180,13 +177,6 @@ async function showStudent (student) {
             ></button>
         </div>
     `;
-}
-
-async function userPopup (id) {
-    FullPagePopup(document.body, inlineComponent(UserCard,
-        async () => (await core.api`get/users/from-id/${id}`),
-        true,
-    ));
 }
 
 // Filters

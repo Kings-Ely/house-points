@@ -11,7 +11,7 @@ import * as core from "../main.js";
  *     name: string,
  *     items: T[],
  *     uniqueKey?: string,
- *     searchKey: string,
+ *     searchKey: string | string[],
  *     titleBar?: string,
  *	   withAllMenu?: string,
  *	   itemGenerator?: (T) => string,
@@ -26,6 +26,7 @@ const SelectableList = registerComponent(($el, id, {
 	items,
 	uniqueKey='id',
 	searchKey,
+	searchBarHint=searchKey,
 	titleBar='',
 	withAllMenu='',
 	itemGenerator,
@@ -91,13 +92,12 @@ const SelectableList = registerComponent(($el, id, {
 							aria-label="unselect all"
 						></button>
 					</span>
-					
 					${withAllMenu}
 				</div>
 				<div>
 					<label>
 						<input
-							placeholder="search for ${searchKey}..."
+							placeholder="search for ${searchBarHint}..."
 							oninput="_SelectableList${id}__reloadItems()"
 							class="search"
 							autocomplete="off"
@@ -124,9 +124,24 @@ const SelectableList = registerComponent(($el, id, {
 		const searchValue = $search.value.toLowerCase();
 
 		for (let item of items) {
-			if (searchValue && !item[searchKey].toLowerCase().includes(searchValue)) {
-				continue;
+			if (searchValue) {
+				let found = false;
+				if (typeof searchKey === 'string') {
+					if (item[searchKey]?.toLowerCase()?.includes(searchValue)) {
+						found = true;
+					}
+				} else if (Array.isArray(searchKey)) {
+					for (let key of searchKey) {
+						if (item[key]?.toLowerCase()?.includes(searchValue)) {
+							found = true;
+							break;
+						}
+					}
+				}
+
+				if (!found) continue;
 			}
+
 			if (!filter(item)) {
 				continue;
 			}
