@@ -494,7 +494,12 @@ svg {
     transform: scale(1);
 }
 
-.icon-accent svg {
+.icon.bordered {
+    border: 1px solid var(--border);
+    border-radius: 50%;
+}
+
+.icon.icon-accent svg {
     fill: var(--accent);
 }
 
@@ -506,6 +511,10 @@ svg {
 .icon.medium svg {
     height: 35px;
     width: 35px;
+}
+
+.icon.icon-hover-warning:hover svg {
+    fill: var(--text-warning) !important;
 }
 
 [data-label] {
@@ -827,3 +836,25 @@ svg {
     display: grid;
     grid-template-columns: 150px 1fr 50px;
 }
+
+.house-point {
+    display: grid;
+    grid-template-columns: 0 1fr 100px 1fr 60px 60px;
+    border-bottom: 1px solid var(--border);
+    grid-gap: 10px;
+    padding: 0;
+}
+
+.house-point.last {
+    border-bottom: none;
+}
+
+.house-point.hp-with-email {
+    grid-template-columns: 1fr 1fr 100px 1fr 60px 60px;
+}
+
+.house-point > * {
+    display: flex;
+    align-items: center;
+}
+

@@ -19,7 +19,7 @@ window.deleteUser = deleteUser;
 window.uploadAddStudentsFile = uploadAddStudentsFile;
 window.toggleYearGroup = toggleYearGroup;
 window.toggleAdmin = toggleAdmin;
-window.userPopup = core.userPopupFromID;
+window.userPopupFromID = core.userPopupFromID;
 
 (async () => {
     await core.init('../..', true, true);
@@ -147,7 +147,7 @@ async function showStudent (student) {
                 </span>
             ` : `
                 <button 
-                    onclick="userPopup('${id}')" 
+                    onclick="userPopupFromID('${id}')" 
                     class="student-link"
                     data-label="View"
                     aria-label="View"

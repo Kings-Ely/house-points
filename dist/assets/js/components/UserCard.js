@@ -1,7 +1,8 @@
 'use strict';
 import { registerComponent } from "./components.js";
 import * as core from "../main.js";
-import { showError } from "../main.js";
+import { inlineComponent, showError } from "../main.js";
+import HousePoint from "./HousePoint.js";
 
 /** @typedef {{
  * 		id?: string,
@@ -23,23 +24,6 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 
 	/** @type User */
 	let user;
-
-	window[`_UserCard${id}__changeHpQuantity`] = async (id, value) => {
-		await core.api`update/house-points/quantity/${id}/${value}`;
-		await hardReload();
-	};
-
-	window[`_UserCard${id}__changeDescription`] = async (id, value) => {
-		await core.api`update/house-points/description/${id}/${value}`;
-		await hardReload();
-	};
-
-	window[`_UserCard${id}__deleteHousePoint`] = async (id) => {
-		await core.api`delete/house-points/with-id/${id}`;
-		await hardReload();
-	};
-
-	window[`_UserCard${id}__eventPopup`] = core.eventPopup;
 
 	let userCard = document.createElement('div');
 	userCard.classList.add('user-card');
@@ -66,53 +50,12 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 				</h3>
 				<p>(${user.pending} pending, ${user.rejected} rejected)</p>
 				<div class="user-card-housepoints">
-					${user['housePoints'].map(point => `
-						<div class="hp">
-							<div class="flex-center" style="z-index: 2">
-								${admin ? `
-									<input 
-										type="number"
-										min="0"
-										onchange="_UserCard${id}__changeHpQuantity('${point.id}', this.value)"
-										value="${point['quantity']}"
-										style="width: 40px; padding: 0;"
-										class="editable-text"
-									>
-								` : `
-									(${point['quantity']})
-								`}
-							</div>
-							<p>
-								(${core.getRelativeTime(point['created']*1000)})
-							</p>
-							
-							${point.eventName ? `
-								<button
-									svg="event.svg"
-									class="icon small"
-									onclick="_UserCard${id}__eventPopup('${point.eventID}')"
-								>
-									${point.eventName}
-								</button>
-								
-							` : (admin ? `
-								<input 
-									class="editable-text"
-									value="${point.description}"
-									onchange="_UserCard${id}__changeDescription('${point.id}', this.value)"
-								>
-							` : point.description)}
-							
-							${admin ? `
-								<button
-								   data-label="Delete house point"
-									onclick="_UserCard${id}__deleteHousePoint('${point['id']}')"
-									svg="bin.svg"
-									class="icon small"
-								></button>
-							` : ''}
-						</div>
-					`).join('')}
+					${user['housePoints']
+						.map((point, i) => inlineComponent(HousePoint, point, admin, false, async () => {
+							user = await getUser();
+							await reload();
+						}, i === user['housePoints'].length - 1))
+						.join('')}
 					
 					${admin ? `
 						<div class="add-hp">

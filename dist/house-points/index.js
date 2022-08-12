@@ -1,6 +1,7 @@
 import * as core from "../assets/js/main.js";
 import SelectableList from "../assets/js/components/SelectableList.js";
-import { reloadDOM } from "../assets/js/main.js";
+import { inlineComponent, reloadDOM } from "../assets/js/main.js";
+import HousePoint from "../assets/js/components/HousePoint.js";
 
 /** @typedef {{
  *     id: string,
@@ -38,8 +39,13 @@ window.eventPopup = core.eventPopup;
 })();
 
 async function showHousePointList () {
+    const hps = (await core.api`get/house-points`)['data'];
+    const admin = await core.isAdmin();
+
+    core.preloadSVGs('bin.svg', 'red-cross.svg', 'pending.svg', 'selected-checkbox.svg', 'unselected-checkbox.svg');
+
     SelectableList('#hps', {
-        name: 'House Points',
+        name: `House Points (${hps.length})`,
         items: (await core.api`get/house-points`)['data'],
         uniqueKey: 'id',
         searchKey: ['studentEmail', 'description', 'eventName'],
@@ -73,8 +79,8 @@ async function showHousePointList () {
                 svg="bin.svg"
             ></button>
         `,
-        itemGenerator: makeHousePointHMTL,
-        gridTemplateColsCSS: '1fr 1fr 1fr 60px 60px',
+        itemGenerator: (hp) => inlineComponent(HousePoint, hp, admin, true, showHousePointList, true),
+        gridTemplateColsCSS: '1fr',
         filter: (item) => {
             return filters.years.includes(item['studentYear']) &&
                 (filters.admin ? item['admin'] : true);
@@ -82,88 +88,6 @@ async function showHousePointList () {
     });
 
     reloadDOM();
-}
-
-/**
- *
- * @param {HP} hp
- * @param {boolean} admin show admin options
- * @returns {Promise<string>}
- */
-async function makeHousePointHMTL (hp, admin) {
-    const isMe = (hp.userID === (await core.userInfo())['id']);
-
-    let acceptedHTML;
-    let icon = '';
-
-    if (hp['status'] === 'Rejected') {
-        acceptedHTML = `
-            Rejected ${core.getRelativeTime(hp['completed'] * 1000)}
-            <br>
-            <b>"${hp['rejectMessage']}"</b>
-        `;
-        icon = 'red-cross.svg';
-
-    } else if (hp['status'] === 'Accepted') {
-        acceptedHTML = `
-            Accepted ${core.getRelativeTime(hp['completed'] * 1000)}
-        `;
-        icon = 'accent-tick.svg';
-
-    } else {
-        acceptedHTML = 'Not Yet Accepted';
-        icon = 'pending.svg';
-    }
-
-    const submittedTime = hp['created'] * 1000;
-
-    return `
-        <div class=vertical-flex-center style="${isMe ? 'font-weight: bold' : ''}">
-            <button onclick="userPopup('${hp.studentEmail}')">
-                ${hp.studentEmail}
-            </button>
-        </div>
-        <div class="vertical-flex-center">
-            ${hp.eventName ? `
-                <button
-                    data-label="View Event"
-                    onclick="eventPopup('${hp['eventID']}')"
-                    aria-label="${hp['eventName']}"
-                    svg="event.svg"
-                    class="icon small evt-link"
-                    style="--offset-x: 50px"
-                >
-                    <b>${hp['eventName']}</b>
-                </button>
-            ` : ''}
-            ${hp.description}
-            ${hp.quantity > 1 ? `
-                (${hp['quantity']} points)
-            ` : ''}
-        </div>
-        <div>
-            ${new Date(submittedTime).toDateString()}
-            (${core.getRelativeTime(submittedTime)})
-            <br>
-            ${acceptedHTML}
-        </div>
-        <div
-            svg="${icon}"
-            data-label="${hp.status}"
-            class="icon icon-info-only"
-        ></div>
-        <div>
-            ${admin ? `
-                <button
-                    onclick="deleteHousePoint('${hp['id']}')"
-                    class="icon"
-                    aria-label="delete"
-                    data-label="Delete"
-                    svg="bin.svg"
-                ></button>
-            ` : ''}
-        </div>
-    `;
 }
 
 // Filters

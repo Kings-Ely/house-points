@@ -34,7 +34,6 @@ const SelectableList = registerComponent(($el, id, {
 	selected,
 	filter = () => true,
 }) => {
-
 	core.preloadSVGs('selected-checkbox.svg', 'unselected-checkbox.svg');
 
 	window[`_SelectableList${id}__selectAll`] = async (select) => {
