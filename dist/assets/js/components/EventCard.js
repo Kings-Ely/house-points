@@ -2,9 +2,6 @@
 import {registerComponent} from "./components.js";
 import * as core from "../main.js";
 import StudentEmailInputWithIntellisense from "./StudentEmailInputWithIntellisense.js";
-import FullPagePopup from "./FullPagePopup.js";
-import UserCard from "./UserCard.js";
-import {inlineComponent} from "../main.js";
 
 /** @typedef {{
  * 		id: string,
@@ -13,6 +10,8 @@ import {inlineComponent} from "../main.js";
  * 		description: string,
  * 		studentEmail: string
  * }} Event */
+
+window.userPopup = core.userPopup;
 
 /**
  * @param {El} $el
@@ -61,18 +60,9 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 		await hardReload();
 	};
 
-	window._EventCard__studentPopup ||= async (email) => {
-		const user = await core.api`get/users/from-email/${email}`;
-
-		if (!user.ok) {
-			await core.showError('User not found');
-			return;
-		}
-
-		FullPagePopup(document.body, inlineComponent(UserCard,
-			async () => (await core.api`get/users/from-email/${email}`),
-			(await core.userInfo())['admin'],
-		));
+	window[`_EventCard${id}__changeName`] = async (id, value) => {
+		await core.api`update/events/change-name/${id}/${value}`;
+		await hardReload();
 	};
 
 	function render () {
@@ -82,7 +72,17 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 
 		$el.innerHTML = `
 			<div class="event-card" id="event-card-${id}">
-				<h1>${event.name}</h1>
+				<h1>
+					${admin ? `
+						<input
+							value="${event.name}"
+							onchange="_EventCard${id}__changeName('${event.id}', this.value)"
+							class="editable-text event-title-editable"
+						>
+					` : `
+						${event.name}
+					`}
+				</h1>
 				<p>
 					${ago} (${date})
 				</p>
@@ -96,7 +96,7 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 					${event['housePoints'].map(point => `
 						<div class="hp">
 							<button
-								onclick="window._EventCard__studentPopup('${point.studentEmail}')"
+								onclick="userPopup('${point.studentEmail}')"
 							>
 								${point.studentEmail || '???'}
 							</button>

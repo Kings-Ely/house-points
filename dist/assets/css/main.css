@@ -93,7 +93,7 @@ hr {
 input, button, textarea {
     border: none;
     background: none;
-    font-size: 25px;
+    font-size: 17px;
     outline: none;
 }
 
@@ -109,6 +109,26 @@ input:hover {
 
 input:focus {
     background: var(--bg-accent);
+}
+
+.editable-text {
+    border: 1px solid transparent;
+    background: transparent;
+    font: inherit;
+    transition: 300ms;
+    border-radius: 0;
+}
+
+.editable-text:hover {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-light);
+}
+
+.editable-text:focus {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
 }
 
 textarea {
@@ -142,6 +162,29 @@ textarea {
     background: var(--bg-accent);
 }
 
+input, button, textarea {
+    font-family: 'Quicksand', sans-serif;
+}
+
+a:hover, a:focus,
+button:hover, button:focus,
+input:hover, input:focus,
+textarea:hover, textarea:focus {
+    color: var(--text-light);
+}
+
+input, textarea {
+    font-size: 18px;
+}
+
+button, a {
+    cursor: pointer;
+}
+
+input, textarea {
+    cursor: text;
+}
+
 /* --- FONTS --- */
 
 * {
@@ -167,29 +210,6 @@ h2 {
 
 h2, h3 {
     font-family: 'Raleway', sans-serif;
-}
-
-input, button, textarea {
-    font-family: 'Quicksand', sans-serif;
-}
-
-a:hover, a:focus,
-button:hover, button:focus,
-input:hover, input:focus,
-textarea:hover, textarea:focus {
-    color: var(--text-light);
-}
-
-input, textarea {
-    font-size: 18px;
-}
-
-button, a {
-    cursor: pointer;
-}
-
-input, textarea {
-    cursor: text;
 }
 
 @media only screen and (max-aspect-ratio: 6/5) {
@@ -234,7 +254,7 @@ nav {
     background: var(--nav-colour);
     height: var(--nav-height);
     width: 100%;
-    border-bottom: 1px solid var(--nav-border-bottom);
+    border-bottom: 2px solid var(--nav-border-bottom);
 }
 
 #nav-left, #nav-right {
@@ -762,8 +782,12 @@ svg {
     background: none;
 }
 
-.event-card button, .event-card input {
+.event-card :not(h1) > button, .event-card :not(h1) > input {
     font-size: 16px;
+}
+
+.event-card .event-title-editable {
+    text-align: center;
 }
 
 /* UserCard */
@@ -772,7 +796,6 @@ svg {
     text-align: center;
     max-width: 95vw;
     padding: 10px 20px 50px 20px;
-    height: fit-content;
 }
 
 .user-card h2 {
@@ -781,6 +804,21 @@ svg {
 
 .user-card .user-card-housepoints {
     max-height: 50vh;
-    overflow-y: scroll;
-    height: fit-content;
+}
+
+.user-card .hp {
+    display: grid;
+    grid-template-columns: 20px 1fr 2fr 50px;
+}
+
+.user-card .hp > * {
+    margin-top: 0;
+    padding-top: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.user-card .add-hp {
+    display: grid;
+    grid-template-columns: 150px 1fr 50px;
 }

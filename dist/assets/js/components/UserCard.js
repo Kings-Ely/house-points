@@ -1,6 +1,7 @@
 'use strict';
 import { registerComponent } from "./components.js";
 import * as core from "../main.js";
+import { showError } from "../main.js";
 
 /** @typedef {{
  * 		id?: string,
@@ -28,52 +29,122 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 		await hardReload();
 	};
 
+	window[`_UserCard${id}__changeDescription`] = async (id, value) => {
+		await core.api`update/house-points/description/${id}/${value}`;
+		await hardReload();
+	};
+
 	window[`_UserCard${id}__deleteHousePoint`] = async (id) => {
 		await core.api`delete/house-points/with-id/${id}`;
 		await hardReload();
 	};
 
+	let userCard = document.createElement('div');
+	userCard.classList.add('user-card');
+	$el.appendChild(userCard);
+
 	function render () {
-		$el.innerHTML = `
-			<div class="user-card">
-				<h2>
-					<a href="${core.ROOT_PATH}/user/?email=${user.email}">
-						${user.email}
-					</a>
-				</h2>
-				<div>
-					<h3>
-						${user['accepted']} House Points Awarded
-					</h3>
-					<div class="user-card-housepoints">
-						${user['housePoints'].map(point => `
-							<div class="hp">
+		userCard.innerHTML = `
+			<h2>
+				<a href="${core.ROOT_PATH}/user/?email=${user.email}">
+					${user.email}
+				</a>
+			</h2>
+			<div>
+				<h3>
+					${user['accepted']} House Points Awarded
+				</h3>
+				<div class="user-card-housepoints">
+					${user['housePoints'].map(point => `
+						<div class="hp">
+							<div class="flex-center" style="z-index: 2">
 								${admin ? `
 									<input 
 										type="number"
+										min="0"
 										onchange="_UserCard${id}__changeHpQuantity('${point.id}', this.value)"
 										value="${point['quantity']}"
-										style="width: 40px; font-size: 15px"
+										style="width: 40px; padding: 0;"
+										class="editable-text"
 									>
-									<button
-									   data-label="Delete house point"
-										onclick="_UserCard${id}__deleteHousePoint('${point['id']}')"
-										svg="bin.svg"
-										class="icon small"
-									></button>
 								` : `
 									(${point['quantity']})
 								`}
-								
-								${core.getRelativeTime(point['created']*1000)}
-								
-								${point['eventName'] || point['description']}
 							</div>
-						`).join('')}
-					</div>
+							<p>
+								(${core.getRelativeTime(point['created']*1000)})
+							</p>
+							
+							${point['eventName'] || (admin ? `
+								<input 
+									class="editable-text"
+									value="${point.description}"
+									onchange="_UserCard${id}__changeDescription('${point.id}', this.value)"
+								>
+							` : point.description)}
+							
+							${admin ? `
+								<button
+								   data-label="Delete house point"
+									onclick="_UserCard${id}__deleteHousePoint('${point['id']}')"
+									svg="bin.svg"
+									class="icon small"
+								></button>
+							` : ''}
+						</div>
+					`).join('')}
+					
+					${admin ? `
+						<div class="add-hp">
+							<input 
+								type="number"
+								placeholder="quantity"
+								style="width: 100px"
+								class="new-hp-quantity"
+								aria-label="new house point quantity"
+							>
+							
+							<input
+								placeholder="description"
+								class="new-hp-description"
+								aria-label="new house point description"
+							>
+							
+							<button
+							    data-label="Create house point"
+								svg="plus.svg"
+								class="icon small new-hp-create"
+							></button>
+							
+						</div>
+					` : ''}
 				</div>
 			</div>
 		`;
+
+		if (admin) {
+			const $newHpQuantity = userCard.querySelector('.new-hp-quantity');
+			const $newHpDescription = userCard.querySelector('.new-hp-description');
+			const $newHpCreate = userCard.querySelector('.new-hp-create');
+
+			$newHpCreate.addEventListener('click', async () => {
+				const quantity = $newHpQuantity.value;
+				const description = $newHpDescription.value;
+
+				if (quantity < 1) {
+					await showError('Quantity must be 1 or more');
+					return;
+				}
+
+				if (!description) {
+					await showError('Description is required');
+					return;
+				}
+
+				await core.api`create/house-points/give/${user.id}/${quantity}?description=${description}`;
+				await hardReload();
+			});
+		}
 	}
 
 	async function hardReload () {

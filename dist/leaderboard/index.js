@@ -13,6 +13,8 @@ const $whichYears = document.getElementById('show-year');
 let showYears = [9, 10, 11, 12, 13];
 let leaderboardData;
 
+window.userPopup = core.userPopup;
+
 (async () => {
     await core.init('..', true);
 
@@ -30,9 +32,9 @@ let leaderboardData;
 function showStudent (student) {
     return `
         <div class="student">
-            <div>
+            <button onclick="userPopup('${student['email']}')">
                 ${student['email']} (Y${student['year']})
-            </div>
+            </button>
             <div>
                 ${student['accepted']}
             </div>
@@ -76,11 +78,13 @@ function leaderboard (users) {
     } else {
         function podiumHTMl (idx) {
             return `
-                <div>
+                <button
+                    onclick="userPopup('${users[idx]['email']}')"
+                >
                     ${users[idx]['email'].split('@')[0]} (Y${users[idx]['year']}) 
                     <br>
                     <b>${users[idx]['accepted']}</b>
-                </div>
+                </button>
             `;
         }
         $podium1st.innerHTML = podiumHTMl(0);

@@ -63,6 +63,7 @@ async function awardTypeList () {
 						<input
 							value="${awardType.name}"
 							onchange="awardTypeUpdateName('${awardType.id}', this.value)"
+							class="editable-text"
 						>
 					</label>
 				</div>
@@ -72,6 +73,8 @@ async function awardTypeList () {
 							value="${awardType.hpsRequired}"
 							onchange="awardTypeUpdateRequired('${awardType.id}', this.value)"
 							data-label="House Points Required"
+							class="editable-text"
+							type="number"
 						>
 					</label>
 				</div>
@@ -80,6 +83,7 @@ async function awardTypeList () {
 						<input
 							value="${awardType.description}"
 							onchange="awardTypeUpdateDesc('${awardType.id}', this.value)"
+							class="editable-text"
 						>
 					</label>
 				</div>

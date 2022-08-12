@@ -28,11 +28,6 @@
     background: var(--bg-accent);
 }
 
-#award-types input {
-    border: none;
-    background: transparent;
-}
-
 #award-types label, #award-types input {
     width: 100%;
 }
