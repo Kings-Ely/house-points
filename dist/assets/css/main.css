@@ -531,11 +531,9 @@ svg {
     padding: 6px;
     color: var(--label-text);
     background: var(--label-bg);
-    z-index: 2;
     text-align: center;
     font-size: 15px;
     border: 1px solid var(--label-border);
-    width: fit-content;
     top: 110%;
     left: calc(50% - 50px + var(--offset-x));
     pointer-events: none;
@@ -854,3 +852,36 @@ svg {
     align-items: center;
 }
 
+.house-point-date-time {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.house-point input[type=date] {
+    font-size: 16px;
+}
+
+.house-point-date-time > * {
+    flex: 1;
+    flex-basis: 50%;
+    margin: 0;
+    padding: 0;
+    font-size: 0.9em;
+}
+
+.house-point .email-second-half {
+    font-size: 0.8em;
+    color: var(--text-v-light);
+    padding: 0;
+    margin: 0;
+}
+
+.house-point.large {
+    gap: 10px;
+    font-size: 1.1em;
+}
+
+.house-point.large > * {
+    padding: 10px;
+}

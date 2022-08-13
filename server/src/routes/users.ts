@@ -6,7 +6,6 @@ import {
     addHousePointsToUser,
     AUTH_ERR,
     generateUUID,
-    getSessionID,
     IDFromSession,
     isAdmin,
     isLoggedIn, passwordHash, validPassword
@@ -17,8 +16,8 @@ import {
  * @admin
  * Gets all users
  */
-route('get/users', async ({ query, cookies }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('get/users', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
     const data = await query`
         SELECT 
@@ -47,10 +46,10 @@ route('get/users', async ({ query, cookies }) => {
  * @admin
  * Gets the user details from a user ID
  */
-route('get/users/from-id/:id', async ({ query, params, cookies }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('get/users/from-id/:id', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id } = params;
+    const { id } = body;
 
     if (!id) return 'No user ID';
 
@@ -81,12 +80,13 @@ route('get/users/from-id/:id', async ({ query, params, cookies }) => {
  * @admin
  * Gets the user details from an email
  * Note that this exposes the user ID
+ * @param email
  */
-route('get/users/from-email/:email',
-    async ({ query, params, cookies }) => {
-    if (!await isLoggedIn(cookies, query)) return AUTH_ERR;
+route('get/users/from-email',
+    async ({ query, body }) => {
+    if (!await isLoggedIn(body, query)) return AUTH_ERR;
 
-    const { email } = params;
+    const { email } = body;
 
     if (!email) return 'No email';
 
@@ -110,8 +110,8 @@ route('get/users/from-email/:email',
 
     await addHousePointsToUser(query, user);
 
-    if (!await isAdmin(cookies, query)) {
-        const id = await IDFromSession(query, getSessionID(cookies));
+    if (!await isAdmin(body, query)) {
+        const id = await IDFromSession(query, body.session);
         if (id !== user.id) {
             delete user.id;
 
@@ -127,11 +127,12 @@ route('get/users/from-email/:email',
 });
 
 /**
- * Gets the user details frm a session, checking that the session is valid first
+ * Gets the user details from a session, checking that the session is valid first
+ * @param sessionID
  */
-route('get/users/from-session/:session', async ({ query, params }) => {
-    const { session } = params;
-    if (!session) return 'No session ID';
+route('get/users/from-session', async ({ query, body }) => {
+    const { sessionID } = body;
+    if (!sessionID) return 'No session ID';
 
     const data = await query`
         SELECT
@@ -141,7 +142,7 @@ route('get/users/from-session/:session', async ({ query, params }) => {
             users.student,
             users.year
         FROM users, sessions
-        WHERE sessions.id = ${session}
+        WHERE sessions.id = ${sessionID}
             AND sessions.user = users.id
             AND UNIX_TIMESTAMP(sessions.opened) + sessions.expires > UNIX_TIMESTAMP()
             AND sessions.active = 1
@@ -163,21 +164,18 @@ route('get/users/from-session/:session', async ({ query, params }) => {
  * @admin
  * Gets the details of multiple users from a list of IDs.
  * IDs are delimited by ','
+ * @param {string[]} userIDs
  */
-route('get/users/batch-info/:userIDs',
-    async ({ query, params, cookies }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('get/users/batch-info',
+    async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userIDs } = params;
+    const { userIDs: ids } = body;
 
-    if (!userIDs) return 'No codes';
-
-    const IDs = userIDs.split(',').filter(Boolean);
-
-    if (!IDs.length) return {
+    if (!ids?.length) return {
         status: 406,
         error: 'No IDs'
-    }
+    };
 
     const data = await query`
         SELECT 
@@ -187,7 +185,7 @@ route('get/users/batch-info/:userIDs',
             email,
             year
         FROM users
-        WHERE id IN (${IDs})
+        WHERE id IN (${ids})
     `;
 
     for (let i = 0; i < data.length; i++) {
@@ -201,8 +199,8 @@ route('get/users/batch-info/:userIDs',
  * @account
  * Gets the data required for to make the leaderboard.
  */
-route('get/users/leaderboard', async ({ query, cookies }) => {
-    if (!await isLoggedIn(cookies, query)) return AUTH_ERR;
+route('get/users/leaderboard', async ({ query, body }) => {
+    if (!await isLoggedIn(body, query)) return AUTH_ERR;
 
     let data = (await query`
         SELECT 
@@ -216,7 +214,7 @@ route('get/users/leaderboard', async ({ query, cookies }) => {
 
     data.forEach((u: any) => addHousePointsToUser(query, u));
 
-    if (!await isAdmin(cookies, query)) {
+    if (!await isAdmin(body, query)) {
         // remove id from each user
         for (let i = 0; i < data.length; i++) {
             delete data[i]['id'];
@@ -236,15 +234,16 @@ route('get/users/leaderboard', async ({ query, cookies }) => {
  * Hashes the password along with the salt before storing it in the DB.
  *
  * @param {(13 >= number >= 9) || (number == 0)} year - year of student
- *                                                      if the year is 0 then it is a non-student (teacher)
- *                                                      account, and they are assumed to be an admin
- *
+ *                                                      if the year is 0 then it is a
+ *                                                      non-student (teacher) account,
+ *                                                      and they are assumed to be an admin
+ * @param email
+ * @param password
  */
-route('create/users/:email/:password?year=9',
-    async ({ query, params, cookies }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('create/users', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { email, year: yearStr, password } = params;
+    const { email, year: yearStr = '9', password } = body;
 
     const year = parseInt(yearStr);
 
@@ -295,14 +294,15 @@ route('create/users/:email/:password?year=9',
  *
  * @param {1|any} admin - whether they should be an admin now.
  *                        1 for admin, anything else for not admin.
+ * @param userID
  */
-route('update/users/admin/:userID?admin',
-    async ({ query, params, cookies }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('update/users/admin',
+    async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userID, admin } = params;
+    const { userID, admin } = body;
 
-    const mySession = getSessionID(cookies);
+    const mySession = body.session;
     if (!mySession) return 'No session ID found';
 
     if (await IDFromSession(query, mySession) === userID) return {
@@ -327,12 +327,14 @@ route('update/users/admin/:userID?admin',
  * Needed for when everyone goes up a year.
  * Changes a students year by an amount between -3 and 3 and not 0
  * Cannot change a non-student's year from 0
+ * @param userID
+ * @param {int} by
  */
-route('update/users/year/:userID/:by',
-    async ({ query, params, cookies }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('update/users/year',
+    async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userID: user, by: yC } = params;
+    const { userID: user, by: yC } = body;
     const yearChange = parseInt(yC);
 
     if (isNaN(yearChange)) {
@@ -371,9 +373,11 @@ route('update/users/year/:userID/:by',
  * This is a high risk route, as you are updating the password of a user,
  * and this must be able to be done by a user without login details
  * if they are using the 'forgot password' feature.
+ * @param sessionID
+ * @param newPassword
  */
-route('update/users/password/:sessionID/:newPassword', async ({ query, params }) => {
-    const { sessionID, newPassword } = params;
+route('update/users/password', async ({ query, body }) => {
+    const { sessionID, newPassword } = body;
 
     const userID = await IDFromSession(query, sessionID);
 
@@ -414,13 +418,14 @@ route('update/users/password/:sessionID/:newPassword', async ({ query, params })
 /**
  * @admin
  * Deletes a user from a user ID
+ * @param userID
  */
-route('delete/users/:userID', async ({ query, params, cookies }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('delete/users', async ({ query, body}) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userID } = params;
+    const { userID } = body;
 
-    if (await IDFromSession(query, getSessionID(cookies)) === userID) return {
+    if (await IDFromSession(query, body.session) === userID) return {
         status: 403,
         error: 'You cannot delete your own account'
     };

@@ -1,6 +1,6 @@
 import route from '../index';
 import { error } from '../log';
-import { AUTH_ERR, authLvl, generateUUID, getSessionID, isAdmin, isLoggedIn } from '../util';
+import { AUTH_ERR, authLvl, generateUUID, isAdmin } from '../util';
 import emailValidator from "email-validator";
 import * as notifications from '../notifications';
 import type mysql from "mysql2";
@@ -8,10 +8,12 @@ import type mysql from "mysql2";
 /**
  * Gets the authorisation level of a session ID
  * Note that this is one of the few routes which does not require logged in or admin.
+ *
+ * @param sessionID
  * @returns 0 for invalid/expired, >= 1 for logged in, 2 for admin user
  */
-route('get/sessions/auth-level/:sessionID', async ({ query, params }) => {
-    const { sessionID } = params;
+route('get/sessions/auth-level', async ({ query, body }) => {
+    const { sessionID } = body;
 
     return {
         level: await authLvl(sessionID, query)
@@ -23,8 +25,8 @@ route('get/sessions/auth-level/:sessionID', async ({ query, params }) => {
  * Gets details about all sessions which have not yet expired.
  * Not really any purpose other than monitoring the server.
  */
-route('get/sessions/active', async ({ query, cookies }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('get/sessions/active', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
     return { data: await query`
         SELECT 
@@ -47,11 +49,13 @@ route('get/sessions/active', async ({ query, cookies }) => {
  * which could pose a security threat.
  *
  * @param {number} [expires=86400] - the number of seconds the session should be valid for
+ * @param email
+ * @param password
  */
-route('create/sessions/from-login/:email/:password?expires=86400', async ({ query, params }) => {
+route('create/sessions/from-login', async ({ query, body }) => {
 
     // password in plaintext
-    const { email, password, expires: expiresRaw } = params;
+    const { email, password, expires: expiresRaw = '86400'} = body;
 
     if (!email || !password) {
         return 'Missing email or password';
@@ -106,11 +110,12 @@ route('create/sessions/from-login/:email/:password?expires=86400', async ({ quer
  * removing the benefits of sessions entirely over simply using the userID as the auth token.
  *
  * @param {number} [expires=86400] - the number of seconds the session should be valid for
+ * @param userID
  */
-route('create/sessions/from-user-id/:userID?expires=86400', async ({ query, params, cookies }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('create/sessions/from-user-id', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userID, expires: expiresRaw } = params;
+    const { userID, expires: expiresRaw = '86400'} = body;
 
     if (!userID) {
         return 'UserID not specified';
@@ -147,9 +152,10 @@ route('create/sessions/from-user-id/:userID?expires=86400', async ({ query, para
  * Runs the 'forgotten password' flow.
  * Takes an email and sends a link to their email with a new session
  * which expires in 1 hour.
+ * @param email
  */
-route('create/sessions/for-forgotten-password/:email', async ({ query, params, cookies }) => {
-    const { email } = params;
+route('create/sessions/for-forgotten-password', async ({ query, body }) => {
+    const { email } = body;
 
     if (!email) {
         return 'Email not specified';
@@ -182,9 +188,10 @@ route('create/sessions/for-forgotten-password/:email', async ({ query, params, c
 
 /**
  * Removes the session from the database
+ * @param sessionID
  */
-route('delete/sessions/with-id/:sessionID', async ({ query, params }) => {
-    const { sessionID } = params;
+route('delete/sessions/with-id', async ({ query, body }) => {
+    const { sessionID } = body;
 
     if (!sessionID) return 'Session ID not specified';
 

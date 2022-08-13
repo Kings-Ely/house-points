@@ -3,17 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import { v4 as UUIDv4 } from 'uuid';
 
-import { Cookies } from './route';
 import { queryFunc } from './sql';
 import crypto from "crypto";
-
-/**
- * Gets the session ID from the cookies using the given cookies object
- * and the COOKIE_SESSION_KEY environment variable.
- */
-export function getSessionID (cookies: Cookies): string {
-    return cookies[process.env.COOKIE_SESSION_KEY || 'sessionID'] || '';
-}
 
 /**
  * Object to return from a route if incorrect credentials were provided.
@@ -66,27 +57,6 @@ export function loadEnv (filePath = ".env"): void {
     };
 }
 
-
-
-/**
- * Parses a string of the form "a=b;c=d" into an object
- */
-export function parseCookies (cookie: string): Record<string, string> {
-    const list: Record<string, any> = {};
-    if (!cookie) return list;
-
-    cookie.split(`;`).forEach(function(cookie) {
-        let [ name, ...rest] = cookie.split(`=`);
-        name = name?.trim();
-        if (!name) return;
-        const value = rest.join(`=`).trim();
-        if (!value) return;
-        list[name] = decodeURIComponent(value);
-    });
-
-    return list;
-}
-
 // DB query helpers
 
 /**
@@ -117,15 +87,15 @@ export async function authLvl (sessionID: string, query: queryFunc) {
 /**
  * True if user code is valid
  */
-export async function isLoggedIn (cookies: Cookies, query: queryFunc): Promise<boolean> {
-    return await authLvl(getSessionID(cookies), query) > 0;
+export async function isLoggedIn (body: any, query: queryFunc): Promise<boolean> {
+    return await authLvl(body.session, query) > 0;
 }
 
 /**
  * True if user code is valid and an admin
  */
-export async function isAdmin (cookies: Cookies, query: queryFunc): Promise<boolean> {
-    return await authLvl(getSessionID(cookies), query) >= 2;
+export async function isAdmin (body: any, query: queryFunc): Promise<boolean> {
+    return await authLvl(body.session, query) >= 2;
 }
 
 /**
@@ -184,8 +154,8 @@ export async function IDFromSession (query: queryFunc, sessionID: string): Promi
 /**
  * Gets the user ID from a cookies object
  */
-export async function userID (cookies: Cookies, query: queryFunc) {
-    return IDFromSession(query, getSessionID(cookies));
+export async function userID (body: any, query: queryFunc) {
+    return IDFromSession(query, body.session);
 }
 
 /**

@@ -1,5 +1,5 @@
 import route from "../";
-import { AUTH_ERR, generateUUID, getSessionID, isAdmin, isLoggedIn, userFromSession } from '../util';
+import { AUTH_ERR, generateUUID, isAdmin, isLoggedIn, userFromSession } from '../util';
 import mysql from "mysql2";
 
 /**
@@ -11,10 +11,10 @@ import mysql from "mysql2";
  * @param {string} id - events which have this ID
  * @param {string} userID - events which have house points which belong to this user
  */
-route('get/events?id&userID&from&to', async ({ query, params, cookies }) => {
-    if (!await isLoggedIn(cookies, query)) return AUTH_ERR;
+route('get/events', async ({ query, body }) => {
+    if (!await isLoggedIn(body, query)) return AUTH_ERR;
 
-    let { id, userID, from: fromRaw, to: toRaw } = params;
+    let { id, userID, from: fromRaw, to: toRaw } = body;
 
     let from = parseInt(fromRaw) || 0;
     let to = parseInt(toRaw) || 0;
@@ -35,12 +35,12 @@ route('get/events?id&userID&from&to', async ({ query, params, cookies }) => {
         ORDER BY time DESC
     `;
 
-    const admin = await isAdmin(cookies, query);
-    const signedIn = await isLoggedIn(cookies, query);
+    const admin = await isAdmin(body, query);
+    const signedIn = await isLoggedIn(body, query);
 
     if (!signedIn) return AUTH_ERR;
 
-    const user = await userFromSession(query, getSessionID(cookies));
+    const user = await userFromSession(query, body.session);
     if (!user) return AUTH_ERR;
     if (!user['id']) return AUTH_ERR;
 
@@ -101,11 +101,14 @@ route('get/events?id&userID&from&to', async ({ query, params, cookies }) => {
  * @admin
  * Creates an event
  * Does not add house points, this must be done separately
+ * @param name
+ * @param timestamp
+ * @param description
  */
-route('create/events/:name/:timestamp?description', async ({ query, cookies, params }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('create/events', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { name, timestamp: tsRaw, description } = params;
+    const { name, timestamp: tsRaw, description } = body;
 
     if (name.length < 3) {
         return `Event name must be more than 3 characters, got '${name}'`;
@@ -137,11 +140,13 @@ route('create/events/:name/:timestamp?description', async ({ query, cookies, par
 /**
  * @admin
  * Updates the name of an event from an event ID
+ * @param id
+ * @param name
  */
-route('update/events/change-name/:id/:name', async ({ query, cookies, params }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('update/events/change-name', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id, name: newName } = params;
+    const { id, name: newName } = body;
 
     let queryRes = await query<mysql.OkPacket>`
         UPDATE events
@@ -158,11 +163,13 @@ route('update/events/change-name/:id/:name', async ({ query, cookies, params }) 
 /**
  * @admin
  * Updates the timestamp of an event from an event ID
+ * @param id
+ * @param {int} time
  */
-route('update/events/change-time/:id/:time', async ({ query, cookies, params }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('update/events/change-time/:id/:time', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id, time: rawTime } = params;
+    const { id, time: rawTime } = body;
 
     const time = parseInt(rawTime);
     if (isNaN(time) || !time) {
@@ -185,11 +192,12 @@ route('update/events/change-time/:id/:time', async ({ query, cookies, params }) 
  * @admin
  * Deletes an event from an event ID
  * @param {1|0} deleteHps - if true, also deletes all house points with an event ID of this event
+ * @param id
  */
-route('delete/events/with-id/:id?deleteHps=1', async ({ query, cookies, params }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('delete/events/with-id', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id, deleteHps } = params;
+    const { id, deleteHps = 1 } = body;
 
     if (deleteHps === '1') {
         await query`DELETE FROM housepoints WHERE event = ${id}`;

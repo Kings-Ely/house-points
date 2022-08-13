@@ -1,14 +1,13 @@
 import route from "../";
-import { AUTH_ERR, generateUUID, getSessionID, isAdmin, isLoggedIn, userFromSession } from '../util';
+import { AUTH_ERR, generateUUID, isAdmin, isLoggedIn } from '../util';
 import mysql from "mysql2";
-import * as notifications from "../notifications";
 
 /**
  * @account
  * No options as you always want all of them
  */
-route('get/award-types', async ({ query, cookies }) => {
-    if (!await isLoggedIn(cookies, query)) return AUTH_ERR;
+route('get/award-types', async ({ query, body }) => {
+    if (!await isLoggedIn(body, query)) return AUTH_ERR;
 
     return {
         data: await query`
@@ -25,13 +24,14 @@ route('get/award-types', async ({ query, cookies }) => {
 
 /**
  * @admin
- *
+ * @param name
+ * @param required
+ * @param description
  */
-route('create/award-types/:name/:required?description', async ({ query, params, cookies }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('create/award-types', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
-
-    const { name, required, description='' } = params;
+    const { name, required, description='' } = body;
     const hpsRequired = parseInt(required);
 
     if (!name) return 'Missing parameter name';
@@ -62,11 +62,13 @@ route('create/award-types/:name/:required?description', async ({ query, params, 
 
 /**
  * @admin
+ * @param id
+ * @param newName
  */
-route('update/award-types/name/:id/:newName', async ({ query, cookies, params }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('update/award-types/name', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id, newName } = params;
+    const { id, newName } = body;
 
     if (!id) return 'Missing parameter id';
     if (!newName) return 'Missing parameter newName';
@@ -82,11 +84,13 @@ route('update/award-types/name/:id/:newName', async ({ query, cookies, params })
 
 /**
  * @admin
+ * @param id
+ * @param {int} newQuantity
  */
-route('update/award-types/hps-required/:id/:newQuantity', async ({ query, cookies, params }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('update/award-types/hps-required/:id/:newQuantity', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id, newQuantity } = params;
+    const { id, newQuantity } = body;
 
     const quantity = parseInt(newQuantity);
 
@@ -105,11 +109,13 @@ route('update/award-types/hps-required/:id/:newQuantity', async ({ query, cookie
 
 /**
  * @admin
+ * @param id
+ * @param newDescription
  */
-route('update/award-types/description/:id/:newDescription', async ({ query, cookies, params }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('update/award-types/description/:id/:newDescription', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id, newDescription } = params;
+    const { id, newDescription } = body;
 
     if (!id) return 'Missing parameter id';
     if (!newDescription) return 'Missing parameter newDescription';
@@ -125,11 +131,12 @@ route('update/award-types/description/:id/:newDescription', async ({ query, cook
 
 /**
  * @admin
+ * @param id
  */
-route('delete/award-types/with-id/:id', async ({ query, params, cookies }) => {
-    if (!await isAdmin(cookies, query)) return AUTH_ERR;
+route('delete/award-types/with-id/:id', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id } = params;
+    const { id } = body;
 
     if (!id) return 'Missing parameter id';
 

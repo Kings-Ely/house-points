@@ -29,8 +29,22 @@ async function main () {
 
     let i = 0;
     for (let hp of pending) {
-        $pendingHPs.innerHTML += core.inlineComponent(HousePoint,
-            hp, admin, true, main, i === pending.length-1, true);
+        $pendingHPs.innerHTML += core.inlineComponent(HousePoint, hp, main, {
+            admin,
+            showBorderBottom: hp !== pending[pending.length - 1],
+            showEmail: true,
+            showReason: true,
+            showNumPoints: true,
+            showDate: true,
+            showRelativeTime: true,
+            showStatusHint: false,
+            showStatusIcon: false,
+            showDeleteButton: false,
+            showPendingOptions: true,
+            reasonEditable: false,
+            pointsEditable: true,
+            dateEditable: false
+        });
 
         if (i === 4) {
             $pendingHPs.innerHTML += `

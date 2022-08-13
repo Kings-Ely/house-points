@@ -51,10 +51,25 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 				<p>(${user.pending} pending, ${user.rejected} rejected)</p>
 				<div class="user-card-housepoints">
 					${user['housePoints']
-						.map((point, i) => inlineComponent(HousePoint, point, admin, false, async () => {
+						.map((point, i) => inlineComponent(HousePoint, point, async () => {
 							user = await getUser();
 							await reload();
-						}, i === user['housePoints'].length - 1))
+						}, {
+							admin,
+							showBorderBottom: i !== (user['housePoints'].length - 1),
+							showEmail: false,
+							showReason: true,
+							showNumPoints: true,
+							showDate: true,
+							showRelativeTime: true,
+							showStatusHint: true,
+							showStatusIcon: true,
+							showDeleteButton: true,
+							showPendingOptions: true,
+							reasonEditable: true,
+							pointsEditable: true,
+							dateEditable: false
+						}))
 						.join('')}
 					
 					${admin ? `

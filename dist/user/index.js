@@ -71,7 +71,7 @@ async function reloadUserInfoFromEmail () {
 }
 
 async function housePoints () {
-    const { housePoints: hps, accepted } = await core.userInfo();
+    const { housePoints: hps, accepted, admin } = await core.userInfo();
 
     $hps.innerHTML = `
         <h2>House Points (${accepted})</h2>
@@ -89,8 +89,23 @@ async function housePoints () {
     let html = '';
 
     for (let hp of hps) {
-        html += core.inlineComponent(HousePoint,
-            hp, await core.isAdmin(), true, reloadUserInfoFromEmail, hp === hps[hps.length-1], true);
+        html += core.inlineComponent(HousePoint, hp, reloadUserInfoFromEmail, {
+            admin,
+            showBorderBottom: hp !== hps[hps.length - 1],
+            showEmail: false,
+            showReason: true,
+            showNumPoints: true,
+            showDate: true,
+            showRelativeTime: true,
+            showStatusHint: true,
+            showStatusIcon: true,
+            showDeleteButton: !me,
+            showPendingOptions: !me,
+            reasonEditable: !me,
+            pointsEditable: !me,
+            dateEditable: !me,
+            large: true
+        });
     }
     $hps.innerHTML += html;
 }
