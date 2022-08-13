@@ -31,11 +31,12 @@ route('get/award-types', async ({ query, body }) => {
 route('create/award-types', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { name='', required='', description='' } = body;
-    const hpsRequired = parseInt(required);
+    const { name='', required=-1, description='' } = body;
 
     if (!name) return 'Missing parameter name';
-    if (isNaN(hpsRequired)) return 'Invalid house point requirement';
+    if (!Number.isInteger(required) || required < 0) {
+        return 'Invalid house point requirement';
+    }
 
     const id = await generateUUID();
 
@@ -49,7 +50,7 @@ route('create/award-types', async ({ query, body }) => {
             ${id},
             ${name},
             ${description},
-            ${hpsRequired}
+            ${required}
         )
     `;
 
@@ -62,13 +63,13 @@ route('create/award-types', async ({ query, body }) => {
 
 /**
  * @admin
- * @param id
+ * @param awardTypeID
  * @param newName
  */
 route('update/award-types/name', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id='', newName='' } = body;
+    const { awardTypeID:id='', newName='' } = body;
 
     if (!id) return 'Missing parameter id';
     if (!newName) return 'Missing parameter newName';
@@ -84,18 +85,18 @@ route('update/award-types/name', async ({ query, body }) => {
 
 /**
  * @admin
- * @param id
+ * @param awardTypeID
  * @param {int} newQuantity
  */
 route('update/award-types/hps-required', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id='', newQuantity='' } = body;
-
-    const quantity = parseInt(newQuantity);
+    const { awardTypeID:id='', quantity=-1 } = body;
 
     if (!id) return 'Missing parameter id';
-    if (isNaN(quantity)) return 'Invalid quantity';
+    if (!Number.isInteger(quantity) || quantity < 0) {
+        return 'Invalid house point requirement';
+    }
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE awardTypes
@@ -103,19 +104,21 @@ route('update/award-types/hps-required', async ({ query, body }) => {
         WHERE id = ${id}
     `;
 
-    if (queryRes.affectedRows === 0) return 'Award type not found with that ID';
+    if (queryRes.affectedRows === 0) {
+        return 'Award type not found with that ID';
+    }
 });
 
 
 /**
  * @admin
- * @param id
+ * @param awardTypeID
  * @param newDescription
  */
 route('update/award-types/description', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id='', newDescription='' } = body;
+    const { awardTypeID: id ='', newDescription='' } = body;
 
     if (!id) return 'Missing parameter id';
     if (!newDescription) return 'Missing parameter newDescription';
@@ -131,18 +134,16 @@ route('update/award-types/description', async ({ query, body }) => {
 
 /**
  * @admin
- * @param id
+ * @param awardTypeID
  */
 route('delete/award-types', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id } = body;
-
-    if (!id) return 'Missing parameter id';
+    if (!body.awardTypeID) return 'Missing parameter id';
 
     const queryRes = await query<mysql.OkPacket>`
         DELETE FROM awardTypes
-        WHERE id = ${id}
+        WHERE id = ${body.awardTypeID}
     `;
 
     if (queryRes.affectedRows === 0) return 'Award type not found';
