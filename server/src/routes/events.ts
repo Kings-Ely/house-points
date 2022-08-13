@@ -162,7 +162,7 @@ route('update/events/name', async ({ query, body }) => {
  * @param eventID
  * @param description
  */
-route('update/events/name', async ({ query, body }) => {
+route('update/events/description', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
     const { eventID='', description='' } = body;

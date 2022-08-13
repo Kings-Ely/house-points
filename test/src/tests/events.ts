@@ -229,8 +229,8 @@ Test.test('Events | Updating event timestamp', async (api) => {
         return `Expected event time to be '${then}', got '${time3}'`;
     }
 
-    await api(`delete/users/${userID}`);
-    await api(`delete/events/with-id/${id}`);
+    await api(`delete/users`, { userID });
+    await api(`delete/events`, { eventID: id });
 
     return true;
 });
