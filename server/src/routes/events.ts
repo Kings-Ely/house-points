@@ -14,10 +14,7 @@ import mysql from "mysql2";
 route('get/events', async ({ query, body }) => {
     if (!await isLoggedIn(body, query)) return AUTH_ERR;
 
-    let { id='', userID='', from: fromRaw='', to: toRaw='' } = body;
-
-    let from = parseInt(fromRaw) || 0;
-    let to = parseInt(toRaw) || 0;
+    let { id='', userID='', from=0, to=0 } = body;
 
     let data = await query`
         SELECT
@@ -37,12 +34,10 @@ route('get/events', async ({ query, body }) => {
 
     const admin = await isAdmin(body, query);
     const signedIn = await isLoggedIn(body, query);
-
     if (!signedIn) return AUTH_ERR;
 
     const user = await userFromSession(query, body.session);
-    if (!user) return AUTH_ERR;
-    if (!user['id']) return AUTH_ERR;
+    if (!user || !user.id) return AUTH_ERR;
 
     for (let i = 0; i < data.length; i++) {
         data[i]['housePoints'] = await query`
@@ -102,20 +97,19 @@ route('get/events', async ({ query, body }) => {
  * Creates an event
  * Does not add house points, this must be done separately
  * @param name
- * @param timestamp
+ * @param {int} time
  * @param description
  */
 route('create/events', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { name='', timestamp: tsRaw='', description='' } = body;
+    const { name='', time=Math.ceil(Date.now()/1000), description='' } = body;
 
     if (name.length < 3) {
         return `Event name must be more than 3 characters, got '${name}'`;
     }
 
-    let time = parseInt(tsRaw);
-    if (isNaN(time) || !time) {
+    if (!Number.isInteger(time)) {
         return 'Timestamp must be an integer (UNIX timestamp)';
     }
     if (time < 1) {
@@ -140,20 +134,46 @@ route('create/events', async ({ query, body }) => {
 /**
  * @admin
  * Updates the name of an event from an event ID
- * @param id
+ * @param eventID
  * @param name
  */
-route('update/events/change-name', async ({ query, body }) => {
+route('update/events/name', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id='', name: newName='' } = body;
+    const { eventID='', name='' } = body;
+
+    if (!eventID) return 'EventID is not in body of request';
+    if (!name) return 'Event must have name';
 
     let queryRes = await query<mysql.OkPacket>`
         UPDATE events
-        SET name = ${newName}
-        WHERE id = ${id}
+        SET name = ${name}
+        WHERE id = ${eventID}
    `;
+    if (queryRes.affectedRows === 0) return {
+        status: 406,
+        error: `Event not found`
+    };
+});
 
+/**
+ * @admin
+ * Updates the description of an event from an event ID
+ * @param eventID
+ * @param description
+ */
+route('update/events/name', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
+
+    const { eventID='', description='' } = body;
+
+    if (!eventID) return 'EventID is not in body of request';
+
+    let queryRes = await query<mysql.OkPacket>`
+        UPDATE events
+        SET description = ${description}
+        WHERE id = ${eventID}
+   `;
     if (queryRes.affectedRows === 0) return {
         status: 406,
         error: `Event not found`
@@ -163,55 +183,55 @@ route('update/events/change-name', async ({ query, body }) => {
 /**
  * @admin
  * Updates the timestamp of an event from an event ID
- * @param id
+ * @param eventID
  * @param {int} time
  */
-route('update/events/change-time', async ({ query, body }) => {
+route('update/events/time', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id='', time: rawTime='' } = body;
+    const { eventID='', time=Math.ceil(Date.now()/1000) } = body;
 
-    const time = parseInt(rawTime);
-    if (isNaN(time) || !time) {
-        return `Invalid event time '${rawTime}', must be an integer (UNIX timestamp)`;
+    if (!eventID) return 'EventID is not in body of request';
+    if (!Number.isInteger(time)) {
+        return `Invalid event time, must be an integer (UNIX timestamp)`;
     }
 
     let queryRes = await query<mysql.OkPacket>`
         UPDATE events
         SET time = FROM_UNIXTIME(${time})
-        WHERE id = ${id}
+        WHERE id = ${eventID}
    `;
-
     if (!queryRes.affectedRows) return {
         status: 406,
-        error: `Event with ID '${id}' not found`
+        error: `Event with ID '${eventID}' not found`
     };
 });
 
 /**
  * @admin
  * Deletes an event from an event ID
+ * @param eventID
  * @param {1|0} deleteHps - if true, also deletes all house points with an event ID of this event
- * @param id
  */
-route('delete/events/with-id', async ({ query, body }) => {
+route('delete/events', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id='', deleteHps='1' } = body;
+    const { eventID='', deleteHps=true } = body;
+    if (!eventID) return 'EventID is not in body of request';
 
-    if (deleteHps === '1') {
+    if (deleteHps) {
         await query`
             DELETE FROM housepoints
-            WHERE event = ${id}
+            WHERE event = ${eventID}
         `;
     }
 
     const res = await query<mysql.OkPacket>`
-        DELETE FROM events 
-        WHERE id = ${id}
+        DELETE FROM events
+        WHERE id = ${eventID}
     `;
     if (!res.affectedRows) return {
         status: 406,
-        error: `No events to delete with ID '${id}'`
+        error: `No events to delete with that ID`
     }
 });

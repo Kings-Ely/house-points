@@ -19,7 +19,10 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
 
     // create event
     const now = Math.round(Date.now() / 1000);
-    res = await api(`create/events/doing+something+2022/${now}`);
+    res = await api(`create/events`, {
+        name: 'doing something 2022',
+        time: now
+    });
     if (res.ok !== true || res.status !== 201) {
         return `2: ${JSON.stringify(res)}`;
     }
@@ -29,18 +32,24 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
         return `3: ${JSON.stringify(res)}`;
     }
 
-    const { sessionID } = await generateUser(api);
+    const { sessionID, userID } = await generateUser(api);
 
     // same but without admin user
 
     // this should fail, only admins can create events
-    res = await api(`create/events/doing+something+else+2022/${now}`, sessionID);
+    res = await api(`create/events`, {
+        session: sessionID,
+        name: 'doing something else 2022',
+        time: now
+    });
     if (res.ok || res.status !== 401) {
         return `4: ${JSON.stringify(res)}`;
     }
 
     // everyone logged in can see the events though
-    res = await api(`get/events`, sessionID);
+    res = await api(`get/events`, {
+        session: sessionID
+    });
     if (res?.data?.length !== 1) {
         return `5: ${JSON.stringify(res)}`;
     }
@@ -51,7 +60,10 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
     const id = res.data?.[0]?.id;
 
     // deleting shouldn't work without admin user either
-    res = await api(`delete/events/with-id/${id}`, sessionID);
+    res = await api(`delete/events`, {
+        session: sessionID,
+        eventID: id
+    });
     if (res.ok || res.status !== 401) {
         return `7: ${JSON.stringify(res)}`;
     }
@@ -63,7 +75,7 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
     }
 
     // now delete with admin user
-    res = await api(`delete/events/with-id/${id}`);
+    res = await api(`delete/events`, { eventID: id });
     if (res.ok !== true || res.status !== 200) {
         return `9: ${JSON.stringify(res)}`;
     }
@@ -74,7 +86,7 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
         return `10: ${JSON.stringify(res)}`;
     }
 
-    await api(`delete/users/${sessionID}`);
+    await api(`delete/users`, { userID });
 
     return true;
 });
@@ -85,7 +97,10 @@ Test.test('Events | Updating event name', async (api) => {
     const { sessionID, userID } = await generateUser(api);
 
     // create event
-    let res = await api(`create/events/doing+something+2022/${now}`);
+    let res = await api(`create/events`, {
+        name: 'doing something 2022',
+        time: now
+    });
     if (res.ok !== true || res.status !== 201) {
         return `0: ${JSON.stringify(res)}`;
     }
@@ -100,7 +115,10 @@ Test.test('Events | Updating event name', async (api) => {
     }
 
     // update event name
-    res = await api(`update/events/change-name/${id}/doing+something+else+2022`);
+    res = await api(`update/events/name`, {
+        eventID: id,
+        name: 'doing something else 2022'
+    });
     if (res.ok !== true || res.status !== 200) {
         return `3: ${JSON.stringify(res)}`;
     }
@@ -118,7 +136,11 @@ Test.test('Events | Updating event name', async (api) => {
     }
 
     // updating without permission
-    res = await api(`update/events/change-name/${id}/not+doing+anything`, sessionID);
+    res = await api(`update/events/name`, {
+        session: sessionID,
+        eventID: id,
+        name: 'not doing anything'
+    });
     if (res.ok || res.status !== 401) {
         return `5: ${JSON.stringify(res)}`;
     }
@@ -135,8 +157,8 @@ Test.test('Events | Updating event name', async (api) => {
         return `Expected event name to be 'doing something else 2022', got '${name3}'`;
     }
 
-    await api(`delete/users/${userID}`);
-    await api(`delete/events/with-id/${id}`);
+    await api(`delete/users`, { userID: userID });
+    await api(`delete/events`, { eventID: id });
 
     return true;
 });
@@ -150,7 +172,10 @@ Test.test('Events | Updating event timestamp', async (api) => {
     const { sessionID, userID } = await generateUser(api);
 
     // create event
-    let res = await api(`create/events/doing+something+2022/${now}`);
+    let res = await api(`create/events`, {
+        name: 'doing something 2022',
+        time: now
+    });
     if (res.ok !== true || res.status !== 201) {
         return `0: ${JSON.stringify(res)}`;
     }
@@ -168,7 +193,10 @@ Test.test('Events | Updating event timestamp', async (api) => {
     }
 
     // update event name
-    res = await api(`update/events/change-time/${id}/${then}`);
+    res = await api(`update/events/time`, {
+        eventID: id,
+        time: then
+    });
     if (res.ok !== true || res.status !== 200) {
         return `4: ${JSON.stringify(res)}`;
     }
@@ -183,7 +211,11 @@ Test.test('Events | Updating event timestamp', async (api) => {
     }
 
     // updating without permission
-    res = await api(`update/events/change-time/${id}/${now}`, sessionID);
+    res = await api(`update/events/time`, {
+        session: sessionID,
+        eventID: id,
+        time: now
+    });
     if (res.ok || res.status !== 401) {
         return `6: ${JSON.stringify(res)}`;
     }
@@ -210,8 +242,14 @@ Test.test('Events | Events are gotten in order of time', async (api) => {
     const then = now - 60 * 60 * 24 * 7;
 
     // create house points
-    await api(`create/events/now/${now}`);
-    await api(`create/events/then/${then}`);
+    await api(`create/events`, {
+        name: 'now',
+        time: now
+    });
+    await api(`create/events`, {
+        name: 'then',
+        time: then
+    });
 
     let res = await api(`get/events`);
     if (res?.data?.length !== 2) {
@@ -231,12 +269,18 @@ Test.test('Events | Events are gotten in order of time', async (api) => {
         return `Expected event time to be '${then}', got '${time2}'`;
     }
 
-    await api(`delete/events/with-id/${id1}`);
-    await api(`delete/events/with-id/${id2}`);
+    await api(`delete/events`, { eventID: id1 });
+    await api(`delete/events`, { eventID: id2 });
 
     // repeat the other way round
-    await api(`create/events/then/${then}`);
-    await api(`create/events/now/${now}`);
+    await api(`create/events`, {
+        name: 'then',
+        time: then
+    });
+    await api(`create/events`, {
+        name: 'now',
+        time: now
+    });
 
     res = await api(`get/events`);
     if (res?.data?.length !== 2) {
@@ -254,8 +298,8 @@ Test.test('Events | Events are gotten in order of time', async (api) => {
         return `Expected event time to be '${then}', got '${time2}'`;
     }
 
-    await api(`delete/events/with-id/${id1}`);
-    await api(`delete/events/with-id/${id2}`);
+    await api(`delete/events`, { eventID: id1 });
+    await api(`delete/events`, { eventID: id2 });
 
     return true;
 });
