@@ -53,7 +53,7 @@ export default class Test {
         this.batteryName = batteryName;
     }
 
-    run(api: API, code: CommandLineOptions) {
+    run (api: API, code: CommandLineOptions) {
         return this.test(api, code);
     }
 
@@ -69,7 +69,7 @@ export default class Test {
     /**
      * @returns {TestResult}
      */
-    static async testAll(api: API, flags: CommandLineOptions) {
+    static async testAll (api: API, flags: CommandLineOptions) {
         let time = now();
 
         const res = new TestResult();
@@ -109,7 +109,7 @@ export default class Test {
         return true;
     }
 
-    static isOb(o: any) {
+    static isOb (o: any) {
         return o != null && typeof o === 'object';
     }
 }

@@ -32,8 +32,15 @@ class Logger {
             return;
         }
 
-        messages = messages.map(r => JSON.stringify(r, undefined, 5));
-        let out = `[${type}] ${messages.join(' ')}`;
+        const message = messages
+            .map(m => {
+                // make sure it is all a string
+                if (typeof m === 'string') return m;
+                return JSON.stringify(m, null, 5);
+            })
+            .join(' ');
+
+        let out = `[${type}] ${message}`;
         if (this.useConsole) {
             console.log(out);
         } else {

@@ -7,10 +7,10 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
     // check no events at start
     let res = await api(`get/events`);
     if (res.ok !== true) {
-        return `get/events failed: ${JSON.stringify(res)}`;
+        return `0: ${JSON.stringify(res)}`;
     }
     if (res?.data?.length !== 0) {
-        return `Expected no events ${JSON.stringify(res)}`;
+        return `1: ${JSON.stringify(res)}`;
     }
 
     // use:
@@ -21,12 +21,12 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
     const now = Math.round(Date.now() / 1000);
     res = await api(`create/events/doing+something+2022/${now}`);
     if (res.ok !== true || res.status !== 201) {
-        return `create/events/doing+something+2022 failed: ${JSON.stringify(res)}`;
+        return `2: ${JSON.stringify(res)}`;
     }
     // get event
     res = await api(`get/events`);
     if (res?.data?.length !== 1) {
-        return `Expected 1 event, got ${JSON.stringify(res)}`;
+        return `3: ${JSON.stringify(res)}`;
     }
 
     const { sessionID } = await generateUser(api);
@@ -36,16 +36,16 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
     // this should fail, only admins can create events
     res = await api(`create/events/doing+something+else+2022/${now}`, sessionID);
     if (res.ok || res.status !== 401) {
-        return `Expected 401 from 'create/events/doing+something+else+2022', got '${JSON.stringify(res)}'`;
+        return `4: ${JSON.stringify(res)}`;
     }
 
     // everyone logged in can see the events though
     res = await api(`get/events`, sessionID);
     if (res?.data?.length !== 1) {
-        return `Expected 1 events, got ${JSON.stringify(res)}`;
+        return `5: ${JSON.stringify(res)}`;
     }
     if (res.data?.[0]?.name !== 'doing something 2022') {
-        return `1Expected event name to be 'doing something 2022', got '${res?.data?.[0]?.name}'`;
+        return `6: ${JSON.stringify(res)}`;
     }
 
     const id = res.data?.[0]?.id;
@@ -53,25 +53,25 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
     // deleting shouldn't work without admin user either
     res = await api(`delete/events/with-id/${id}`, sessionID);
     if (res.ok || res.status !== 401) {
-        return `Expected 401 from 'delete/events/with-id/${id}', got '${JSON.stringify(res)}'`;
+        return `7: ${JSON.stringify(res)}`;
     }
 
     // check that the event is still there
     res = await api(`get/events`);
     if (res?.data?.length !== 1) {
-        return `Expected 1 event, got ${JSON.stringify(res)}`;
+        return `8: ${JSON.stringify(res)}`;
     }
 
     // now delete with admin user
     res = await api(`delete/events/with-id/${id}`);
     if (res.ok !== true || res.status !== 200) {
-        return `delete/events/with-id/${id} failed: ${JSON.stringify(res)}`;
+        return `9: ${JSON.stringify(res)}`;
     }
 
     // check that the event is gone
     res = await api(`get/events`);
     if (res?.data?.length !== 0) {
-        return `Expected no events, got ${JSON.stringify(res)}`;
+        return `10: ${JSON.stringify(res)}`;
     }
 
     await api(`delete/users/${sessionID}`);
@@ -87,27 +87,27 @@ Test.test('Events | Updating event name', async (api) => {
     // create event
     let res = await api(`create/events/doing+something+2022/${now}`);
     if (res.ok !== true || res.status !== 201) {
-        return `create/events/doing+something+2022 failed: ${JSON.stringify(res)}`;
+        return `0: ${JSON.stringify(res)}`;
     }
 
     res = await api(`get/events`);
     if (res?.data?.length !== 1) {
-        return `Expected 1 event, got ${JSON.stringify(res)}`;
+        return `1: ${JSON.stringify(res)}`;
     }
     const { id, name } = res.data?.[0];
     if (name !== 'doing something 2022') {
-        return `2Expected event name to be 'doing something 2022', got '${name}'`;
+        return `2: ${JSON.stringify(res)}`;
     }
 
     // update event name
     res = await api(`update/events/change-name/${id}/doing+something+else+2022`);
     if (res.ok !== true || res.status !== 200) {
-        return `update/events/change-name/${id}/name/doing+something+else+2022 failed: ${JSON.stringify(res)}`;
+        return `3: ${JSON.stringify(res)}`;
     }
 
     res = await api(`get/events`);
     if (res?.data?.length !== 1) {
-        return `Expected 1 event, got ${JSON.stringify(res)}`;
+        return `4: ${JSON.stringify(res)}`;
     }
     const { id: id2, name: name2 } = res.data?.[0];
     if (id !== id2) {
@@ -120,12 +120,12 @@ Test.test('Events | Updating event name', async (api) => {
     // updating without permission
     res = await api(`update/events/change-name/${id}/not+doing+anything`, sessionID);
     if (res.ok || res.status !== 401) {
-        return `Expected 401 from 'update/events/${id}/name/not+doing+anything', got '${JSON.stringify(res)}'`;
+        return `5: ${JSON.stringify(res)}`;
     }
 
     res = await api(`get/events`);
     if (res?.data?.length !== 1) {
-        return `Expected 1 event, got ${JSON.stringify(res)}`;
+        return `6: ${JSON.stringify(res)}`;
     }
     const { id: id3, name: name3 } = res.data?.[0];
     if (id !== id3) {
@@ -152,30 +152,30 @@ Test.test('Events | Updating event timestamp', async (api) => {
     // create event
     let res = await api(`create/events/doing+something+2022/${now}`);
     if (res.ok !== true || res.status !== 201) {
-        return `create/events/doing+something+2022 failed: ${JSON.stringify(res)}`;
+        return `0: ${JSON.stringify(res)}`;
     }
 
     res = await api(`get/events`);
     if (res?.data?.length !== 1) {
-        return `Expected 1 event, got ${JSON.stringify(res)}`;
+        return `1: ${JSON.stringify(res)}`;
     }
     const { id, name, time } = res.data?.[0];
     if (name !== 'doing something 2022') {
-        return `3Expected event name to be 'doing something 2022', got '${name}'`;
+        return `2: ${JSON.stringify(res)}`;
     }
     if (time !== now) {
-        return `Expected event time to be '${now}', got '${time}'`;
+        return `3: now=${now}, ${JSON.stringify(res)}`;
     }
 
     // update event name
     res = await api(`update/events/change-time/${id}/${then}`);
     if (res.ok !== true || res.status !== 200) {
-        return `update/events/change-time/id/then failed: ${JSON.stringify(res)}`;
+        return `4: ${JSON.stringify(res)}`;
     }
 
     res = await api(`get/events`);
     if (res?.data?.length !== 1) {
-        return `Expected 1 event, got ${JSON.stringify(res)}`;
+        return `5: ${JSON.stringify(res)}`;
     }
     const time2 = res.data?.[0]?.['time'];
     if (time2 !== then) {
@@ -185,12 +185,12 @@ Test.test('Events | Updating event timestamp', async (api) => {
     // updating without permission
     res = await api(`update/events/change-time/${id}/${now}`, sessionID);
     if (res.ok || res.status !== 401) {
-        return `Expected 401 from 'update/events/change-time/id/now', got '${JSON.stringify(res)}'`;
+        return `6: ${JSON.stringify(res)}`;
     }
 
     res = await api(`get/events`);
     if (res?.data?.length !== 1) {
-        return `Expected 1 event, got ${JSON.stringify(res)}`;
+        return `7: ${JSON.stringify(res)}`;
     }
     const time3 = res.data?.[0]?.['time'];
     if (time3 !== then) {

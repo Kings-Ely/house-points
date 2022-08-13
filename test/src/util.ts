@@ -26,12 +26,16 @@ export async function generateUser (api: API, year=10): Promise<IGenerateUserRes
 
     const password = randomFromAlph();
 
-    let res = await api(`create/users/${email}/${password}?year=${year}`);
+    let res = await api(`create/users`, {
+        email, password, year
+    });
     if (res.ok !== true || (res.status !== 200 && res.status !== 201)) {
         throw `create/users/email/password failed: ${JSON.stringify(res)}`;
     }
 
-    res = await api(`create/sessions/from-login/${email}/${password}`);
+    res = await api(`create/sessions/from-login`, {
+        email, password
+    });
     if (res.ok !== true || res.status !== 200 || typeof res.sessionID !== 'string' || typeof res.userID !== 'string') {
         throw `create/sessions/from-login/email/password failed: ${JSON.stringify(res)}`;
     }

@@ -13,7 +13,7 @@ import type mysql from "mysql2";
  * @returns 0 for invalid/expired, >= 1 for logged in, 2 for admin user
  */
 route('get/sessions/auth-level', async ({ query, body }) => {
-    const { sessionID } = body;
+    const { sessionID='' } = body;
 
     return {
         level: await authLvl(sessionID, query)
@@ -55,7 +55,7 @@ route('get/sessions/active', async ({ query, body }) => {
 route('create/sessions/from-login', async ({ query, body }) => {
 
     // password in plaintext
-    const { email, password, expires: expiresRaw = '86400'} = body;
+    const { email='', password='', expires: expiresRaw = '86400'} = body;
 
     if (!email || !password) {
         return 'Missing email or password';
@@ -115,7 +115,7 @@ route('create/sessions/from-login', async ({ query, body }) => {
 route('create/sessions/from-user-id', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userID, expires: expiresRaw = '86400'} = body;
+    const { userID='', expires: expiresRaw = '86400'} = body;
 
     if (!userID) {
         return 'UserID not specified';
@@ -155,7 +155,7 @@ route('create/sessions/from-user-id', async ({ query, body }) => {
  * @param email
  */
 route('create/sessions/for-forgotten-password', async ({ query, body }) => {
-    const { email } = body;
+    const { email='' } = body;
 
     if (!email) {
         return 'Email not specified';
@@ -191,7 +191,7 @@ route('create/sessions/for-forgotten-password', async ({ query, body }) => {
  * @param sessionID
  */
 route('delete/sessions/with-id', async ({ query, body }) => {
-    const { sessionID } = body;
+    const { sessionID='' } = body;
 
     if (!sessionID) return 'Session ID not specified';
 

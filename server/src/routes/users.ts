@@ -46,10 +46,10 @@ route('get/users', async ({ query, body }) => {
  * @admin
  * Gets the user details from a user ID
  */
-route('get/users/from-id/:id', async ({ query, body }) => {
+route('get/users/from-id', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id } = body;
+    const { id='' } = body;
 
     if (!id) return 'No user ID';
 
@@ -252,7 +252,7 @@ route('create/users', async ({ query, body }) => {
         return `Year '${year}' is not between 9 and 13`;
     }
 
-    if (!emailValidator.validate(email)) {
+    if (!emailValidator.validate(email || '')) {
         return `Invalid email`;
     }
 
@@ -300,10 +300,12 @@ route('update/users/admin',
     async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userID, admin } = body;
+    const { userID='', admin='' } = body;
 
     const mySession = body.session;
     if (!mySession) return 'No session ID found';
+
+    if (!admin) return 'Must specify admin in body';
 
     if (await IDFromSession(query, mySession) === userID) return {
         status: 403,
@@ -334,7 +336,7 @@ route('update/users/year',
     async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userID: user, by: yC } = body;
+    const { userID: user='', by: yC } = body;
     const yearChange = parseInt(yC);
 
     if (isNaN(yearChange)) {
@@ -377,7 +379,7 @@ route('update/users/year',
  * @param newPassword
  */
 route('update/users/password', async ({ query, body }) => {
-    const { sessionID, newPassword } = body;
+    const { sessionID='', newPassword='' } = body;
 
     const userID = await IDFromSession(query, sessionID);
 
@@ -433,7 +435,7 @@ route('delete/users', async ({ query, body}) => {
     await query`DELETE FROM housepoints WHERE student = ${userID}`;
 
     const queryRes = await query<mysql.OkPacket>`
-        DELETE FROM users 
+        DELETE FROM users
         WHERE id = ${userID}
     `;
     if (!queryRes.affectedRows) return {

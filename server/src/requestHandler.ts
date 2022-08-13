@@ -68,22 +68,31 @@ export default async function (req: IncomingMessage, res: ServerResponse, query:
     res.setHeader("Access-Control-Allow-Credentials", "true");
     res.setHeader('Content-Type', 'application/json');
 
-    if (!req.url || !(req.url in routes)) {
-        warning`404: ${req.method} '${req.url}'`;
+    let path = req.url;
+
+    // remove '/' at start
+    if (path?.[0] === '/') {
+        path = path.substring(1);
+    }
+
+    // remove '/' at end
+    if (path?.[path?.length-1] === '/') {
+        path = path.substring(0, path.length-1);
+    }
+
+    if (!path || !(path in routes)) {
+        warning`404: ${req.method} '${path}'`;
         res.writeHead(404);
         res.end(JSON.stringify({
             status: 404,
-            error: `No path matches [${req.method}] '${req.url}'`
+            error: `No path matches [${req.method}] '${path}'`
         }));
         return;
     }
 
-    const path = req.url;
-
     const handler = routes[path];
 
     let apiRes: any;
-
 
     try {
 

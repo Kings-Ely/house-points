@@ -55,14 +55,14 @@ route('get/server/echo', async ({ body, query }) => {
  * @account
  * Measures the performance of running 'n' simple SQL queries and
  * returns some stats on the timing data
- * @param iterations
+ * @param {int} [iterations=100]
  */
-route('get/server/performance?iterations=100', async ({ query, body }) => {
+route('get/server/performance', async ({ query, body }) => {
     if (!await isLoggedIn(body, query)) return AUTH_ERR;
 
     const start = now();
 
-    const n = parseInt(body.iterations);
+    const n = parseInt(body?.iterations || '100');
     if (!n) return 'Invalid iterations';
     // easy way to DOS server with big numbers...
     if (n > 1000) return 'Iterations too big';

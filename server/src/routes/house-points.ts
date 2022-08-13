@@ -27,7 +27,7 @@ const MAX_HOUSE_POINTS = 100;
 route('get/house-points', async ({ query, body }) => {
     if (!await isLoggedIn(body, query)) return AUTH_ERR;
 
-    let { id, userID, yearGroup: ygRaw, status, from: fromRaw, to: toRaw } = body;
+    let { id='', userID='', yearGroup: ygRaw='', status='', from: fromRaw='', to: toRaw='' } = body;
 
     let yearGroup = parseInt(ygRaw) || 0;
     let from = parseInt(fromRaw) || 0;
@@ -101,12 +101,10 @@ route('get/house-points', async ({ query, body }) => {
  * @param description
  * @param event
  */
-route(
-    'create/house-points/give',
-async ({ query, body }) => {
+route('create/house-points/give', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userID, description, event, quantity: rawQuantity } = body;
+    const { userID='', description='', event='', quantity: rawQuantity='' } = body;
 
     let student = await userFromID(query, userID);
     if (!student) return `Student with ID '${userID}' not found`;
@@ -152,12 +150,10 @@ async ({ query, body }) => {
  * @param description
  * @param event
  */
-route(
-    'create/house-points/request',
-async ({ query, body }) => {
+route('create/house-points/request', async ({ query, body }) => {
     if (!await isLoggedIn(body, query)) return AUTH_ERR;
 
-    const { userID, description, event, quantity: rawQuantity } = body;
+    const { userID='', description='', event='', quantity: rawQuantity='' } = body;
 
     let quantity = parseInt(rawQuantity);
     if (isNaN(quantity) || !quantity) {
@@ -224,12 +220,10 @@ async ({ query, body }) => {
  *                          This is the message shown to the student for why the HP was rejected.
  * @param housePointID
  */
-route(
-    'update/house-points/accepted',
-async ({ query, body }) => {
+route('update/house-points/accepted', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { housePointID: id, reject } = body;
+    const { housePointID: id='', reject='' } = body;
 
     const hps = await query`
         SELECT
@@ -287,7 +281,7 @@ async ({ query, body }) => {
 route('update/house-points/quantity', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { housePointID: id, quantity: rawQuantity } = body;
+    const { housePointID: id='', quantity: rawQuantity='' } = body;
 
     const quantity = parseInt(rawQuantity);
     if (isNaN(quantity)) {
@@ -322,7 +316,7 @@ route('update/house-points/quantity', async ({ query, body }) => {
 route('update/house-points/timestamp', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { housePointID: id, quantity: rawQuantity } = body;
+    const { housePointID: id='', quantity: rawQuantity='' } = body;
 
     const quantity = parseInt(rawQuantity);
     if (isNaN(quantity)) {
@@ -353,7 +347,7 @@ route('update/house-points/timestamp', async ({ query, body }) => {
  * @param housePointID
  */
 route('delete/house-points/with-id', async ({ query, body }) => {
-    const { housePointID: id } = body;
+    const { housePointID: id='' } = body;
 
     // if we aren't an admin user, we can still delete it if
     // they own the house point

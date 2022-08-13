@@ -14,7 +14,7 @@ import mysql from "mysql2";
 route('get/events', async ({ query, body }) => {
     if (!await isLoggedIn(body, query)) return AUTH_ERR;
 
-    let { id, userID, from: fromRaw, to: toRaw } = body;
+    let { id='', userID='', from: fromRaw='', to: toRaw='' } = body;
 
     let from = parseInt(fromRaw) || 0;
     let to = parseInt(toRaw) || 0;
@@ -108,7 +108,7 @@ route('get/events', async ({ query, body }) => {
 route('create/events', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { name, timestamp: tsRaw, description } = body;
+    const { name='', timestamp: tsRaw='', description='' } = body;
 
     if (name.length < 3) {
         return `Event name must be more than 3 characters, got '${name}'`;
@@ -146,7 +146,7 @@ route('create/events', async ({ query, body }) => {
 route('update/events/change-name', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id, name: newName } = body;
+    const { id='', name: newName='' } = body;
 
     let queryRes = await query<mysql.OkPacket>`
         UPDATE events
@@ -166,10 +166,10 @@ route('update/events/change-name', async ({ query, body }) => {
  * @param id
  * @param {int} time
  */
-route('update/events/change-time/:id/:time', async ({ query, body }) => {
+route('update/events/change-time', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id, time: rawTime } = body;
+    const { id='', time: rawTime='' } = body;
 
     const time = parseInt(rawTime);
     if (isNaN(time) || !time) {
@@ -197,10 +197,13 @@ route('update/events/change-time/:id/:time', async ({ query, body }) => {
 route('delete/events/with-id', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id, deleteHps = 1 } = body;
+    const { id='', deleteHps='1' } = body;
 
     if (deleteHps === '1') {
-        await query`DELETE FROM housepoints WHERE event = ${id}`;
+        await query`
+            DELETE FROM housepoints
+            WHERE event = ${id}
+        `;
     }
 
     const res = await query<mysql.OkPacket>`

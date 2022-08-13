@@ -21,11 +21,11 @@ const flags = commandLineArgs([
 	{ name: 'deploy', alias: 'd', type: Boolean, defaultValue: false },
 ]);
 
-export type API = (path: string, code?: string) => Promise<any>;
+export type API = (path: string, body?: any) => Promise<any>;
 export type testExecutor = (api: API, args: CommandLineOptions) => Promise<boolean | Error | string>;
 
 const adminPassword = 'password';
-const adminEmail = encodeURIComponent('admin@example.com');
+const adminEmail = 'admin@example.com';
 
 let adminSessionID: string | null = null;
 
@@ -33,26 +33,32 @@ let adminSessionID: string | null = null;
  * Makes API request to localhost API server
  * Uses http, and the port stored in the .env file
  */
-async function api (path: string, session: string | null = null): Promise<any> {
+async function api (path: string, body: Record<string, any> = {}): Promise<any> {
 	// assume host is localhost
 	const url = `http://localhost:${process.env.PORT}/${path}`;
 
-	if (session === null) {
+	if (!body.session && body.session !== '') {
 		if (adminSessionID === null) {
-			let res = await api(`create/sessions/from-login/${adminEmail}/${adminPassword}`, '');
+			let res = await api(`create/sessions/from-login`, {
+				email: adminEmail,
+				password: adminPassword,
+				session: ''
+			});
 			if (res.error || !res.ok) {
 				throw c.red(res.error);
 			}
 			adminSessionID = res.sessionID;
+			console.log(c.green(`Got admin session ID: ${adminSessionID}`));
 		}
-		session = adminSessionID;
+		body.session = adminSessionID;
 	}
 
 	// get request to api server
 	const res = await fetch(url, {
-		method: 'GET',
-		headers: {
-			cookie: process.env.COOKIE_SESSION_KEY + '=' + session
+		'method': 'POST',
+		'body': JSON.stringify(body),
+		'headers': {
+			'Content-Type': 'application/json'
 		}
 	}).catch(e => {
 		// don't do anything fancy with fetch errors, just log them
@@ -66,13 +72,13 @@ async function api (path: string, session: string | null = null): Promise<any> {
 	}
 
 	// get text content of response
-	const body = await res.text();
+	const resBody = await res.text();
 
     if (flags.verbose) {
-        console.log(`${c.yellow`API`} '${url}': ${body}`);
+        console.log(`${c.yellow`API`} '${url}': ${resBody}`);
     }
 
-	return JSON.parse(body);
+	return JSON.parse(resBody);
 }
 
 async function deploy () {
@@ -98,7 +104,6 @@ async function deploy () {
 			}
 		});
 	});
-
 }
 
 (async () => {
@@ -123,9 +128,10 @@ async function deploy () {
 	}
 
 	// stop the server process by sending it a 'kill signal'
-	if ((await api(`delete/server`)).ok) {
+	const killServerRes = await api(`delete/server`);
+	if (killServerRes.ok) {
 		console.log(c.green(`Server Killed, finished testing in ${timeSinceStart()}ms`));
 	} else {
-		console.log(c.red(`Server not killed`));
+		console.log(c.red(`Server not killed: ${JSON.stringify(killServerRes)}`));
 	}
 })();

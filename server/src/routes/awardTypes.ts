@@ -31,7 +31,7 @@ route('get/award-types', async ({ query, body }) => {
 route('create/award-types', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { name, required, description='' } = body;
+    const { name='', required='', description='' } = body;
     const hpsRequired = parseInt(required);
 
     if (!name) return 'Missing parameter name';
@@ -68,7 +68,7 @@ route('create/award-types', async ({ query, body }) => {
 route('update/award-types/name', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id, newName } = body;
+    const { id='', newName='' } = body;
 
     if (!id) return 'Missing parameter id';
     if (!newName) return 'Missing parameter newName';
@@ -87,10 +87,10 @@ route('update/award-types/name', async ({ query, body }) => {
  * @param id
  * @param {int} newQuantity
  */
-route('update/award-types/hps-required/:id/:newQuantity', async ({ query, body }) => {
+route('update/award-types/hps-required', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id, newQuantity } = body;
+    const { id='', newQuantity='' } = body;
 
     const quantity = parseInt(newQuantity);
 
@@ -112,10 +112,10 @@ route('update/award-types/hps-required/:id/:newQuantity', async ({ query, body }
  * @param id
  * @param newDescription
  */
-route('update/award-types/description/:id/:newDescription', async ({ query, body }) => {
+route('update/award-types/description', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id, newDescription } = body;
+    const { id='', newDescription='' } = body;
 
     if (!id) return 'Missing parameter id';
     if (!newDescription) return 'Missing parameter newDescription';
@@ -133,10 +133,10 @@ route('update/award-types/description/:id/:newDescription', async ({ query, body
  * @admin
  * @param id
  */
-route('delete/award-types/with-id/:id', async ({ query, body }) => {
+route('delete/award-types', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id } = body;
+    const { id='' } = body;
 
     if (!id) return 'Missing parameter id';
 
