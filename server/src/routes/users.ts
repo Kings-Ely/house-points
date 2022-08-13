@@ -15,137 +15,125 @@ import {
 /**
  * @admin
  * Gets all users
- */
-route('get/users', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
-
-    const data = await query`
-        SELECT 
-            id,
-            email, 
-            year,
-            admin,
-            student
-        FROM users
-        ORDER BY
-            student,
-            admin DESC,
-            year,
-            email
-    `;
-
-    // add house points to all users without waiting for one user to finish
-    await Promise.all(data.map(async (user: any) => {
-        await addHousePointsToUser(query, user);
-    }));
-
-    return { data };
-});
-
-/**
- * @admin
- * Gets the user details from a user ID
- */
-route('get/users/from-id', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
-
-    const { id='' } = body;
-
-    if (!id) return 'No user ID';
-
-    const data = await query`
-        SELECT 
-            id,
-            email,
-            admin,
-            student,
-            year
-        FROM users
-        WHERE id = ${id}
-    `;
-
-    if (!data.length) return {
-        status: 406,
-        error: 'User not found'
-    };
-
-    const user = data[0];
-
-    await addHousePointsToUser(query, user);
-
-    return user;
-});
-
-/**
- * @admin
- * Gets the user details from an email
- * Note that this exposes the user ID
+ * @param userID
  * @param email
- */
-route('get/users/from-email',
-    async ({ query, body }) => {
-    if (!await isLoggedIn(body, query)) return AUTH_ERR;
-
-    const { email } = body;
-
-    if (!email) return 'No email';
-
-    const data = await query`
-        SELECT 
-            id,
-            email,
-            admin,
-            student,
-            year
-        FROM users
-        WHERE email = ${email}
-    `;
-
-    if (!data.length) return {
-        status: 406,
-        error: 'User not found'
-    };
-
-    const user = data[0];
-
-    await addHousePointsToUser(query, user);
-
-    if (!await isAdmin(body, query)) {
-        const id = await IDFromSession(query, body.session);
-        if (id !== user.id) {
-            delete user.id;
-
-            for (let hp of user['housePoints']) {
-                delete hp.id;
-                delete hp.userID;
-                delete hp.rejectMessage;
-            }
-        }
-    }
-
-    return user;
-});
-
-/**
- * Gets the user details from a session, checking that the session is valid first
  * @param sessionID
  */
-route('get/users/from-session', async ({ query, body }) => {
-    const { sessionID } = body;
-    if (!sessionID) return 'No session ID';
+route('get/users', async ({ query, body }) => {
+    const { userID='', email='', sessionID='' } = body;
 
+    if (sessionID) {
+        if (userID) return `Invalid body: cannot specify both 'session' and 'id'`;
+        if (email) return `Invalid body: cannot specify both 'session' and 'email'`;
+
+        const data = await query`
+            SELECT
+                users.id,
+                users.email,
+                users.admin,
+                users.student,
+                users.year
+            FROM users, sessions
+            WHERE sessions.id = ${sessionID}
+                AND sessions.user = users.id
+                AND UNIX_TIMESTAMP(sessions.opened) + sessions.expires > UNIX_TIMESTAMP()
+                AND sessions.active = 1
+        `;
+
+        if (!data.length) return {
+            status: 406,
+            error: 'User not found'
+        };
+
+        const user = data[0];
+
+        await addHousePointsToUser(query, user);
+
+        return user;
+    }
+
+    if (email) {
+        if (userID) return `Invalid body: cannot specify both 'email' and 'id'`;
+        if (!await isLoggedIn(body, query)) return AUTH_ERR;
+
+        const { email } = body;
+
+        if (!email) return 'No email';
+
+        const data = await query`
+            SELECT 
+                id,
+                email,
+                admin,
+                student,
+                year
+            FROM users
+            WHERE email = ${email}
+        `;
+
+        if (!data.length) return {
+            status: 406,
+            error: 'User not found'
+        };
+
+        const user = data[0];
+
+        await addHousePointsToUser(query, user);
+
+        // censor the data if they don't have access
+        if (!await isAdmin(body, query)) {
+            const id = await IDFromSession(query, body.session);
+            if (id !== user.id) {
+                delete user.id;
+
+                for (let hp of user['housePoints']) {
+                    delete hp.id;
+                    delete hp.userID;
+                    delete hp.rejectMessage;
+                }
+            }
+        }
+
+        return user;
+    }
+
+    // gets all users
+    if (!userID) {
+        if (!await isAdmin(body, query)) return AUTH_ERR;
+
+        const data = await query`
+            SELECT 
+                id,
+                email, 
+                year,
+                admin,
+                student
+            FROM users
+            ORDER BY
+                student,
+                admin DESC,
+                year,
+                email
+        `;
+
+        // add house points to all users without waiting for one user to finish
+        await Promise.all(data.map(async (user: any) => {
+            await addHousePointsToUser(query, user);
+        }));
+
+        return { data };
+    }
+
+    // user with specific ID
     const data = await query`
-        SELECT
-            users.id,
-            users.email,
-            users.admin,
-            users.student,
-            users.year
-        FROM users, sessions
-        WHERE sessions.id = ${sessionID}
-            AND sessions.user = users.id
-            AND UNIX_TIMESTAMP(sessions.opened) + sessions.expires > UNIX_TIMESTAMP()
-            AND sessions.active = 1
+        SELECT 
+            id,
+            email,
+            admin,
+            student,
+            year
+        FROM users
+        WHERE id = ${userID}
     `;
 
     if (!data.length) return {
@@ -166,8 +154,7 @@ route('get/users/from-session', async ({ query, body }) => {
  * IDs are delimited by ','
  * @param {string[]} userIDs
  */
-route('get/users/batch-info',
-    async ({ query, body }) => {
+route('get/users/batch-info', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
     const { userIDs: ids } = body;
@@ -243,11 +230,12 @@ route('get/users/leaderboard', async ({ query, body }) => {
 route('create/users', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { email, year: yearStr = '9', password } = body;
+    const { email='', year=9, password='' } = body;
 
-    const year = parseInt(yearStr);
 
-    if (isNaN(year)) return `Year '${year}' is not a number`;
+    if (!Number.isInteger(year)) {
+        return `Year is not a number`;
+    }
     if ((year < 9 || year > 13) && year !== 0) {
         return `Year '${year}' is not between 9 and 13`;
     }
@@ -296,11 +284,10 @@ route('create/users', async ({ query, body }) => {
  *                        1 for admin, anything else for not admin.
  * @param userID
  */
-route('update/users/admin',
-    async ({ query, body }) => {
+route('update/users/admin', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userID='', admin='' } = body;
+    const { userID='', admin=false } = body;
 
     const mySession = body.session;
     if (!mySession) return 'No session ID found';
@@ -314,7 +301,7 @@ route('update/users/admin',
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE users
-        SET admin = ${admin === '1'}
+        SET admin = ${admin}
         WHERE id = ${userID}
    `;
     if (!queryRes.affectedRows) return {
@@ -332,21 +319,23 @@ route('update/users/admin',
  * @param userID
  * @param {int} by
  */
-route('update/users/year',
-    async ({ query, body }) => {
+route('update/users/year', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userID: user='', by: yC } = body;
-    const yearChange = parseInt(yC);
+    const { userID: user='', by: yearChange } = body;
 
-    if (isNaN(yearChange)) {
-        return `Year change '${yearChange}' is not a number`;
+    if (!Number.isInteger(yearChange)) {
+        return `Year change is not an integer`;
     }
     if (Math.abs(yearChange) > 2) {
         return `Can't change year by more than 2 at once, trying to change by ${yearChange}`;
     }
 
-    const currentYear = await query`SELECT year FROM users WHERE id = ${user}`;
+    const currentYear = await query`
+        SELECT year 
+        FROM users 
+        WHERE id = ${user}
+    `;
     if (!currentYear.length) return {
         status: 406,
         error: 'User not found'
@@ -360,7 +349,7 @@ route('update/users/year',
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE users
-        SET year = ${newYear} 
+        SET year = ${newYear}
         WHERE id = ${user}
     `;
 
@@ -432,7 +421,10 @@ route('delete/users', async ({ query, body}) => {
         error: 'You cannot delete your own account'
     };
 
-    await query`DELETE FROM housepoints WHERE student = ${userID}`;
+    await query`
+        DELETE FROM housepoints
+        WHERE student = ${userID}
+    `;
 
     const queryRes = await query<mysql.OkPacket>`
         DELETE FROM users

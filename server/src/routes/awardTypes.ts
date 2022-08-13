@@ -136,7 +136,7 @@ route('update/award-types/description', async ({ query, body }) => {
 route('delete/award-types', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { id='' } = body;
+    const { id } = body;
 
     if (!id) return 'Missing parameter id';
 

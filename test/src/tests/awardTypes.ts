@@ -71,9 +71,14 @@ Test.test('Award  Types | Creating, getting and deleting auth', async (api) => {
     }
 
     // assumed to work
-    await api(`create/award-types/House+Tie/18`);
+    await api(`create/award-types`, {
+        name: 'House Tie',
+        quantity: 18
+    });
 
-    res = await api(`get/award-types`, sessionID);
+    res = await api(`get/award-types`, {
+        session: sessionID
+    });
     if (res.ok !== true) {
         return `3: ${JSON.stringify(res)}`;
     }
@@ -81,14 +86,19 @@ Test.test('Award  Types | Creating, getting and deleting auth', async (api) => {
         return `4: ${JSON.stringify(res)}`;
     }
 
-    res = await api(`delete/award-types/with-id/${res.data?.[0]?.id}`, sessionID);
+    res = await api(`delete/award-types`, {
+        session: sessionID,
+        id: res.data?.[0]?.id
+    });
     if (res.ok || res.status !== 401) {
         return `5: ${JSON.stringify(res)}`;
     }
 
-    await api(`delete/award-types/with-id/${res.data?.[0]?.id}`);
+    await api(`delete/award-types`, {
+        id: res.data?.[0]?.id
+    });
 
-    await api(`delete/users/with-id/${userID}`);
+    await api(`delete/users`, { userID });
 
     return true;
 });
@@ -96,7 +106,10 @@ Test.test('Award  Types | Creating, getting and deleting auth', async (api) => {
 Test.test('Award  Types | Updating name', async (api) => {
     const { sessionID, userID } = await generateUser(api);
 
-    await api(`create/award-types/House+Tie/18`);
+    await api(`create/award-types`, {
+        name: 'House Points',
+        quantity: 18
+    });
 
     let res = await api(`get/award-types`);
     if (res.ok !== true) {
@@ -106,7 +119,10 @@ Test.test('Award  Types | Updating name', async (api) => {
         return `1: ${JSON.stringify(res)}`;
     }
 
-    res = await api(`update/award-types/name/${res.data?.[0]?.id}/House+Tie+2`);
+    res = await api(`update/award-types/name`, {
+        newName: 'House Tie 2',
+        id: res.data?.[0]?.id
+    });
     if (res.ok !== true || res.status !== 200) {
         return `2: ${JSON.stringify(res)}`;
     }
@@ -118,11 +134,17 @@ Test.test('Award  Types | Updating name', async (api) => {
         return `4: ${JSON.stringify(res)}`;
     }
 
-    res = await api(`update/award-types/name/${res.data?.[0]?.id}/House+Tie`, sessionID);
+    res = await api(`update/award-types/name`, {
+        session: sessionID,
+        newName: 'House Tie',
+        id: res.data?.[0]?.id
+    });
     if (res.ok || res.status !== 401) {
         return `5: ${JSON.stringify(res)}`;
     }
-    res = await api(`get/award-types`, sessionID);
+    res = await api(`get/award-types`, {
+        session: sessionID
+    });
     if (res.ok !== true) {
         return `6: ${JSON.stringify(res)}`;
     }
@@ -130,9 +152,11 @@ Test.test('Award  Types | Updating name', async (api) => {
         return `7: ${JSON.stringify(res)}`;
     }
 
-    await api(`delete/award-types/with-id/${res.data?.[0]?.id}`);
+    await api(`delete/award-types`, {
+        id: res.data?.[0]?.id
+    });
 
-    await api(`delete/users/with-id/${userID}`);
+    await api(`delete/users`, { userID });
 
     return true;
 });
@@ -140,7 +164,10 @@ Test.test('Award  Types | Updating name', async (api) => {
 Test.test('Award  Types | Updating quantity', async (api) => {
     const { sessionID, userID } = await generateUser(api);
 
-    await api(`create/award-types/House+Tie/18`);
+    await api(`create/award-types`, {
+        name: 'House Tie',
+        quantity: 18
+    });
 
     let res = await api(`get/award-types`);
     if (res.ok !== true) {
@@ -150,7 +177,10 @@ Test.test('Award  Types | Updating quantity', async (api) => {
         return `1: ${JSON.stringify(res)}`;
     }
 
-    res = await api(`update/award-types/hps-required/${res.data?.[0]?.id}/20`);
+    res = await api(`update/award-types/hps-required`, {
+        id: res.data?.[0]?.id,
+        newQuantity: 20
+    });
     if (res.ok !== true || res.status !== 200) {
         return `2: ${JSON.stringify(res)}`;
     }
@@ -162,7 +192,11 @@ Test.test('Award  Types | Updating quantity', async (api) => {
         return `4: ${JSON.stringify(res)}`;
     }
 
-    res = await api(`update/award-types/hps-required/${res.data?.[0]?.id}/18`, sessionID);
+    res = await api(`update/award-types/hps-required`, {
+        session: sessionID,
+        id: res.data?.[0]?.id,
+        newQuantity: 18
+    });
     if (res.ok || res.status !== 401) {
         return `5: ${JSON.stringify(res)}`;
     }
@@ -174,9 +208,9 @@ Test.test('Award  Types | Updating quantity', async (api) => {
         return `7: ${JSON.stringify(res)}`;
     }
 
-    await api(`delete/award-types/with-id/${res.data?.[0]?.id}`);
+    await api(`delete/award-types`, { id: res.data?.[0]?.id });
 
-    await api(`delete/users/with-id/${userID}`);
+    await api(`delete/users`, { userID });
 
     return true;
 });

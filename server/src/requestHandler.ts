@@ -7,7 +7,7 @@ export interface IHandlerArgs {
     url: string;
     res: ServerResponse;
     req: IncomingMessage;
-    body: Record<string, string>;
+    body: Record<string, any>;
     query: queryFunc;
 }
 
