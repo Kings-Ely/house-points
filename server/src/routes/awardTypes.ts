@@ -80,7 +80,10 @@ route('update/award-types/name', async ({ query, body }) => {
         WHERE id = ${id}
     `;
 
-    if (queryRes.affectedRows === 0) return 'Award type not found with that ID';
+    if (queryRes.affectedRows === 0) return {
+        status: 406,
+        error: `No Award Types to delete with that ID`
+    }
 });
 
 /**
@@ -104,8 +107,9 @@ route('update/award-types/hps-required', async ({ query, body }) => {
         WHERE id = ${id}
     `;
 
-    if (queryRes.affectedRows === 0) {
-        return 'Award type not found with that ID';
+    if (queryRes.affectedRows === 0) return {
+        status: 406,
+        error: `No Award Types found that ID`
     }
 });
 
@@ -129,7 +133,10 @@ route('update/award-types/description', async ({ query, body }) => {
         WHERE id = ${id}
     `;
 
-    if (queryRes.affectedRows === 0) return 'Award type not found with that ID';
+    if (queryRes.affectedRows === 0) return {
+        status: 406,
+        error: `No Award Types to delete with that ID`
+    }
 });
 
 /**
@@ -146,5 +153,8 @@ route('delete/award-types', async ({ query, body }) => {
         WHERE id = ${body.awardTypeID}
     `;
 
-    if (queryRes.affectedRows === 0) return 'Award type not found';
+    if (queryRes.affectedRows === 0) return {
+        status: 406,
+        error: `No Award Types to delete with that ID`
+    };
 });
