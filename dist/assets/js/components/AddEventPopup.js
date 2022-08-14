@@ -175,6 +175,12 @@ const AddEventPopup = registerComponent(($el, id, reload) => {
 			return;
 		}
 
+		if (Object.keys(studentsInEvent).length < 1) {
+			if (!confirm(`Are you sure you want to proceed with 0 students in the event?`)) {
+				return;
+			}
+		}
+
 		const time = new Date($dateInp.value).getTime();
 
 		// event before the year 2000 is not allowed

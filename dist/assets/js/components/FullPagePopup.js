@@ -1,7 +1,6 @@
 'use strict';
 import { registerComponent } from "./components.js";
-
-let popupStack = [];
+import { state } from "../main.js";
 
 /**
  * Makes a full page popup which can be closed by clicking on the background.
@@ -42,7 +41,7 @@ const FullPagePopup = registerComponent(($el, id, content, showHeader=true) => {
 
 	function hide () {
 		$p.remove();
-		popupStack.splice(popupStack.indexOf($p), 1);
+		state.popupStack.splice(state.popupStack.indexOf(id), 1);
 		removeEventListener('keydown', keyDownListener);
 	}
 
@@ -57,7 +56,7 @@ const FullPagePopup = registerComponent(($el, id, content, showHeader=true) => {
 
 	function keyDownListener (evt) {
 		if (evt.key === 'Escape') {
-			if (popupStack[popupStack.length - 1] === $p) {
+			if (state.popupStack[state.popupStack.length - 1] === id) {
 				hide();
 			}
 		}
@@ -65,7 +64,7 @@ const FullPagePopup = registerComponent(($el, id, content, showHeader=true) => {
 
 	addEventListener('keydown', keyDownListener);
 
-	popupStack.push($p);
+	state.popupStack.push(id);
 
 	return hide;
 });

@@ -52,11 +52,13 @@ export const state = {
     inlineComponentIndex: 0,
     spinnerQueue: [],
     spinnerFrameID: 0,
+    popupStack: [],
 }
 
 // polluting the global namespace
 window.logout = logout;
 window.signInAs = signInAs;
+window.state = state;
 
 // for making relative dates
 /** @type {{[ k: 'month'|'hour'|'year'|'day'|'minute'|'second' ]: number}} */

@@ -21,11 +21,6 @@ async function showAllEvents () {
 
 	if (await core.isAdmin()) {
 		core.show('#add-event-button', 'flex');
-
-		document.getElementById('add-event-button')
-			.addEventListener('click', () => {
-				AddEventPopup(document.body, showAllEvents)
-			});
 	}
 
 	const { data: items } = await core.api(`get/events`);
@@ -108,3 +103,8 @@ async function deleteEvents () {
 	}));
 	await showAllEvents();
 }
+
+document.getElementById('add-event-button')
+	.addEventListener('click', () => {
+		AddEventPopup(document.body, showAllEvents)
+	});
