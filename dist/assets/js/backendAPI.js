@@ -1,7 +1,4 @@
-import { API_ROOT, showError, waitForReady, state, getSession } from "./main.js";
-
-let spinnerQueue = [];
-let spinnerFrameID = 0;
+import { API_ROOT, showError, waitForReady, state, getSession, SPINNER_STOP_DELAY } from "./main.js";
 
 // Spinner
 
@@ -15,11 +12,12 @@ export async function showSpinner () {
 
 	document.body.style.cursor = 'progress';
 
+	state.spinnerFrameID++
+	state.spinnerQueue.push(state.spinnerFrameID);
+
 	const current = document.querySelector('.spinner');
 	if (current) {
-		spinnerFrameID++
-		spinnerQueue.push(spinnerFrameID);
-		return spinnerFrameID;
+		return state.spinnerFrameID;
 	}
 
 	const loader = document.createElement('div');
@@ -28,7 +26,7 @@ export async function showSpinner () {
 
 	document.body.appendChild(loader);
 
-	return spinnerFrameID;
+	return state.spinnerFrameID;
 }
 
 /**
@@ -36,19 +34,19 @@ export async function showSpinner () {
  * @param {int} id
  */
 export function stopSpinner (id) {
-	if (spinnerQueue.includes(id)) {
-		spinnerQueue.splice(spinnerQueue.indexOf(id), 1);
+	if (state.spinnerQueue.includes(id)) {
+		state.spinnerQueue.splice(state.spinnerQueue.indexOf(id), 1);
 	}
 
-	if (spinnerQueue.length > 0) return;
+	if (state.spinnerQueue.length > 0) return;
 	setTimeout(() => {
-		if (spinnerQueue.length === 0) {
+		if (state.spinnerQueue.length === 0) {
 			const current = document.querySelector('.spinner');
 			state.currentlyShowingLoadingAnim = false;
-			document.body.removeChild(current);
+			if (current) document.body.removeChild(current);
 			document.body.style.cursor = 'default';
 		}
-	}, 200);
+	}, SPINNER_STOP_DELAY);
 }
 
 

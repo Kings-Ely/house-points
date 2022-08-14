@@ -1,5 +1,4 @@
 import {
-	COOKIE_ALLOW_COOKIES_KEY,
 	COOKIE_SESSION,
 	getCookie, GETParam,
 	navigate, rawAPI,
@@ -182,4 +181,13 @@ export async function signInAs (id, email) {
 
 	await setSessionCookie(sessionID);
 	await navigate(`/user/?email=${email}`);
+}
+
+/**
+ * Generates a password.
+ * @returns {string}
+ */
+export function genPassword () {
+	return 'changeme';
+	//return genRandomString(15);
 }

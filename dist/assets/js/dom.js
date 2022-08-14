@@ -3,7 +3,7 @@ import {
 	HOUSE_NAME,
 	navigate,
 	ROOT_PATH,
-	userInfo, LS_THEME
+	userInfo, LS_THEME, MAX_NOTIFICATIONS, NOTIFICATION_SHOW_TIME
 } from "./main.js";
 import { loadSVGs } from "./svg.js";
 
@@ -82,28 +82,31 @@ export async function showError (message) {
 		document.body.appendChild(state.$error);
 	}
 
-	let myErrId = state.currentErrorMessageID++;
+	let myErrId = state.currentNotificationID++;
 
-	while (state.currentlyShowingErrorMessageIDs.length > 4) {
-		let id = state.currentlyShowingErrorMessageIDs.shift();
+	while (state.visibleNotifications.length > MAX_NOTIFICATIONS) {
+		let id = state.visibleNotifications.shift();
 		document.getElementById(`error-${id}`).remove();
 	}
 
 	let errorMessage = document.createElement('div');
 	errorMessage.innerHTML = `
         ${message}
-        <span onclick="this.parentElement.remove()">&times;</span>
+        <span 
+        	onclick="this.parentElement.remove()" 
+        	style="font-size: 18px"
+        >&times;</span>
     `;
 	errorMessage.classList.add('error');
 	errorMessage.id = `error-${myErrId}`;
 	state.$error.appendChild(errorMessage);
-	state.currentlyShowingErrorMessageIDs.push(myErrId);
+	state.visibleNotifications.push(myErrId);
 
 	setTimeout(() => {
 		errorMessage.remove();
-		state.currentlyShowingErrorMessageIDs = state.currentlyShowingErrorMessageIDs
+		state.visibleNotifications = state.visibleNotifications
 			.filter(id => id !== myErrId);
-	}, 5000);
+	}, NOTIFICATION_SHOW_TIME);
 }
 
 
@@ -202,11 +205,10 @@ export function reloadDOM () {
 }
 
 export async function domIsLoaded () {
+	updateTheme();
 	reloadDOM();
 
 	state.documentLoaded = true;
-
-	updateTheme();
 
 	for (const cb of state.onLoadCBs) {
 		cb();

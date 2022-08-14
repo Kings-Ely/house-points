@@ -9,7 +9,6 @@ import {
     reloadDOM,
     scrollToTop,
     showError,
-    updateTheme,
     waitForReady
 } from "./dom.js";
 
@@ -30,11 +29,9 @@ export const
     LS_THEME = 'hpnea_Theme',
     HOUSE_NAME = 'Osmond',
     svgCache = {},
-    AWARD_TYPES = [
-        { name: 'Tie', required: 18 },
-        { name: 'Cuff-links', required: 36 },
-        { name: 'Hip-flask', required: 54 },
-    ];
+    SPINNER_STOP_DELAY = 500,
+    MAX_NOTIFICATIONS = 4,
+    NOTIFICATION_SHOW_TIME = 5000;
 
 // should be const but is set once at the start of the script
 export let
@@ -44,8 +41,8 @@ export const state = {
     $nav: null,
     $footer: null,
     $error: null,
-    currentErrorMessageID: 0,
-    currentlyShowingErrorMessageIDs: [],
+    currentNotificationID: 0,
+    visibleNotifications: [],
     userInfoCallbacks: [],
     userInfoJSON: null,
     isSignedIn: false,
@@ -53,6 +50,8 @@ export const state = {
     onLoadCBs: [],
     documentLoaded: false,
     inlineComponentIndex: 0,
+    spinnerQueue: [],
+    spinnerFrameID: 0,
 }
 
 // polluting the global namespace

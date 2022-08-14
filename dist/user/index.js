@@ -200,7 +200,6 @@ document.getElementById('submit-hp').onclick = async () => {
     $hpReasonInp.value = '';
 };
 
-
 $themeButton.onclick = async () => {
     console.log(core.getInverseTheme());
     core.setTheme(core.getInverseTheme());

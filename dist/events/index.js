@@ -28,7 +28,7 @@ async function showAllEvents () {
 			});
 	}
 
-	const { data: items } = await core.api`get/events`;
+	const { data: items } = await core.api(`get/events`);
 
 	if (await core.isAdmin()) {
 
@@ -103,8 +103,8 @@ async function deleteEvents () {
 		`Are you sure you want to delete ${selected.length} event${selected.length > 1 ? 's' : ''}?`)) {
 		return;
 	}
-	await Promise.all(selected.map(async id => {
-		await core.api`delete/events/with-id/${id}`;
+	await Promise.all(selected.map(async eventID => {
+		await core.api(`delete/events`, { eventID });
 	}));
 	await showAllEvents();
 }

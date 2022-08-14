@@ -68,7 +68,7 @@ const HousePoint = registerComponent((
             	Rejected ${core.getRelativeTime(hp['completed'] * 1000)}
             </span>
         `;
-		icon = 'red-cross.svg';
+		icon = 'cross.svg';
 
 	} else if (hp['status'] === 'Accepted') {
 		acceptedHTML = `

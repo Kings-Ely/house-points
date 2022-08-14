@@ -91,7 +91,7 @@ const AddEventPopup = registerComponent(($el, id, reload) => {
 							onclick="_AddEventPopup__removeStudentFromEvent('${id}')"
 						   data-label="Remove from new event"
 							aria-label="Remove from new event"
-							svg="bin.svg"
+							svg="cross.svg"
 							class="icon small"
 						></button>
 					</div>

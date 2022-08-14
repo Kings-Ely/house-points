@@ -31,7 +31,7 @@ window.userPopupFromID = core.userPopupFromID;
 async function showStudentsList () {
     SelectableList('#students', {
         name: 'Students',
-        items: (await core.api`get/users`)['data'],
+        items: (await core.api(`get/users`))['data'],
         uniqueKey: 'id',
         searchKey: 'email',
         selected,
@@ -274,8 +274,11 @@ $addStudentButton.addEventListener('click', () => {
             }
         }
 
-        //const res = await core.api`create/users/${$emailInp.value}/${core.genRandomString(10)}?year=${$yearInp.value}`;
-        const res = await core.api`create/users/${$emailInp.value}/changeme?year=${$yearInp.value}`;
+        const res = await core.api(`create/users`, {
+            password: core.genPassword(),
+            email: $emailInp.value,
+            year: $yearInp.value
+        });
 
         if (res.ok) {
             $emailInp.value = '';
@@ -292,7 +295,7 @@ async function deleteUser (id, email) {
         return;
     }
 
-    await core.api`delete/users/${id}`;
+    await core.api(`delete/users`, { userID: id });
 
     if (selected.includes(id)) {
         selected.splice(selected.indexOf(id), 1);
@@ -309,7 +312,7 @@ async function deleteSelected () {
 
     // send API requests at the same time and wait for all to finish
     await Promise.all(selected.map(async id => {
-        await core.api`delete/users/${id}`;
+        await core.api(`delete/users`, { userID: id });
     }));
 
     selected.splice(0, selected.length);
@@ -323,7 +326,9 @@ async function ageSelected (amount) {
     }
 
     await Promise.all(selected.map(async id => {
-        await core.api`update/users/year/${id}/${amount}`;
+        await core.api(`update/users/year`, {
+            userID: id, by: amount
+        });
     }));
 
     await showStudentsList();
@@ -336,7 +341,11 @@ async function giveHPToSelected () {
     if (!reason) return;
 
     await Promise.all(selected.map(async id => {
-        await core.api`create/house-points/give/${id}/1?description=${reason}`;
+        await core.api(`create/house-points/give`, {
+            description: reason,
+            userID: id,
+            quantity: 1
+        });
     }));
 
     await showStudentsList();
@@ -344,32 +353,36 @@ async function giveHPToSelected () {
 
 /**
  * Makes the API request to make a user not an admin and refreshes the list of students.
- * @param {string} id
+ * @param {string} userID
  * @param {string} email
  * @returns {Promise<void>}
  */
-async function revokeAdmin (id, email) {
+async function revokeAdmin (userID, email) {
     if (!confirm(`Are you sure you want to revoke '${email}'s admin access?`)) {
         return;
     }
 
-    await core.api`update/users/admin/${id}?admin=0`;
+    await core.api(`update/users/admin`, {
+        userID, admin: false
+    });
 
     await showStudentsList();
 }
 
 /**
  * Makes the API request to make a user an admin and refreshes the list of students.
- * @param {string} id
+ * @param {string} userID
  * @param {string} email
  * @returns {Promise<void>}
  */
-async function makeAdmin (id, email) {
+async function makeAdmin (userID, email) {
     if (!confirm(`Are you sure you want to make '${email}' an admin?`)) {
         return;
     }
 
-    await core.api`update/users/admin/${id}?admin=1`;
+    await core.api(`update/users/admin`, {
+        userID, admin: true
+    });
 
     await showStudentsList();
 }
@@ -441,7 +454,7 @@ async function uploadAddStudentsFile () {
                 return;
             }
 
-            const [ email, year, hpsRaw = '0' ] = csv[i];
+            const [ email, yearRaw, hpsRaw = '0' ] = csv[i];
 
             const hps = parseInt(hpsRaw || '0');
             if (isNaN(hps)) {
@@ -450,7 +463,18 @@ async function uploadAddStudentsFile () {
                 return;
             }
 
-            let res = await core.api`create/users/${email}/changeme?year=${year}`;
+            const year = parseInt(yearRaw);
+            if (isNaN(year)) {
+                errors.push(`Row ${i+1}: invalid year (col 2)`);
+                finishedOne();
+                return;
+            }
+
+            let res = await core.api(`create/users`, {
+                email,
+                year,
+                password: core.genPassword()
+            });
             if (res['error']) {
                 errors.push(`Error on row ${i+1}: ${res['error']}`);
                 finishedOne();
@@ -466,7 +490,11 @@ async function uploadAddStudentsFile () {
             }
 
             if (hps > 0) {
-                res = await core.api`create/house-points/give/${userID}/${hps}?description=Random+Stuff`;
+                res = await core.api(`create/house-points/give`, {
+                    description: 'From before',
+                    userID,
+                    quantity: hps
+                });
                 if (res['error']) {
                     errors.push(`Error on row ${i+1}: ${res['error']}`);
                     finishedOne();

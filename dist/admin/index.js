@@ -19,7 +19,9 @@ window.userPopupFromID = core.userPopupFromID;
 })();
 
 async function main () {
-    const { data: pending } = await core.api`get/house-points?status=Pending`;
+    const { data: pending } = await core.api(`get/house-points`, {
+        status: 'Pending'
+    });
     const admin = await core.isAdmin();
 
     $numPendingHPs.innerText = pending.length;

@@ -346,6 +346,10 @@ route('update/users/year', async ({ query, body }) => {
 
     const newYear = currentYear[0].year + yearChange;
 
+    if (newYear > 13 || newYear < 9) {
+        return `Cannot change year to ${newYear}, must be between 8 and 13`;
+    }
+
     const queryRes = await query<mysql.OkPacket>`
         UPDATE users
         SET year = ${newYear}

@@ -34,15 +34,14 @@ window.eventPopup = core.eventPopup;
 
 (async () => {
     await core.init('..', true, true);
+    core.preloadSVGs('bin.svg', 'cross.svg', 'pending.svg', 'selected-checkbox.svg', 'unselected-checkbox.svg');
 
     await showHousePointList();
 })();
 
 async function showHousePointList () {
-    const hps = (await core.api`get/house-points`)['data'];
+    const { data: hps } = await core.api(`get/house-points`);
     const admin = await core.isAdmin();
-
-    core.preloadSVGs('bin.svg', 'red-cross.svg', 'pending.svg', 'selected-checkbox.svg', 'unselected-checkbox.svg');
 
     SelectableList('#hps', {
         name: `House Points (${hps.length})`,
@@ -100,28 +99,14 @@ function toggleYearGroup (age) {
     showHousePointList();
 }
 
-async function deleteHousePoint (id, email) {
-    if (!confirm(`Are you sure you want to delete ${email}'s house point?`)) {
-        return;
-    }
-
-    await core.api`delete/house-points/with-id/${id}`;
-
-    if (selected.includes(id)) {
-        selected.splice(selected.indexOf(id), 1);
-    }
-
-    await showHousePointList();
-}
-
 async function deleteSelected () {
     if (!confirm(`Are you sure you want to delete ${selected.length} house points?`)) {
         return;
     }
 
     // send API requests at the same time and wait for all to finish
-    await Promise.all(selected.map(async id => {
-        await core.api`delete/house-points/with-id/${id}`;
+    await Promise.all(selected.map(async housePointID => {
+        await core.api(`delete/house-points`, { housePointID });
     }));
 
     selected.splice(0, selected.length);
