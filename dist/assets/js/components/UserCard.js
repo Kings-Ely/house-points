@@ -29,6 +29,10 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 	userCard.classList.add('user-card');
 	$el.appendChild(userCard);
 
+	window[`_UserCard${id}__signInAs`] = async (...args) => {
+		await core.signInAs(...args);
+	}
+
 	function render () {
 		userCard.innerHTML = `
 			<h2>
@@ -36,7 +40,7 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 					<button 
 						class="icon medium"
 						svg="account.svg"
-						onclick="signInAs('${user.id}', '${user.email}')"
+						onclick="_UserCard${id}__signInAs('${user.id}', '${user.email}')"
 						data-label="Sign in as"
 					></button>
 				` : ''}
@@ -53,7 +57,7 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 					${user['housePoints']
 						.map((point, i) => inlineComponent(HousePoint, point, async () => {
 							user = await getUser();
-							await reload();
+							await render();
 						}, {
 							admin,
 							showBorderBottom: i !== (user['housePoints'].length - 1),
@@ -74,26 +78,23 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 					
 					${admin ? `
 						<div class="add-hp">
+							<input
+								placeholder="New house point description"
+								class="new-hp-description"
+								aria-label="new house point description"
+							>
 							<input 
 								type="number"
-								placeholder="quantity"
+								placeholder="Quantity"
 								style="width: 100px"
 								class="new-hp-quantity"
 								aria-label="new house point quantity"
 							>
-							
-							<input
-								placeholder="description"
-								class="new-hp-description"
-								aria-label="new house point description"
-							>
-							
 							<button
 							    data-label="Create house point"
 								svg="plus.svg"
 								class="icon small new-hp-create"
 							></button>
-							
 						</div>
 					` : ''}
 				</div>
@@ -106,7 +107,7 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 			const $newHpCreate = userCard.querySelector('.new-hp-create');
 
 			$newHpCreate.addEventListener('click', async () => {
-				const quantity = $newHpQuantity.value;
+				const quantity = parseInt($newHpQuantity.value);
 				const description = $newHpDescription.value;
 
 				if (quantity < 1) {

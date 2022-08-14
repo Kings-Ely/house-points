@@ -1,5 +1,7 @@
 import * as core from "../assets/js/main.js";
 import HousePoint from "../assets/js/components/HousePoint.js";
+import housePoint from "../assets/js/components/HousePoint.js";
+import { escapeHTML } from "../assets/js/main.js";
 
 const $name = document.getElementById('name');
 const $hps = document.getElementById('hps');
@@ -7,7 +9,7 @@ const $hpReasonInp = document.getElementById('hp-reason');
 const $info = document.getElementById('info');
 const $themeButton = document.getElementById('switch-theme');
 
-let myUserInfo;
+let theUsersInfo = null;
 let me = false;
 
 window.eventPopup = core.eventPopup;
@@ -22,15 +24,13 @@ window.eventPopup = core.eventPopup;
         return;
     }
 
-    myUserInfo = await core.userInfo();
-
     await reloadUserInfoFromEmail();
 
-    me = myUserInfo['email'] === core.GETParam('email');
+    me = (await core.userInfo())['email'] === core.GETParam('email');
 
-    if ((await core.userInfo())['student']) {
+    if (theUsersInfo.student) {
 
-        if (me || myUserInfo['admin']) {
+        if (me || await core.isAdmin()) {
             core.show('#submit-hp-request');
         }
 
@@ -39,7 +39,7 @@ window.eventPopup = core.eventPopup;
     } else {
         await title();
 
-        if ((await core.userInfo())['admin']) {
+        if (theUsersInfo['admin']) {
             $hps.innerHTML = `
                 <a 
                     href="../admin/"
@@ -53,7 +53,7 @@ window.eventPopup = core.eventPopup;
         }
     }
 
-    if (!(await core.userInfo()).admin) {
+    if (!theUsersInfo.admin) {
         await showInfo();
     } else {
         core.hide('#info');
@@ -65,16 +65,15 @@ window.eventPopup = core.eventPopup;
 async function reloadUserInfoFromEmail () {
     const email = core.GETParam('email');
 
-    const info = await core.api(`get/users`, { email });
-
-    await core.handleUserInfo(info);
+    theUsersInfo = await core.api(`get/users`, { email });
 }
 
 async function housePoints () {
-    const { housePoints: hps, accepted, admin } = await core.userInfo();
+    const { housePoints: hps, accepted } = theUsersInfo;
+    const admin = await core.isAdmin();
 
     $hps.innerHTML = `
-        <h2>House Points (${accepted})</h2>
+        <h2>House Points (${escapeHTML(accepted)})</h2>
     `;
 
     if (hps.length === 0) {
@@ -89,7 +88,10 @@ async function housePoints () {
     let html = '';
 
     for (let hp of hps) {
-        html += core.inlineComponent(HousePoint, hp, reloadUserInfoFromEmail, {
+        html += core.inlineComponent(HousePoint, hp, async () => {
+            await reloadUserInfoFromEmail();
+            await housePoints();
+        }, {
             admin,
             showBorderBottom: hp !== hps[hps.length - 1],
             showEmail: false,
@@ -112,63 +114,31 @@ async function housePoints () {
 
 async function title () {
 
-    const info = await core.userInfo();
-
-    const [ username, emailExt ] = info['email'].split('@');
+    const [ username, emailExt ] = theUsersInfo['email'].split('@');
 
     $name.innerHTML = `
         <p style="font-size: 3em">
             <span>
-                ${username}
+                ${escapeHTML(username)}
             </span>
             <span style="color: var(--text-v-light)">
-                @${emailExt} ${info['admin'] ? ' (Admin)' : ''}
+                @${escapeHTML(emailExt)}
+                ${escapeHTML(theUsersInfo['admin'] ? ' (Admin)' : '')}
             </span>
         </p>
     `;
 }
 
 async function showInfo () {
-    const info = await core.userInfo();
-
-    const hpCount = info['accepted'];
-
     $info.innerHTML = `
         <p>
-             <b>${hpCount}</b> accepted, 
-            <b>${info['pending']}</b> pending and 
-            <b>${info['rejected']}</b> rejected house points.
+            <b>${escapeHTML(theUsersInfo['accepted'])}</b> accepted, 
+            <b>${escapeHTML(theUsersInfo['pending'])}</b> pending and 
+            <b>${escapeHTML(theUsersInfo['rejected'])}</b> rejected house points.
         </p>
     `;
 
-    let goalsLeft = 0;
-
-    for (let goal of core.AWARD_TYPES) {
-        if (hpCount >= goal['points']) {
-            $info.innerHTML += `
-                <p>
-                    Reached 'House ${goal['name']}' (${goal['required']})!
-                </p>
-            `;
-        } else {
-            $info.innerHTML += `
-                <p>
-                    Need 
-                    <b>${goal['required'] - hpCount}</b>
-                    more house points to reach 'House ${goal['name']}'.
-                </p>
-            `;
-            goalsLeft++;
-        }
-    }
-
-    if (goalsLeft === 0) {
-        $info.innerHTML += `
-            <p>
-                Reached all house goals!
-            </p>
-        `;
-    }
+    // TODO: goals info here
 }
 
 async function reloadHousePoints () {
@@ -191,7 +161,7 @@ document.getElementById('submit-hp').onclick = async () => {
     for (let reason of $hpReasonInp.value.split('\n')) {
         if (!reason) continue;
         await core.api(`create/house-points/request`, {
-            userID: await core.userID(),
+            userID: theUsersInfo.id,
             description: reason,
             quantity: 1
         });
@@ -201,7 +171,6 @@ document.getElementById('submit-hp').onclick = async () => {
 };
 
 $themeButton.onclick = async () => {
-    console.log(core.getInverseTheme());
     core.setTheme(core.getInverseTheme());
     reloadThemeButton();
     core.reloadDOM();

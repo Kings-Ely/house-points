@@ -1,6 +1,7 @@
 'use strict';
 import { registerComponent } from "./components.js";
 import * as core from "../main.js";
+import { formatTimeStampForInput } from "../main.js";
 
 /**
  * A house point ready to go in a list.
@@ -15,7 +16,6 @@ import * as core from "../main.js";
  *     showEmail: boolean,
  *     showReason: boolean,
  *     showNumPoints: boolean,
- *     showDate: boolean,
  *     showRelativeTime: boolean,
  *     showStatusHint: boolean,
  *     showStatusIcon: boolean,
@@ -34,9 +34,9 @@ const HousePoint = registerComponent((
 		showBorderBottom=false,
 		showEmail=true,
 		showReason=true,
+		allowEventReason=true,
 		showNumPoints=true,
 		showDate=true,
-		showRelativeTime=true,
 		showStatusHint=true,
 		showStatusIcon=true,
 		showDeleteButton=admin,
@@ -55,43 +55,54 @@ const HousePoint = registerComponent((
 		reasonEditable = false;
 		pointsEditable = false;
 		dateEditable = false;
+		showDeleteButton = false;
 		showPendingOptions = false;
 	}
 
-	const showDateTime = showDate || showRelativeTime || showStatusHint;
+	const showDateTime = showDate || showStatusHint;
 
 	if (hp['status'] === 'Rejected') {
 		acceptedHTML = `
             <span
             	data-label="'${hp['rejectMessage']}'"
             >
-            	Rejected ${core.getRelativeTime(hp['completed'] * 1000)}
+            	Rejected ${core.escapeHTML(core.getRelativeTime(hp['completed'] * 1000))}
             </span>
         `;
 		icon = 'cross.svg';
 
-	} else if (hp['status'] === 'Accepted') {
-		acceptedHTML = `
-            Accepted ${core.getRelativeTime(hp['completed'] * 1000)}
-        `;
-	} else {
+	} else if (hp['status'] === 'Pending') {
 		acceptedHTML = `
 			<span data-label="Waiting for approval">Not Yet Accepted</span>
 		`;
 		icon = 'pending.svg';
+		// default to accepted, as sometimes the house point won't have a status,
+		// as it is assumed to be accepted
+	} else {
+		acceptedHTML = `
+            Accepted ${core.escapeHTML(core.getRelativeTime(hp['completed'] * 1000))}
+        `;
 	}
 
+	// this time in ms where the house point 'created' is in seconds.
 	const submittedTime = hp['created'] * 1000;
 
-	window[`_HousePoint${id}__eventPopup`] = core.eventPopup;
-	window[`_HousePoint${id}__userPopup`] = core.userPopup;
+	// Preserve the 'admin' of this component rather than use the admin of the user,
+	// as the user may be overriden with another user on the /user?email=someone-else
+	window[`_HousePoint${id}__eventPopup`] = (id) => {
+		return core.eventPopup(id, admin);
+	}
+	window[`_HousePoint${id}__userPopup`] = (id) => {
+		return core.userPopup(id, admin);
+	}
+
+	// definitely used 'namespaced' keys for functions specific to this component
 
 	window[`_HousePoint${id}__changeHpQuantity`] = async (value) => {
 		await core.api(`update/house-points/quantity`, {
 			housePointID: hp.id,
-			quantity: value
+			quantity: parseInt(value)
 		});
-		reload();
 	};
 
 	window[`_HousePoint${id}__changeDescription`] = async (value) => {
@@ -99,26 +110,29 @@ const HousePoint = registerComponent((
 			housePointID: hp.id,
 			description: value
 		});
-		reload();
 	};
 
 	window[`_HousePoint${id}__changeDate`] = async (value) => {
-		// TODO: get the right date format for this api
+		// +1 to make sure it is on the right side of the date boundary
+		const timestamp = Math.ceil(new Date(value).getTime() / 1000) + 1;
+		if (timestamp <= 1) {
+			await core.showError('Invalid date!');
+			return;
+		}
 		await core.api(`update/house-points/created`, {
 			housePointID: hp.id,
-			timestamp: value
+			timestamp
 		});
-		reload();
 	};
 
 	window[`_HousePoint${id}__deleteHousePoint`] = async () => {
-		if (confirm('Are you sure you want to delete this house point?')) {
+		if (!confirm('Are you sure you want to delete this house point?')) {
 			return;
 		}
 		await core.api(`delete/house-points`, {
 			housePointID: hp.id
 		});
-		reload()
+		reload();
 	};
 
 	window[`_HousePoint${id}__accept`] = async () => {
@@ -140,7 +154,7 @@ const HousePoint = registerComponent((
 
 	// Dynamically determine the width of each column based on which columns are shown
 	const gridTemplateColumn = `
-		${showEmail ? '250px' : ''}
+		${showEmail ? '320px' : ''}
 		${showReason ? '1fr' : ''}
 		${showNumPoints ? '100px' : ''}
 		${showDateTime ? '300px' : ''}
@@ -149,10 +163,7 @@ const HousePoint = registerComponent((
 		${showPendingOptions ? '125px' : '0'}
 	`;
 
-	const submittedDate = new Date(submittedTime);
-	const dateFormattedForInp = `${submittedDate.getFullYear()}-`+
-		("0" + (submittedDate.getMonth() + 1)).slice(-2) + '-' +
-		("0" + submittedDate.getDate()).slice(-2)
+	const dateFormattedForInp = formatTimeStampForInput(hp['created']);
 
 	$el.innerHTML = `
 		<div 
@@ -165,27 +176,33 @@ const HousePoint = registerComponent((
 						data-label="View User"
 						onclick="_HousePoint${id}__userPopup('${hp.studentEmail}')"
 					>
-						${hp.studentEmail.split('@')[0]}
+						${core.escapeHTML(hp.studentEmail.split('@')[0])}
 						<span class="email-second-half">
 							@${hp.studentEmail.split('@')[1]}
 						</span>
+						(Y${core.escapeHTML(hp.studentYear)})
 					</button>
 				</div>
 			` : ''}
 			${showReason ? `
 				<div>
-		            ${hp.eventName ? `
+		            ${hp.eventName && allowEventReason ? `
 						<button
 							svg="event.svg"
 							class="icon small"
 							onclick="_HousePoint${id}__eventPopup()"
 							style="font: inherit; margin: 0; padding: 0"
 						>
-							${hp.eventName}
+							${core.escapeHTML(hp.eventName)}
 						</button>
 						
 						${hp.description ? `
-							(<p>${hp.description}</p>)
+							<p 
+								style="padding-left: 5px; color: var(--text-light)"
+								data-label="${core.escapeHTML(hp.description)}"
+							>
+								(${core.escapeHTML(core.limitStrLength(hp.description, 20))})
+							</p>
 						` : ''}
 						
 					` : (reasonEditable ? `
@@ -195,7 +212,7 @@ const HousePoint = registerComponent((
 							onchange="_HousePoint${id}__changeDescription(this.value)"
 							style="width: 100%"
 						>
-					` : hp.description)}
+					` : core.escapeHTML(hp.description))}
 	            </div>
 			` : ''}
 			
@@ -211,15 +228,16 @@ const HousePoint = registerComponent((
 	                        style="width: 40px"
 	                    > points
 	                ` : `
-	                    ${hp['quantity']} pts
+	                    ${core.escapeHTML(hp['quantity'])} pts
 	                `}
 				</div>
 			` : ''}
 			
 			${showDateTime ? `
 	            <div class="house-point-date-time">
-	            	<p>
-		                ${showDate ? `
+	            	
+	                ${showDate ? `
+	                   	<p data-label="${core.escapeHTML(core.getRelativeTime(submittedTime))}">
 			                ${dateEditable ? `
 				                <input
 				                    type="date"
@@ -227,15 +245,10 @@ const HousePoint = registerComponent((
 				                    onchange="_HousePoint${id}__changeDate(this.value)"
 				                >
 			                ` : `
-				                ${new Date(submittedTime).toDateString()}
+				                ${core.escapeHTML(new Date(submittedTime).toDateString())}
 			                `}
-			            ` : ''}
-					</p>
-					<p>
-						${showRelativeTime ? `
-		                    (${core.getRelativeTime(submittedTime)})
-	                    ` : ''}              
-					</p>
+		                </p>
+		            ` : ''}
 					<p>
 						${showStatusHint ? acceptedHTML : ''}
 					</p>
@@ -247,7 +260,7 @@ const HousePoint = registerComponent((
 		            ${icon ? `
 		                <span
 		                    svg="${icon}"
-			                data-label="${hp['status']}"
+			                data-label="${core.escapeHTML(hp['status'])}"
 			                class="icon medium icon-info-only"
 		                ></span>
 		            ` : ''}
@@ -256,7 +269,7 @@ const HousePoint = registerComponent((
 			${showDeleteButton ? `
 				<div>
 					<button
-					   data-label="Delete house point"
+					    data-label="Delete house point"
 						onclick="_HousePoint${id}__deleteHousePoint()"
 						svg="bin.svg"
 						class="icon small"

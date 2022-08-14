@@ -257,3 +257,48 @@ export async function addHousePointsToUser (query: queryFunc, user: any & { id: 
 
     // user passed by reference as it's an object so don't need to return anything
 }
+
+/**
+ * Adds house point details to a user
+ * Adds 'housePoints', 'accepted', 'rejected', 'pending' keys to the user object.
+ * Assumed admin level authentication, censor the data after if necessary.
+ */
+export async function addHousePointsToEvent (query: queryFunc, event: any & { id: string }) {
+    if (!event['id']) {
+        throw new Error('User has no ID');
+    }
+
+    event['housePoints'] = await query`
+        SELECT
+            housepoints.id,
+            housepoints.quantity,
+            housepoints.description,
+            housepoints.status,
+            UNIX_TIMESTAMP(housepoints.created) as created,
+            UNIX_TIMESTAMP(housepoints.completed) as completed,
+            housepoints.rejectMessage,
+            
+            users.id as userID,
+            users.email as studentEmail,
+            users.year as studentYear,
+            
+            housepoints.event as eventID,
+            events.name as eventName,
+            events.description as eventDescription,
+            UNIX_TIMESTAMP(events.time) as eventTime
+            
+        FROM users, housepoints
+        LEFT JOIN events
+        ON events.id = housepoints.event
+        
+        WHERE
+            housepoints.student = users.id
+            AND events.id = ${event['id']}
+       ORDER BY created DESC
+    `;
+
+    event['housePointCount'] = event['housePoints']
+        .reduce((acc: any, cur: any) => acc + cur['quantity'], 0);
+
+    // event passed by reference as it's an object so don't need to return anything
+}

@@ -201,7 +201,7 @@ const AddEventPopup = registerComponent(($el, id, reload) => {
 
 		await Promise.all(Object.keys(studentsInEvent).map(async userID => {
 			await core.api(`create/house-points/give`, {
-				event: eventID,
+				eventID,
 				userID,
 				quantity: studentsInEvent[userID],
 			});

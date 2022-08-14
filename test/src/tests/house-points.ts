@@ -353,7 +353,7 @@ Test.test('HPs | Making sure hps are deleted when event is deleted', async (api)
     await api(`create/house-points/give`, {
         userID,
         quantity: 1,
-        event: eventID
+        eventID: eventID
     });
 
     res = await api(`get/house-points`);

@@ -15,7 +15,7 @@
 
     --text: #ffffff;
     --nav-colour: #494949;
-    --text-light: #efefef;
+    --text-light: #dedede;
     --bg: #343434;
     --bg-accent: #505050;
     --accent: #0b700b;
@@ -50,7 +50,6 @@ html, body {
     padding: 0;
     margin: 0;
     background: var(--bg);
-    overflow-x: hidden;
 }
 
 main {
@@ -540,6 +539,7 @@ svg {
     top: 110%;
     left: calc(50% - 50px + var(--offset-x));
     pointer-events: none;
+    z-index: 999999;
 }
 
 [data-label]:hover::before {
@@ -836,7 +836,7 @@ svg {
 
 .user-card .add-hp {
     display: grid;
-    grid-template-columns: 150px 1fr 50px;
+    grid-template-columns: 5fr 1fr 30px;
 }
 
 .house-point {
@@ -856,9 +856,7 @@ svg {
 }
 
 .house-point-date-time {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    display: block;
 }
 
 .house-point input[type=date] {

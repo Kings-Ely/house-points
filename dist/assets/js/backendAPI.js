@@ -53,13 +53,17 @@ export function stopSpinner (id) {
 /**
  * Connect to the API without all the checks and spinners and stuff
  * @param {string} path
- * @param {any} body
+ * @param {any} [body=null]
  * @returns {Promise<Record<string, any>>}
  */
 export async function rawAPI (path, body) {
 	return await new Promise(async (resolve) => {
 		let res;
 
+		if (typeof body !== 'object') {
+			console.error('api called with non-object body: ', body);
+			body = {};
+		}
 		body ||= {};
 		body.session = getSession();
 

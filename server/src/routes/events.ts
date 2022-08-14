@@ -1,5 +1,5 @@
 import route from "../";
-import { AUTH_ERR, generateUUID, isAdmin, isLoggedIn, userFromSession } from '../util';
+import { addHousePointsToEvent, AUTH_ERR, generateUUID, isAdmin, isLoggedIn, userFromSession } from '../util';
 import mysql from "mysql2";
 
 /**
@@ -40,29 +40,7 @@ route('get/events', async ({ query, body }) => {
     if (!user || !user.id) return AUTH_ERR;
 
     for (let i = 0; i < data.length; i++) {
-        data[i]['housePoints'] = await query`
-            SELECT
-                housepoints.id,
-                housepoints.quantity,
-                housepoints.description,
-                
-                users.id as userID,
-                users.email as studentEmail,
-                users.year as studentYear
-                
-            FROM users, housepoints
-            
-            WHERE
-                housepoints.student = users.id
-                
-                AND ((housepoints.event = ${eventID}) OR ${!eventID})
-                AND ((users.id = ${userID})           OR ${!userID})
-                
-            ORDER BY users.year DESC, users.email
-        `;
-
-        data[i]['housePointCount'] = data[i]['housePoints']
-            .reduce((acc: any, cur: any) => acc + cur['quantity'], 0);
+        await addHousePointsToEvent(query, data[i]);
 
         if (!admin) {
             for (let j = 0; j < data[i]['housePoints'].length; j++) {

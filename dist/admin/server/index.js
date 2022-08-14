@@ -38,7 +38,7 @@ async function serverStatusAndPing () {
 	let pingTimes = [];
 	let start = performance.now();
 
-	let res = await core.rawAPI`get/server/ping`;
+	let res = await core.rawAPI(`get/server/ping`);
 	if (res.status === 502) {
 		serverDown();
 		console.error('get/server/check: ', res);
@@ -53,7 +53,7 @@ async function serverStatusAndPing () {
 	pingTimes.push(performance.now() - start);
 	start = performance.now();
 
-	res = await core.rawAPI`get/server/check`;
+	res = await core.rawAPI(`get/server/check`);
 	if (res.status === 401) {
 		await core.navigate(`/?error=auth&cb=${location.href}`);
 		return;
@@ -67,7 +67,7 @@ async function serverStatusAndPing () {
 	pingTimes.push(performance.now() - start);
 	start = performance.now();
 
-	res = await core.rawAPI`get/server/performance`;
+	res = await core.rawAPI(`get/server/performance`);
 	if (res.status !== 200 || !res.ok) {
 		serverDown();
 		console.error('get/server/performance: ', res);
@@ -79,7 +79,7 @@ async function serverStatusAndPing () {
 	pingTimes.push(performance.now() - start);
 	start = performance.now();
 
-	res = await core.rawAPI`get/server/pid`;
+	res = await core.rawAPI(`get/server/pid`);
 	if (res.status !== 200 || !res.ok) {
 		serverDown();
 		console.error('get/server/pid: ', res);
@@ -91,7 +91,7 @@ async function serverStatusAndPing () {
 	pingTimes.push(performance.now() - start);
 	start = performance.now();
 
-	res = await core.rawAPI`get/server/health`;
+	res = await core.rawAPI(`get/server/health`);
 	if (res.status !== 200 || !res.ok) {
 		serverDown();
 		console.error('get/server/performance: ', res);
@@ -145,7 +145,7 @@ function showServerStats () {
 async function activeSessions () {
 	SelectableList('#sessions', {
 		name: 'Active Sessions (Users currently logged in)',
-		items: (await core.rawAPI`get/sessions/active`)['data'],
+		items: (await core.rawAPI(`get/sessions/active`))['data'],
 		uniqueKey: 'id',
 		searchKey: 'email',
 		selected: selectedSessions,
@@ -188,8 +188,8 @@ async function deleteSelectedSessions () {
 		return;
 	}
 
-	for (let session of selectedSessions) {
-		await core.api`delete/sessions/with-id/${session}`;
+	for (let sessionID of selectedSessions) {
+		await core.api(`delete/sessions`, { sessionID });
 	}
 
 	await activeSessions();
@@ -206,7 +206,7 @@ $killServerButton.onclick = async () => {
 
 	await core.showSpinner();
 
-	await core.api`delete/server`;
+	await core.api(`delete/server`);
 
 	location.reload();
 }
@@ -230,7 +230,7 @@ $restartServerButton.onclick = async () => {
 
 	await core.showSpinner();
 
-	let res = await core.api`delete/server`;
+	let res = await core.api(`delete/server`);
 	if (res.status !== 200 || !res.ok) {
 		await core.showError('Failed to stop server');
 		return;

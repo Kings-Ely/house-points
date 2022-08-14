@@ -106,14 +106,14 @@ route('get/house-points', async ({ query, body }) => {
  * Gives a house point to the student with that userID
  *
  * @param {string} description - description of house point
- * @param {string} event - id of event house points should be associated with
+ * @param {string} eventID - id of event house points should be associated with
  * @param description
  * @param event
  */
 route('create/house-points/give', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userID='', description='', event='', quantity=1 } = body;
+    const { userID='', description='', eventID='', quantity=1 } = body;
 
     let student = await userFromID(query, userID);
     if (!student) return `Student with ID '${userID}' not found`;
@@ -126,6 +126,29 @@ route('create/house-points/give', async ({ query, body }) => {
         return `Quantity must be at most ${MAX_HOUSE_POINTS}`;
     }
 
+    if (eventID) {
+        let eventData = await query`
+            SELECT *
+            FROM events
+            WHERE events.id = ${eventID}
+        `;
+        if (!eventData.length) {
+            return `Event with ID '${eventID}' not found`;
+        }
+
+        eventData = await query`
+            SELECT *
+            FROM users, housepoints, events
+            WHERE users.id = housepoints.student
+                AND housepoints.event = events.id
+                AND users.id = ${userID}
+                AND events.id = ${eventID}
+        `;
+        if (eventData.length > 0) {
+            return `Student already in event`;
+        }
+    }
+
     const id = await generateUUID();
 
     await query`
@@ -134,8 +157,8 @@ route('create/house-points/give', async ({ query, body }) => {
             ${id},
             ${userID},
             ${quantity},
-            ${event},
-            ${description || ''},
+            ${eventID},
+            ${description},
             'Accepted',
             CURRENT_TIMESTAMP
         )
@@ -309,6 +332,30 @@ route('update/house-points/quantity', async ({ query, body }) => {
 
 /**
  * @admin
+ * Updates the description of a house point
+ *
+ * @param housePointID
+ * @param {int} description
+ */
+route('update/house-points/description', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
+
+    const { housePointID: id='', description='' } = body;
+
+    const queryRes = await query<mysql.OkPacket>`
+        UPDATE housepoints
+        SET description = ${description}
+        WHERE id = ${id}
+    `;
+
+    if (!queryRes.affectedRows) return {
+        status: 406,
+        error: `No house point found with ID '${id}'`
+    };
+});
+
+/**
+ * @admin
  * Updates the creation time of the house point
  * @param housePointID
  * @param {int} timestamp
@@ -325,7 +372,7 @@ route('update/house-points/created', async ({ query, body }) => {
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE housepoints
-        SET created = ${timestamp}
+        SET created = FROM_UNIXTIME(${timestamp})
         WHERE id = ${id}
     `;
 

@@ -45,7 +45,7 @@ import './routes/server';
 import './routes/house-points';
 import './routes/events';
 import './routes/session';
-import './routes/awardTypes';
+import './routes/award-types';
 import './routes/awards';
 
 function startServer () {

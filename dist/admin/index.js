@@ -1,19 +1,14 @@
 import * as core from "../assets/js/main.js";
-import StudentEmailInputWithIntellisense from "../assets/js/components/StudentEmailInputWithIntellisense.js";
 import HousePoint from "../assets/js/components/HousePoint.js";
 
-const $addHpReason = document.getElementById('add-hp-reason');
 const $pendingHPs = document.getElementById('pending');
 const $numPendingHPs = document.getElementById('num-pending');
 // gets replaced with input element once loaded
-let $addHPName = document.getElementById('add-hp-name-inp');
-const $addHPSubmit = document.getElementById('add-hp-submit');
 window.userPopupFromID = core.userPopupFromID;
 
 (async () => {
     await core.init('..', true, true);
 
-    $addHPName = StudentEmailInputWithIntellisense($addHPName);
 
     await main();
 })();
@@ -69,29 +64,3 @@ async function main () {
 
     core.reloadDOM();
 }
-
-$addHPSubmit.onclick = async () => {
-
-    if (!$addHpReason.value) {
-        await core.showError('Reason required');
-        return;
-    }
-
-    if (!$addHPName.value) {
-        await core.showError('Name required');
-        return;
-    }
-
-    const codeRes = await core.api`get/users/code-from-name/${$addHPName.value}`;
-
-    if (!codeRes.ok || !codeRes.code) {
-        // error automatically shown
-        return;
-    }
-
-    await core.api`create/house-points/give/${codeRes.code}/1?description=${$addHpReason.value}`;
-
-    $addHpReason.value = '';
-
-    await main();
-};

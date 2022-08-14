@@ -13,7 +13,7 @@ import './tests/self';
 import './tests/users';
 import './tests/events';
 import './tests/house-points';
-import './tests/awardTypes';
+import './tests/award-types';
 import './tests/awards';
 
 const flags = commandLineArgs([

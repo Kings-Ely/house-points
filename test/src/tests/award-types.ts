@@ -118,7 +118,7 @@ Test.test('Award  Types | Updating name', async (api) => {
     }
 
     res = await api(`update/award-types/name`, {
-        newName: 'House Tie 2',
+        name: 'House Tie 2',
         awardTypeID: res.data?.[0]?.id
     });
     if (res.ok !== true || res.status !== 200) {
@@ -134,7 +134,7 @@ Test.test('Award  Types | Updating name', async (api) => {
 
     res = await api(`update/award-types/name`, {
         session: sessionID,
-        newName: 'House Tie',
+        name: 'House Tie',
         awardTypeID: res.data?.[0]?.id
     });
     if (res.ok || res.status !== 401) {

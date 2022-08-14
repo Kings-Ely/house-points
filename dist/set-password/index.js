@@ -1,4 +1,5 @@
 import * as core from "../assets/js/main.js";
+import { escapeHTML } from "../assets/js/main.js";
 
 const
 	$password = document.getElementById('password'),
@@ -19,9 +20,8 @@ const
 	const s = decodeURIComponent(core.GETParam('s'));
 
 	await core.eraseCookie(core.COOKIE_SESSION);
-	await core.eraseCookie(core.ALT_COOKIE_KEY);
 
-	const user = await core.api`get/users/from-session/${s}`;
+	const user = await core.api(`get/users`, { sessionID: s });
 
 	if (!user.ok) {
 		await core.navigate(`../?error=auth`);
@@ -35,9 +35,9 @@ const
 function showChangePassword (user) {
 	document.getElementById('content').style.display = 'block';
 	document.getElementById('email').innerHTML = `
-		${user.email.split('@')[0]}
+		${escapeHTML(user.email.split('@')[0])}
 		<span style="color: var(--text-v-light)">
-			@${user.email.split('@')[1]}
+			@${escapeHTML(user.email.split('@')[1])}
 		</span>
 	`;
 }
@@ -62,7 +62,10 @@ $submit.addEventListener('click', async () => {
 		return;
 	}
 
-	const res = await core.api`update/users/password/${s}/${password}`;
+	const res = await core.api(`update/users/password`,  {
+		sessionID: s,
+		password
+	});
 
 	if (res.ok) {
 		await core.logoutAction();

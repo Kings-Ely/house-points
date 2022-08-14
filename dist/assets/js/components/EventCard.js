@@ -2,6 +2,8 @@
 import {registerComponent} from "./components.js";
 import * as core from "../main.js";
 import StudentEmailInputWithIntellisense from "./StudentEmailInputWithIntellisense.js";
+import HousePoint from "./HousePoint.js";
+import { inlineComponent } from "../main.js";
 
 /** @typedef {{
  * 		id: string,
@@ -10,8 +12,6 @@ import StudentEmailInputWithIntellisense from "./StudentEmailInputWithIntellisen
  * 		description: string,
  * 		studentEmail: string
  * }} Event */
-
-window.userPopup = core.userPopup;
 
 /**
  * @param {El} $el
@@ -51,7 +51,7 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 		}
 
 		await core.api(`create/house-points/give`, {
-			event: event['id'],
+			eventID: event['id'],
 			userID,
 			quantity: 1
 		});
@@ -67,10 +67,18 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 		await hardReload();
 	};
 
-	window[`_EventCard${id}__changeName`] = async (eventID, value) => {
+	window[`_EventCard${id}__changeName`] = async (value) => {
 		await core.api(`update/events/name`, {
-			eventID,
+			eventID: event.id,
 			name: value
+		});
+		await hardReload();
+	};
+
+	window[`_HousePoint${id}__changeTime`] = async (value) => {
+		await core.api(`update/events/time`, {
+			eventID: event.id,
+			time: new Date(value).getTime()/1000
 		});
 		await hardReload();
 	};
@@ -86,15 +94,21 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 					${admin ? `
 						<input
 							value="${event.name}"
-							onchange="_EventCard${id}__changeName('${event.id}', this.value)"
+							onchange="_EventCard${id}__changeName(this.value)"
 							class="editable-text event-title-editable"
 						>
 					` : `
 						${event.name}
 					`}
 				</h1>
-				<p>
-					${ago} (${date})
+				<p data-label="${ago}">
+					${admin ? `
+		                <input
+		                    type="date"
+		                    value="${core.formatTimeStampForInput(event.time)}"
+		                    onchange="_HousePoint${id}__changeTime(this.value)"
+		                >
+					` : date}
 				</p>
 				<p style="font-size: 1.2em">
 					${event.description}
@@ -103,31 +117,23 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 					<h2>
 						${event['housePointCount']} House Points Awarded
 					</h2>
-					${event['housePoints'].map(point => `
-						<div class="hp">
-							<button
-								onclick="userPopup('${point.studentEmail}')"
-							>
-								${point.studentEmail || '???'}
-							</button>
-							${admin ? `
-								<input 
-									type="number"
-									onchange="_EventCard${id}__changeHpQuantity('${point.id}', this.value)"
-									value="${point['quantity']}"
-									style="width: 40px; font-size: 15px"
-								>
-								<button
-								   data-label="Delete house points"
-									onclick="_EventCard${id}__deleteStudent('${point['id']}')"
-									svg="bin.svg"
-									class="icon small"
-								></button>
-							` : `
-								(${point['quantity']})
-							`}
-						</div>
-					`).join('')}
+					${event['housePoints'].map(point => inlineComponent(
+						HousePoint, point, hardReload, {
+							admin,
+							showBorderBottom: point === event['housePoints'][event['housePoints'].length - 1],
+							showEmail: true,
+							showReason: true,
+							allowEventReason: false,
+							showNumPoints: true,
+							showDate: false,
+							showStatusHint: false,
+							showStatusIcon: true,
+							showDeleteButton: true,
+							showPendingOptions: false,
+							reasonEditable: true,
+							pointsEditable: true,
+							dateEditable: false
+					})).join('')}
 					
 					${admin ? `
 						<div style="margin: 20px 0">
@@ -145,6 +151,13 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 				</div>
 			</div>
 		`;
+
+		core.asAdmin(() => {
+			$addStudentToEvent = StudentEmailInputWithIntellisense(
+				`#event-card-${id} .add-student-to-event`, 'Add student by email...');
+		});
+
+		core.reloadDOM();
 	}
 
 	async function hardReload () {
@@ -155,12 +168,7 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 		}
 		event = newEvent;
 		render();
-		core.reloadDOM();
 
-		core.asAdmin(() => {
-			$addStudentToEvent = StudentEmailInputWithIntellisense(
-				`#event-card-${id} .add-student-to-event`, 'Add student by email...');
-		});
 	}
 
 	hardReload().then();

@@ -23,7 +23,8 @@ window.userPopupFromID = core.userPopupFromID;
 
 (async () => {
     await core.init('../..', true, true);
-    await core.preloadSVGs('star-filled.svg', 'star-empty.svg', 'bin.svg', 'circle-up-arrow.svg', 'circle-down-arrow.svg', 'plus.svg');
+    await core.preloadSVGs('star-filled.svg', 'star-empty.svg', 'bin.svg', 'circle-up-arrow.svg',
+        'circle-down-arrow.svg', 'plus.svg', 'unselected-checkbox.svg');
 
     await showStudentsList();
 })();

@@ -25,30 +25,39 @@ async function refresh () {
 }
 
 async function awardTypeUpdateName (id, name) {
-	await core.api`update/award-types/name/${id}/${name}`;
+	await core.api(`update/award-types/name`, {
+		awardTypeID: id,
+		name
+	});
 	await refresh();
 }
 
-async function awardTypeUpdateDesc (id, name) {
-	await core.api`update/award-types/description/${id}/${name}`;
+async function awardTypeUpdateDesc (awardTypeID, description) {
+	await core.api(`update/award-types/description`, {
+		awardTypeID,
+		description
+	});
 	await refresh();
 }
 
 async function awardTypeUpdateRequired (id, value) {
-	await core.api`update/award-types/hps-required/${id}/${value}`;
+	await core.api(`update/award-types/hps-required`, {
+		awardTypeID: id,
+		quantity: parseInt(value)
+	});
 	await refresh();
 }
 
-async function awardTypeDelete (id) {
+async function awardTypeDelete (awardTypeID) {
 	if (!confirm('Are you sure you want to delete this award type?')) {
 		return;
 	}
-	await core.api`delete/award-types/with-id/${id}`;
+	await core.api(`delete/award-types`, { awardTypeID });
 	await refresh();
 }
 
 async function awardTypeList () {
-	const { data } = await core.api`get/award-types`;
+	const { data } = await core.api(`get/award-types`);
 
 	// No SelectableList as there are going to be so few it's not worth it
 	$awardTypes.innerHTML = `
@@ -107,7 +116,7 @@ $awardTypeSubmit.addEventListener('click', async () => {
 	const
 		name = $awardTypeName.value,
 		description = $awardTypeDescription.value,
-		required = $awardTypeRequired.value;
+		required = parseInt($awardTypeRequired.value);
 
 	if (name.length < 3) {
 		await showError('Name must be at least 3 characters long');
@@ -119,7 +128,11 @@ $awardTypeSubmit.addEventListener('click', async () => {
 		return;
 	}
 
-	await core.api`create/award-types/${name}/${required}?description=${description}`;
+	await core.api(`create/award-types`, {
+		name,
+		description,
+		required
+	});
 
 
 	$awardTypeName.value = '';

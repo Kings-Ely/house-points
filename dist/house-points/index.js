@@ -45,7 +45,7 @@ async function showHousePointList () {
 
     SelectableList('#hps', {
         name: `House Points (${hps.length})`,
-        items: (await core.api`get/house-points`)['data'],
+        items: hps,
         uniqueKey: 'id',
         searchKey: ['studentEmail', 'description', 'eventName'],
         searchBarHint: 'user/description',

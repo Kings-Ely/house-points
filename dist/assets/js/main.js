@@ -355,10 +355,32 @@ export function CSVToArray (strData, strDelimiter) {
     return arrData;
 }
 
-export function genRandomString(len=10, charset="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") {
+export function genRandomString (len=10, charset="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") {
     let text = "";
     for (let _ = 0; _ < len; _++) {
         text += charset.charAt(Math.floor(Math.random() * charset.length));
     }
     return text;
+}
+export function formatTimeStampForInput (seconds) {
+    const date = new Date(seconds * 1000);
+    return `${date.getFullYear()}-`+
+        ("0" + (date.getMonth() + 1)).slice(-2) + '-' +
+        ("0" + date.getDate()).slice(-2);
+}
+
+/**
+ * Returns the string in HTML escaped form to prevent XSS attacks
+ * and general horribleness
+ * @param {*} unsafe
+ * @returns {*}
+ */
+export function escapeHTML (unsafe) {
+    return unsafe
+        .toString()
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }

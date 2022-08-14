@@ -69,14 +69,14 @@ route('create/award-types', async ({ query, body }) => {
 route('update/award-types/name', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { awardTypeID:id='', newName='' } = body;
+    const { awardTypeID: id='', name='' } = body;
 
     if (!id) return 'Missing parameter id';
-    if (!newName) return 'Missing parameter newName';
+    if (!name) return 'Missing parameter name';
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE awardTypes
-        SET name = ${newName}
+        SET name = ${name}
         WHERE id = ${id}
     `;
 
@@ -122,14 +122,14 @@ route('update/award-types/hps-required', async ({ query, body }) => {
 route('update/award-types/description', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { awardTypeID: id ='', newDescription='' } = body;
+    const { awardTypeID: id ='', description='' } = body;
 
     if (!id) return 'Missing parameter id';
-    if (!newDescription) return 'Missing parameter newDescription';
+    if (!description) return 'Missing parameter description';
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE awardTypes
-        SET description = ${newDescription}
+        SET description = ${description}
         WHERE id = ${id}
     `;
 

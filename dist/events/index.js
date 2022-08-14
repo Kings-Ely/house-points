@@ -72,9 +72,10 @@ function eventHTML (event) {
 		>
 			<button
 				style="text-decoration: none; font-weight: bold"
+				class="vertical-flex-center"
 			>
 				${event.name}
-				<span style="font-size: 0.6em; color: var(--text-light)">
+				<span style="font-size: 0.9em; color: var(--text-light); padding-left: 5px">
 					(${new Date(event.time*1000).toLocaleDateString()})
 				</span>
 			</button>

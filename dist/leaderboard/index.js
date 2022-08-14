@@ -1,4 +1,5 @@
 import * as core from "../assets/js/main.js";
+import { escapeHTML } from "../assets/js/main.js";
 
 // Slightly horrible with 1st, 2nd and 3rd place on the leaderboard...
 // could do an array or something but with always exactly 3 it's a bit pointless.
@@ -33,10 +34,11 @@ function showStudent (student) {
     return `
         <div class="student">
             <button onclick="userPopup('${student['email']}')">
-                ${student['email']} (Y${student['year']})
+                ${escapeHTML(student['email'])} 
+                (Y${escapeHTML(student['year'])})
             </button>
             <div>
-                ${student['accepted']}
+                ${escapeHTML(student['accepted'])}
             </div>
         </div>
     `;
@@ -81,9 +83,10 @@ function leaderboard (users) {
                 <button
                     onclick="userPopup('${users[idx]['email']}')"
                 >
-                    ${users[idx]['email'].split('@')[0]} (Y${users[idx]['year']}) 
+                    ${escapeHTML(users[idx]['email'].split('@')[0])}
+                     (Y${escapeHTML(users[idx]['year'])}) 
                     <br>
-                    <b>${users[idx]['accepted']}</b>
+                    <b>${escapeHTML(users[idx]['accepted'])}</b>
                 </button>
             `;
         }
@@ -145,7 +148,7 @@ async function yearGroups (users) {
 
 async function main (reload=true) {
     if (reload || !leaderboardData) {
-        leaderboardData = (await core.api`get/users/leaderboard`)['data'];
+        leaderboardData = (await core.api(`get/users/leaderboard`))['data'];
     }
     leaderboard(leaderboardData);
     await yearGroups(leaderboardData);
