@@ -29,7 +29,7 @@ const AddEventPopup = registerComponent(($el, id, reload) => {
 			return;
 		}
 
-		const user = await core.api`get/users/from-email/${email}`;
+		const user = await core.api(`get/users`, { email });
 
 		if (!user.ok) {
 			// error automatically shown
@@ -64,7 +64,9 @@ const AddEventPopup = registerComponent(($el, id, reload) => {
 			return;
 		}
 
-		const { data } = await core.api`get/users/batch-info/${Object.keys(studentsInEvent).join(',')}`;
+		const { data } = await core.api(`get/users/batch-info`, {
+			userIDs: Object.keys(studentsInEvent)
+		});
 
 		let html = '';
 		for (let user of data) {
@@ -182,13 +184,21 @@ const AddEventPopup = registerComponent(($el, id, reload) => {
 		}
 
 		const { id: eventID } =
-			await core.api`create/events/${$nameInp.value}/${time}?description=${$descInp.value}`;
+			await core.api(`create/events`, {
+				name: $nameInp.value,
+				time,
+				description: $descInp.value,
+			});
 
 		$nameInp.value = '';
 		$descInp.value = '';
 
 		await Promise.all(Object.keys(studentsInEvent).map(async userID => {
-			await core.api`create/house-points/give/${userID}/${studentsInEvent[userID]}?event=${eventID}`;
+			await core.api(`create/house-points/give`, {
+				event: eventID,
+				userID,
+				quantity: studentsInEvent[userID],
+			});
 		}));
 
 		studentsInEvent = {};

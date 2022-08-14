@@ -31,7 +31,7 @@ $ch = curl_init();
 /* Support for POST requests */
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     curl_setopt($ch, CURLOPT_POST, TRUE);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($_POST));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, file_get_contents('php://input'));
 }
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_HEADER, TRUE);

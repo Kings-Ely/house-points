@@ -24,7 +24,7 @@ const StudentEmailInputWithIntellisense = registerComponent((
 		$el,
 		placeholder,
 		async () => {
-			data = (await core.api`get/users`).data;
+			data = (await core.api(`get/users`)).data;
 			return data.map(user => user.email);
 		},
 		(item, search) => {

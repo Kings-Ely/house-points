@@ -1,8 +1,9 @@
 import {
+	COOKIE_ALLOW_COOKIES_KEY,
 	COOKIE_SESSION,
 	getCookie, GETParam,
 	navigate, rawAPI,
-	ROOT_PATH, setCookie,
+	ROOT_PATH, setCookie, setTheme,
 	state
 } from "./main.js";
 import { eraseCookie } from "./cookies.js";
@@ -35,7 +36,9 @@ export async function handleUserInfo (info) {
  */
 export async function reloadUserInfo () {
 	state.userInfoIsLoaded = false;
-	await handleUserInfo(await rawAPI(`get/users/from-session/${getSession()}`));
+	await handleUserInfo(await rawAPI(`get/users`, {
+		sessionID: getSession()
+	}));
 }
 
 // user auth cookie utilities
@@ -127,6 +130,7 @@ export async function logout () {
  */
 export async function logoutAction () {
 	await eraseCookie(COOKIE_SESSION);
+	await setTheme();
 	await navigate(ROOT_PATH);
 }
 
@@ -137,7 +141,7 @@ export async function logoutAction () {
  * @returns {Promise<void>}
  */
 export async function testApiCon () {
-	const res = await api`get/server/ping`
+	const res = await api(`get/server/ping`)
 		.catch(err => {
 			console.error(err);
 			if (GETParam('error') !== 'api-con') {
@@ -168,7 +172,9 @@ export async function signInAs (id, email) {
 		return;
 	}
 
-	const { sessionID } = await api`create/sessions/from-user-id/${id}`;
+	const { sessionID } = await api(`create/sessions/from-user-id`, {
+		userID: id
+	});
 
 	if (!sessionID) {
 		return;

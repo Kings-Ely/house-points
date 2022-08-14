@@ -10,15 +10,14 @@ import UserCard from "./components/UserCard.js";
  * @returns {Promise<void>}
  */
 export async function eventPopup (id) {
-	if (!(await core.api`get/events?id=${id}`)?.['data']?.[0]) {
-		console.error(`Event not found: ${id}`);
-		await core.showError('Event not found with that ID');
-		return;
-	}
-
 	FullPagePopup(document.body, inlineComponent(EventCard,
-		async () => ((await core.api`get/events?id=${id}`)?.['data']?.[0]),
-		(await core.userInfo())['admin'],
+	async () => {
+			const events = await core.api(`get/events`, {
+				eventID: id
+			});
+			return events?.['data']?.[0];
+		},
+		(await core.userInfo())['admin']
 	));
 }
 
@@ -28,14 +27,8 @@ export async function eventPopup (id) {
  * @returns {Promise<void>}
  */
 export async function userPopupFromID (id) {
-	if (!(await core.rawAPI`get/users/from-id/${id}`).ok) {
-		console.error(`User not found: ${id}`);
-		await core.showError('User not found with that ID');
-		return;
-	}
-
 	FullPagePopup(document.body, inlineComponent(UserCard,
-		async () => (await core.api`get/users/from-id/${id}`),
+		async () => (await core.api(`get/users`, { userID: id })),
 		(await core.userInfo())['admin'],
 	));
 }
@@ -46,13 +39,8 @@ export async function userPopupFromID (id) {
  * @returns {Promise<void>}
  */
 export async function userPopup (email) {
-	if (!(await core.api`get/users/from-email/${email}`).ok) {
-		await core.showError('User not found');
-		return;
-	}
-
 	FullPagePopup(document.body, inlineComponent(UserCard,
-		async () => (await core.api`get/users/from-email/${email}`),
+		async () => (await core.api(`get/users`, { email })),
 		(await core.userInfo())['admin'],
 	));
 }

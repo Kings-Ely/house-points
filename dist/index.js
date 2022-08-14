@@ -1,7 +1,6 @@
 'use strict';
 import * as core from "./assets/js/main.js";
 import FullPagePopup from "./assets/js/components/FullPagePopup.js";
-import { getSession, logoutAction, showError, showErrorFromCode } from "./assets/js/main.js";
 
 const $go = document.getElementById('go');
 const $email = document.getElementById('email');
@@ -12,11 +11,10 @@ const $password = document.getElementById('password');
 
 	if (core.GETParam('error')) {
 		await core.showErrorFromCode(core.GETParam('error'));
-		await core.sleep(1000);
 	}
 
 	if (await core.signedIn()) {
-		await logoutAction();
+		await core.logoutAction();
 	}
 })();
 
@@ -35,7 +33,9 @@ async function doLogIn () {
 		return;
 	}
 
-	const res = await core.api`create/sessions/from-login/${email}/${password}`;
+	const res = await core.api(`create/sessions/from-login`, {
+		email, password
+	});
 
 	if (res.error) {
 		return;
@@ -63,7 +63,7 @@ async function doLogIn () {
 }
 
 $go.onclick = async () => {
-	doLogIn();
+	await doLogIn();
 };
 
 document.getElementById('forgotten-password').onclick = async () => {
@@ -77,7 +77,9 @@ document.getElementById('forgotten-password').onclick = async () => {
 		return;
 	}
 
-	const res = await core.api`create/sessions/for-forgotten-password/${email}`;
+	const res = await core.api(`create/sessions/for-forgotten-password`, {
+		email
+	});
 
 	if (!res.ok || res.error) {
 		return;

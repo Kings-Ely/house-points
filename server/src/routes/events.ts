@@ -8,13 +8,13 @@ import mysql from "mysql2";
  *
  * @param {number} from - events which have a time after this timestamp
  * @param {number} to - events which have a time before this timestamp
- * @param {string} id - events which have this ID
+ * @param {string} eventID - events which have this ID
  * @param {string} userID - events which have house points which belong to this user
  */
 route('get/events', async ({ query, body }) => {
     if (!await isLoggedIn(body, query)) return AUTH_ERR;
 
-    let { id='', userID='', from=0, to=0 } = body;
+    let { eventID='', userID='', from=0, to=0 } = body;
 
     let data = await query`
         SELECT
@@ -25,7 +25,7 @@ route('get/events', async ({ query, body }) => {
             
         FROM events
         WHERE
-            ((id = ${id})          OR ${!id})
+            ((id = ${eventID})     OR ${!eventID})
             AND ((time >= ${from}) OR ${!from})
             AND ((time <= ${to})   OR ${!to})
             
@@ -55,8 +55,8 @@ route('get/events', async ({ query, body }) => {
             WHERE
                 housepoints.student = users.id
                 
-                AND ((housepoints.event = ${id}) OR ${!id})
-                AND ((users.id = ${userID})      OR ${!userID})
+                AND ((housepoints.event = ${eventID}) OR ${!eventID})
+                AND ((users.id = ${userID})           OR ${!userID})
                 
             ORDER BY users.year DESC, users.email
         `;

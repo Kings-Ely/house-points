@@ -1,10 +1,14 @@
-import { API_ROOT, showError, waitForReady, state } from "./main.js";
+import { API_ROOT, showError, waitForReady, state, getSession } from "./main.js";
+
+let spinnerQueue = [];
+let spinnerFrameID = 0;
+
 // Spinner
 
 /**
  * Adds a spinner to the page.
  * Must wait for the DOM to be ready first.
- * @returns {Promise<HTMLElement>}
+ * @returns {Promise<int>}
  */
 export async function showSpinner () {
 	await waitForReady();
@@ -12,7 +16,11 @@ export async function showSpinner () {
 	document.body.style.cursor = 'progress';
 
 	const current = document.querySelector('.spinner');
-	if (current) current.remove();
+	if (current) {
+		spinnerFrameID++
+		spinnerQueue.push(spinnerFrameID);
+		return spinnerFrameID;
+	}
 
 	const loader = document.createElement('div');
 	loader.classList.add('spinner');
@@ -20,68 +28,73 @@ export async function showSpinner () {
 
 	document.body.appendChild(loader);
 
-	return loader;
+	return spinnerFrameID;
 }
 
 /**
  * Hides the spinner by removing it from the DOM
- * @param {HTMLElement} $spinner
+ * @param {int} id
  */
-export function stopSpinner ($spinner) {
-	state.currentlyShowingLoadingAnim = false;
-	document.body.removeChild($spinner);
-	document.body.style.cursor = 'default';
+export function stopSpinner (id) {
+	if (spinnerQueue.includes(id)) {
+		spinnerQueue.splice(spinnerQueue.indexOf(id), 1);
+	}
+
+	if (spinnerQueue.length > 0) return;
+	setTimeout(() => {
+		if (spinnerQueue.length === 0) {
+			const current = document.querySelector('.spinner');
+			state.currentlyShowingLoadingAnim = false;
+			document.body.removeChild(current);
+			document.body.style.cursor = 'default';
+		}
+	}, 200);
 }
 
 
 /**
  * Connect to the API without all the checks and spinners and stuff
- * @param {string|TemplateStringsArray} path
- * @param {*} args
+ * @param {string} path
+ * @param {any} body
  * @returns {Promise<Record<string, any>>}
  */
-export async function rawAPI (path, ...args) {
+export async function rawAPI (path, body) {
+	return await new Promise(async (resolve) => {
+		let res;
 
-	if (typeof path !== 'string') {
-		path = path.reduce((acc, cur, i) => {
-			if (typeof args[i] === 'object') {
-				args[i] = JSON.stringify(args[i]);
-			}
-			let paramStr = (args[i] || '').toString();
-			return acc + cur + paramStr;
-		}, '');
-	}
+		body ||= {};
+		body.session = getSession();
 
-	if (path[0] === '/') {
-		path = path.substring(1);
-	}
+		try {
+			res = await fetch(`${API_ROOT}/?${path}`, {
+				method: 'POST',
+				mode: 'cors',
+				cache: 'no-cache',
+				redirect: 'follow',
+				body: JSON.stringify(body)
+			}).catch((e) => {
+				resolve({
+					error: `Failed to fetch ${path}: ${e}`
+				});
+			});
+		} catch (e) {
+			resolve({
+				error: `Failed to fetch ${path}: ${e}`
+			});
+		}
 
-	// fetch
-	let res;
-	let asJSON;
-	try {
-		res = await fetch(`${API_ROOT}/?${path}`, {
-			method: 'GET',
-			mode: 'cors',
-			cache: 'no-cache',
-			redirect: 'follow',
-			credentials: 'include'
-		}).catch(console.error);
-	} catch (e) {
-		return {
-			error: `Failed to fetch ${path}`
-		};
-	}
+		let asJSON;
+		try {
+			asJSON = await res.json();
+		} catch (e) {
+			asJSON = {
+				error: 'Failed to parse response as JSON'
+			};
+		}
 
-	try {
-		asJSON = await res.json();
-	} catch (e) {
-		asJSON = {
-			error: 'Failed to parse response as JSON'
-		};
-	}
+		resolve(asJSON);
+	});
 
-	return asJSON;
 }
 
 /**
@@ -89,61 +102,37 @@ export async function rawAPI (path, ...args) {
  * but only show the spinner if no other requests are still pending,
  * which would mean the spinner is already being shown.
 
- * @param {string|TemplateStringsArray} path
- * @param {*} args
+ * @param {string} path
+ * @param {*} [body={}]
  * @returns {Promise<Record<string, any>>}
  */
-export async function api (path, ...args) {
+export async function api (path, body=null) {
+	let spinnerID = await showSpinner();
 
-	if (typeof path !== 'string') {
-		path = path.reduce((acc, cur, i) => {
-			if (typeof args[i] === 'object') {
-				args[i] = JSON.stringify(args[i]);
-			}
-			let paramStr = (args[i] || '').toString();
-			return acc + cur + paramStr;
-		}, '');
+	if (typeof body !== 'object') {
+		console.error('api called with non-object body: ', body);
+		body = {};
 	}
-
-	if (path[0] === '/') {
-		path = path.substring(1);
-	}
-
-	let shouldHideAtEnd = false;
-	let loader;
-	if (!state.currentlyShowingLoadingAnim) {
-		// pre-fetch
-		state.currentlyShowingLoadingAnim = true;
-		shouldHideAtEnd = true;
-
-		loader = await showSpinner();
-	}
-
-	if (path[0] === '/') {
-		path = path.substring(1);
-	}
+	body ||= {};
+	body.session = getSession();
 
 	// fetch
-	// include '/' in request as otherwise you get redirected, which takes lots of time
+	// include '/' in request as otherwise you get redirected, which takes more time
 	const res = await fetch(`${API_ROOT}/?${path}`, {
-		method: 'GET',
+		method: 'POST',
 		mode: 'cors',
 		cache: 'no-cache',
 		redirect: 'follow',
-		credentials: 'include'
+		body: JSON.stringify(body)
 	}).catch(async err => {
 		console.error(`Error with API request (${path}): `, err);
-		if (shouldHideAtEnd) {
-			stopSpinner(loader);
-		}
+		stopSpinner(spinnerID);
 		await showError('Something went wrong!');
 	});
 
 	if (res.status === 404) {
 		await showError('Something went wrong! (404)');
-		if (shouldHideAtEnd) {
-			stopSpinner(loader);
-		}
+		stopSpinner(spinnerID);
 		return {};
 	}
 
@@ -166,9 +155,7 @@ export async function api (path, ...args) {
 		await showError('Something went wrong!');
 	}
 
-	if (shouldHideAtEnd) {
-		stopSpinner(loader);
-	}
+	stopSpinner(spinnerID);
 
 	return asJSON;
 }

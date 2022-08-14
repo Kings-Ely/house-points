@@ -65,7 +65,7 @@ window.eventPopup = core.eventPopup;
 async function reloadUserInfoFromEmail () {
     const email = core.GETParam('email');
 
-    const info = await core.api`get/users/from-email/${email}`;
+    const info = await core.api(`get/users`, { email });
 
     await core.handleUserInfo(info);
 }
@@ -190,7 +190,11 @@ document.getElementById('submit-hp').onclick = async () => {
 
     for (let reason of $hpReasonInp.value.split('\n')) {
         if (!reason) continue;
-        await core.api`create/house-points/request/${await core.userID()}/1?description=${reason}`;
+        await core.api(`create/house-points/request`, {
+            userID: await core.userID(),
+            description: reason,
+            quantity: 1
+        });
     }
     await reloadHousePoints();
     $hpReasonInp.value = '';

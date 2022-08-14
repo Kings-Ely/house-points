@@ -70,7 +70,6 @@ route('get/users', async ({ query, body }) => {
             FROM users
             WHERE email = ${email}
         `;
-
         if (!data.length) return {
             status: 406,
             error: 'User not found'

@@ -87,17 +87,27 @@ const HousePoint = registerComponent((
 	window[`_HousePoint${id}__userPopup`] = core.userPopup;
 
 	window[`_HousePoint${id}__changeHpQuantity`] = async (value) => {
-		await core.api`update/house-points/quantity/${hp.id}/${value}`;
+		await core.api(`update/house-points/quantity`, {
+			housePointID: hp.id,
+			quantity: value
+		});
 		reload();
 	};
 
 	window[`_HousePoint${id}__changeDescription`] = async (value) => {
-		await core.api`update/house-points/description/${hp.id}/${value}`;
+		await core.api(`update/house-points/description`, {
+			housePointID: hp.id,
+			description: value
+		});
 		reload();
 	};
 
 	window[`_HousePoint${id}__changeDate`] = async (value) => {
-		await core.api`update/house-points/date/${hp.id}/${value}`;
+		// TODO: get the right date format for this api
+		await core.api(`update/house-points/created`, {
+			housePointID: hp.id,
+			timestamp: value
+		});
 		reload();
 	};
 
@@ -105,19 +115,26 @@ const HousePoint = registerComponent((
 		if (confirm('Are you sure you want to delete this house point?')) {
 			return;
 		}
-		await core.api`delete/house-points/with-id/${hp.id}`;
+		await core.api(`delete/house-points`, {
+			housePointID: hp.id
+		});
 		reload()
 	};
 
 	window[`_HousePoint${id}__accept`] = async () => {
-		await core.api`update/house-points/accepted/${hp.id}`;
+		await core.api(`update/house-points/accepted`, {
+			housePointID: hp.id
+		});
 		reload();
 	}
 
 	window[`_HousePoint${id}__reject`] = async () => {
 		const reject = prompt('Enter a reason for rejecting this house point');
 		if (!reject) return;
-		await core.api`update/house-points/accepted/${hp.id}?reject=${reject}`;
+		await core.api(`update/house-points/accepted`, {
+			housePointID: hp.id,
+			reject
+		});
 		reload();
 	}
 

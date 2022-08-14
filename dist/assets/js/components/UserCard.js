@@ -119,7 +119,11 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 					return;
 				}
 
-				await core.api`create/house-points/give/${user.id}/${quantity}?description=${description}`;
+				await core.api(`create/house-points/give`, {
+					userID: user.id,
+					quantity,
+					description
+				});
 				await hardReload();
 			});
 		}

@@ -46,7 +46,6 @@ export const state = {
     $error: null,
     currentErrorMessageID: 0,
     currentlyShowingErrorMessageIDs: [],
-    currentlyShowingLoadingAnim: false,
     userInfoCallbacks: [],
     userInfoJSON: null,
     isSignedIn: false,
@@ -56,10 +55,9 @@ export const state = {
     inlineComponentIndex: 0,
 }
 
-// everything which pollutes the global namespace
+// polluting the global namespace
 window.logout = logout;
 window.signInAs = signInAs;
-
 
 // for making relative dates
 /** @type {{[ k: 'month'|'hour'|'year'|'day'|'minute'|'second' ]: number}} */
@@ -101,7 +99,9 @@ export async function init (rootPath, requireLoggedIn=false, requireAdmin=false,
     }
 
     if (getSession()) {
-        await handleUserInfo (await rawAPI(`get/users/from-session/${getSession ()}`));
+        await handleUserInfo(await rawAPI(`get/users`, {
+            sessionID: getSession()
+        }));
     } else {
         await handleUserInfo({});
     }

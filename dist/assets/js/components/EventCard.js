@@ -25,8 +25,8 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 
 	let $addStudentToEvent;
 
-	window[`_EventCard${id}__deleteStudent`] = async (id) => {
-		await core.api`delete/house-points/with-id/${id}`;
+	window[`_EventCard${id}__deleteStudent`] = async (housePointID) => {
+		await core.api(`delete/house-points`, { housePointID });
 		await hardReload();
 	};
 
@@ -43,25 +43,35 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 			return;
 		}
 
-		const { id: userID } = await core.rawAPI`get/users/from-email/${email}`;
+		const { id: userID } = await core.rawAPI(`get/users`, { email });
 
 		if (!userID) {
 			await core.showError('That user does not exist');
 			return;
 		}
 
-		await core.api`create/house-points/give/${userID}/1?event=${event['id']}`;
+		await core.api(`create/house-points/give`, {
+			event: event['id'],
+			userID,
+			quantity: 1
+		});
 
 		await hardReload();
 	};
 
-	window[`_EventCard${id}__changeHpQuantity`] = async (id, value) => {
-		await core.api`update/house-points/quantity/${id}/${value}`;
+	window[`_EventCard${id}__changeHpQuantity`] = async (housePointID, value) => {
+		await core.api(`update/house-points/quantity`, {
+			housePointID,
+			quantity: value
+		});
 		await hardReload();
 	};
 
-	window[`_EventCard${id}__changeName`] = async (id, value) => {
-		await core.api`update/events/change-name/${id}/${value}`;
+	window[`_EventCard${id}__changeName`] = async (eventID, value) => {
+		await core.api(`update/events/name`, {
+			eventID,
+			name: value
+		});
 		await hardReload();
 	};
 

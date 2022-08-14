@@ -96,15 +96,16 @@ export default async function (req: IncomingMessage, res: ServerResponse, query:
 
     try {
 
-        const body = await getBody(req).catch(e => {
-            error`Caught Error in Route '${path}' getting req body:\n     ${e} \n    Traceback:\n${e.stack}`;
-            res.writeHead(500);
-            res.end(JSON.stringify({
-                ok: false,
-                status: 500,
-                error: 'Internal server error',
-            }));
-        });
+        const body = await getBody(req)
+            .catch(e => {
+                error`Caught Error in Route '${path}' getting req body:\n     ${e} \n    Traceback:\n${e.stack}`;
+                res.writeHead(500);
+                res.end(JSON.stringify({
+                    ok: false,
+                    status: 500,
+                    error: 'Internal server error',
+                }));
+            });
 
         if (typeof body === 'string' || !body) {
             res.writeHead(400);
