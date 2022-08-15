@@ -1,0 +1,21 @@
+#!/bin/bash
+
+start=`date +%s`
+
+(
+  cd server || exit;
+  webpack;
+)
+
+(
+  cd test || exit;
+  webpack;
+)
+
+node --enable-source-maps test -v --deploy
+
+end=`date +%s.%N`
+
+runtime=$( echo "$end - $start" | bc -l )
+
+echo "Deployment total time: $runtime"
