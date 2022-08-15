@@ -6,4 +6,4 @@ COPY . .
 
 EXPOSE 4464
 
-CMD [ "node", "--enable-source-maps", "index.js", "-cv" ]
+CMD [ "node", "--enable-source-maps", "index.js" ]

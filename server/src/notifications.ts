@@ -1,7 +1,6 @@
 import mailer from 'nodemailer';
 import { queryFunc } from "./sql";
-import log, { error, warning } from "./log";
-import c from 'chalk';
+import log from "./log";
 import { limitStr } from "./util";
 
 let transporter:  mailer.Transporter | undefined;
@@ -18,8 +17,8 @@ function setUpTransporter () {
         }
     });
 
-    log(c.green(`Set up Gmail mailer`));
-    log`Gmail user: ${process.env.GMAIL_USER}`;
+    log.log`Set up Gmail mailer`;
+    log.log`Gmail user: ${process.env.GMAIL_USER}`;
 }
 
 async function mail ({
@@ -39,8 +38,8 @@ async function mail ({
 }): Promise<true | string> {
 
     if (process.env.ALLOW_MAIL !== '1') {
-        warning`Cannot send emails because ALLOW_MAIL is not set`;
-        log`Tried to send email to ${to} '${subject}' with html: ${limitStr(html)}`;
+        log.warning`Cannot send emails because ALLOW_MAIL is not set`;
+        log.log`Tried to send email to ${to} '${subject}' with html: ${limitStr(html)}`;
         return true;
     }
 
@@ -76,16 +75,16 @@ async function mail ({
             attachments
         }, (err, info) => {
             if (err) {
-                error`Error sending email: ${JSON.stringify(err)}`;
+                log.error`Error sending email: ${JSON.stringify(err)}`;
                 reject(`Error sending email: ${JSON.stringify(err)}`);
                 return;
             }
             if (!info['accepted'].includes(to)) {
                 reject(`Email failed to send`);
-                warning`Sent email to ${to} failed: ${JSON.stringify(info)}`;
+                log.warning`Sent email to ${to} failed: ${JSON.stringify(info)}`;
                 return;
             }
-            log`Sent email to ${to}`;
+            log.log`Sent email to ${to}`;
             resolve(true);
         });
     });

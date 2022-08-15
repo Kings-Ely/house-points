@@ -27,6 +27,23 @@ export function limitStr (str:string, maxLength=50) {
 }
 
 /**
+ * Reduces the parameters to a template string (tag) function into a single string
+ */
+export function tagFuncParamsToString (msg: string | TemplateStringsArray, params: any[]): string {
+    if (typeof msg === 'string') {
+        return msg;
+    }
+
+    return msg.reduce((acc, cur, i) => {
+        if (typeof params[i] === 'object') {
+            params[i] = JSON.stringify(params[i]);
+        }
+        let paramStr = (params[i] || '').toString();
+        return acc + cur + paramStr;
+    }, '');
+}
+
+/**
  * Checks to see if an object is JSON-parsable.
  * Note that this is expensive for large JSON strings
  */

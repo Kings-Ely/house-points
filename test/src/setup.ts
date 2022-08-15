@@ -3,7 +3,7 @@ import fs from 'fs';
 import now from 'performance-now';
 import c from 'chalk';
 import { config } from 'dotenv';
-import { CommandLineOptions } from "command-line-args";
+import type { CommandLineOptions } from "command-line-args";
 import { exec } from "child_process";
 
 async function startServer (flags: CommandLineOptions) {
@@ -16,12 +16,13 @@ async function startServer (flags: CommandLineOptions) {
 
 			console.log(c.green(`Built server in ${(now() - t).toPrecision(4)}ms`));
 
-			exec(`node --enable-source-maps server -v`, (err, out, er) => {
+			exec(`node --enable-source-maps server --logTo=test.log --logLevel=4 --dbLogLevel=2`, (err, out, er) => {
 				if (err) reject(err);
 				if (er) reject(er);
 			});
 
-			setTimeout(resolve, 500);
+			// wait for the server to start
+			setTimeout(resolve, 100);
 		});
 	});
 }

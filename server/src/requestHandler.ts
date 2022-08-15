@@ -1,5 +1,5 @@
 import { IncomingMessage, ServerResponse } from "http";
-import { error, verbose, warning } from "./log";
+import log from "./log";
 import now from "performance-now";
 import type { queryFunc } from "./sql";
 
@@ -10,8 +10,6 @@ export interface IHandlerArgs {
     body: Record<string, any>;
     query: queryFunc;
 }
-
-export type Cookies = Record<string, string>;
 
 export type Handler = (args: IHandlerArgs) => Promise<
     IJSONResponse
@@ -47,7 +45,7 @@ function getBody (req: IncomingMessage):  Promise<Record<any, any> | string> {
             try {
                 body = JSON.parse(data);
             } catch (E) {
-                warning`Error parsing JSON data from URL ${req.url} with JSON ${data}: ${E}`;
+                log.warning`Error parsing JSON data from URL ${req.url} with JSON ${data}: ${E}`;
                 resolve('Cannot parse body');
                 return;
             }
@@ -59,7 +57,7 @@ function getBody (req: IncomingMessage):  Promise<Record<any, any> | string> {
 
 export default async function (req: IncomingMessage, res: ServerResponse, query: queryFunc, routes: Record<string, Handler>) {
 
-    verbose`Incoming: ${req.method} ${req.url}`;
+    log.verbose`Incoming: ${req.method} ${req.url}`;
     const start = now();
 
     // set response headers
@@ -81,7 +79,7 @@ export default async function (req: IncomingMessage, res: ServerResponse, query:
     }
 
     if (!path || !(path in routes)) {
-        warning`404: ${req.method} '${path}'`;
+        log.warning`404: ${req.method} '${path}'`;
         res.writeHead(404);
         res.end(JSON.stringify({
             status: 404,
@@ -98,7 +96,7 @@ export default async function (req: IncomingMessage, res: ServerResponse, query:
 
         const body = await getBody(req)
             .catch(e => {
-                error`Caught Error in Route '${path}' getting req body:\n     ${e} \n    Traceback:\n${e.stack}`;
+                log.error`Caught Error in Route '${path}' getting req body:\n     ${e} \n    Traceback:\n${e.stack}`;
                 res.writeHead(500);
                 res.end(JSON.stringify({
                     ok: false,
@@ -126,7 +124,7 @@ export default async function (req: IncomingMessage, res: ServerResponse, query:
         };
 
         apiRes = await handler(args).catch(e => {
-            error`Caught Error in Route '${path}':\n     ${e} \n    Traceback:\n${e.stack}`;
+            log.error`Caught Error in Route '${path}':\n     ${e} \n    Traceback:\n${e.stack}`;
             res.writeHead(500);
             res.end(JSON.stringify({
                 ok: false,
@@ -139,7 +137,7 @@ export default async function (req: IncomingMessage, res: ServerResponse, query:
             status: 500,
             error: 'Internal server error',
         };
-        error`Caught Error in Route '${path}':\n     ${e} \n    Traceback:\n${e.stack}`;
+        log.error`Caught Error in Route '${path}':\n     ${e} \n    Traceback:\n${e.stack}`;
     }
 
     if (typeof apiRes === 'string') {
@@ -149,7 +147,7 @@ export default async function (req: IncomingMessage, res: ServerResponse, query:
     apiRes ||= {};
 
     if (Array.isArray(apiRes)) {
-        error`Arrays not allowed from handlers`;
+        log.error`Arrays not allowed from handlers`;
         apiRes = { status: 500 };
     }
 
@@ -174,5 +172,5 @@ export default async function (req: IncomingMessage, res: ServerResponse, query:
 
     let time = now() - start;
 
-    verbose`[${req.method}] ${time.toPrecision(2)}ms '${req.url}' => '${strResponse}'`;
+    log.verbose`[${req.method}] ${time.toPrecision(2)}ms '${req.url}' => '${strResponse}'`;
 }

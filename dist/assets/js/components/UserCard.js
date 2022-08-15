@@ -20,7 +20,7 @@ import HousePoint from "./HousePoint.js";
  * @param {() => User} getEvent getter for event data
  * @param {boolean} admin should be admin options be shown
  */
-const UserCard = registerComponent(($el, id, getUser, admin) => {
+const UserCard = registerComponent(($el, id, getUser) => {
 
 	/** @type User */
 	let user;
@@ -33,7 +33,10 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 		await core.signInAs(...args);
 	}
 
-	function render () {
+	async function render () {
+
+		const admin = core.isAdmin();
+
 		userCard.innerHTML = `
 			<h2>
 				${admin ? `
@@ -137,7 +140,7 @@ const UserCard = registerComponent(($el, id, getUser, admin) => {
 			return;
 		}
 		user = newUser;
-		render();
+		await render();
 		core.reloadDOM();
 	}
 

@@ -16,9 +16,8 @@ import { inlineComponent } from "../main.js";
 /**
  * @param {El} $el
  * @param {() => Event} getEvent getter for event data
- * @param {boolean} admin should be admin options be shown
  */
-const EventCard = registerComponent(($el, id, getEvent, admin) => {
+const EventCard = registerComponent(($el, id, getEvent) => {
 
 	/** @type Event */
 	let event;
@@ -83,7 +82,9 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 		await hardReload();
 	};
 
-	function render () {
+	async function render () {
+		
+		const admin = await core.isAdmin();
 
 		const ago = core.getRelativeTime(event.time * 1000);
 		const date = new Date(event.time * 1000).toLocaleDateString();
@@ -167,8 +168,7 @@ const EventCard = registerComponent(($el, id, getEvent, admin) => {
 			return;
 		}
 		event = newEvent;
-		render();
-
+		await render();
 	}
 
 	hardReload().then();

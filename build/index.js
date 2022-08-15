@@ -42,21 +42,19 @@ async function buildBackend () {
 async function uploadBackend () {
     console.log('Uploading backend...');
 
-    const paths = [
-        './server/index.js',
-        './server/index.js.map',
-        './server/Dockerfile',
-        './server/package.json',
-    ];
+    const paths = {
+        './server/index.js': '/index.js',
+        './server/index.js.map': '/index.js.map',
+        './server/staging.Dockerfile': '/Dockerfile',
+        './server/package.json': '/package.json',
+        './server/prod.env': '/.env',
+    };
 
-    await Promise.all(paths.map(async (path) =>
-        await upload(path, REMOTE_BACKEND_PATH)
-    ));
-
-    if (fs.existsSync('./server/prod.env')) {
-        // upload prod.env and rename it to .env
-        await upload('./server/prod.env', REMOTE_BACKEND_PATH + '/.env')
-    }
+    await Promise.all(Object.keys(paths).map(async (path) => {
+        if (fs.existsSync(path)) {
+            await upload(path, REMOTE_BACKEND_PATH + paths[path]);
+        }
+    }));
 }
 
 (async () => {

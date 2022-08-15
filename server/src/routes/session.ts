@@ -1,5 +1,5 @@
 import route from '../index';
-import { error } from '../log';
+import log from '../log';
 import { AUTH_ERR, authLvl, generateUUID, isAdmin } from '../util';
 import emailValidator from "email-validator";
 import * as notifications from '../notifications';
@@ -86,7 +86,7 @@ route('create/sessions/from-login', async ({ query, body }) => {
     if (!res.length) return 'Invalid email or password';
     if (res.length > 1) {
         // don't tell the user about this, it's a security issue
-        error`Multiple users found with email ${email}`;
+        log.error`Multiple users found with email ${email}`;
         return 'Invalid email or password';
     }
 
@@ -172,7 +172,7 @@ route('create/sessions/for-forgotten-password', async ({ query, body }) => {
     if (!res.length) return 'Invalid email';
     if (res.length > 1) {
         // don't tell the user about this, it's a security issue
-        error`Multiple users found with email '${email}'`;
+        log.error`Multiple users found with email '${email}'`;
         return 'Invalid email';
     }
     const userID = res[0].id;

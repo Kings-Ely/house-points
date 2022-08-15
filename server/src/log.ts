@@ -1,33 +1,26 @@
 import fs from 'fs';
 import c from 'chalk';
-import ErrnoException = NodeJS.ErrnoException;
+import { tagFuncParamsToString } from "./util";
+import { IFlags, query } from "./index";
+import mysql from "mysql2";
+
+export enum LogLvl {
+    NONE,
+    NO_WARN,
+    NO_INFO,
+    ALL,
+    VERBOSE
+}
 
 class Logger {
     private fileHandle?: fs.WriteStream;
-    private path_ = '';
-    public level: LogLvl = 3;
-    public useConsole = true;
-    public active = true;
+    private path = '';
+    private level: LogLvl = 3;
+    private dbLogLevel: LogLvl = 2;
+    private useConsole = true;
+    private active = true;
 
-    get path () {
-        return this.path_;
-    }
-
-    set path (path: string) {
-        this.path_ = path;
-
-        if (!fs.existsSync(path)) {
-            fs.writeFileSync(path, '');
-        }
-
-        this.fileHandle = fs.createWriteStream(path, {
-            flags: 'a'
-        });
-
-        this.log('START', new Date().toISOString());
-    }
-
-    log (type: string, ...messages: any[]): void {
+    private output (type: string, ...messages: any[]): void {
         if (!this.active) {
             return;
         }
@@ -48,121 +41,135 @@ class Logger {
         }
     }
 
-    async exit (): Promise<ErrnoException | null | undefined> {
+    private async logToDB (message: string): Promise<mysql.OkPacket | undefined> {
+        if (!query) return;
+        return await query<mysql.OkPacket>`
+            INSERT INTO logs (msg) 
+            VALUES (${message})
+        `;
+    }
+
+    /**
+     * Logs a message but only if the 'verbose' flag is set
+     */
+    verbose (msg: string | TemplateStringsArray, ...params: any[]) {
+        if (this.level < LogLvl.VERBOSE) {
+            return;
+        }
+
+        if (typeof msg === 'string') {
+            this.output(c.grey`LOG`, msg, ...params);
+            return;
+        }
+
+        const message = tagFuncParamsToString(msg, params);
+
+        if (this.dbLogLevel >= LogLvl.VERBOSE) {
+            this.logToDB(message).then();
+        }
+
+        this.output(c.grey`LOG`, message);
+    }
+
+    /**
+     * Logs a message
+     */
+    log (msg: string | TemplateStringsArray, ...params: any[]) {
+        if (this.level < LogLvl.ALL) {
+            return;
+        }
+
+        if (typeof msg === 'string') {
+            this.output(c.grey`LOG`, msg, ...params);
+            return;
+        }
+
+        const message = tagFuncParamsToString(msg, params);
+
+        if (this.dbLogLevel >= LogLvl.ALL) {
+            this.logToDB(message).then();
+        }
+
+        this.output(c.grey`LOG`, message);
+    }
+
+    /**
+     * Logs a warning
+     */
+    warning (msg: string | TemplateStringsArray, ...params: any[]) {
+        if (this.level < LogLvl.NO_INFO) {
+            return;
+        }
+
+        if (typeof msg === 'string') {
+            this.output(c.yellow`WARN`, msg + ' ' + params.join(' '));
+            return;
+        }
+
+        const message = tagFuncParamsToString(msg, params);
+
+        if (this.dbLogLevel >= LogLvl.NO_INFO) {
+            this.logToDB(message).then();
+        }
+
+        this.output(c.yellow`WARN`, message);
+    }
+
+    /**
+     * Logs a warning
+     */
+    error (msg: string | TemplateStringsArray, ...params: any[]) {
+        if (this.level < LogLvl.NO_WARN) {
+            return;
+        }
+
+        if (typeof msg === 'string') {
+            this.output(c.red`ERR`, msg + ' ' + params.join(' '));
+            return;
+        }
+
+        const message = tagFuncParamsToString(msg, params);
+
+        if (this.dbLogLevel >= LogLvl.NO_WARN) {
+            this.logToDB(message).then();
+        }
+
+        this.output(c.red`ERR`, message);
+    }
+
+    async close () {
+        this.active = false;
         return new Promise((resolve) => {
             this.fileHandle?.close(resolve);
         });
     }
-}
 
-export enum LogLvl {
-    NONE,
-    NO_WARN,
-    NO_INFO,
-    ALL,
-    VERBOSE
-}
+    setLogOptions (options: IFlags) {
+        this.level = options.logLevel;
+        this.level = options.dbLogLevel;
+        this.useConsole = !options.logTo;
+        this.path = options.logTo;
 
-const logger = new Logger;
+        if (!this.useConsole) {
+            console.log(`Logging to file: ${this.path}`);
 
-export async function close () {
-    logger.active = false;
-    return await logger.exit();
-}
+            if (!fs.existsSync(this.path)) {
+                fs.writeFileSync(this.path, '');
+            }
 
-export function setLogOptions (options: any) {
-    if ('level' in options) logger.level = options.level;
-    if ('useConsole' in options) logger.useConsole = options.useConsole;
-    if ('logTo' in options) logger.path = options.logTo;
+            this.fileHandle = fs.createWriteStream(this.path, {
+                flags: 'a'
+            });
 
-    if (options.verbose) {
-        logger.level = LogLvl.VERBOSE;
-    }
-}
-
-/**
- * Reduces the parameters to a template string function into a single string
- */
-function reduceToMsg (msg: TemplateStringsArray, params: any[]) {
-    return msg.reduce((acc, cur, i) => {
-        if (typeof params[i] === 'object') {
-            params[i] = JSON.stringify(params[i]);
+            this.output('START', new Date().toISOString());
         }
-        let paramStr = (params[i] || '').toString();
-        return acc + cur + paramStr;
-    }, '');
+    }
+
+    static instance: Logger = new Logger();
 }
 
-/**
- * Logs a message
- */
-export default function (msg: string | TemplateStringsArray, ...params: any[]) {
-    if (logger.level < LogLvl.ALL) {
-        return;
-    }
-
-    if (typeof msg === 'string') {
-        logger.log(c.grey`LOG`, msg, ...params);
-        return;
-    }
-
-    logger.log(c.grey`LOG`, reduceToMsg(msg, params));
+export function setupLogger (options: IFlags) {
+    Logger.instance.setLogOptions(options);
 }
 
-/**
- * Logs a message but only if the 'verbose' flag is set
- */
-export function verbose (msg: string | TemplateStringsArray, ...params: any[]) {
-    if (logger.level < LogLvl.VERBOSE) {
-        return;
-    }
-
-    if (typeof msg === 'string') {
-        logger.log(c.grey`LOG`, msg, ...params);
-        return;
-    }
-
-    logger.log(c.grey`LOG`, reduceToMsg(msg, params));
-}
-
-/**
- * Logs a warning
- */
-export function warning (msg: string | TemplateStringsArray, ...params: any[]) {
-    if (logger.level < LogLvl.NO_INFO) {
-        return;
-    }
-
-    if (typeof msg === 'string') {
-        logger.log(c.yellow`WARN`, msg + ' ' + params.join(' '));
-        return;
-    }
-
-    // convert the template string to a string
-    const message = msg.reduce((acc, cur, i) => {
-        return acc + cur + (params[i] || '');
-    }, '');
-
-    logger.log(c.yellow`WARN`, message);
-}
-
-/**
- * Logs a warning
- */
-export function error (msg: string | TemplateStringsArray, ...params: any[]) {
-    if (logger.level < LogLvl.NO_WARN) {
-        return;
-    }
-
-    if (typeof msg === 'string') {
-        logger.log(c.red`ERR`, msg + ' ' + params.join(' '));
-        return;
-    }
-
-    // convert the template string to a string
-    const message = msg.reduce((acc, cur, i) => {
-        return acc + cur + (params[i] || '');
-    }, '');
-
-    logger.log(c.red`ERR`, message);
-}
+export default Logger.instance;

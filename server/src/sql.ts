@@ -1,11 +1,17 @@
 import mysql from 'mysql2';
 import c from 'chalk';
 
-import log, { error, warning } from "./log";
+import log from "./log";
 import { flags } from "./index";
 
-export type queryRes = mysql.RowDataPacket[] | mysql.RowDataPacket[][] | mysql.OkPacket | mysql.OkPacket[] | mysql.ResultSetHeader;
-export type queryFunc = <Res extends queryRes = mysql.RowDataPacket[]>(queryParts: TemplateStringsArray, ...params: any[]) => Promise<Res>;
+export type queryRes = mysql.RowDataPacket[]
+    | mysql.RowDataPacket[][]
+    | mysql.OkPacket
+    | mysql.OkPacket[]
+    | mysql.ResultSetHeader;
+
+export type queryFunc = <Res extends queryRes = mysql.RowDataPacket[]>(
+    queryParts: TemplateStringsArray, ...params: any[]) => Promise<Res>;
 
 export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
 
@@ -30,17 +36,17 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
 
         con.connect((err) => {
             if (err) {
-                error`error when connecting to db: ${JSON.stringify(err)}`;
+                log.error`error when connecting to db: ${JSON.stringify(err)}`;
                 setTimeout(handleDisconnect, 500);
             }
 
-            log(c.green(`Connected to SQL server`));
+            log.log(c.green(`Connected to SQL server`));
             hasConnectedSQL = true;
         });
 
         con.on('error', (err: any) => {
             if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-                warning`Lost connection to SQL server`;
+                log.warning`Lost connection to SQL server`;
                 handleDisconnect();
             } else {
                 throw err;
@@ -72,7 +78,7 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
             }, '');
 
             if (flags.verbose) {
-                log`QUERY: ${con.escape(query)} ${JSON.stringify(params)}`;
+                log.log`QUERY: ${con.escape(query)} ${JSON.stringify(params)}`;
             }
 
             // if it's an array, add all the elements of the array in place as params
@@ -84,7 +90,7 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
 
             con.query(query, params, (err, result) => {
                 if (err) {
-                    error(JSON.stringify(err));
+                    log.error(JSON.stringify(err));
                     fail(err);
                 }
                 resolve(result);

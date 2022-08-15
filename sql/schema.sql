@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 11, 2022 at 06:17 PM
+-- Generation Time: Aug 15, 2022 at 07:37 PM
 -- Server version: 5.7.39
 -- PHP Version: 7.4.30
 
@@ -82,6 +82,17 @@ CREATE TABLE `housepoints` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `logs`
+--
+
+CREATE TABLE `logs` (
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `msg` text COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `sessions`
 --
 
@@ -92,9 +103,6 @@ CREATE TABLE `sessions` (
   `expires` int(128) NOT NULL DEFAULT '86400' COMMENT '86400 is 1 day in seconds',
   `active` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
 --
 -- Table structure for table `users`
 --
