@@ -62,6 +62,13 @@ export function isJson (item: unknown): boolean {
 }
 
 /**
+ * Removes ANSI escape codes from a string so that it is not coloured.
+ */
+export function removeColour (str: string): string {
+    return str.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
+}
+
+/**
  * Loads env from path
  * (relative to '/server'. or more specifically, the directory containing the server JS file)
  */

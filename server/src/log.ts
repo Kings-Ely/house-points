@@ -1,14 +1,14 @@
 import fs from 'fs';
 import c from 'chalk';
-import { tagFuncParamsToString } from "./util";
+import { removeColour, tagFuncParamsToString } from "./util";
 import { IFlags, query } from "./index";
 import mysql from "mysql2";
 
 export enum LogLvl {
     NONE,
-    NO_WARN,
-    NO_INFO,
-    ALL,
+    ERROR,
+    WARN,
+    INFO,
     VERBOSE
 }
 
@@ -20,12 +20,19 @@ class Logger {
     private useConsole = true;
     private active = true;
 
-    private output (type: string, ...messages: any[]): void {
+    /**
+     * Outputs a message to the console and/or file
+     */
+    output (level: LogLvl, type: string, ...messages: any[]): void {
         if (!this.active) {
             return;
         }
 
-        const message = messages
+        if (this.level < level) {
+            return;
+        }
+
+        const message = `[${type}] ` + messages
             .map(m => {
                 // make sure it is all a string
                 if (typeof m === 'string') return m;
@@ -33,19 +40,22 @@ class Logger {
             })
             .join(' ');
 
-        let out = `[${type}] ${message}`;
         if (this.useConsole) {
-            console.log(out);
+            console.log(message);
         } else {
-            fs.appendFileSync(this.path, out + '\n');
+            fs.appendFileSync(this.path, message + '\n');
+        }
+
+        if (this.dbLogLevel >= level) {
+            this.logToDB(removeColour(message)).then();
         }
     }
 
-    private async logToDB (message: string): Promise<mysql.OkPacket | undefined> {
+    private async logToDB (message: string, from='server'): Promise<mysql.OkPacket | undefined> {
         if (!query) return;
         return await query<mysql.OkPacket>`
-            INSERT INTO logs (msg) 
-            VALUES (${message})
+            INSERT INTO logs (msg, madeBy)
+            VALUES (${message}, ${from})
         `;
     }
 
@@ -53,94 +63,43 @@ class Logger {
      * Logs a message but only if the 'verbose' flag is set
      */
     verbose (msg: string | TemplateStringsArray, ...params: any[]) {
-        if (this.level < LogLvl.VERBOSE) {
-            return;
-        }
-
-        if (typeof msg === 'string') {
-            this.output(c.grey`LOG`, msg, ...params);
-            return;
-        }
-
-        const message = tagFuncParamsToString(msg, params);
-
-        if (this.dbLogLevel >= LogLvl.VERBOSE) {
-            this.logToDB(message).then();
-        }
-
-        this.output(c.grey`LOG`, message);
+        this.output(LogLvl.VERBOSE, c.grey`VERB`, tagFuncParamsToString(msg, params));
     }
 
     /**
      * Logs a message
      */
     log (msg: string | TemplateStringsArray, ...params: any[]) {
-        if (this.level < LogLvl.ALL) {
-            return;
-        }
-
-        if (typeof msg === 'string') {
-            this.output(c.grey`LOG`, msg, ...params);
-            return;
-        }
-
         const message = tagFuncParamsToString(msg, params);
 
-        if (this.dbLogLevel >= LogLvl.ALL) {
+        if (this.dbLogLevel >= LogLvl.INFO) {
             this.logToDB(message).then();
         }
 
-        this.output(c.grey`LOG`, message);
+        this.output(LogLvl.INFO, c.grey`INFO`, message);
     }
 
     /**
      * Logs a warning
      */
     warning (msg: string | TemplateStringsArray, ...params: any[]) {
-        if (this.level < LogLvl.NO_INFO) {
-            return;
-        }
-
-        if (typeof msg === 'string') {
-            this.output(c.yellow`WARN`, msg + ' ' + params.join(' '));
-            return;
-        }
-
-        const message = tagFuncParamsToString(msg, params);
-
-        if (this.dbLogLevel >= LogLvl.NO_INFO) {
-            this.logToDB(message).then();
-        }
-
-        this.output(c.yellow`WARN`, message);
+        this.output(LogLvl.WARN, c.yellow`WARN`, tagFuncParamsToString(msg, params));
     }
 
     /**
-     * Logs a warning
+     * Logs an error
      */
     error (msg: string | TemplateStringsArray, ...params: any[]) {
-        if (this.level < LogLvl.NO_WARN) {
-            return;
-        }
-
-        if (typeof msg === 'string') {
-            this.output(c.red`ERR`, msg + ' ' + params.join(' '));
-            return;
-        }
-
-        const message = tagFuncParamsToString(msg, params);
-
-        if (this.dbLogLevel >= LogLvl.NO_WARN) {
-            this.logToDB(message).then();
-        }
-
-        this.output(c.red`ERR`, message);
+        this.output(LogLvl.ERROR, c.red`ERR`, tagFuncParamsToString(msg, params));
     }
 
-    async close () {
+    /**
+     * Closes any active file handles
+     */
+    async close (): Promise<unknown> {
         this.active = false;
         return new Promise((resolve) => {
-            this.fileHandle?.close(resolve);
+            this.fileHandle?.close?.(resolve);
         });
     }
 
@@ -161,7 +120,7 @@ class Logger {
                 flags: 'a'
             });
 
-            this.output('START', new Date().toISOString());
+            this.output(LogLvl.INFO, 'START', new Date().toISOString());
         }
     }
 

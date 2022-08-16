@@ -3,6 +3,7 @@ import { cpuUsage } from 'node:process';
 
 import route from "../";
 import { AUTH_ERR, isAdmin, isLoggedIn } from "../util";
+import log from '../log';
 
 
 /**
@@ -49,6 +50,28 @@ route('get/server/echo', async ({ body, query }) => {
     if (!await isLoggedIn(body, query)) return AUTH_ERR;
 
     return body;
+});
+
+/**
+ * Makes a log
+ * @param message
+ * @param {int} [logLevel=2]
+ */
+route('create/server/logs', async ({ body, query }) => {
+    let { message, logLevel=2 } = body;
+
+    if (typeof message !== 'string') {
+        message = JSON.stringify(message);
+    }
+
+    if (!Number.isInteger(logLevel)) {
+        return { error: 'logLevel must be an integer' };
+    }
+    if (logLevel < 0 || logLevel > 4) {
+        return { error: 'logLevel is invalid' };
+    }
+
+    log.output(logLevel, message);
 });
 
 /**

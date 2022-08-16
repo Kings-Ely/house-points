@@ -17,8 +17,8 @@ export interface IFlags {
 }
 
 export const flags = commandLineArgs([
-    { name: 'logLevel', type: Number, defaultValue: LogLvl.ALL },
-    { name: 'dbLogLevel', type: Number, defaultValue: LogLvl.NO_INFO },
+    { name: 'logLevel', type: Number, defaultValue: LogLvl.INFO },
+    { name: 'dbLogLevel', type: Number, defaultValue: LogLvl.WARN },
     { name: 'logTo', type: String },
     { name: 'port', alias: 'p', type: Number, defaultValue: 0 }
 ]);
