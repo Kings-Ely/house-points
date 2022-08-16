@@ -1,9 +1,6 @@
 import * as core from "../assets/js/main.js";
 import HousePoint from "../assets/js/components/HousePoint.js";
-import housePoint from "../assets/js/components/HousePoint.js";
-import { escapeHTML } from "../assets/js/main.js";
 
-const $name = document.getElementById('name');
 const $hps = document.getElementById('hps');
 const $hpReasonInp = document.getElementById('hp-reason');
 const $info = document.getElementById('info');
@@ -66,6 +63,8 @@ async function reloadUserInfoFromEmail () {
     const email = core.GETParam('email');
 
     theUsersInfo = await core.api(`get/users`, { email });
+
+    core.reservoir.set('the-user', theUsersInfo);
 }
 
 async function housePoints () {
@@ -116,17 +115,10 @@ async function title () {
 
     const [ username, emailExt ] = theUsersInfo['email'].split('@');
 
-    $name.innerHTML = `
-        <p style="font-size: 3em">
-            <span>
-                ${core.escapeHTML(username)}
-            </span>
-            <span style="color: var(--text-v-light)">
-                @${core.escapeHTML(emailExt)}
-                ${core.escapeHTML(theUsersInfo['admin'] ? ' (Admin)' : '')}
-            </span>
-        </p>
-    `;
+    core.reservoir.set({
+        'email0': username,
+        'email1': emailExt
+    });
 }
 
 async function showInfo () {

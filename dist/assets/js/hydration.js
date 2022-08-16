@@ -1,9 +1,14 @@
 import { escapeHTML } from "./main.js";
 
 export function hydrate ($el=document) {
-	const elements = $el.querySelectorAll('[pump]');
-	for (const element of elements) {
-		hydrateAction(element);
+	const dryEls = $el.querySelectorAll('[pump]');
+	for (const element of dryEls) {
+		hydrateDry(element);
+	}
+
+	const ifEls = $el.querySelectorAll('[pump-if]');
+	for (const element of ifEls) {
+		hydrateIf(element);
 	}
 }
 
@@ -30,15 +35,20 @@ class Reservoir {
 		hydrate();
 	}
 
-	has (key) {
-		return key in this.__data;
+	get (key) {
+		const path = key.split('.');
+		let current = this.__data;
+		for (let key of path) {
+			if (!(key in current)) {
+				return undefined;
+			}
+			current = current[key];
+		}
+		return current;
 	}
 
-	get (key) {
-		if (!(key in this.__data)) {
-			throw new Error(`Key ${key} not found in reservoir`);
-		}
-		return this.__data[key];
+	has (key) {
+		return this.get(key) !== undefined;
 	}
 
 	static instance = new Reservoir();
@@ -46,29 +56,39 @@ class Reservoir {
 
 export default Reservoir.instance;
 
-function hydrateAction ($el) {
+function hydrateDry ($el) {
 	const key = $el.getAttribute('pump');
 	const to = $el.getAttribute('pump-to');
+	let dry = $el.getAttribute('dry') ?? $el.innerHTML;
 	let value = Reservoir.instance.get(key);
 
-	if ($el.hasAttribute('pump-clean')) {
+	if (!$el.hasAttribute('pump-dirty')) {
 		value = escapeHTML(value);
 	}
 
 	let html;
 
 	if (to === 'end') {
-		html = $el.innerHTML + value;
-	}
+		html = dry + value;
 
-	else if (to === 'replace') {
+	} else if (to === 'replace') {
 		html = value;
+
+	} else {
+		html = value + dry;
 	}
 
-	else {
-		html = value + $el.innerHTML;
+	if (!$el.hasAttribute('dry')) {
+		$el.setAttribute('dry', dry);
 	}
 
 	$el.innerHTML = html;
 }
 
+function hydrateIf ($el) {
+	const key = $el.getAttribute('pump-if');
+	let value = Reservoir.instance.get(key);
+	if (value) {
+		$el.style.display = 'unset';
+	}
+}

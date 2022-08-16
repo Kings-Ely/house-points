@@ -57,8 +57,10 @@ export const state = {
 }
 
 reservoir.set({
-    'house-name': HOUSE_NAME
+    'house-name': HOUSE_NAME,
 });
+
+export { reservoir };
 
 // polluting the global namespace
 window.logout = logout;
@@ -394,7 +396,7 @@ export function formatTimeStampForInput (seconds) {
  * @returns {*}
  */
 export function escapeHTML (unsafe) {
-    return unsafe
+    return (unsafe ?? '')
         .toString()
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")

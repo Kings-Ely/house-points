@@ -16,7 +16,15 @@
 <div class="spinner"><div><div></div><div></div><div></div><div></div></div></div>
 <nav></nav>
 <main>
-    <div id="name"></div>
+    <section id="name">
+        <p style="font-size: 3em">
+            <span pump="email0"></span>
+            <span style="color: var(--text-v-light)" pump="email1" pump-to="end">
+                @
+            </span>
+            <span pump-if="admin">(Admin)</span>
+        </p>
+    </section>
 
     <section id="settings">
         <a href="../set-password">

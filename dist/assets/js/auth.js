@@ -17,6 +17,12 @@ export async function handleUserInfo (info) {
 	state.userInfoJSON = info;
 	state.userInfoIsLoaded = true;
 
+	core.reservoir.set({
+		'signed-in': state.isSignedIn,
+		'user': state.userInfoJSON,
+		'admin': !!state.userInfoJSON.admin
+	});
+
 	for (const cb of state.userInfoCallbacks) {
 		cb(info);
 	}
