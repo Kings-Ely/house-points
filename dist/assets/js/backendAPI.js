@@ -1,4 +1,4 @@
-import { API_ROOT, showError, waitForReady, state, getSession, SPINNER_STOP_DELAY } from "./main.js";
+import * as core from "./main.js";
 
 // Spinner
 
@@ -8,7 +8,7 @@ import { API_ROOT, showError, waitForReady, state, getSession, SPINNER_STOP_DELA
  * @returns {Promise<int>}
  */
 export async function showSpinner () {
-	await waitForReady();
+	await core.waitForReady();
 
 	document.body.style.cursor = 'progress';
 
@@ -46,7 +46,7 @@ export function stopSpinner (id) {
 			if (current) document.body.removeChild(current);
 			document.body.style.cursor = 'default';
 		}
-	}, SPINNER_STOP_DELAY);
+	}, core.SPINNER_STOP_DELAY);
 }
 
 
@@ -65,10 +65,10 @@ export async function rawAPI (path, body) {
 			body = {};
 		}
 		body ||= {};
-		body.session = getSession();
+		body.session = core.getSession();
 
 		try {
-			res = await fetch(`${API_ROOT}/?${path}`, {
+			res = await fetch(`${core.API_ROOT}/?${path}`, {
 				method: 'POST',
 				mode: 'cors',
 				cache: 'no-cache',
@@ -116,11 +116,11 @@ export async function api (path, body=null) {
 		body = {};
 	}
 	body ||= {};
-	body.session = getSession();
+	body.session = core.getSession();
 
 	// fetch
 	// include '/' in request as otherwise you get redirected, which takes more time
-	const res = await fetch(`${API_ROOT}/?${path}`, {
+	const res = await fetch(`${core.API_ROOT}/?${path}`, {
 		method: 'POST',
 		mode: 'cors',
 		cache: 'no-cache',
@@ -129,11 +129,11 @@ export async function api (path, body=null) {
 	}).catch(async err => {
 		console.error(`Error with API request (${path}): `, err);
 		stopSpinner(spinnerID);
-		await showError('Something went wrong!');
+		await core.showError('Something went wrong!');
 	});
 
 	if (res.status === 404) {
-		await showError('Something went wrong! (404)');
+		await core.showError('Something went wrong! (404)');
 		stopSpinner(spinnerID);
 		return {};
 	}
@@ -146,15 +146,15 @@ export async function api (path, body=null) {
 		// don't try to show error in response if there is no response, so also in try block
 		if (asJSON.error) {
 			if (asJSON.status === 502) {
-				await showError(`Looks like the server is down. Please try again later.`);
+				await core.showError(`Looks like the server is down. Please try again later.`);
 			} else {
-				await showError(asJSON.error);
+				await core.showError(asJSON.error);
 			}
 		}
 
 	} catch (err) {
 		console.error('Error with API request: ', err);
-		await showError('Something went wrong!');
+		await core.showError('Something went wrong!');
 	}
 
 	stopSpinner(spinnerID);

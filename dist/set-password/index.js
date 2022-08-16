@@ -35,9 +35,9 @@ const
 function showChangePassword (user) {
 	document.getElementById('content').style.display = 'block';
 	document.getElementById('email').innerHTML = `
-		${escapeHTML(user.email.split('@')[0])}
+		${core.escapeHTML(user.email.split('@')[0])}
 		<span style="color: var(--text-v-light)">
-			@${escapeHTML(user.email.split('@')[1])}
+			@${core.escapeHTML(user.email.split('@')[1])}
 		</span>
 	`;
 }

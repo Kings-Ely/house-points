@@ -1,6 +1,6 @@
 'use strict';
 import { registerComponent } from "./components.js";
-import { escapeHTML } from "../main.js";
+import * as core from "../main.js";
 
 /**
  * Component for student email input with dropdown for autocompletion of emails in the DB.
@@ -29,7 +29,7 @@ const InputWithDropdown = registerComponent((
 				<input
 					type="text"
 					class="dropdowninp-input"
-					placeholder="${escapeHTML(placeholder)}"
+					placeholder="${core.escapeHTML(placeholder)}"
 					autocomplete="off"
 					aria-label="student email"
 					id="dropdowninp${id}-input"

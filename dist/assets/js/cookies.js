@@ -1,4 +1,4 @@
-import { COOKIE_ALLOW_COOKIES_KEY, showError } from "./main.js";
+import * as core from "./main.js";
 import CookieCard from "./components/CookieCard.js";
 
 // Cookie Utilities
@@ -13,7 +13,7 @@ import CookieCard from "./components/CookieCard.js";
  */
 export async function setCookie (name, value, days=1) {
 	if (!cookiesAllowed() && name !== COOKIE_ALLOW_COOKIES_KEY) {
-		await showError('You must allow cookies to use this site.');
+		await core.showError('You must allow cookies to use this site.');
 		return new Error('Cookies not allowed');
 	}
 
@@ -53,7 +53,7 @@ export function getCookie (name) {
  */
 export async function eraseCookie (name) {
 	if (!cookiesAllowed()) {
-		await showError('You must allow cookies to use this site.');
+		await core.showError('You must allow cookies to use this site.');
 		return new Error('Cookies not allowed');
 	}
 
@@ -76,5 +76,5 @@ export function cookiePopUp () {
 }
 
 export function cookiesAllowed () {
-	return getCookie(COOKIE_ALLOW_COOKIES_KEY) === '1';
+	return getCookie(core.COOKIE_ALLOW_COOKIES_KEY) === '1';
 }

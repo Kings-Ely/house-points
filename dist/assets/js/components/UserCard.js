@@ -1,7 +1,6 @@
 'use strict';
 import { registerComponent } from "./components.js";
 import * as core from "../main.js";
-import { inlineComponent, showError } from "../main.js";
 import HousePoint from "./HousePoint.js";
 
 /** @typedef {{
@@ -48,17 +47,17 @@ const UserCard = registerComponent(($el, id, getUser) => {
 					></button>
 				` : ''}
 				<a href="${core.ROOT_PATH}/user/?email=${user.email}">
-					${user.email}
+					${core.escapeHTML(user.email)}
 				</a>
 			</h2>
 			<div>
 				<h3>
-					${user['accepted']} House Points Awarded
+					${core.escapeHTML(user['accepted'])} House Points Awarded
 				</h3>
-				<p>(${user.pending} pending, ${user.rejected} rejected)</p>
+				<p>(${core.escapeHTML(user.pending)} pending, ${core.escapeHTML(user.rejected)} rejected)</p>
 				<div class="user-card-housepoints">
 					${user['housePoints']
-						.map((point, i) => inlineComponent(HousePoint, point, async () => {
+						.map((point, i) => core.inlineComponent(HousePoint, point, async () => {
 							user = await getUser();
 							await render();
 						}, {
@@ -114,12 +113,12 @@ const UserCard = registerComponent(($el, id, getUser) => {
 				const description = $newHpDescription.value;
 
 				if (quantity < 1) {
-					await showError('Quantity must be 1 or more');
+					await core.showError('Quantity must be 1 or more');
 					return;
 				}
 
 				if (!description) {
-					await showError('Description is required');
+					await core.showError('Description is required');
 					return;
 				}
 

@@ -74,7 +74,7 @@ function eventHTML (event) {
 				style="text-decoration: none; font-weight: bold"
 				class="vertical-flex-center"
 			>
-				${event.name}
+				${core.escapeHTML(event.name)}
 				<span style="font-size: 0.9em; color: var(--text-light); padding-left: 5px">
 					(${new Date(event.time*1000).toLocaleDateString()})
 				</span>
@@ -85,7 +85,7 @@ function eventHTML (event) {
 			style="justify-content: right"
 			onclick="eventPopup('${event.id}')"
 		>
-			${core.limitStrLength(event.description)}
+			${core.escapeHTML(core.limitStrLength(event.description))}
 		</p>
 	`;
 }

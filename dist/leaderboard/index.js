@@ -34,11 +34,11 @@ function showStudent (student) {
     return `
         <div class="student">
             <button onclick="userPopup('${student['email']}')">
-                ${escapeHTML(student['email'])} 
-                (Y${escapeHTML(student['year'])})
+                ${core.escapeHTML(student['email'])} 
+                (Y${core.escapeHTML(student['year'])})
             </button>
             <div>
-                ${escapeHTML(student['accepted'])}
+                ${core.escapeHTML(student['accepted'])}
             </div>
         </div>
     `;
@@ -83,10 +83,10 @@ function leaderboard (users) {
                 <button
                     onclick="userPopup('${users[idx]['email']}')"
                 >
-                    ${escapeHTML(users[idx]['email'].split('@')[0])}
-                     (Y${escapeHTML(users[idx]['year'])}) 
+                    ${core.escapeHTML(users[idx]['email'].split('@')[0])}
+                     (Y${core.escapeHTML(users[idx]['year'])}) 
                     <br>
-                    <b>${escapeHTML(users[idx]['accepted'])}</b>
+                    <b>${core.escapeHTML(users[idx]['accepted'])}</b>
                 </button>
             `;
         }

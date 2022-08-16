@@ -3,7 +3,7 @@ import {registerComponent} from "./components.js";
 import * as core from "../main.js";
 import StudentEmailInputWithIntellisense from "./StudentEmailInputWithIntellisense.js";
 import HousePoint from "./HousePoint.js";
-import { inlineComponent } from "../main.js";
+import { escapeHTML, inlineComponent } from "../main.js";
 
 /** @typedef {{
  * 		id: string,
@@ -99,7 +99,7 @@ const EventCard = registerComponent(($el, id, getEvent) => {
 							class="editable-text event-title-editable"
 						>
 					` : `
-						${event.name}
+						${core.escapeHTML(event.name)}
 					`}
 				</h1>
 				<p data-label="${ago}">
@@ -109,14 +109,14 @@ const EventCard = registerComponent(($el, id, getEvent) => {
 		                    value="${core.formatTimeStampForInput(event.time)}"
 		                    onchange="_HousePoint${id}__changeTime(this.value)"
 		                >
-					` : date}
+					` : escapeHTML(date)}
 				</p>
 				<p style="font-size: 1.2em">
-					${event.description}
+					${core.escapeHTML(event.description)}
 				</p>
 				<div>
 					<h2>
-						${event['housePointCount']} House Points Awarded
+						${core.escapeHTML(event['housePointCount'])} House Points Awarded
 					</h2>
 					${event['housePoints'].map(point => inlineComponent(
 						HousePoint, point, hardReload, {

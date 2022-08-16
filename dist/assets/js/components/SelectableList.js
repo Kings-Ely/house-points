@@ -67,7 +67,7 @@ const SelectableList = registerComponent(($el, id, {
 
 	$el.innerHTML = `
 		<div class="selectable-list" id="selectable-list-${id}">
-			<h2>${name}</h2>
+			<h2>${core.escapeHTML(name)}</h2>
 			<div class="with-all-menu">
 				<div>
 					<span class="select-all-outline">
@@ -105,7 +105,7 @@ const SelectableList = registerComponent(($el, id, {
 					</label>
 				</div>
 			</div>
-			<div>${titleBar}</div>
+			<div>${core.escapeHTML(titleBar)}</div>
 			<div class="items"></div>
 		</div>
 	`;

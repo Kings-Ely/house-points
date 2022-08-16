@@ -73,7 +73,7 @@ async function housePoints () {
     const admin = await core.isAdmin();
 
     $hps.innerHTML = `
-        <h2>House Points (${escapeHTML(accepted)})</h2>
+        <h2>House Points (${core.escapeHTML(accepted)})</h2>
     `;
 
     if (hps.length === 0) {
@@ -119,11 +119,11 @@ async function title () {
     $name.innerHTML = `
         <p style="font-size: 3em">
             <span>
-                ${escapeHTML(username)}
+                ${core.escapeHTML(username)}
             </span>
             <span style="color: var(--text-v-light)">
-                @${escapeHTML(emailExt)}
-                ${escapeHTML(theUsersInfo['admin'] ? ' (Admin)' : '')}
+                @${core.escapeHTML(emailExt)}
+                ${core.escapeHTML(theUsersInfo['admin'] ? ' (Admin)' : '')}
             </span>
         </p>
     `;
@@ -132,9 +132,9 @@ async function title () {
 async function showInfo () {
     $info.innerHTML = `
         <p>
-            <b>${escapeHTML(theUsersInfo['accepted'])}</b> accepted, 
-            <b>${escapeHTML(theUsersInfo['pending'])}</b> pending and 
-            <b>${escapeHTML(theUsersInfo['rejected'])}</b> rejected house points.
+            <b>${core.escapeHTML(theUsersInfo['accepted'])}</b> accepted, 
+            <b>${core.escapeHTML(theUsersInfo['pending'])}</b> pending and 
+            <b>${core.escapeHTML(theUsersInfo['rejected'])}</b> rejected house points.
         </p>
     `;
 

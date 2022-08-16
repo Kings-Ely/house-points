@@ -57,7 +57,7 @@ route('get/server/echo', async ({ body, query }) => {
  * @param message
  * @param {int} [logLevel=2]
  */
-route('create/server/logs', async ({ body, query }) => {
+route('create/server/logs', async ({ body }) => {
     let { message, logLevel=2 } = body;
 
     if (typeof message !== 'string') {

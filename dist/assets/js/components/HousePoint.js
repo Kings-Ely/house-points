@@ -1,7 +1,6 @@
 'use strict';
 import { registerComponent } from "./components.js";
 import * as core from "../main.js";
-import { escapeHTML, formatTimeStampForInput } from "../main.js";
 
 /**
  * A house point ready to go in a list.
@@ -64,7 +63,7 @@ const HousePoint = registerComponent((
 	if (hp['status'] === 'Rejected') {
 		acceptedHTML = `
             <span
-            	data-label="'${escapeHTML(hp['rejectMessage'])}'"
+            	data-label="'${core.escapeHTML(hp['rejectMessage'])}'"
             >
             	Rejected ${core.escapeHTML(core.getRelativeTime(hp['completed'] * 1000))}
             </span>
@@ -163,7 +162,7 @@ const HousePoint = registerComponent((
 		${showPendingOptions ? '125px' : '0'}
 	`;
 
-	const dateFormattedForInp = formatTimeStampForInput(hp['created']);
+	const dateFormattedForInp = core.formatTimeStampForInput(hp['created']);
 
 	$el.innerHTML = `
 		<div 

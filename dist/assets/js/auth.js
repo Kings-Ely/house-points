@@ -1,10 +1,5 @@
-import {
-	COOKIE_SESSION,
-	getCookie, GETParam,
-	navigate, rawAPI,
-	ROOT_PATH, setCookie, setTheme,
-	state
-} from "./main.js";
+'use strict';
+import * as core from "./main.js";
 import { eraseCookie } from "./cookies.js";
 import { api } from "./backendAPI.js";
 
@@ -29,24 +24,13 @@ export async function handleUserInfo (info) {
 	state.userInfoCallbacks = [];
 }
 
-/**
- * Reloads the user info cache
- * @returns {Promise<void>}
- */
-export async function reloadUserInfo () {
-	state.userInfoIsLoaded = false;
-	await handleUserInfo(await rawAPI(`get/users`, {
-		sessionID: getSession()
-	}));
-}
-
 // user auth cookie utilities
 export function getSession () {
-	return getCookie(COOKIE_SESSION);
+	return core.getCookie(core.COOKIE_SESSION);
 }
 
 export async function setSessionCookie (id) {
-	return await setCookie(COOKIE_SESSION, id);
+	return await core.setCookie(core.COOKIE_SESSION, id);
 }
 
 /**
@@ -128,9 +112,9 @@ export async function logout () {
  * @returns {Promise<void>}
  */
 export async function logoutAction () {
-	await eraseCookie(COOKIE_SESSION);
-	await setTheme();
-	await navigate(ROOT_PATH);
+	await eraseCookie(core.COOKIE_SESSION);
+	await core.setTheme();
+	await core.navigate(core.ROOT_PATH);
 }
 
 /**
@@ -143,15 +127,15 @@ export async function testApiCon () {
 	const res = await api(`get/server/ping`)
 		.catch(err => {
 			console.error(err);
-			if (GETParam('error') !== 'api-con') {
-				navigate('/?error=api-con');
+			if (core.GETParam('error') !== 'api-con') {
+				core.navigate('/?error=api-con');
 			}
 		});
 
 	if (!res.ok || res.status !== 200) {
 		console.error(res);
-		if (GETParam('error') !== 'api-con') {
-			await navigate('/?error=api-con')
+		if (core.GETParam('error') !== 'api-con') {
+			await core.navigate('/?error=api-con')
 		}
 	}
 }
@@ -180,7 +164,7 @@ export async function signInAs (id, email) {
 	}
 
 	await setSessionCookie(sessionID);
-	await navigate(`/user/?email=${email}`);
+	await core.navigate(`/user/?email=${email}`);
 }
 
 /**

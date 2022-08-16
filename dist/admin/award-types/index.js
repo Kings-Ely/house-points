@@ -1,5 +1,5 @@
 import * as core from "../../assets/js/main.js";
-import { preloadSVGs, reloadDOM, showError } from "../../assets/js/main.js";
+import { escapeHTML, preloadSVGs, reloadDOM, showError } from "../../assets/js/main.js";
 
 const
 	$awardTypeRequired = document.querySelector('#award-type-required'),
@@ -70,7 +70,7 @@ async function awardTypeList () {
 				<div>
 					<label>
 						<input
-							value="${awardType.name}"
+							value="${core.escapeHTML(awardType.name)}"
 							onchange="awardTypeUpdateName('${awardType.id}', this.value)"
 							class="editable-text"
 						>
@@ -79,7 +79,7 @@ async function awardTypeList () {
 				<div>
 					<label>
 						<input
-							value="${awardType.hpsRequired}"
+							value="${core.escapeHTML(awardType.hpsRequired)}"
 							onchange="awardTypeUpdateRequired('${awardType.id}', this.value)"
 							data-label="House Points Required"
 							class="editable-text"
@@ -90,7 +90,7 @@ async function awardTypeList () {
 				<div>
 					<label>
 						<input
-							value="${awardType.description}"
+							value="${core.escapeHTML(awardType.description)}"
 							onchange="awardTypeUpdateDesc('${awardType.id}', this.value)"
 							class="editable-text"
 						>

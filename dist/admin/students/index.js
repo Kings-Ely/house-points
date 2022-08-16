@@ -1,6 +1,7 @@
 import * as core from "../../assets/js/main.js";
 import SelectableList from "../../assets/js/components/SelectableList.js";
 import fullPagePopup from "../../assets/js/components/FullPagePopup.js";
+import { escapeHTML } from "../../assets/js/main.js";
 
 const
     $addStudentButton = document.getElementById('add-student'),
@@ -413,7 +414,7 @@ async function uploadAddStudentsFile () {
                     ${csv.length}
                     students with
                     <span style="color: ${errors.length ? 'var(--text-warning)' : 'rgb(118,255,103)'}">
-                        ${errors.length}
+                        ${core.escapeHTML(errors.length)}
                     </span>
                     errors.
                 </p>

@@ -1,5 +1,6 @@
 import * as core from "../../assets/js/main.js";
 import SelectableList from "../../assets/js/components/SelectableList.js";
+import { escapeHTML } from "../../assets/js/main.js";
 
 const $status = document.getElementById('status');
 const $stats = document.getElementById('server-stats');
@@ -135,8 +136,8 @@ function showServerStats () {
 	for (const key in stats) {
 		$stats.innerHTML += `
 			<div>
-				<p>${key}</p>
-				<p>${stats[key]}</p>
+				<p>${core.escapeHTML(key)}</p>
+				<p>${core.escapeHTML(stats[key])}</p>
 			</div>
 		`;
 	}
@@ -161,7 +162,7 @@ async function activeSessions () {
 		itemGenerator: session => `
 			<p>
 				${session['id'] === core.getSession() ? `
-					<b>${session['email']}</b> (Your current session)
+					<b>${core.escapeHTML(session['email'])}</b> (Your current session)
 				` : `
 					<button
 						onclick="signInAs('${session['userID']}', '${session['email']}')"
@@ -172,8 +173,8 @@ async function activeSessions () {
 			</p>
 			<p>
 				Created
-				${core.getRelativeTime(session['opened']*1000)}
-				(${new Date(session['opened']*1000).toLocaleString()})
+				${core.escapeHTML(core.getRelativeTime(session['opened']*1000))}
+				(${core.escapeHTML(new Date(session['opened']*1000).toLocaleString())})
 			</p>
 		`,
 		gridTemplateColsCSS: '1fr 1fr',

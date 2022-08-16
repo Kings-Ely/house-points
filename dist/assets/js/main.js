@@ -11,6 +11,7 @@ import {
     showError,
     waitForReady
 } from "./dom.js";
+import reservoir from "./hydration.js";
 
 export * from './auth.js';
 export * from './backendAPI.js';
@@ -54,6 +55,10 @@ export const state = {
     spinnerFrameID: 0,
     popupStack: [],
 }
+
+reservoir.set({
+    'house-name': HOUSE_NAME
+});
 
 // polluting the global namespace
 window.logout = logout;
@@ -355,6 +360,13 @@ export function CSVToArray (strData, strDelimiter) {
     return arrData;
 }
 
+/**
+ * Creates a random string
+ * Note: this is not cryptographically secure
+ * @param {number} len
+ * @param {string} charset
+ * @returns {string}
+ */
 export function genRandomString (len=10, charset="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") {
     let text = "";
     for (let _ = 0; _ < len; _++) {
@@ -362,6 +374,12 @@ export function genRandomString (len=10, charset="ABCDEFGHIJKLMNOPQRSTUVWXYZabcd
     }
     return text;
 }
+
+/**
+ * Format a UNIX timestamp to the date format expected by a <input type="date"> element
+ * @param {number} seconds
+ * @returns {string}
+ */
 export function formatTimeStampForInput (seconds) {
     const date = new Date(seconds * 1000);
     return `${date.getFullYear()}-`+

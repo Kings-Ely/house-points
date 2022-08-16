@@ -74,8 +74,8 @@ const AddEventPopup = registerComponent(($el, id, reload) => {
 			html += `
 				<div class="add-student-to-event-student">
 					<div style="display: block">
-						${email} 
-						(Y${year})
+						${core.escapeHTML(email)} 
+						(Y${core.escapeHTML(year)})
 						gets
 						<input
 							type="number"

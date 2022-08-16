@@ -1,11 +1,7 @@
-import {
-	state,
-	HOUSE_NAME,
-	navigate,
-	ROOT_PATH,
-	userInfo, LS_THEME, MAX_NOTIFICATIONS, NOTIFICATION_SHOW_TIME
-} from "./main.js";
+import * as core from "./main.js";
 import { loadSVGs } from "./svg.js";
+import { loadSVG } from "./main.js";
+import { hydrate } from "./hydration.js";
 
 /**
  * Kind of ew way of doing it. But it works.
@@ -84,7 +80,7 @@ export async function showError (message) {
 
 	let myErrId = state.currentNotificationID++;
 
-	while (state.visibleNotifications.length > MAX_NOTIFICATIONS) {
+	while (state.visibleNotifications.length > core.MAX_NOTIFICATIONS) {
 		let id = state.visibleNotifications.shift();
 		document.getElementById(`error-${id}`).remove();
 	}
@@ -106,7 +102,7 @@ export async function showError (message) {
 		errorMessage.remove();
 		state.visibleNotifications = state.visibleNotifications
 			.filter(id => id !== myErrId);
-	}, NOTIFICATION_SHOW_TIME);
+	}, core.NOTIFICATION_SHOW_TIME);
 }
 
 
@@ -145,7 +141,7 @@ export async function waitForReady () {
  * @returns {Promise<void>}
  */
 export async function loadFooter () {
-	const footerHTMLRes = await fetch(`${ROOT_PATH}/assets/html/footer.html`);
+	const footerHTMLRes = await fetch(`${core.ROOT_PATH}/assets/html/footer.html`);
 	state.$footer.innerHTML = await footerHTMLRes.text();
 }
 
@@ -156,7 +152,7 @@ export async function loadFooter () {
  * @returns {Promise<void>}
  */
 export async function loadNav () {
-	const navRes = await fetch(`${ROOT_PATH}/assets/html/nav.html`);
+	const navRes = await fetch(`${core.ROOT_PATH}/assets/html/nav.html`);
 	state.$nav.innerHTML = await navRes.text();
 
 	const $adminLink = document.getElementById('admin-link');
@@ -167,18 +163,18 @@ export async function loadNav () {
 	// replace links in nav relative to this page
 	document.querySelectorAll('nav a').forEach(a => {
 		a.setAttribute('href',
-			`${ROOT_PATH}${a.getAttribute('href')}`);
+			`${core.ROOT_PATH}${a.getAttribute('href')}`);
 	});
 
 	// show page title
 	const $center = document.querySelector('#nav-center');
 	$center.innerHTML = `
         <div>
-            ${HOUSE_NAME} House Points - ${document.title}
+            ${core.escapeHTML(core.HOUSE_NAME)} House Points - ${core.escapeHTML(document.title)}
         </div>
     `;
 
-	const user = await userInfo();
+	const user = await core.userInfo();
 
 	if (!user) return;
 
@@ -190,9 +186,8 @@ export async function loadNav () {
 		$adminLink.style.display = 'block';
 		$adminLink.setAttribute('aria-hidden', 'false');
 		$adminLink.onclick = () => {
-			navigate(`/admin`);
+			core.navigate(`/admin`);
 		};
-
 	}
 }
 
@@ -202,6 +197,7 @@ export async function loadNav () {
  */
 export function reloadDOM () {
 	loadSVGs();
+	hydrate();
 }
 
 export async function domIsLoaded () {
@@ -236,14 +232,14 @@ export function updateTheme () {
  * @param value
  */
 export function setTheme (value='light') {
-	localStorage.setItem(LS_THEME, value);
+	localStorage.setItem(core.LS_THEME, value);
 	updateTheme();
 }
 /**
  * Gets the localStorage theme value
  */
 export function getTheme () {
-	return localStorage.getItem(LS_THEME);
+	return localStorage.getItem(core.LS_THEME);
 }
 
 /**
