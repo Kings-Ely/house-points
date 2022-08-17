@@ -196,8 +196,8 @@ export async function loadNav () {
  * Actually only adds new SVGs at the moment but might do more later.
  */
 export function reloadDOM () {
-	loadSVGs();
 	hydrate();
+	loadSVGs();
 }
 
 export async function domIsLoaded () {

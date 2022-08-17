@@ -29,7 +29,6 @@ const
 	}
 
 	showChangePassword(user);
-
 })();
 
 function showChangePassword (user) {

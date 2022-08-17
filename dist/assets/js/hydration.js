@@ -1,14 +1,19 @@
 import { escapeHTML } from "./main.js";
 
 export function hydrate ($el=document) {
-	const dryEls = $el.querySelectorAll('[pump]');
-	for (const element of dryEls) {
-		hydrateDry(element);
+
+	if ($el.hasAttribute('pump-if')) {
+		if (!hydrateIf($el)) {
+			return;
+		}
 	}
 
-	const ifEls = $el.querySelectorAll('[pump-if]');
-	for (const element of ifEls) {
-		hydrateIf(element);
+	if ($el.hasAttribute('pump')) {
+		hydrateDry($el);
+	}
+
+	for (const child of $el.children) {
+		hydrate(child);
 	}
 }
 
@@ -88,7 +93,9 @@ function hydrateDry ($el) {
 function hydrateIf ($el) {
 	const key = $el.getAttribute('pump-if');
 	let value = Reservoir.instance.get(key);
+
 	if (value) {
 		$el.style.display = 'unset';
 	}
+	return !!value;
 }

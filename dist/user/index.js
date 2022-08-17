@@ -36,16 +36,7 @@ window.eventPopup = core.eventPopup;
     } else {
         await title();
 
-        if (theUsersInfo['admin']) {
-            $hps.innerHTML = `
-                <a 
-                    href="../admin/"
-                    class="big-link"
-                    svg="admin.svg"
-                >Admin Dashboard</a>
-            `;
-            core.reloadDOM();
-        } else {
+        if (!theUsersInfo['admin']) {
             core.hide('#hps');
         }
     }
