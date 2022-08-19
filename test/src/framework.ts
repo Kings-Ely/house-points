@@ -25,7 +25,7 @@ export class TestResult {
         }
     }
 
-    str (verbose=false) {
+    str () {
         return `
             ---   TEST REPORT   ---
                 ${chalk[this.failed < 1 ? 'green' : 'red'](this.failed)} tests failed

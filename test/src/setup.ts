@@ -6,17 +6,17 @@ import { config } from 'dotenv';
 import type { CommandLineOptions } from "command-line-args";
 import { exec } from "child_process";
 
-async function startServer (flags: CommandLineOptions) {
+async function startServer (_: CommandLineOptions) {
 	let t = now();
 
 	return new Promise((resolve, reject) => {
-		exec(`cd server; webpack`, (err, out, er) => {
+		exec(`cd server; webpack`, (err, _, er) => {
 			if (err) reject(err);
 			if (er) reject(er);
 
 			console.log(c.green(`Built server in ${(now() - t).toPrecision(4)}ms`));
 
-			exec(`node --enable-source-maps server --logTo=test.log --logLevel=4 --dbLogLevel=2`, (err, out, er) => {
+			exec(`node --enable-source-maps server --logTo=test.log --logLevel=4 --dbLogLevel=2`, (err, _, er) => {
 				if (err) reject(err);
 				if (er) reject(er);
 			});

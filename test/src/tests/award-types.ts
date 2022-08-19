@@ -1,7 +1,7 @@
 import Test from '../framework';
 import { generateUser } from "../util";
 
-Test.test('Award  Types | Creating, getting and deleting', async (api) => {
+Test.test('Award Types | Creating, getting and deleting', async (api) => {
     let res = await api(`get/award-types`);
     if (res.ok !== true) {
         return `0: ${JSON.stringify(res)}`;
@@ -49,7 +49,7 @@ Test.test('Award  Types | Creating, getting and deleting', async (api) => {
     return true;
 });
 
-Test.test('Award  Types | Creating, getting and deleting auth', async (api) => {
+Test.test('Award Types | Creating, getting and deleting auth', async (api) => {
     const { sessionID, userID } = await generateUser(api);
 
     let res = await api(`get/award-types`, {

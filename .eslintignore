@@ -1,7 +1,7 @@
 .idea
 node_modules
 bin
-dist
+sql
 coverage
 .webpack
 webpack.config.js
