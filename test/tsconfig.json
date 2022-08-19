@@ -1,14 +1,22 @@
 {
     "compilerOptions": {
         "strict": true,
+        "target": "es5",
         "moduleResolution": "node",
-        "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "experimentalDecorators": true,
         "noEmit": false,
         "removeComments": true,
         "downlevelIteration": true,
-        "target": "es5",
+        "emitDecoratorMetadata": true,
+        "forceConsistentCasingInFileNames": true,
+        "noEmitOnError": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUncheckedIndexedAccess": true,
+        "noImplicitOverride": true,
+        "allowSyntheticDefaultImports": true
     },
     "exclude": [ "node_modules" ]
 }
