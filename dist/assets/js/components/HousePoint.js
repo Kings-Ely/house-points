@@ -99,14 +99,14 @@ const HousePoint = registerComponent((
 
 	window[`_HousePoint${id}__changeHpQuantity`] = async (value) => {
 		await core.api(`update/house-points/quantity`, {
-			housePointID: hp.id,
+			housePointId: hp.id,
 			quantity: parseInt(value)
 		});
 	};
 
 	window[`_HousePoint${id}__changeDescription`] = async (value) => {
 		await core.api(`update/house-points/description`, {
-			housePointID: hp.id,
+			housePointId: hp.id,
 			description: value
 		});
 	};
@@ -119,7 +119,7 @@ const HousePoint = registerComponent((
 			return;
 		}
 		await core.api(`update/house-points/created`, {
-			housePointID: hp.id,
+			housePointId: hp.id,
 			timestamp
 		});
 	};
@@ -129,14 +129,14 @@ const HousePoint = registerComponent((
 			return;
 		}
 		await core.api(`delete/house-points`, {
-			housePointID: hp.id
+			housePointId: hp.id
 		});
 		reload();
 	};
 
 	window[`_HousePoint${id}__accept`] = async () => {
 		await core.api(`update/house-points/accepted`, {
-			housePointID: hp.id
+			housePointId: hp.id
 		});
 		reload();
 	}
@@ -145,7 +145,7 @@ const HousePoint = registerComponent((
 		const reject = prompt('Enter a reason for rejecting this house point');
 		if (!reject) return;
 		await core.api(`update/house-points/accepted`, {
-			housePointID: hp.id,
+			housePointId: hp.id,
 			reject
 		});
 		reload();

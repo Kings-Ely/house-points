@@ -87,7 +87,7 @@ async function serverStatusAndPing () {
 		return;
 	}
 
-	stats['Process ID'] = res.pid;
+	stats['Process Id'] = res.pid;
 
 	pingTimes.push(performance.now() - start);
 	start = performance.now();
@@ -165,7 +165,7 @@ async function activeSessions () {
 					<b>${core.escapeHTML(session['email'])}</b> (Your current session)
 				` : `
 					<button
-						onclick="signInAs('${session['userID']}', '${session['email']}')"
+						onclick="signInAs('${session['userId']}', '${session['email']}')"
 						data-label="Sign in as"
 						style="font-size: 1em; cursor: pointer;"
 					>${session['email']}</button>
@@ -189,8 +189,8 @@ async function deleteSelectedSessions () {
 		return;
 	}
 
-	for (let sessionID of selectedSessions) {
-		await core.api(`delete/sessions`, { sessionID });
+	for (let sessionId of selectedSessions) {
+		await core.api(`delete/sessions`, { sessionId });
 	}
 
 	await activeSessions();

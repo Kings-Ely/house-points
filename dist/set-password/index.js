@@ -21,7 +21,7 @@ const
 
 	await core.eraseCookie(core.COOKIE_SESSION);
 
-	const user = await core.api(`get/users`, { sessionID: s });
+	const user = await core.api(`get/users`, { sessionId: s });
 
 	if (!user.ok) {
 		await core.navigate(`../?error=auth`);
@@ -62,7 +62,7 @@ $submit.addEventListener('click', async () => {
 	}
 
 	const res = await core.api(`update/users/password`,  {
-		sessionID: s,
+		sessionId: s,
 		password
 	});
 

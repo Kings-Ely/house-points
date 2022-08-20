@@ -145,9 +145,9 @@ const SelectableList = registerComponent(($el, id, {
 				continue;
 			}
 
-			const itemID = item[uniqueKey];
+			const itemId = item[uniqueKey];
 
-			const isSelected = selected.includes(itemID);
+			const isSelected = selected.includes(itemId);
 
 			$items.innerHTML += `
 				<div class="item">
@@ -155,7 +155,7 @@ const SelectableList = registerComponent(($el, id, {
 						class="icon medium no-scale"
 						svg="${isSelected ? 'selected-checkbox' : 'unselected-checkbox'}.svg"
 						aria-label="${isSelected ? 'Unselect' : 'Select'}"
-						onclick="_SelectableList${id}__select('${itemID}', ${isSelected ? 'false' : 'true'})"
+						onclick="_SelectableList${id}__select('${itemId}', ${isSelected ? 'false' : 'true'})"
 					></button>
 					<div class="item-content" style="grid-template-columns: ${gridTemplateColsCSS}">
 						  ${await itemGenerator(item, isSelected)}

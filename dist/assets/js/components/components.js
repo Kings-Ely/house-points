@@ -12,7 +12,7 @@
  *  @typedef {($el: El, id: number, ...args: *) => *} ComponentDefinition
  */
 
-let currentComponentID = 0;
+let currentComponentId = 0;
 
 /**
  * Turns a ComponentDefinition into a Component.
@@ -27,7 +27,7 @@ export function registerComponent (cb) {
         if (!($el instanceof HTMLElement)) {
             throw new Error('Trying to insert component into not-HTMLElement');
         }
-        return cb($el, currentComponentID++, ...args);
+        return cb($el, currentComponentId++, ...args);
     };
 }
 

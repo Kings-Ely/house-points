@@ -11,7 +11,7 @@ function setUpTransporter () {
         auth: {
             type: 'OAuth2',
             user: process.env.GMAIL_USER,
-            clientId: process.env.GMAIL_CLIENT_ID,
+            clientId: process.env.GMAIL_CLIENT_Id,
             clientSecret: process.env.GMAIL_CLIENT_SECRET,
             refreshToken: process.env.GMAIL_REFRESH_TOKEN
         }
@@ -90,14 +90,14 @@ async function mail ({
     });
 }
 
-async function sendEmailToUser (query: queryFunc, userID: string, subject: string, html: string) {
+async function sendEmailToUser (query: queryFunc, userId: string, subject: string, html: string) {
     const users  = await query`
         SELECT email
         FROM users
-        WHERE id = ${userID}
+        WHERE id = ${userId}
     `;
     if (!users.length) {
-        return 'Invalid userID';
+        return 'Invalid userId';
     }
     const email = users[0].email;
     return await mail({
@@ -109,25 +109,25 @@ async function sendEmailToUser (query: queryFunc, userID: string, subject: strin
 
 // Exposed
 
-export async function forgottenPasswordEmail (query: queryFunc, userID: string, newSessionID: string): Promise <string | true> {
-    return await sendEmailToUser(query, userID, 'Forgotten Password', `
+export async function forgottenPasswordEmail (query: queryFunc, userId: string, newSessionId: string): Promise <string | true> {
+    return await sendEmailToUser(query, userId, 'Forgotten Password', `
         <h3>You have requested to reset your password.</h3>
         <p style="padding: 20px;">
             To reset your password, click the link, which will expire in 1 hour.
             <b>
-            <a href="${process.env.SITE_ROOT}/set-password?s=${newSessionID}">
+            <a href="${process.env.SITE_ROOT}/set-password?s=${newSessionId}">
                 Reset Password
             </a>
         </p>
     `);
 }
 
-export async function receivedHousePoint (query: queryFunc, userID: string, quantity: number) {
+export async function receivedHousePoint (query: queryFunc, userId: string, quantity: number) {
     let title = 'Received House Point';
     if (quantity > 1) {
         title = `Received ${quantity} House Points`;
     }
-    return await sendEmailToUser(query, userID, title, `
+    return await sendEmailToUser(query, userId, title, `
         <h3>
             You have received ${quantity} house point${quantity > 1 ? 's' : ''}!
         </h3>
@@ -139,9 +139,9 @@ export async function receivedHousePoint (query: queryFunc, userID: string, quan
     `);
 }
 
-export async function housePointRequestAcceptedOrRejected (query: queryFunc, userID: string, hpReason: string, rejectMessage='') {
+export async function housePointRequestAcceptedOrRejected (query: queryFunc, userId: string, hpReason: string, rejectMessage='') {
     const title = `Your House Point Request has been ${rejectMessage ? 'Rejected' : 'Accepted'}`;
-    return await sendEmailToUser(query, userID, title, `
+    return await sendEmailToUser(query, userId, title, `
         <h3>
             Your house point request for '${hpReason}' has been ${rejectMessage ? 'rejected.' : 'accepted!'}
         </h3>

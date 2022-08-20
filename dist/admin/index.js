@@ -4,7 +4,7 @@ import HousePoint from "../assets/js/components/HousePoint.js";
 const $pendingHPs = document.getElementById('pending');
 const $numPendingHPs = document.getElementById('num-pending');
 // gets replaced with input element once loaded
-window.userPopupFromID = core.userPopupFromID;
+window.userPopupFromId = core.userPopupFromId;
 
 (async () => {
     await core.init('..', true, true);

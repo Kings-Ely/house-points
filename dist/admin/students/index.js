@@ -20,7 +20,7 @@ window.deleteUser = deleteUser;
 window.uploadAddStudentsFile = uploadAddStudentsFile;
 window.toggleYearGroup = toggleYearGroup;
 window.toggleAdmin = toggleAdmin;
-window.userPopupFromID = core.userPopupFromID;
+window.userPopupFromId = core.userPopupFromId;
 
 (async () => {
     await core.init('../..', true, true);
@@ -149,7 +149,7 @@ async function showStudent (student) {
                 </span>
             ` : `
                 <button 
-                    onclick="userPopupFromID('${id}')" 
+                    onclick="userPopupFromId('${id}')" 
                     class="student-link"
                     data-label="View"
                     aria-label="View"
@@ -297,7 +297,7 @@ async function deleteUser (id, email) {
         return;
     }
 
-    await core.api(`delete/users`, { userID: id });
+    await core.api(`delete/users`, { userId: id });
 
     if (selected.includes(id)) {
         selected.splice(selected.indexOf(id), 1);
@@ -314,7 +314,7 @@ async function deleteSelected () {
 
     // send API requests at the same time and wait for all to finish
     await Promise.all(selected.map(async id => {
-        await core.api(`delete/users`, { userID: id });
+        await core.api(`delete/users`, { userId: id });
     }));
 
     selected.splice(0, selected.length);
@@ -329,7 +329,7 @@ async function ageSelected (amount) {
 
     await Promise.all(selected.map(async id => {
         await core.api(`update/users/year`, {
-            userID: id, by: amount
+            userId: id, by: amount
         });
     }));
 
@@ -345,7 +345,7 @@ async function giveHPToSelected () {
     await Promise.all(selected.map(async id => {
         await core.api(`create/house-points/give`, {
             description: reason,
-            userID: id,
+            userId: id,
             quantity: 1
         });
     }));
@@ -355,17 +355,17 @@ async function giveHPToSelected () {
 
 /**
  * Makes the API request to make a user not an admin and refreshes the list of students.
- * @param {string} userID
+ * @param {string} userId
  * @param {string} email
  * @returns {Promise<void>}
  */
-async function revokeAdmin (userID, email) {
+async function revokeAdmin (userId, email) {
     if (!confirm(`Are you sure you want to revoke '${email}'s admin access?`)) {
         return;
     }
 
     await core.api(`update/users/admin`, {
-        userID, admin: false
+        userId, admin: false
     });
 
     await showStudentsList();
@@ -373,17 +373,17 @@ async function revokeAdmin (userID, email) {
 
 /**
  * Makes the API request to make a user an admin and refreshes the list of students.
- * @param {string} userID
+ * @param {string} userId
  * @param {string} email
  * @returns {Promise<void>}
  */
-async function makeAdmin (userID, email) {
+async function makeAdmin (userId, email) {
     if (!confirm(`Are you sure you want to make '${email}' an admin?`)) {
         return;
     }
 
     await core.api(`update/users/admin`, {
-        userID, admin: true
+        userId, admin: true
     });
 
     await showStudentsList();
@@ -483,9 +483,9 @@ async function uploadAddStudentsFile () {
                 return;
             }
 
-            const { userID } = res;
+            const { userId } = res;
 
-            if (!userID) {
+            if (!userId) {
                 errors.push(`Error on row ${i+1}: Not sure what went wrong :/. User wasn't created - I don't think?`);
                 finishedOne();
                 return;
@@ -494,7 +494,7 @@ async function uploadAddStudentsFile () {
             if (hps > 0) {
                 res = await core.api(`create/house-points/give`, {
                     description: 'From before',
-                    userID,
+                    userId,
                     quantity: hps
                 });
                 if (res['error']) {

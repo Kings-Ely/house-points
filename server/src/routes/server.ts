@@ -22,7 +22,7 @@ route('get/server/ping', async () => {});
 
 /**
  * @admin
- * Get the process ID of the Node process running this server
+ * Get the process Id of the Node process running this server
  */
 route('get/server/pid', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;

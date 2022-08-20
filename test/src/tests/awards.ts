@@ -10,8 +10,55 @@ Test.test('Awards | Creating, getting and deleting', async (api) => {
         return `1: ${JSON.stringify(res)}`;
     }
 
-    const { sessionID, userID } = await generateUser(api);
+    const { id: awardTypeId } = await api(`create/awardTypes`, {
+        name: 'Requires 2',
+        required: 2
+    });
 
+    const { sessionId, userId } = await generateUser(api);
+
+    res = await api(`create/awards`, {
+        userId,
+        awardTypeId,
+        description: 'desc'
+    });
+    if (res.ok !== true || res.status !== 201 || !res.id) {
+        return `2: ${JSON.stringify(res)}`;
+    }
+    if (typeof res.id !== 'string') {
+        return `3: ${JSON.stringify(res)}`;
+    }
+    res = await api(`get/awards`);
+    if (res?.data?.length !== 1) {
+        return `4: ${JSON.stringify(res)}`;
+    }
+    if (res.data?.[0]?.id !== awardTypeId) {
+        return `5: ${JSON.stringify(res)}`;
+    }
+    if (res.data?.[0]?.student !== userId) {
+        return `6: ${JSON.stringify(res)}`;
+    }
+    if (res.data?.[0]?.type !== awardTypeId) {
+        return `7: ${JSON.stringify(res)}`;
+    }
+    if (res.data?.[0]?.description !== 'desc') {
+        return `8: ${JSON.stringify(res)}`;
+    }
+
+    res = await api(`delete/awards`, {
+        awardId: res.data?.[0]?.id
+    });
+    if (res.ok !== true || res.status !== 200) {
+        return `9: ${JSON.stringify(res)}`;
+    }
+
+    res = await api(`get/awards`);
+    if (res?.data?.length !== 0) {
+        return `10: ${JSON.stringify(res)}`;
+    }
+
+    await api(`delete/awardTypes`, { awardTypeId });
+    await api(`delete/users`, { userId });
 
     return true;
 });

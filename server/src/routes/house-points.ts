@@ -1,12 +1,12 @@
 import route from "../";
 import {
     AUTH_ERR,
-    generateUUID,
+    generateUUId,
     isAdmin,
     isLoggedIn,
-    userFromID,
+    userFromId,
     userFromSession,
-    userID
+    userId
 } from '../util';
 import mysql from "mysql2";
 import * as notifications from '../notifications';
@@ -17,8 +17,8 @@ const MAX_HOUSE_POINTS = 100;
  * @account
  * Gets all house points and filters them based on the parameters
  *
- * @param {string} id - house points with this ID
- * @param {string} userID - house points with a user=userID
+ * @param {string} housePointId - house points with this Id
+ * @param {string} userId - house points with a user=userId
  * @param {13 >= number >= 9} yearGroup - house points earned by a student in this year group
  * @param {'Accepted'|'Pending'|'Rejected'} status - house points with this status
  * @param {number} from - house points created after this timestamp
@@ -27,7 +27,7 @@ const MAX_HOUSE_POINTS = 100;
 route('get/house-points', async ({ query, body }) => {
     if (!await isLoggedIn(body, query)) return AUTH_ERR;
 
-    let { housePointID='', userID='', yearGroup=0, status='', from=0, to=0 } = body;
+    let { housePointId='', userId='', yearGroup=0, status='', from=0, to=0 } = body;
 
     if (!Number.isInteger(yearGroup) || yearGroup > 13 || yearGroup < 9) {
         if (yearGroup !== 0) return 'Invalid year group';
@@ -52,11 +52,11 @@ route('get/house-points', async ({ query, body }) => {
             UNIX_TIMESTAMP(housepoints.completed) as completed,
             housepoints.rejectMessage,
             
-            users.id as userID,
+            users.id as userId,
             users.email as studentEmail,
             users.year as studentYear,
             
-            housepoints.event as eventID,
+            housepoints.event as eventId,
             events.name as eventName,
             events.description as eventDescription,
             UNIX_TIMESTAMP(events.time) as eventTime
@@ -68,8 +68,8 @@ route('get/house-points', async ({ query, body }) => {
         WHERE
             housepoints.student = users.id
             
-            AND ((housepoints.id = ${housePointID}) OR ${!housePointID})
-            AND ((users.id = ${userID})             OR ${!userID})
+            AND ((housepoints.id = ${housePointId}) OR ${!housePointId})
+            AND ((users.id = ${userId})             OR ${!userId})
             AND ((housepoints.status = ${status})   OR ${!status})
             AND ((users.year = ${yearGroup})        OR ${!yearGroup})
             AND ((created >= ${from})               OR ${!from})
@@ -85,12 +85,12 @@ route('get/house-points', async ({ query, body }) => {
         if (!user['id']) return AUTH_ERR;
 
         for (let i = 0; i < res.length; i++) {
-            if (res[i]['userID'] === user['id']) {
+            if (res[i]['userId'] === user['id']) {
                 continue;
             }
 
             // if the house point does not belong to the user, censor it
-            delete res[i]['userID'];
+            delete res[i]['userId'];
             delete res[i]['studentEmail'];
             delete res[i]['rejectMessage'];
             delete res[i]['description'];
@@ -103,20 +103,19 @@ route('get/house-points', async ({ query, body }) => {
 /**
  * @admin
  * @notification
- * Gives a house point to the student with that userID
+ * Gives a house point to the student with that userId
  *
  * @param {string} description - description of house point
- * @param {string} eventID - id of event house points should be associated with
- * @param description
+ * @param {string} eventId - id of event house points should be associated with
  * @param event
  */
 route('create/house-points/give', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userID='', description='', eventID='', quantity=1 } = body;
+    const { userId='', description='', eventId='', quantity=1 } = body;
 
-    let student = await userFromID(query, userID);
-    if (!student) return `Student with ID '${userID}' not found`;
+    let student = await userFromId(query, userId);
+    if (!student) return `Student with Id '${userId}' not found`;
     if (!student['student']) return 'Can only give house points to students';
 
     if (!Number.isInteger(quantity) || quantity < 1) {
@@ -126,14 +125,14 @@ route('create/house-points/give', async ({ query, body }) => {
         return `Quantity must be at most ${MAX_HOUSE_POINTS}`;
     }
 
-    if (eventID) {
+    if (eventId) {
         let eventData = await query`
             SELECT *
             FROM events
-            WHERE events.id = ${eventID}
+            WHERE events.id = ${eventId}
         `;
         if (!eventData.length) {
-            return `Event with ID '${eventID}' not found`;
+            return `Event with Id '${eventId}' not found`;
         }
 
         eventData = await query`
@@ -141,30 +140,30 @@ route('create/house-points/give', async ({ query, body }) => {
             FROM users, housepoints, events
             WHERE users.id = housepoints.student
                 AND housepoints.event = events.id
-                AND users.id = ${userID}
-                AND events.id = ${eventID}
+                AND users.id = ${userId}
+                AND events.id = ${eventId}
         `;
         if (eventData.length > 0) {
             return `Student already in event`;
         }
     }
 
-    const id = await generateUUID();
+    const id = await generateUUId();
 
     await query`
         INSERT INTO housepoints (id, student, quantity, event, description, status, completed)
         VALUES (
             ${id},
-            ${userID},
+            ${userId},
             ${quantity},
-            ${eventID},
+            ${eventId},
             ${description},
             'Accepted',
             CURRENT_TIMESTAMP
         )
     `;
 
-    let notifRes = await notifications.receivedHousePoint(query, userID, quantity);
+    let notifRes = await notifications.receivedHousePoint(query, userId, quantity);
     if (notifRes !== true) return notifRes;
 
     return { status: 201, id };
@@ -175,7 +174,7 @@ route('create/house-points/give', async ({ query, body }) => {
  * Creates a house points request.
  * All users can do this.
  * This house point can be GET but does not count towards any house points counts
- * @param userID
+ * @param userId
  * @param {int?} quantity
  * @param description
  * @param event
@@ -183,7 +182,7 @@ route('create/house-points/give', async ({ query, body }) => {
 route('create/house-points/request', async ({ query, body }) => {
     if (!await isLoggedIn(body, query)) return AUTH_ERR;
 
-    const { userID='', description='', event='', quantity=1 } = body;
+    const { userId='', description='', event='', quantity=1 } = body;
 
     if (!Number.isInteger(quantity) || quantity < 1) {
         return 'Quantity must be an integer greater than 0';
@@ -192,8 +191,8 @@ route('create/house-points/request', async ({ query, body }) => {
         return `Quantity must be at most ${MAX_HOUSE_POINTS}`;
     }
 
-    let student = await userFromID(query, userID);
-    if (!student) return `Student with ID '${userID}' not found`;
+    let student = await userFromId(query, userId);
+    if (!student) return `Student with Id '${userId}' not found`;
     if (!student.student) return 'Can only give house points to students';
 
     if (event) {
@@ -213,18 +212,18 @@ route('create/house-points/request', async ({ query, body }) => {
             ON housepoints.student = users.id
             WHERE housepoints.event = ${event}
         `;
-        if (usersInEvent.filter(u => u.id === userID).length) {
+        if (usersInEvent.filter(u => u.id === userId).length) {
             return 'User is already in event';
         }
     }
 
-    const id = await generateUUID();
+    const id = await generateUUId();
 
     await query`
         INSERT INTO housepoints (id, student, quantity, event, description, status)
         VALUES (
             ${id},
-            ${userID},
+            ${userId},
             ${quantity},
             ${event},
             ${description},
@@ -242,23 +241,23 @@ route('create/house-points/request', async ({ query, body }) => {
  * You cannot change a house point from 'Accepted' or 'Rejected' to any other status,
  * only from 'Pending'.
  * This route is the only way to change the status of a house point.
- * Takes a house point ID
+ * Takes a house point Id
  *
  * @param {string} reject - If present, rejects the house points instead of accepting it.
  *                          This is the message shown to the student for why the HP was rejected.
- * @param housePointID
+ * @param housePointId
  */
 route('update/house-points/accepted', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { housePointID: id='', reject='' } = body;
+    const { housePointId: id='', reject='' } = body;
 
     const hps = await query`
         SELECT
             housepoints.status,
             housepoints.description,
             users.email,
-            users.id as userID
+            users.id as userId
         FROM housepoints, users
         WHERE housepoints.id = ${id}
             AND housepoints.student = users.id
@@ -266,7 +265,7 @@ route('update/house-points/accepted', async ({ query, body }) => {
 
     if (!hps.length) return {
         status: 406,
-        error: `No house point found with that ID`
+        error: `No house point found with that Id`
     };
 
     const hp = hps[0];
@@ -295,7 +294,7 @@ route('update/house-points/accepted', async ({ query, body }) => {
         `;
     }
 
-    let notifRes = await notifications.housePointRequestAcceptedOrRejected(query, hp['userID'], hp['description'], reject);
+    let notifRes = await notifications.housePointRequestAcceptedOrRejected(query, hp['userId'], hp['description'], reject);
     if (notifRes !== true) return notifRes;
 });
 
@@ -303,13 +302,13 @@ route('update/house-points/accepted', async ({ query, body }) => {
  * @admin
  * Updates the quantity of a house point
  *
- * @param housePointID
+ * @param housePointId
  * @param {int} quantity
  */
 route('update/house-points/quantity', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { housePointID: id='', quantity=-1 } = body;
+    const { housePointId: id='', quantity=-1 } = body;
 
     if (!Number.isInteger(quantity) || quantity < 1) {
         return 'Quantity must be an integer greater than 0';
@@ -326,7 +325,7 @@ route('update/house-points/quantity', async ({ query, body }) => {
 
     if (!queryRes.affectedRows) return {
         status: 406,
-        error: `No house point found with ID '${id}'`
+        error: `No house point found with Id '${id}'`
     };
 });
 
@@ -334,13 +333,13 @@ route('update/house-points/quantity', async ({ query, body }) => {
  * @admin
  * Updates the description of a house point
  *
- * @param housePointID
+ * @param housePointId
  * @param {int} description
  */
 route('update/house-points/description', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { housePointID: id='', description='' } = body;
+    const { housePointId: id='', description='' } = body;
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE housepoints
@@ -350,25 +349,25 @@ route('update/house-points/description', async ({ query, body }) => {
 
     if (!queryRes.affectedRows) return {
         status: 406,
-        error: `No house point found with ID '${id}'`
+        error: `No house point found with Id '${id}'`
     };
 });
 
 /**
  * @admin
  * Updates the creation time of the house point
- * @param housePointID
+ * @param housePointId
  * @param {int} timestamp
  */
 route('update/house-points/created', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { housePointID: id='', timestamp=-1 } = body;
+    const { housePointId: id='', timestamp=-1 } = body;
 
     if (!Number.isInteger(timestamp) || timestamp < 1) {
         return 'Quantity must be an valid UNIX timestamp';
     }
-    if (!id) return 'No house point ID provided';
+    if (!id) return 'No house point Id provided';
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE housepoints
@@ -378,17 +377,17 @@ route('update/house-points/created', async ({ query, body }) => {
 
     if (!queryRes.affectedRows) return {
         status: 406,
-        error: `No house point found with that ID`
+        error: `No house point found with that Id`
     };
 });
 
 /**
  * @admin
- * Deletes a house point from a house point ID
- * @param housePointID
+ * Deletes a house point from a house point Id
+ * @param housePointId
  */
 route('delete/house-points', async ({ query, body }) => {
-    const { housePointID: id='' } = body;
+    const { housePointId: id='' } = body;
 
     // if we aren't an admin user, we can still delete it if
     // they own the house point
@@ -404,7 +403,7 @@ route('delete/house-points', async ({ query, body }) => {
 
         // doesn't get to know if house point even exists or not
         if (!res.length) return AUTH_ERR;
-        if (res[0]['id'] !== await userID(body, query)) {
+        if (res[0]['id'] !== await userId(body, query)) {
             return AUTH_ERR;
         }
     }
@@ -415,6 +414,6 @@ route('delete/house-points', async ({ query, body }) => {
     `;
     if (!res.affectedRows) return {
         status: 406,
-        error: `No house points to delete with ID '${id}'`
+        error: `No house points to delete with Id '${id}'`
     }
 });

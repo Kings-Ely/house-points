@@ -25,7 +25,7 @@ export * from './popups.js';
 // Global constants and variables
 export const
     API_ROOT = 'https://josephcoppin.com/school/house-points/api',
-    COOKIE_SESSION = 'hpnea_SessionID',
+    COOKIE_SESSION = 'hpnea_SessionId',
     COOKIE_ALLOW_COOKIES_KEY = 'hpnea_AllowedCookies',
     LS_THEME = 'hpnea_Theme',
     HOUSE_NAME = 'Osmond',
@@ -42,7 +42,7 @@ export const state = {
     $nav: null,
     $footer: null,
     $error: null,
-    currentNotificationID: 0,
+    currentNotificationId: 0,
     visibleNotifications: [],
     userInfoCallbacks: [],
     userInfoJSON: null,
@@ -52,7 +52,7 @@ export const state = {
     documentLoaded: false,
     inlineComponentIndex: 0,
     spinnerQueue: [],
-    spinnerFrameID: 0,
+    spinnerFrameId: 0,
     popupStack: [],
 }
 
@@ -108,7 +108,7 @@ export async function init (rootPath, requireLoggedIn=false, requireAdmin=false,
 
     if (getSession()) {
         await handleUserInfo(await rawAPI(`get/users`, {
-            sessionID: getSession()
+            sessionId: getSession()
         }));
     } else {
         await handleUserInfo({});

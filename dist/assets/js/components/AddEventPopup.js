@@ -65,7 +65,7 @@ const AddEventPopup = registerComponent(($el, id, reload) => {
 		}
 
 		const { data } = await core.api(`get/users/batch-info`, {
-			userIDs: Object.keys(studentsInEvent)
+			userIds: Object.keys(studentsInEvent)
 		});
 
 		let html = '';
@@ -189,7 +189,7 @@ const AddEventPopup = registerComponent(($el, id, reload) => {
 			return;
 		}
 
-		const { id: eventID } =
+		const { id: eventId } =
 			await core.api(`create/events`, {
 				name: $nameInp.value,
 				time,
@@ -199,11 +199,11 @@ const AddEventPopup = registerComponent(($el, id, reload) => {
 		$nameInp.value = '';
 		$descInp.value = '';
 
-		await Promise.all(Object.keys(studentsInEvent).map(async userID => {
+		await Promise.all(Object.keys(studentsInEvent).map(async userId => {
 			await core.api(`create/house-points/give`, {
-				eventID,
-				userID,
-				quantity: studentsInEvent[userID],
+				eventId,
+				userId,
+				quantity: studentsInEvent[userId],
 			});
 		}));
 

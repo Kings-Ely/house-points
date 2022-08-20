@@ -57,7 +57,7 @@ export default class Test {
         return this.test(api, code);
     }
 
-    static currentID = 0;
+    static currentId = 0;
 
     static tests: Test[] = [];
 

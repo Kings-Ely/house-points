@@ -12,12 +12,12 @@ export async function showSpinner () {
 
 	document.body.style.cursor = 'progress';
 
-	state.spinnerFrameID++
-	state.spinnerQueue.push(state.spinnerFrameID);
+	state.spinnerFrameId++
+	state.spinnerQueue.push(state.spinnerFrameId);
 
 	const current = document.querySelector('.spinner');
 	if (current) {
-		return state.spinnerFrameID;
+		return state.spinnerFrameId;
 	}
 
 	const loader = document.createElement('div');
@@ -26,7 +26,7 @@ export async function showSpinner () {
 
 	document.body.appendChild(loader);
 
-	return state.spinnerFrameID;
+	return state.spinnerFrameId;
 }
 
 /**
@@ -109,7 +109,7 @@ export async function rawAPI (path, body) {
  * @returns {Promise<Record<string, any>>}
  */
 export async function api (path, body=null) {
-	let spinnerID = await showSpinner();
+	let spinnerId = await showSpinner();
 
 	if (typeof body !== 'object') {
 		console.error('api called with non-object body: ', body);
@@ -128,13 +128,13 @@ export async function api (path, body=null) {
 		body: JSON.stringify(body)
 	}).catch(async err => {
 		console.error(`Error with API request (${path}): `, err);
-		stopSpinner(spinnerID);
+		stopSpinner(spinnerId);
 		await core.showError('Something went wrong!');
 	});
 
 	if (res.status === 404) {
 		await core.showError('Something went wrong! (404)');
-		stopSpinner(spinnerID);
+		stopSpinner(spinnerId);
 		return {};
 	}
 
@@ -157,7 +157,7 @@ export async function api (path, body=null) {
 		await core.showError('Something went wrong!');
 	}
 
-	stopSpinner(spinnerID);
+	stopSpinner(spinnerId);
 
 	return asJSON;
 }

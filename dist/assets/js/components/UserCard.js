@@ -123,7 +123,7 @@ const UserCard = registerComponent(($el, id, getUser) => {
 				}
 
 				await core.api(`create/house-points/give`, {
-					userID: user.id,
+					userId: user.id,
 					quantity,
 					description
 				});

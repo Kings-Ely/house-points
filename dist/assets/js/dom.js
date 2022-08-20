@@ -78,7 +78,7 @@ export async function showError (message) {
 		document.body.appendChild(state.$error);
 	}
 
-	let myErrId = state.currentNotificationID++;
+	let myErrId = state.currentNotificationId++;
 
 	while (state.visibleNotifications.length > core.MAX_NOTIFICATIONS) {
 		let id = state.visibleNotifications.shift();

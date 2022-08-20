@@ -41,14 +41,14 @@ async function doLogIn () {
 		return;
 	}
 
-	const { sessionID } = res;
+	const { sessionId } = res;
 
-	if (!sessionID) {
+	if (!sessionId) {
 		core.showError`Something went wrong!`;
 		return;
 	}
 
-	if (await core.setSessionCookie(sessionID) instanceof Error) {
+	if (await core.setSessionCookie(sessionId) instanceof Error) {
 		// cookies error is now shown
 		return;
 	}

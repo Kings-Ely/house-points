@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-import { v4 as UUIDv4 } from 'uuid';
+import { v4 as UUIdv4 } from 'uuid';
 
 import { queryFunc } from './sql';
 import crypto from "crypto";
@@ -89,13 +89,13 @@ export function loadEnv (filePath = ".env"): void {
  * 1: normal student
  * 2: admin
  */
-export async function authLvl (sessionID: string, query: queryFunc) {
-    if (!sessionID) return 0;
+export async function authLvl (sessionId: string, query: queryFunc) {
+    if (!sessionId) return 0;
 
     const res = await query`
         SELECT users.admin
         FROM sessions, users
-        WHERE sessions.id = ${sessionID}
+        WHERE sessions.id = ${sessionId}
             AND sessions.user = users.id
             AND UNIX_TIMESTAMP(sessions.opened) + sessions.expires > UNIX_TIMESTAMP()
             AND sessions.active = 1
@@ -131,11 +131,11 @@ export function decodeParam (param: string): string {
 }
 
 /**
- * Generate a random UUID using UUID v4 generator.
+ * Generate a random UUId using UUId v4 generator.
  * Does not check for collisions at the moment, but should be fine.
  */
-export async function generateUUID (): Promise<string> {
-    return UUIDv4();
+export async function generateUUId (): Promise<string> {
+    return UUIdv4();
 }
 
 export function passwordHash (password: string) {
@@ -160,13 +160,13 @@ export function validPassword (password: string): true | string {
 }
 
 /**
- * Gets the userID from a session ID
+ * Gets the userId from a session Id
  */
-export async function IDFromSession (query: queryFunc, sessionID: string): Promise<string> {
+export async function IdFromSession (query: queryFunc, sessionId: string): Promise<string> {
     const res = await query`
         SELECT user
         FROM sessions
-        WHERE id = ${sessionID}
+        WHERE id = ${sessionId}
         AND UNIX_TIMESTAMP(opened) + expires > UNIX_TIMESTAMP()
     `;
 
@@ -176,16 +176,16 @@ export async function IDFromSession (query: queryFunc, sessionID: string): Promi
 }
 
 /**
- * Gets the user ID from a cookies object
+ * Gets the user Id from a cookies object
  */
-export async function userID (body: any, query: queryFunc) {
-    return IDFromSession(query, body.session);
+export async function userId (body: any, query: queryFunc) {
+    return IdFromSession(query, body.session);
 }
 
 /**
- * Gets the user details from a user ID
+ * Gets the user details from a user Id
  */
-export async function userFromID (query: queryFunc, id: string): Promise<Record<string, any> | null> {
+export async function userFromId (query: queryFunc, id: string): Promise<Record<string, any> | null> {
     const res = await query`
         SELECT
             id,
@@ -237,7 +237,7 @@ export async function userFromSession (query: queryFunc, id: string): Promise<Re
  */
 export async function addHousePointsToUser (query: queryFunc, user: any & { id: string }) {
     if (!user['id']) {
-        throw new Error('User has no ID');
+        throw new Error('User has no Id');
     }
 
     user['housePoints'] = await query`
@@ -250,11 +250,11 @@ export async function addHousePointsToUser (query: queryFunc, user: any & { id: 
             UNIX_TIMESTAMP(housepoints.completed) as completed,
             housepoints.rejectMessage,
             
-            users.id as userID,
+            users.id as userId,
             users.email as studentEmail,
             users.year as studentYear,
             
-            housepoints.event as eventID,
+            housepoints.event as eventId,
             events.name as eventName,
             events.description as eventDescription,
             UNIX_TIMESTAMP(events.time) as eventTime
@@ -289,7 +289,7 @@ export async function addHousePointsToUser (query: queryFunc, user: any & { id: 
  */
 export async function addHousePointsToEvent (query: queryFunc, event: any & { id: string }) {
     if (!event['id']) {
-        throw new Error('User has no ID');
+        throw new Error('User has no Id');
     }
 
     event['housePoints'] = await query`
@@ -302,11 +302,11 @@ export async function addHousePointsToEvent (query: queryFunc, event: any & { id
             UNIX_TIMESTAMP(housepoints.completed) as completed,
             housepoints.rejectMessage,
             
-            users.id as userID,
+            users.id as userId,
             users.email as studentEmail,
             users.year as studentYear,
             
-            housepoints.event as eventID,
+            housepoints.event as eventId,
             events.name as eventName,
             events.description as eventDescription,
             UNIX_TIMESTAMP(events.time) as eventTime

@@ -32,7 +32,8 @@ CREATE TABLE `awards` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `student` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `type` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `awarded` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `awarded` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------

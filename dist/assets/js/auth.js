@@ -53,13 +53,13 @@ export async function userInfo () {
 }
 
 /**
- * Gets the user ID from the session stored in the session cookie
+ * Gets the user Id from the session stored in the session cookie
  * @returns {Promise<string>}
  */
-export async function userID () {
+export async function userId () {
 	const user = await userInfo();
 	if (!user['id']){
-		throw 'no user ID found';
+		throw 'no user Id found';
 	}
 	return user['id'];
 }
@@ -147,7 +147,7 @@ export async function testApiCon () {
 }
 
 /**
- * Tries to sign you in as the user with the given ID.
+ * Tries to sign you in as the user with the given Id.
  * @param {string} id
  * @param {string} email
  * @returns {Promise<void>}
@@ -161,15 +161,15 @@ export async function signInAs (id, email) {
 		return;
 	}
 
-	const { sessionID } = await api(`create/sessions/from-user-id`, {
-		userID: id
+	const { sessionId } = await api(`create/sessions/from-user-id`, {
+		userId: id
 	});
 
-	if (!sessionID) {
+	if (!sessionId) {
 		return;
 	}
 
-	await setSessionCookie(sessionID);
+	await setSessionCookie(sessionId);
 	await core.navigate(`/user/?email=${email}`);
 }
 

@@ -99,8 +99,8 @@ async function deleteEvents () {
 		`Are you sure you want to delete ${selected.length} event${selected.length > 1 ? 's' : ''}?`)) {
 		return;
 	}
-	await Promise.all(selected.map(async eventID => {
-		await core.api(`delete/events`, { eventID });
+	await Promise.all(selected.map(async eventId => {
+		await core.api(`delete/events`, { eventId });
 	}));
 	await showAllEvents();
 }

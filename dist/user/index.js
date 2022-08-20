@@ -144,7 +144,7 @@ document.getElementById('submit-hp').onclick = async () => {
     for (let reason of $hpReasonInp.value.split('\n')) {
         if (!reason) continue;
         await core.api(`create/house-points/request`, {
-            userID: theUsersInfo.id,
+            userId: theUsersInfo.id,
             description: reason,
             quantity: 1
         });

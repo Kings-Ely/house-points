@@ -3,10 +3,10 @@ import { generateUser } from '../util';
 
 Test.test('Users | user auth', async (api) => {
 
-    const { userID, sessionID, email } = await generateUser(api);
+    const { userId, sessionId, email } = await generateUser(api);
 
     let res = await api(`get/sessions/auth-level`, {
-        sessionID
+        sessionId
     });
     if (res.ok !== true || res.status !== 200 || res.level < 1) {
         return `0: ${JSON.stringify(res)}`;
@@ -14,7 +14,7 @@ Test.test('Users | user auth', async (api) => {
 
     // check code actually works
     res = await api(`get/users`, {
-        userID
+        userId
     });
     if (res.admin !== 0 || res.student !== 1) {
         return `1: ${JSON.stringify(res)}`;
@@ -38,7 +38,7 @@ Test.test('Users | user auth', async (api) => {
 
     // make our user an admin
     res = await api(`update/users/admin`, {
-        userID,
+        userId,
         admin: true
     });
     if (res.ok !== true) {
@@ -47,7 +47,7 @@ Test.test('Users | user auth', async (api) => {
 
     // check new auth level
     res = await api(`get/sessions/auth-level`, {
-        sessionID
+        sessionId
     });
     if (res.level !== 2) {
         return `7: ${JSON.stringify(res)}`;
@@ -55,7 +55,7 @@ Test.test('Users | user auth', async (api) => {
 
     // check we can access restricted data with our code
     res = await api(`get/users`, {
-        session: sessionID
+        session: sessionId
     });
     if (res?.data?.length !== 2) {
         return `8: ${JSON.stringify(res)}`;
@@ -63,7 +63,7 @@ Test.test('Users | user auth', async (api) => {
 
     // delete our user
     res = await api(`delete/users`, {
-        userID
+        userId
     });
     if (res.ok !== true) {
         return `9: ${JSON.stringify(res)}`;
@@ -71,7 +71,7 @@ Test.test('Users | user auth', async (api) => {
 
     // check that the user is gone
     res = await api(`get/sessions/auth-level`, {
-        sessionID
+        sessionId
     });
     if (res.level !== 0) {
         return `10: ${JSON.stringify(res)}`;
@@ -82,32 +82,32 @@ Test.test('Users | user auth', async (api) => {
 
 Test.test('Users | auth with 2', async (api) => {
 
-    const { userID: userID1, sessionID: sessionID1 } = await generateUser(api);
-    const { userID: userID2, sessionID: sessionID2 } = await generateUser(api);
+    const { userId: userId1, sessionId: sessionId1 } = await generateUser(api);
+    const { userId: userId2, sessionId: sessionId2 } = await generateUser(api);
 
-    if (userID1.length < 2 || userID2.length < 2) {
-        return `Expected userID to be at least 2 characters, got: '${userID1}' and '${userID2}'`;
+    if (userId1.length < 2 || userId2.length < 2) {
+        return `Expected userId to be at least 2 characters, got: '${userId1}' and '${userId2}'`;
     }
-    if (userID1 === userID2) {
-        return `Expected different userIDs, got '${userID1}' and '${userID2}'`;
+    if (userId1 === userId2) {
+        return `Expected different userIds, got '${userId1}' and '${userId2}'`;
     }
 
-    if (sessionID1.length < 2 || sessionID2.length < 2) {
-        return `Expected userID to be at least 2 characters, got: '${sessionID1}' and '${sessionID2}'`;
+    if (sessionId1.length < 2 || sessionId2.length < 2) {
+        return `Expected userId to be at least 2 characters, got: '${sessionId1}' and '${sessionId2}'`;
     }
-    if (sessionID1 === sessionID2) {
-        return `Expected different userIDs, got '${sessionID1}' and '${sessionID2}'`;
+    if (sessionId1 === sessionId2) {
+        return `Expected different userIds, got '${sessionId1}' and '${sessionId2}'`;
     }
 
     // check that both codes have been made and work
     let res = await api(`get/sessions/auth-level`, {
-        sessionID: sessionID1
+        sessionId: sessionId1
     });
     if (res.level !== 1) {
         return `0: ${JSON.stringify(res)}`;
     }
     res = await api(`get/sessions/auth-level`, {
-        sessionID: sessionID2
+        sessionId: sessionId2
     });
     if (res.level !== 1) {
         return `1: ${JSON.stringify(res)}`;
@@ -124,13 +124,13 @@ Test.test('Users | auth with 2', async (api) => {
     }
 
     res = await api(`delete/users`, {
-        userID: userID2
+        userId: userId2
     });
     if (res.ok !== true) {
         return `4: ${JSON.stringify(res)}`;
     }
     res = await api(`delete/users`, {
-        userID: userID1
+        userId: userId1
     });
     if (res.ok !== true) {
         return `5: ${JSON.stringify(res)}`;
@@ -139,27 +139,27 @@ Test.test('Users | auth with 2', async (api) => {
     return true;
 });
 
-Test.test('Users | sign in with user ID', async (api) => {
-    const { userID, sessionID } = await generateUser(api, 0);
+Test.test('Users | sign in with user Id', async (api) => {
+    const { userId, sessionId } = await generateUser(api, 0);
 
     let res = await api(`create/sessions/from-user-id`, {
-        userID
+        userId
     });
     if (res.ok !== true) {
         return `0: ${JSON.stringify(res)}`;
     }
-    if (res.sessionID === sessionID) {
-        return `Expected different sessionID, both were '${res.sessionID}'`;
+    if (res.sessionId === sessionId) {
+        return `Expected different sessionId, both were '${res.sessionId}'`;
     }
-    if (res.userID !== userID) {
-        return `Expected userID to be '${userID}', got '${res.userID}'`;
+    if (res.userId !== userId) {
+        return `Expected userId to be '${userId}', got '${res.userId}'`;
     }
 
     const userSes1 = await api(`get/users`, {
-        sessionID: res.sessionID
+        sessionId: res.sessionId
     });
     const userSes2 = await api(`get/users`, {
-        sessionID
+        sessionId
     });
 
     if (!Test.eq(userSes1, userSes2)) {
@@ -167,7 +167,7 @@ Test.test('Users | sign in with user ID', async (api) => {
     }
 
     await api(`delete/users`, {
-        userID
+        userId
     });
 
     return true;
@@ -175,36 +175,36 @@ Test.test('Users | sign in with user ID', async (api) => {
 
 
 Test.test('Users | with year: 0', async (api) => {
-    const { userID, email } = await generateUser(api, 0);
+    const { userId, email } = await generateUser(api, 0);
 
-    let res = await api(`get/users`, { userID });
+    let res = await api(`get/users`, { userId });
     if (res['year'] !== 0) {
-        return `Expected {..., year: 0} from 'get/users/from-id/userID', got '${JSON.stringify(res)}'`;
+        return `Expected {..., year: 0} from 'get/users/from-id/userId', got '${JSON.stringify(res)}'`;
     }
     if (res['email'] !== email) {
-        return `Expected {..., name: '${email}'} from 'get/users/from-id/userID', got '${JSON.stringify(res)}'`;
+        return `Expected {..., name: '${email}'} from 'get/users/from-id/userId', got '${JSON.stringify(res)}'`;
     }
     if (res['admin'] !== 1) {
-        return `Expected {..., admin: 1} from 'get/users/from-id/userID', got '${JSON.stringify(res)}'`;
+        return `Expected {..., admin: 1} from 'get/users/from-id/userId', got '${JSON.stringify(res)}'`;
     }
     if (res['student'] !== 0) {
-        return `Expected {..., student: 0} from 'get/users/from-id/userID', got '${JSON.stringify(res)}'`;
+        return `Expected {..., student: 0} from 'get/users/from-id/userId', got '${JSON.stringify(res)}'`;
     }
 
-    await api(`delete/users`, { userID });
+    await api(`delete/users`, { userId });
 
     return true;
 });
 
 Test.test('Users | Getting info from email', async (api) => {
-    const { userID: userID1, sessionID: sessionID1, email: email1 } = await generateUser(api, 0);
-    const { userID: userID2, sessionID: sessionID2, email: email2 } = await generateUser(api);
+    const { userId: userId1, sessionId: sessionId1, email: email1 } = await generateUser(api, 0);
+    const { userId: userId2, sessionId: sessionId2, email: email2 } = await generateUser(api);
 
     let res = await api(`get/users`, {
         email: email2
     });
-    if (res?.id !== userID2) {
-        return `Expected id '${userID2}' from 'get/users/from-email', got '${res.id}'`;
+    if (res?.id !== userId2) {
+        return `Expected id '${userId2}' from 'get/users/from-email', got '${res.id}'`;
     }
     if (res?.email !== email2) {
         return `Expected email '${email2}' from 'get/users/from-email', got '${res.email}'`;
@@ -233,15 +233,15 @@ Test.test('Users | Getting info from email', async (api) => {
 
     // check that we can do that again but using the newly created admin code
     res = await api(`get/users`, {
-        session: sessionID1,
+        session: sessionId1,
         email: email2
     });
-    if (res.id !== userID2) {
+    if (res.id !== userId2) {
         return `0: ${JSON.stringify(res)}`;
     }
 
     res = await api(`get/users`, {
-        session: sessionID2,
+        session: sessionId2,
         email: email1
     });
     if (res.id) {
@@ -251,70 +251,70 @@ Test.test('Users | Getting info from email', async (api) => {
         return `2: ${JSON.stringify(res)}`;
     }
 
-    await api(`delete/users`, { userID: userID1 });
-    await api(`delete/users`, { userID: userID2 });
+    await api(`delete/users`, { userId: userId1 });
+    await api(`delete/users`, { userId: userId2 });
 
     return true;
 });
 
 Test.test('Users | Getting all', async (api) => {
-    const { userID: userID1, sessionID: sessionID1 } = await generateUser(api, 0);
-    const { userID: userID2, sessionID: sessionID2 } = await generateUser(api);
+    const { userId: userId1, sessionId: sessionId1 } = await generateUser(api, 0);
+    const { userId: userId2, sessionId: sessionId2 } = await generateUser(api);
 
     let res = await api(`get/users`, {
-        session: sessionID2
+        session: sessionId2
     });
     if (res.ok || res.status !== 401 || res.data) {
         return `0: ${JSON.stringify(res)}`;
     }
     res = await api(`get/users`, {
-        session: sessionID1
+        session: sessionId1
     });
     if (res?.data?.length !== 3) {
         return `1: ${JSON.stringify(res)}`;
     }
 
-    await api(`delete/users`, { userID: userID1 });
-    await api(`delete/users`, { userID: userID2 });
+    await api(`delete/users`, { userId: userId1 });
+    await api(`delete/users`, { userId: userId2 });
 
     return true;
 });
 
 Test.test('Users | Getting leaderboard data', async (api) => {
-    const { userID: userID1, sessionID: sessionID1 } = await generateUser(api, 0);
-    const { userID: userID2, sessionID: sessionID2 } = await generateUser(api);
+    const { userId: userId1, sessionId: sessionId1 } = await generateUser(api, 0);
+    const { userId: userId2, sessionId: sessionId2 } = await generateUser(api);
 
     let res = await api(`get/users/leaderboard`, {
-        session: 'invalid session ID'
+        session: 'invalid session Id'
     });
     if (res.ok || res.status !== 401 || res.data) {
         return `0: ${JSON.stringify(res)}`;
     }
     res = await api(`get/users/leaderboard`, {
-        session: sessionID2
+        session: sessionId2
     });
     if (!Array.isArray(res.data)) {
         return `1: ${JSON.stringify(res)}`;
     }
     res = await api(`get/users/leaderboard`, {
-        session: sessionID1
+        session: sessionId1
     });
     if (!Array.isArray(res.data)) {
         return `Expected array from 'get/users/leaderboard', got '${JSON.stringify(res)}'`;
     }
 
-    await api(`delete/users`, { userID: userID1 });
-    await api(`delete/users`, { userID: userID2 });
+    await api(`delete/users`, { userId: userId1 });
+    await api(`delete/users`, { userId: userId2 });
 
     return true;
 });
 
 Test.test('Users | Getting batch data', async (api) => {
-    const { userID: userID1, email: email1 } = await generateUser(api);
-    const { userID: userID2, email: email2 } = await generateUser(api);
+    const { userId: userId1, email: email1 } = await generateUser(api);
+    const { userId: userId2, email: email2 } = await generateUser(api);
 
     let { data: res } = await api(`get/users/batch-info`, {
-        userIDs: [userID1, userID2]
+        userIds: [userId1, userId2]
     });
 
     if (res?.length !== 2) {
@@ -322,37 +322,37 @@ Test.test('Users | Getting batch data', async (api) => {
     }
 
     // comes back in arbitrary order, make sure its in the right order
-    if (res[0].id === userID2) {
+    if (res[0].id === userId2) {
         [res[0], res[1]] = [res[1], res[0]];
     }
 
     // check details of two users that we got back
-    if (res[0].id !== userID1) {
+    if (res[0].id !== userId1) {
         return `1: ${JSON.stringify(res)}`;
     }
     if (res[0].email !== email1) {
         return `2: ${JSON.stringify(res)}`;
     }
 
-    if (res[1].id !== userID2) {
+    if (res[1].id !== userId2) {
         return `3: ${JSON.stringify(res)}`;
     }
     if (res[1].email !== email2) {
         return `4: ${JSON.stringify(res)}`;
     }
 
-    await api(`delete/users`, { userID: userID1 });
-    await api(`delete/users`, { userID: userID2 });
+    await api(`delete/users`, { userId: userId1 });
+    await api(`delete/users`, { userId: userId2 });
 
     return true;
 });
 
 Test.test('Users | Creating', async (api) => {
-    const { userID: userID1, sessionID: sessionID1 } = await generateUser(api, 0);
-    const { userID: userID2, sessionID: sessionID2 } = await generateUser(api);
+    const { userId: userId1, sessionId: sessionId1 } = await generateUser(api, 0);
+    const { userId: userId2, sessionId: sessionId2 } = await generateUser(api);
 
     let res = await api(`create/users`, {
-        session: sessionID2,
+        session: sessionId2,
         email: 'fake@example.com',
         password: 'mypassword',
         year: 10
@@ -361,7 +361,7 @@ Test.test('Users | Creating', async (api) => {
         return `0: ${JSON.stringify(res)}`;
     }
     res = await api(`create/users`, {
-        sessionID: sessionID1,
+        sessionId: sessionId1,
         email: 'fake@example.com',
         password: 'mypassword',
         year: 10
@@ -375,63 +375,63 @@ Test.test('Users | Creating', async (api) => {
         email: 'fake@example.com',
         password: 'mypassword',
     });
-    if (!res.ok || res.status !== 200 || !res.sessionID || !res.userID) {
+    if (!res.ok || res.status !== 200 || !res.sessionId || !res.userId) {
         return `5: ${JSON.stringify(res)}`;
     }
 
-    const { sessionID: sessionID3, userID: userID3 } = res;
+    const { sessionId: sessionId3, userId: userId3 } = res;
 
     res = await api(`get/users`, {
-        session: sessionID1,
-        userID: userID3
+        session: sessionId1,
+        userId: userId3
     });
     if (res.email !== 'fake@example.com') {
         return `6: ${JSON.stringify(res)}`;
     }
 
     res = await api(`get/users`, {
-        session: sessionID3,
-        userID: userID3
+        session: sessionId3,
+        userId: userId3
     });
     if (!res.ok || res.email !== 'fake@example.com') {
         return `7: ${JSON.stringify(res)}`;
     }
     
-    await api(`delete/users`, { userID: userID1 });
-    await api(`delete/users`, { userID: userID2 });
-    await api(`delete/users`, { userID: userID3 });
+    await api(`delete/users`, { userId: userId1 });
+    await api(`delete/users`, { userId: userId2 });
+    await api(`delete/users`, { userId: userId3 });
 
     return true;
 });
 
 Test.test('Users | Updating admin status', async (api) => {
-    const { userID: userID1, sessionID: sessionID1 } = await generateUser(api, 0);
-    const { userID: userID2, sessionID: sessionID2 } = await generateUser(api);
+    const { userId: userId1, sessionId: sessionId1 } = await generateUser(api, 0);
+    const { userId: userId2, sessionId: sessionId2 } = await generateUser(api);
     
     let res = await api(`update/users/admin`, {
-        session: sessionID2,
-        userId: userID2,
+        session: sessionId2,
+        userId: userId2,
         admin: true
     });
     if (res.ok || res.status !== 401 || res.data) {
         return `0: ${JSON.stringify(res)}`;
     }
     res = await api(`get/users`, {
-        userID: userID2
+        userId: userId2
     });
     if (res['admin'] !== 0) {
         return `1: ${JSON.stringify(res)}`;
     }
     res = await api(`update/users/admin`, {
-        session: sessionID1,
-        userID: userID2,
+        session: sessionId1,
+        userId: userId2,
         admin: true
     });
     if (res.ok !== true) {
         return `2: ${JSON.stringify(res)}`;
     }
     res = await api(`get/users`, {
-        userID: userID2
+        userId: userId2
     });
     if (res['admin'] !== 1) {
         return `3: ${JSON.stringify(res)}`;
@@ -441,41 +441,41 @@ Test.test('Users | Updating admin status', async (api) => {
     // TODO Demoting other admins
     // TODO Promoting other admins
     
-    await api(`delete/users`, { userID: userID1 });
-    await api(`delete/users`, { userID: userID2 });
+    await api(`delete/users`, { userId: userId1 });
+    await api(`delete/users`, { userId: userId2 });
 
     return true;
 });
 
 Test.test('Users | Deleting', async (api) => {
-    const { userID: userID1, sessionID: sessionID1 } = await generateUser(api, 0);
-    const { userID: userID2, sessionID: sessionID2 } = await generateUser(api);
-    const { userID: userID3, sessionID: sessionID3 } = await generateUser(api);
+    const { userId: userId1, sessionId: sessionId1 } = await generateUser(api, 0);
+    const { userId: userId2, sessionId: sessionId2 } = await generateUser(api);
+    const { userId: userId3, sessionId: sessionId3 } = await generateUser(api);
 
     // non-admin deleting admin
     let res = await api(`delete/users`, {
-        session: sessionID2,
-        userID: userID1
+        session: sessionId2,
+        userId: userId1
     });
     if (res.ok || res.status !== 401 || res.code) {
         return `0: ${JSON.stringify(res)}`;
     }
     res = await api(`get/sessions/auth-level`, {
-        sessionID: sessionID1
+        sessionId: sessionId1
     });
     if (res.level !== 2) {
         return `1: ${JSON.stringify(res)}`;
     }
     // non-admin deleting non-admin
     res = await api(`delete/users`, {
-        session: sessionID2,
-        userID: userID3
+        session: sessionId2,
+        userId: userId3
     });
     if (res.ok || res.status !== 401 || res.code) {
         return `2: ${JSON.stringify(res)}`;
     }
     res = await api(`get/sessions/auth-level`, {
-        sessionID: sessionID3
+        sessionId: sessionId3
     });
     if (res.level !== 1) {
         return `3: ${JSON.stringify(res)}`;
@@ -483,14 +483,14 @@ Test.test('Users | Deleting', async (api) => {
 
     // Admin deleting non-admin
     res = await api(`delete/users`, {
-        session: sessionID1,
-        userID: userID2
+        session: sessionId1,
+        userId: userId2
     });
     if (res.ok !== true) {
         return `4: ${JSON.stringify(res)}`;
     }
     res = await api(`get/sessions/auth-level`, {
-        sessionID: sessionID2
+        sessionId: sessionId2
     });
     if (res.level !== 0) {
         return `5: ${JSON.stringify(res)}`;
@@ -498,86 +498,86 @@ Test.test('Users | Deleting', async (api) => {
 
     // Deleting self
     res = await api(`delete/users`, {
-        session: sessionID1,
-        userID: userID1
+        session: sessionId1,
+        userId: userId1
     });
     if (res.ok || res.status !== 403 || res.code) {
         return `6: ${JSON.stringify(res)}`;
     }
     res = await api(`get/sessions/auth-level`, {
-        sessionID: sessionID1
+        sessionId: sessionId1
     });
     if (res.level !== 2) {
         return `6: ${JSON.stringify(res)}`;
     }
 
-    await api(`delete/users`, { userID: userID1 });
-    await api(`delete/users`, { userID: userID2 });
-    await api(`delete/users`, { userID: userID3 });
+    await api(`delete/users`, { userId: userId1 });
+    await api(`delete/users`, { userId: userId2 });
+    await api(`delete/users`, { userId: userId3 });
 
     return true;
 });
 
 
 Test.test(`Users | Updating year`, async (api) => {
-    const { userID: userID1, sessionID: sessionID1 } = await generateUser(api, 0);
-    const { userID: userID2, sessionID: sessionID2 } = await generateUser(api);
+    const { userId: userId1, sessionId: sessionId1 } = await generateUser(api, 0);
+    const { userId: userId2, sessionId: sessionId2 } = await generateUser(api);
 
     let res = await api(`get/users`, {
-        userID: userID2
+        userId: userId2
     });
     if (res['year'] !== 10) {
         return `0: ${JSON.stringify(res)}`;
     }
     res = await api(`update/users/year`, {
-        session: sessionID2,
-        userID: userID2,
+        session: sessionId2,
+        userId: userId2,
         by: 1
     });
     if (res.ok || res.status !== 401 || res.data) {
         return `1: ${JSON.stringify(res)}`;
     }
     res = await api(`get/users`, {
-        sessionID: sessionID2
+        sessionId: sessionId2
     });
     if (res['year'] !== 10) {
         return `2: ${JSON.stringify(res)}`;
     }
     res = await api(`update/users/year`, {
-        session: sessionID1,
-        userID: userID2,
+        session: sessionId1,
+        userId: userId2,
         by: 1
     });
     if (!res.ok) {
         return `3: ${JSON.stringify(res)}`;
     }
-    res = await api(`get/users`, { userID: userID2 });
+    res = await api(`get/users`, { userId: userId2 });
     if (res['year'] !== 11) {
         return `4: ${JSON.stringify(res)}`;
     }
     res = await api(`update/users/year`, {
-        session: sessionID1,
-        userID: userID2,
+        session: sessionId1,
+        userId: userId2,
         by: -1
     });
     if (!res.ok) {
         return `5: ${JSON.stringify(res)}`;
     }
-    res = await api(`get/users`, { userID: userID2 });
+    res = await api(`get/users`, { userId: userId2 });
     if (res['year'] !== 10) {
         return `6: ${JSON.stringify(res)}`;
     }
     res = await api(`update/users/year`, {
-        session: sessionID1,
-        userID: userID2,
+        session: sessionId1,
+        userId: userId2,
         by: 3
     });
     if (res.ok || res.status !== 400) {
         return `7: ${JSON.stringify(res)}`;
     }
 
-    await api(`delete/users`, { userID: userID2 });
-    await api(`delete/users`, { userID: userID1 });
+    await api(`delete/users`, { userId: userId2 });
+    await api(`delete/users`, { userId: userId1 });
 
     return true;
 });

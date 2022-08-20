@@ -27,7 +27,7 @@ export type testExecutor = (api: API, args: CommandLineOptions) => Promise<boole
 const adminPassword = 'password';
 const adminEmail = 'admin@example.com';
 
-let adminSessionID: string | null = null;
+let adminSessionId: string | null = null;
 
 /**
  * Makes API request to localhost API server
@@ -38,7 +38,7 @@ async function api (path: string, body: Record<string, any> = {}): Promise<any> 
   const url = `http://localhost:${process.env.PORT}/${path}`;
 
   if (!body.session && body.session !== '') {
-    if (adminSessionID === null) {
+    if (adminSessionId === null) {
       let res = await api(`create/sessions/from-login`, {
         email: adminEmail,
         password: adminPassword,
@@ -47,10 +47,10 @@ async function api (path: string, body: Record<string, any> = {}): Promise<any> 
       if (res.error || !res.ok) {
         throw c.red(res.error);
       }
-      adminSessionID = res.sessionID;
-      console.log(c.green(`Got admin session ID: ${adminSessionID}`));
+      adminSessionId = res.sessionId;
+      console.log(c.green(`Got admin session Id: ${adminSessionId}`));
     }
-    body.session = adminSessionID;
+    body.session = adminSessionId;
   }
 
   // get request to api server

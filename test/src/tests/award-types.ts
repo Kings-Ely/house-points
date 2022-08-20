@@ -14,7 +14,7 @@ Test.test('Award Types | Creating, getting and deleting', async (api) => {
         name: 'House Tie',
         required: 18
     });
-    if (res.ok !== true || res.status !== 201) {
+    if (res.ok !== true || res.status !== 201 || !res.id) {
         return `2: ${JSON.stringify(res)}`;
     }
     res = await api(`get/award-types`);
@@ -35,7 +35,7 @@ Test.test('Award Types | Creating, getting and deleting', async (api) => {
         return `7: ${JSON.stringify(res)}`;
     }
     res = await api(`delete/award-types`, {
-        awardTypeID: res.data?.[0]?.id
+        awardTypeId: res.data?.[0]?.id
     });
     if (res.ok !== true || res.status !== 200) {
         return `8: ${JSON.stringify(res)}`;
@@ -50,10 +50,10 @@ Test.test('Award Types | Creating, getting and deleting', async (api) => {
 });
 
 Test.test('Award Types | Creating, getting and deleting auth', async (api) => {
-    const { sessionID, userID } = await generateUser(api);
+    const { sessionId, userId } = await generateUser(api);
 
     let res = await api(`get/award-types`, {
-        session: sessionID
+        session: sessionId
     });
     if (res?.ok !== true || res?.data?.length !== 0) {
         return `0: ${JSON.stringify(res)}`;
@@ -62,7 +62,7 @@ Test.test('Award Types | Creating, getting and deleting auth', async (api) => {
     res = await api(`create/award-types`, {
         name: 'House Tie',
         required: 18,
-        session: sessionID
+        session: sessionId
     });
     if (res?.ok || res?.status !== 401) {
         return `2: ${JSON.stringify(res)}`;
@@ -75,7 +75,7 @@ Test.test('Award Types | Creating, getting and deleting auth', async (api) => {
     });
 
     res = await api(`get/award-types`, {
-        session: sessionID
+        session: sessionId
     });
     if (res.ok !== true) {
         return `3: ${JSON.stringify(res)}`;
@@ -85,7 +85,7 @@ Test.test('Award Types | Creating, getting and deleting auth', async (api) => {
     }
 
     res = await api(`delete/award-types`, {
-        session: sessionID,
+        session: sessionId,
         id: res.data?.[0]?.id
     });
     if (res.ok || res.status !== 401) {
@@ -93,16 +93,16 @@ Test.test('Award Types | Creating, getting and deleting auth', async (api) => {
     }
 
     await api(`delete/award-types`, {
-        awardTypeID: res.data?.[0]?.id
+        awardTypeId: res.data?.[0]?.id
     });
 
-    await api(`delete/users`, { userID });
+    await api(`delete/users`, { userId });
 
     return true;
 });
 
 Test.test('Award  Types | Updating name', async (api) => {
-    const { sessionID, userID } = await generateUser(api);
+    const { sessionId, userId } = await generateUser(api);
 
     await api(`create/award-types`, {
         name: 'House Points',
@@ -119,7 +119,7 @@ Test.test('Award  Types | Updating name', async (api) => {
 
     res = await api(`update/award-types/name`, {
         name: 'House Tie 2',
-        awardTypeID: res.data?.[0]?.id
+        awardTypeId: res.data?.[0]?.id
     });
     if (res.ok !== true || res.status !== 200) {
         return `2: ${JSON.stringify(res)}`;
@@ -133,15 +133,15 @@ Test.test('Award  Types | Updating name', async (api) => {
     }
 
     res = await api(`update/award-types/name`, {
-        session: sessionID,
+        session: sessionId,
         name: 'House Tie',
-        awardTypeID: res.data?.[0]?.id
+        awardTypeId: res.data?.[0]?.id
     });
     if (res.ok || res.status !== 401) {
         return `5: ${JSON.stringify(res)}`;
     }
     res = await api(`get/award-types`, {
-        session: sessionID
+        session: sessionId
     });
     if (res.ok !== true) {
         return `6: ${JSON.stringify(res)}`;
@@ -151,16 +151,16 @@ Test.test('Award  Types | Updating name', async (api) => {
     }
 
     await api(`delete/award-types`, {
-        awardTypeID: res.data?.[0]?.id
+        awardTypeId: res.data?.[0]?.id
     });
 
-    await api(`delete/users`, { userID });
+    await api(`delete/users`, { userId });
 
     return true;
 });
 
 Test.test('Award  Types | Updating quantity', async (api) => {
-    const { sessionID, userID } = await generateUser(api);
+    const { sessionId, userId } = await generateUser(api);
 
     await api(`create/award-types`, {
         name: 'House Tie',
@@ -176,7 +176,7 @@ Test.test('Award  Types | Updating quantity', async (api) => {
     }
 
     res = await api(`update/award-types/hps-required`, {
-        awardTypeID: res.data?.[0]?.id,
+        awardTypeId: res.data?.[0]?.id,
         quantity: 20
     });
     if (res.ok !== true || res.status !== 200) {
@@ -191,15 +191,15 @@ Test.test('Award  Types | Updating quantity', async (api) => {
     }
 
     res = await api(`update/award-types/hps-required`, {
-        session: sessionID,
-        awardTypeID: res.data?.[0]?.id,
+        session: sessionId,
+        awardTypeId: res.data?.[0]?.id,
         quantity: 18
     });
     if (res.ok || res.status !== 401) {
         return `5: ${JSON.stringify(res)}`;
     }
     res = await api(`get/award-types`, {
-        session: sessionID
+        session: sessionId
     });
     if (res.ok !== true) {
         return `6: ${JSON.stringify(res)}`;
@@ -210,7 +210,7 @@ Test.test('Award  Types | Updating quantity', async (api) => {
 
     await api(`delete/award-types`, { id: res.data?.[0]?.id });
 
-    await api(`delete/users`, { userID });
+    await api(`delete/users`, { userId });
 
     return true;
 });

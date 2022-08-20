@@ -32,13 +32,13 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
         return `3: ${JSON.stringify(res)}`;
     }
 
-    const { sessionID, userID } = await generateUser(api);
+    const { sessionId, userId } = await generateUser(api);
 
     // same but without admin user
 
     // this should fail, only admins can create events
     res = await api(`create/events`, {
-        session: sessionID,
+        session: sessionId,
         name: 'doing something else 2022',
         time: now
     });
@@ -48,7 +48,7 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
 
     // everyone logged in can see the events though
     res = await api(`get/events`, {
-        session: sessionID
+        session: sessionId
     });
     if (res?.data?.length !== 1) {
         return `5: ${JSON.stringify(res)}`;
@@ -61,8 +61,8 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
 
     // deleting shouldn't work without admin user either
     res = await api(`delete/events`, {
-        session: sessionID,
-        eventID: id
+        session: sessionId,
+        eventId: id
     });
     if (res.ok || res.status !== 401) {
         return `7: ${JSON.stringify(res)}`;
@@ -75,7 +75,7 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
     }
 
     // now delete with admin user
-    res = await api(`delete/events`, { eventID: id });
+    res = await api(`delete/events`, { eventId: id });
     if (res.ok !== true || res.status !== 200) {
         return `9: ${JSON.stringify(res)}`;
     }
@@ -86,7 +86,7 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
         return `10: ${JSON.stringify(res)}`;
     }
 
-    await api(`delete/users`, { userID });
+    await api(`delete/users`, { userId });
 
     return true;
 });
@@ -94,7 +94,7 @@ Test.test('Events | Creating, getting and deleting events', async (api) => {
 Test.test('Events | Updating event name', async (api) => {
     const now = Math.round(Date.now() / 1000);
 
-    const { sessionID, userID } = await generateUser(api);
+    const { sessionId, userId } = await generateUser(api);
 
     // create event
     let res = await api(`create/events`, {
@@ -116,7 +116,7 @@ Test.test('Events | Updating event name', async (api) => {
 
     // update event name
     res = await api(`update/events/name`, {
-        eventID: id,
+        eventId: id,
         name: 'doing something else 2022'
     });
     if (res.ok !== true || res.status !== 200) {
@@ -137,8 +137,8 @@ Test.test('Events | Updating event name', async (api) => {
 
     // updating without permission
     res = await api(`update/events/name`, {
-        session: sessionID,
-        eventID: id,
+        session: sessionId,
+        eventId: id,
         name: 'not doing anything'
     });
     if (res.ok || res.status !== 401) {
@@ -157,8 +157,8 @@ Test.test('Events | Updating event name', async (api) => {
         return `Expected event name to be 'doing something else 2022', got '${name3}'`;
     }
 
-    await api(`delete/users`, { userID: userID });
-    await api(`delete/events`, { eventID: id });
+    await api(`delete/users`, { userId: userId });
+    await api(`delete/events`, { eventId: id });
 
     return true;
 });
@@ -169,7 +169,7 @@ Test.test('Events | Updating event timestamp', async (api) => {
     // 1 week ago
     const then = now - 60 * 60 * 24 * 7;
 
-    const { sessionID, userID } = await generateUser(api);
+    const { sessionId, userId } = await generateUser(api);
 
     // create event
     let res = await api(`create/events`, {
@@ -194,7 +194,7 @@ Test.test('Events | Updating event timestamp', async (api) => {
 
     // update event name
     res = await api(`update/events/time`, {
-        eventID: id,
+        eventId: id,
         time: then
     });
     if (res.ok !== true || res.status !== 200) {
@@ -212,8 +212,8 @@ Test.test('Events | Updating event timestamp', async (api) => {
 
     // updating without permission
     res = await api(`update/events/time`, {
-        session: sessionID,
-        eventID: id,
+        session: sessionId,
+        eventId: id,
         time: now
     });
     if (res.ok || res.status !== 401) {
@@ -229,8 +229,8 @@ Test.test('Events | Updating event timestamp', async (api) => {
         return `Expected event time to be '${then}', got '${time3}'`;
     }
 
-    await api(`delete/users`, { userID });
-    await api(`delete/events`, { eventID: id });
+    await api(`delete/users`, { userId });
+    await api(`delete/events`, { eventId: id });
 
     return true;
 });
@@ -269,8 +269,8 @@ Test.test('Events | Events are gotten in order of time', async (api) => {
         return `Expected event time to be '${then}', got '${time2}'`;
     }
 
-    await api(`delete/events`, { eventID: id1 });
-    await api(`delete/events`, { eventID: id2 });
+    await api(`delete/events`, { eventId: id1 });
+    await api(`delete/events`, { eventId: id2 });
 
     // repeat the other way round
     await api(`create/events`, {
@@ -298,8 +298,8 @@ Test.test('Events | Events are gotten in order of time', async (api) => {
         return `Expected event time to be '${then}', got '${time2}'`;
     }
 
-    await api(`delete/events`, { eventID: id1 });
-    await api(`delete/events`, { eventID: id2 });
+    await api(`delete/events`, { eventId: id1 });
+    await api(`delete/events`, { eventId: id2 });
 
     return true;
 });

@@ -26,15 +26,15 @@ async function refresh () {
 
 async function awardTypeUpdateName (id, name) {
 	await core.api(`update/award-types/name`, {
-		awardTypeID: id,
+		awardTypeId: id,
 		name
 	});
 	await refresh();
 }
 
-async function awardTypeUpdateDesc (awardTypeID, description) {
+async function awardTypeUpdateDesc (awardTypeId, description) {
 	await core.api(`update/award-types/description`, {
-		awardTypeID,
+		awardTypeId,
 		description
 	});
 	await refresh();
@@ -42,17 +42,17 @@ async function awardTypeUpdateDesc (awardTypeID, description) {
 
 async function awardTypeUpdateRequired (id, value) {
 	await core.api(`update/award-types/hps-required`, {
-		awardTypeID: id,
+		awardTypeId: id,
 		quantity: parseInt(value)
 	});
 	await refresh();
 }
 
-async function awardTypeDelete (awardTypeID) {
+async function awardTypeDelete (awardTypeId) {
 	if (!confirm('Are you sure you want to delete this award type?')) {
 		return;
 	}
-	await core.api(`delete/award-types`, { awardTypeID });
+	await core.api(`delete/award-types`, { awardTypeId });
 	await refresh();
 }
 

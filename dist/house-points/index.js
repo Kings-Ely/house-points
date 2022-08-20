@@ -11,10 +11,10 @@ import HousePoint from "../assets/js/components/HousePoint.js";
  *     created: number,
  *     completed: number,
  *     rejectMessage: string,
- *     userID: string,
+ *     userId: string,
  *     studentEmail: string,
  *     studentYear: number,
- *     eventID: string,
+ *     eventId: string,
  *     eventName: string,
  *     eventDescription: string,
  *     eventTime: number
@@ -105,8 +105,8 @@ async function deleteSelected () {
     }
 
     // send API requests at the same time and wait for all to finish
-    await Promise.all(selected.map(async housePointID => {
-        await core.api(`delete/house-points`, { housePointID });
+    await Promise.all(selected.map(async housePointId => {
+        await core.api(`delete/house-points`, { housePointId });
     }));
 
     selected.splice(0, selected.length);

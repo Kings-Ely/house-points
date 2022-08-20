@@ -5,8 +5,8 @@ import route from '../';
 import {
     addHousePointsToUser,
     AUTH_ERR,
-    generateUUID,
-    IDFromSession,
+    generateUUId,
+    IdFromSession,
     isAdmin,
     isLoggedIn, passwordHash, validPassword
 } from '../util';
@@ -15,15 +15,15 @@ import {
 /**
  * @admin
  * Gets all users
- * @param userID
+ * @param userId
  * @param email
- * @param sessionID
+ * @param sessionId
  */
 route('get/users', async ({ query, body }) => {
-    const { userID='', email='', sessionID='' } = body;
+    const { userId='', email='', sessionId='' } = body;
 
-    if (sessionID) {
-        if (userID) return `Invalid body: cannot specify both 'session' and 'id'`;
+    if (sessionId) {
+        if (userId) return `Invalid body: cannot specify both 'session' and 'id'`;
         if (email) return `Invalid body: cannot specify both 'session' and 'email'`;
 
         const data = await query`
@@ -34,7 +34,7 @@ route('get/users', async ({ query, body }) => {
                 users.student,
                 users.year
             FROM users, sessions
-            WHERE sessions.id = ${sessionID}
+            WHERE sessions.id = ${sessionId}
                 AND sessions.user = users.id
                 AND UNIX_TIMESTAMP(sessions.opened) + sessions.expires > UNIX_TIMESTAMP()
                 AND sessions.active = 1
@@ -53,7 +53,7 @@ route('get/users', async ({ query, body }) => {
     }
 
     if (email) {
-        if (userID) return `Invalid body: cannot specify both 'email' and 'id'`;
+        if (userId) return `Invalid body: cannot specify both 'email' and 'id'`;
         if (!await isLoggedIn(body, query)) return AUTH_ERR;
 
         const { email } = body;
@@ -81,13 +81,13 @@ route('get/users', async ({ query, body }) => {
 
         // censor the data if they don't have access
         if (!await isAdmin(body, query)) {
-            const id = await IDFromSession(query, body.session);
+            const id = await IdFromSession(query, body.session);
             if (id !== user.id) {
                 delete user.id;
 
                 for (let hp of user['housePoints']) {
                     delete hp.id;
-                    delete hp.userID;
+                    delete hp.userId;
                     delete hp.rejectMessage;
                 }
             }
@@ -97,7 +97,7 @@ route('get/users', async ({ query, body }) => {
     }
 
     // gets all users
-    if (!userID) {
+    if (!userId) {
         if (!await isAdmin(body, query)) return AUTH_ERR;
 
         const data = await query`
@@ -123,7 +123,7 @@ route('get/users', async ({ query, body }) => {
         return { data };
     }
 
-    // user with specific ID
+    // user with specific Id
     const data = await query`
         SELECT 
             id,
@@ -132,7 +132,7 @@ route('get/users', async ({ query, body }) => {
             student,
             year
         FROM users
-        WHERE id = ${userID}
+        WHERE id = ${userId}
     `;
 
     if (!data.length) return {
@@ -149,18 +149,18 @@ route('get/users', async ({ query, body }) => {
 
 /**
  * @admin
- * Gets the details of multiple users from a list of IDs.
- * IDs are delimited by ','
- * @param {string[]} userIDs
+ * Gets the details of multiple users from a list of Ids.
+ * Ids are delimited by ','
+ * @param {string[]} userIds
  */
 route('get/users/batch-info', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userIDs: ids } = body;
+    const { userIds: ids } = body;
 
     if (!ids?.length) return {
         status: 406,
-        error: 'No IDs'
+        error: 'No Ids'
     };
 
     const data = await query`
@@ -216,7 +216,7 @@ route('get/users/leaderboard', async ({ query, body }) => {
  * @admin
  * Creates an account from an email and password.
  * Note admin - students cannot create their own accounts
- * Generates a salt and ID for the student.
+ * Generates a salt and Id for the student.
  * Hashes the password along with the salt before storing it in the DB.
  *
  * @param {(13 >= number >= 9) || (number == 0)} year - year of student
@@ -260,40 +260,40 @@ route('create/users', async ({ query, body }) => {
 
     const [ passHash, salt ] = passwordHash(password);
 
-    const userID = await generateUUID();
+    const userId = await generateUUId();
 
     await query`
         INSERT INTO users
             (id,          email,    password,        salt,    year,    admin,    student)
         VALUES
-            (${userID}, ${email}, ${passHash}, ${salt}, ${year}, ${admin}, ${student})
+            (${userId}, ${email}, ${passHash}, ${salt}, ${year}, ${admin}, ${student})
     `;
 
-    return { status: 201, userID };
+    return { status: 201, userId };
 });
 
 /**
  * @admin
- * Change a user's admin status from their ID.
- * If the userID is the same as the ID associated with the session in cookies
+ * Change a user's admin status from their Id.
+ * If the userId is the same as the Id associated with the session in cookies
  * it returns an error.
  * Otherwise, you could remove all admins from the system.
  *
  * @param {1|any} admin - whether they should be an admin now.
  *                        1 for admin, anything else for not admin.
- * @param userID
+ * @param userId
  */
 route('update/users/admin', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userID='', admin=false } = body;
+    const { userId='', admin=false } = body;
 
     const mySession = body.session;
-    if (!mySession) return 'No session ID found';
+    if (!mySession) return 'No session Id found';
 
     if (!admin) return 'Must specify admin in body';
 
-    if (await IDFromSession(query, mySession) === userID) return {
+    if (await IdFromSession(query, mySession) === userId) return {
         status: 403,
         error: 'You cannot change your own admin status'
     };
@@ -301,7 +301,7 @@ route('update/users/admin', async ({ query, body }) => {
     const queryRes = await query<mysql.OkPacket>`
         UPDATE users
         SET admin = ${admin}
-        WHERE id = ${userID}
+        WHERE id = ${userId}
    `;
     if (!queryRes.affectedRows) return {
         status: 406,
@@ -315,13 +315,13 @@ route('update/users/admin', async ({ query, body }) => {
  * Needed for when everyone goes up a year.
  * Changes a students year by an amount between -3 and 3 and not 0
  * Cannot change a non-student's year from 0
- * @param userID
+ * @param userId
  * @param {int} by
  */
 route('update/users/year', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userID: user='', by: yearChange } = body;
+    const { userId: user='', by: yearChange } = body;
 
     if (!Number.isInteger(yearChange)) {
         return `Year change is not an integer`;
@@ -363,21 +363,21 @@ route('update/users/year', async ({ query, body }) => {
 });
 
 /**
- * Updates the password from a session ID and new password.
+ * Updates the password from a session Id and new password.
  * This is a high risk route, as you are updating the password of a user,
  * and this must be able to be done by a user without login details
  * if they are using the 'forgot password' feature.
- * @param sessionID
+ * @param sessionId
  * @param newPassword
  */
 route('update/users/password', async ({ query, body }) => {
-    const { sessionID='', newPassword='' } = body;
+    const { sessionId='', newPassword='' } = body;
 
-    const userID = await IDFromSession(query, sessionID);
+    const userId = await IdFromSession(query, sessionId);
 
-    if (!userID) return {
+    if (!userId) return {
         status: 401,
-        error: 'Invalid session ID'
+        error: 'Invalid session Id'
     }
 
     const validPasswordRes = validPassword(newPassword);
@@ -392,7 +392,7 @@ route('update/users/password', async ({ query, body }) => {
         SET
             password = ${passHash},
             salt = ${salt}
-        WHERE id = ${userID}
+        WHERE id = ${userId}
     `;
 
     if (!queryRes.affectedRows) return {
@@ -404,34 +404,34 @@ route('update/users/password', async ({ query, body }) => {
         UPDATE sessions
         SET active = 0
         WHERE
-            id = ${sessionID}
+            id = ${sessionId}
             OR UNIX_TIMESTAMP(opened) + expires > UNIX_TIMESTAMP()
     `;
 });
 
 /**
  * @admin
- * Deletes a user from a user ID
- * @param userID
+ * Deletes a user from a user Id
+ * @param userId
  */
 route('delete/users', async ({ query, body}) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userID } = body;
+    const { userId } = body;
 
-    if (await IDFromSession(query, body.session) === userID) return {
+    if (await IdFromSession(query, body.session) === userId) return {
         status: 403,
         error: 'You cannot delete your own account'
     };
 
     await query`
         DELETE FROM housepoints
-        WHERE student = ${userID}
+        WHERE student = ${userId}
     `;
 
     const queryRes = await query<mysql.OkPacket>`
         DELETE FROM users
-        WHERE id = ${userID}
+        WHERE id = ${userId}
     `;
     if (!queryRes.affectedRows) return {
         status: 406,

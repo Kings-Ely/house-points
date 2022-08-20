@@ -1,22 +1,22 @@
 import route from '../index';
 import log from '../log';
-import { AUTH_ERR, authLvl, generateUUID, isAdmin } from '../util';
+import { AUTH_ERR, authLvl, generateUUId, isAdmin } from '../util';
 import emailValidator from "email-validator";
 import * as notifications from '../notifications';
 import type mysql from "mysql2";
 
 /**
- * Gets the authorisation level of a session ID
+ * Gets the authorisation level of a session Id
  * Note that this is one of the few routes which does not require logged in or admin.
  *
- * @param sessionID
+ * @param sessionId
  * @returns 0 for invalid/expired, >= 1 for logged in, 2 for admin user
  */
 route('get/sessions/auth-level', async ({ query, body }) => {
-    const { sessionID='' } = body;
+    const { sessionId='' } = body;
 
     return {
-        level: await authLvl(sessionID, query)
+        level: await authLvl(sessionId, query)
     };
 });
 
@@ -31,7 +31,7 @@ route('get/sessions/active', async ({ query, body }) => {
     return { data: await query`
         SELECT 
             users.email,
-            users.id as userID,
+            users.id as userId,
             sessions.id,
             UNIX_TIMESTAMP(sessions.opened) as opened
         FROM sessions, users
@@ -90,35 +90,35 @@ route('create/sessions/from-login', async ({ query, body }) => {
         return 'Invalid email or password';
     }
 
-    const sessionID = await generateUUID();
+    const sessionId = await generateUUId();
 
     await query`
         INSERT INTO sessions (id, user, expires)
-        VALUES (${sessionID}, ${res[0].id}, ${expires});
+        VALUES (${sessionId}, ${res[0].id}, ${expires});
     `;
 
-    return { sessionID, userID: res[0].id };
+    return { sessionId, userId: res[0].id };
 });
 
 /**
  * @admin
- * Creates a session from a user ID.
+ * Creates a session from a user Id.
  * This is an admin route because you should only be able to create a session from a
- * user ID if you already have a valid session.
+ * user Id if you already have a valid session.
  * This means the root of all sessions is valid login details.
- * Otherwise, if someone's userID was leaked, it could be used to continually generate sessions,
- * removing the benefits of sessions entirely over simply using the userID as the auth token.
+ * Otherwise, if someone's userId was leaked, it could be used to continually generate sessions,
+ * removing the benefits of sessions entirely over simply using the userId as the auth token.
  *
  * @param {number} [expires=86400] - the number of seconds the session should be valid for
- * @param userID
+ * @param userId
  */
 route('create/sessions/from-user-id', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { userID='', expires: expiresRaw = '86400'} = body;
+    const { userId='', expires: expiresRaw = '86400'} = body;
 
-    if (!userID) {
-        return 'UserID not specified';
+    if (!userId) {
+        return 'UserId not specified';
     }
     const expires = parseInt(expiresRaw);
     if (isNaN(expires)) {
@@ -134,18 +134,18 @@ route('create/sessions/from-user-id', async ({ query, body }) => {
     const res = await query`
         SELECT email
         FROM users
-        WHERE id = ${userID}
+        WHERE id = ${userId}
     `;
-    if (!res.length) return 'Invalid userID';
+    if (!res.length) return 'Invalid userId';
 
-    const sessionID = await generateUUID();
+    const sessionId = await generateUUId();
 
     await query`
         INSERT INTO sessions (id, user, expires)
-        VALUES (${sessionID}, ${userID}, ${expires});
+        VALUES (${sessionId}, ${userId}, ${expires});
     `;
 
-    return { sessionID, userID };
+    return { sessionId, userId };
 });
 
 /**
@@ -175,30 +175,30 @@ route('create/sessions/for-forgotten-password', async ({ query, body }) => {
         log.error`Multiple users found with email '${email}'`;
         return 'Invalid email';
     }
-    const userID = res[0].id;
-    const sessionID = await generateUUID();
+    const userId = res[0].id;
+    const sessionId = await generateUUId();
 
     await query`
         INSERT INTO sessions (id, user, expires)
-        VALUES (${sessionID}, ${userID}, ${60*60});
+        VALUES (${sessionId}, ${userId}, ${60*60});
     `;
 
-    await notifications.forgottenPasswordEmail(query, userID, sessionID);
+    await notifications.forgottenPasswordEmail(query, userId, sessionId);
 });
 
 /**
  * Removes the session from the database
- * @param sessionID
+ * @param sessionId
  */
 route('delete/sessions/with-id', async ({ query, body }) => {
-    const { sessionID='' } = body;
+    const { sessionId='' } = body;
 
-    if (!sessionID) return 'Session ID not specified';
+    if (!sessionId) return 'Session Id not specified';
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE sessions
         SET active = 0
-        WHERE id = ${sessionID}
+        WHERE id = ${sessionId}
     `;
     if (queryRes.affectedRows === 0) return {
         status: 406,

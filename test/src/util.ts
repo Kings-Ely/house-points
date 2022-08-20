@@ -12,8 +12,8 @@ export const randomFromAlph = (len=5) => {
 
 export interface IGenerateUserRes {
     password: string;
-    sessionID: string
-    userID: string;
+    sessionId: string
+    userId: string;
     email: string;
 }
 
@@ -36,7 +36,7 @@ export async function generateUser (api: API, year=10): Promise<IGenerateUserRes
     res = await api(`create/sessions/from-login`, {
         email, password
     });
-    if (res.ok !== true || res.status !== 200 || typeof res.sessionID !== 'string' || typeof res.userID !== 'string') {
+    if (res.ok !== true || res.status !== 200 || typeof res.sessionId !== 'string' || typeof res.userId !== 'string') {
         throw `create/sessions/from-login/email/password failed: ${JSON.stringify(res)}`;
     }
 
