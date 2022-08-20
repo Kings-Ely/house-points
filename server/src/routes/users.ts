@@ -2,11 +2,12 @@ import emailValidator from 'email-validator';
 import mysql from "mysql2";
 
 import route from '../';
+import log from "../log";
 import {
     addHousePointsToUser,
     AUTH_ERR,
     generateUUId,
-    IdFromSession,
+    idFromSession,
     isAdmin,
     isLoggedIn, passwordHash, validPassword
 } from '../util';
@@ -35,7 +36,7 @@ route('get/users', async ({ query, body }) => {
                 users.year
             FROM users, sessions
             WHERE sessions.id = ${sessionId}
-                AND sessions.user = users.id
+                AND sessions.userId = users.id
                 AND UNIX_TIMESTAMP(sessions.opened) + sessions.expires > UNIX_TIMESTAMP()
                 AND sessions.active = 1
         `;
@@ -81,7 +82,7 @@ route('get/users', async ({ query, body }) => {
 
         // censor the data if they don't have access
         if (!await isAdmin(body, query)) {
-            const id = await IdFromSession(query, body.session);
+            const id = await idFromSession(query, body.session);
             if (id !== user.id) {
                 delete user.id;
 
@@ -293,7 +294,7 @@ route('update/users/admin', async ({ query, body }) => {
 
     if (!admin) return 'Must specify admin in body';
 
-    if (await IdFromSession(query, mySession) === userId) return {
+    if (await idFromSession(query, mySession) === userId) return {
         status: 403,
         error: 'You cannot change your own admin status'
     };
@@ -373,7 +374,7 @@ route('update/users/year', async ({ query, body }) => {
 route('update/users/password', async ({ query, body }) => {
     const { sessionId='', newPassword='' } = body;
 
-    const userId = await IdFromSession(query, sessionId);
+    const userId = await idFromSession(query, sessionId);
 
     if (!userId) return {
         status: 401,
@@ -418,15 +419,17 @@ route('delete/users', async ({ query, body}) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
     const { userId } = body;
+    
+    log.error`${await idFromSession(query, body.session)} ${userId}, ${body?.isown}`;
 
-    if (await IdFromSession(query, body.session) === userId) return {
+    if (await idFromSession(query, body.session) === userId) return {
         status: 403,
         error: 'You cannot delete your own account'
     };
 
     await query`
         DELETE FROM housepoints
-        WHERE student = ${userId}
+        WHERE userId = ${userId}
     `;
 
     const queryRes = await query<mysql.OkPacket>`

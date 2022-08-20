@@ -262,14 +262,14 @@ $addStudentButton.addEventListener('click', () => {
             return;
         }
 
-        let studentYear = parseInt($yearInp.value || '0');
+        let userYear = parseInt($yearInp.value || '0');
 
-        if ((studentYear > 13 || studentYear < 9) && studentYear !== 0) {
+        if ((userYear > 13 || userYear < 9) && userYear !== 0) {
             await core.showError('Year must be between 9 and 13 or blank for non-students');
             return;
         }
 
-        if (studentYear === 0) {
+        if (userYear === 0) {
             if (!confirm(
                 'Are you sure you want this to be an non-student, admin account? If not, please provide a year.')) {
                 return;

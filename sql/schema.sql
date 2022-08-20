@@ -30,8 +30,8 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `awards` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `student` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `type` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `userId` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `awardTypeId` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `awarded` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `description` text COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -70,9 +70,9 @@ CREATE TABLE `events` (
 
 CREATE TABLE `housepoints` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `student` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `userId` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `quantity` int(11) NOT NULL DEFAULT '1',
-  `event` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `eventId` varchar(128) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `completed` timestamp NULL DEFAULT NULL,
@@ -100,7 +100,7 @@ CREATE TABLE `logs` (
 
 CREATE TABLE `sessions` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `user` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `userId` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `opened` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `expires` int(128) NOT NULL DEFAULT '86400' COMMENT '86400 is 1 day in seconds',
   `active` tinyint(1) NOT NULL DEFAULT '1'

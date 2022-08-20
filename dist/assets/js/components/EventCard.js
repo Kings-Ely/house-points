@@ -10,7 +10,7 @@ import { escapeHTML, inlineComponent } from "../main.js";
  * 		time: number,
  * 		name: string,
  * 		description: string,
- * 		studentEmail: string
+ * 		userEmail: string
  * }} Event */
 
 /**

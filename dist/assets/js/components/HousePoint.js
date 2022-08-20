@@ -173,13 +173,13 @@ const HousePoint = registerComponent((
 				<div>
 					<button
 						data-label="View User"
-						onclick="_HousePoint${id}__userPopup('${hp.studentEmail}')"
+						onclick="_HousePoint${id}__userPopup('${hp.userEmail}')"
 					>
-						${core.escapeHTML(hp.studentEmail.split('@')[0])}
+						${core.escapeHTML(hp.userEmail.split('@')[0])}
 						<span class="email-second-half">
-							@${hp.studentEmail.split('@')[1]}
+							@${hp.userEmail.split('@')[1]}
 						</span>
-						(Y${core.escapeHTML(hp.studentYear)})
+						(Y${core.escapeHTML(hp.userYear)})
 					</button>
 				</div>
 			` : ''}

@@ -93,7 +93,7 @@ route('create/sessions/from-login', async ({ query, body }) => {
     const sessionId = await generateUUId();
 
     await query`
-        INSERT INTO sessions (id, user, expires)
+        INSERT INTO sessions (id, userId, expires)
         VALUES (${sessionId}, ${res[0].id}, ${expires});
     `;
 
@@ -141,7 +141,7 @@ route('create/sessions/from-user-id', async ({ query, body }) => {
     const sessionId = await generateUUId();
 
     await query`
-        INSERT INTO sessions (id, user, expires)
+        INSERT INTO sessions (id, userId, expires)
         VALUES (${sessionId}, ${userId}, ${expires});
     `;
 
@@ -179,7 +179,7 @@ route('create/sessions/for-forgotten-password', async ({ query, body }) => {
     const sessionId = await generateUUId();
 
     await query`
-        INSERT INTO sessions (id, user, expires)
+        INSERT INTO sessions (id, userId, expires)
         VALUES (${sessionId}, ${userId}, ${60*60});
     `;
 

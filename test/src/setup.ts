@@ -15,12 +15,15 @@ async function startServer (_: CommandLineOptions) {
 			if (er) reject(er);
 
 			console.log(c.green(`Built server in ${(now() - t).toPrecision(4)}ms`));
+			t = now();
 
 			exec(`node --enable-source-maps server --logTo=test.log --logLevel=4 --dbLogLevel=2`, (err, _, er) => {
 				if (err) reject(err);
 				if (er) reject(er);
 			});
-
+			
+			console.log(c.green(`Server starting`));
+			
 			// wait for the server to start
 			setTimeout(resolve, 100);
 		});
@@ -28,7 +31,7 @@ async function startServer (_: CommandLineOptions) {
 }
 
 
-export default async function (flags: CommandLineOptions) {
+export default async function setup (flags: CommandLineOptions) {
 
 	// setup environment variables
 	config({ path: './server/.env' });

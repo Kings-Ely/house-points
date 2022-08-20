@@ -146,10 +146,10 @@ Test.test('HPs | Creating house point requests', async (api) => {
     if (hp['status'] !== 'Pending') {
         return `4: ${JSON.stringify(res)}`;
     }
-    if (hp['studentEmail'] !== email) {
+    if (hp['userEmail'] !== email) {
         return `5: ${JSON.stringify(res)}`;
     }
-    if (hp['studentYear'] !== 10) {
+    if (hp['userYear'] !== 10) {
         return `6: ${JSON.stringify(res)}`;
     }
 

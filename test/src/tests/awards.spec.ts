@@ -10,13 +10,13 @@ Test.test('Awards | Creating, getting and deleting', async (api) => {
         return `1: ${JSON.stringify(res)}`;
     }
 
-    const { id: awardTypeId } = await api(`create/awardTypes`, {
+    const { id: awardTypeId } = await api(`create/award-types`, {
         name: 'Requires 2',
         required: 2
     });
 
-    const { sessionId, userId } = await generateUser(api);
-
+    const { userId } = await generateUser(api);
+    
     res = await api(`create/awards`, {
         userId,
         awardTypeId,
@@ -31,9 +31,6 @@ Test.test('Awards | Creating, getting and deleting', async (api) => {
     res = await api(`get/awards`);
     if (res?.data?.length !== 1) {
         return `4: ${JSON.stringify(res)}`;
-    }
-    if (res.data?.[0]?.id !== awardTypeId) {
-        return `5: ${JSON.stringify(res)}`;
     }
     if (res.data?.[0]?.student !== userId) {
         return `6: ${JSON.stringify(res)}`;

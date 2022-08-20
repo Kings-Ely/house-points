@@ -12,8 +12,8 @@ import HousePoint from "../assets/js/components/HousePoint.js";
  *     completed: number,
  *     rejectMessage: string,
  *     userId: string,
- *     studentEmail: string,
- *     studentYear: number,
+ *     userEmail: string,
+ *     userYear: number,
  *     eventId: string,
  *     eventName: string,
  *     eventDescription: string,
@@ -47,7 +47,7 @@ async function showHousePointList () {
         name: `House Points (${hps.length})`,
         items: hps,
         uniqueKey: 'id',
-        searchKey: ['studentEmail', 'description', 'eventName'],
+        searchKey: ['userEmail', 'description', 'eventName'],
         searchBarHint: 'user/description',
         selected,
         withAllMenu: `
@@ -81,7 +81,7 @@ async function showHousePointList () {
         itemGenerator: (hp) => inlineComponent(HousePoint, hp, admin, true, showHousePointList, true),
         gridTemplateColsCSS: '1fr',
         filter: (item) => {
-            return filters.years.includes(item['studentYear']) &&
+            return filters.years.includes(item['userYear']) &&
                 (filters.admin ? item['admin'] : true);
         }
     });

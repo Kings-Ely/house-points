@@ -200,7 +200,7 @@ route('delete/events', async ({ query, body }) => {
     if (deleteHps) {
         await query`
             DELETE FROM housepoints
-            WHERE event = ${eventId}
+            WHERE eventId = ${eventId}
         `;
     }
 

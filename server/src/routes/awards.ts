@@ -1,5 +1,5 @@
 import route from "../";
-import { AUTH_ERR, generateUUId, isAdmin, isLoggedIn, userFromId, userFromSession } from "../util";
+import { AUTH_ERR, generateUUId, isAdmin, isLoggedIn, userFromId, userFromSession, userId } from "../util";
 import * as notifications from "../notifications";
 import mysql from "mysql2";
 
@@ -40,8 +40,8 @@ route('get/awards', async ({ query, body }) => {
             UNIX_TIMESTAMP(awards.awarded) as awarded,
             
             users.id as userId,
-            users.email as studentEmail,
-            users.year as studentYear,
+            users.email as userEmail,
+            users.year as userYear,
             
             awardTypes.name as awardName,
             awardTypes.description as awardDescription,
@@ -50,8 +50,8 @@ route('get/awards', async ({ query, body }) => {
         FROM users, awards, awardTypes
         
         WHERE
-            awards.student = users.id
-            AND awards.type = awardTypes.id
+            awards.userId = users.id
+            AND awards.awardTypeId = awardTypes.id
             
             AND ((awards.id = ${awardId})    OR ${!awardId})
             AND ((users.id = ${userId})      OR ${!userId})
@@ -74,7 +74,7 @@ route('get/awards', async ({ query, body }) => {
 
             // if the house point does not belong to the user, censor it
             delete res[i]['userId'];
-            delete res[i]['studentEmail'];
+            delete res[i]['userEmail'];
             delete res[i]['description'];
         }
     }
@@ -114,19 +114,19 @@ route('create/awards', async ({ query, body }) => {
     awardsData = await query`
         SELECT *
         FROM users, housepoints, events
-        WHERE users.id = housepoints.student
-            AND housepoints.event = events.id
+        WHERE users.id = housepoints.userId
+            AND housepoints.eventId = events.id
             AND users.id = ${userId}
             AND events.id = ${awardTypeId}
     `;
     if (awardsData.length > 0) {
-        return `Student already in event`;
+        return `Student already has that award`;
     }
 
     const id = await generateUUId();
 
     await query`
-        INSERT INTO awards (id, student, type, description)
+        INSERT INTO awards (id, userId, awardTypeId, description)
         VALUES (
             ${id},
             ${userId},
@@ -151,13 +151,33 @@ route('update/awards/description', async ({ query, body }) => {
     const { awardId: id='', description='' } = body;
 
     const queryRes = await query<mysql.OkPacket>`
-        UPDATE housepoints
+        UPDATE awards
         SET description = ${description}
         WHERE id = ${id}
     `;
 
     if (!queryRes.affectedRows) return {
         status: 406,
-        error: `No house point found with Id '${id}'`
+        error: `No award found with Id '${id}'`
     };
+});
+
+/**
+ * @admin
+ * Deletes a award from an award Id
+ * @param awardId
+ */
+route('delete/awards', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
+
+    const { awardId: id='' } = body;
+
+    const res = await query<mysql.OkPacket>`
+        DELETE FROM awards
+        WHERE id = ${id}
+    `;
+    if (!res.affectedRows) return {
+        status: 406,
+        error: `No awards to delete with Id '${id}'`
+    }
 });

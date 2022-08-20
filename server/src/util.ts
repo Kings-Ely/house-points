@@ -96,7 +96,7 @@ export async function authLvl (sessionId: string, query: queryFunc) {
         SELECT users.admin
         FROM sessions, users
         WHERE sessions.id = ${sessionId}
-            AND sessions.user = users.id
+            AND sessions.userId = users.id
             AND UNIX_TIMESTAMP(sessions.opened) + sessions.expires > UNIX_TIMESTAMP()
             AND sessions.active = 1
     `;
@@ -162,11 +162,12 @@ export function validPassword (password: string): true | string {
 /**
  * Gets the userId from a session Id
  */
-export async function IdFromSession (query: queryFunc, sessionId: string): Promise<string> {
+export async function idFromSession (query: queryFunc, sessionId: string): Promise<string> {
     const res = await query`
-        SELECT user
+        SELECT userId
         FROM sessions
-        WHERE id = ${sessionId}
+        WHERE
+            id = ${sessionId}
         AND UNIX_TIMESTAMP(opened) + expires > UNIX_TIMESTAMP()
     `;
 
@@ -176,10 +177,10 @@ export async function IdFromSession (query: queryFunc, sessionId: string): Promi
 }
 
 /**
- * Gets the user Id from a cookies object
+ * Gets the user Id from a body object
  */
 export async function userId (body: any, query: queryFunc) {
-    return IdFromSession(query, body.session);
+    return idFromSession(query, body?.session || '');
 }
 
 /**
@@ -217,7 +218,7 @@ export async function userFromSession (query: queryFunc, id: string): Promise<Re
             users.student
         FROM users, sessions
         WHERE
-            sessions.user = users.id
+            sessions.userId = users.id
             
             AND sessions.id = ${id}
             AND UNIX_TIMESTAMP(opened) + expires > UNIX_TIMESTAMP()
@@ -251,20 +252,20 @@ export async function addHousePointsToUser (query: queryFunc, user: any & { id: 
             housepoints.rejectMessage,
             
             users.id as userId,
-            users.email as studentEmail,
-            users.year as studentYear,
+            users.email as userEmail,
+            users.year as userYear,
             
-            housepoints.event as eventId,
+            housepoints.eventId as eventId,
             events.name as eventName,
             events.description as eventDescription,
             UNIX_TIMESTAMP(events.time) as eventTime
             
         FROM users, housepoints
         LEFT JOIN events
-        ON events.id = housepoints.event
+        ON events.id = housepoints.eventId
         
         WHERE
-            housepoints.student = users.id
+            housepoints.userId = users.id
             AND users.id = ${user['id']}
        ORDER BY created DESC
     `;
@@ -303,20 +304,20 @@ export async function addHousePointsToEvent (query: queryFunc, event: any & { id
             housepoints.rejectMessage,
             
             users.id as userId,
-            users.email as studentEmail,
-            users.year as studentYear,
+            users.email as userEmail,
+            users.year as userYear,
             
-            housepoints.event as eventId,
+            housepoints.eventId as eventId,
             events.name as eventName,
             events.description as eventDescription,
             UNIX_TIMESTAMP(events.time) as eventTime
             
         FROM users, housepoints
         LEFT JOIN events
-        ON events.id = housepoints.event
+        ON events.id = housepoints.eventId
         
         WHERE
-            housepoints.student = users.id
+            housepoints.userId = users.id
             AND events.id = ${event['id']}
        ORDER BY created DESC
     `;

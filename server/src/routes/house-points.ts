@@ -53,20 +53,20 @@ route('get/house-points', async ({ query, body }) => {
             housepoints.rejectMessage,
             
             users.id as userId,
-            users.email as studentEmail,
-            users.year as studentYear,
+            users.email as userEmail,
+            users.year as userYear,
             
-            housepoints.event as eventId,
+            housepoints.eventId as eventId,
             events.name as eventName,
             events.description as eventDescription,
             UNIX_TIMESTAMP(events.time) as eventTime
             
         FROM users, housepoints
         LEFT JOIN events
-        ON events.id = housepoints.event
+        ON events.id = housepoints.eventId
         
         WHERE
-            housepoints.student = users.id
+            housepoints.userId = users.id
             
             AND ((housepoints.id = ${housePointId}) OR ${!housePointId})
             AND ((users.id = ${userId})             OR ${!userId})
@@ -91,7 +91,7 @@ route('get/house-points', async ({ query, body }) => {
 
             // if the house point does not belong to the user, censor it
             delete res[i]['userId'];
-            delete res[i]['studentEmail'];
+            delete res[i]['userEmail'];
             delete res[i]['rejectMessage'];
             delete res[i]['description'];
         }
@@ -138,8 +138,8 @@ route('create/house-points/give', async ({ query, body }) => {
         eventData = await query`
             SELECT *
             FROM users, housepoints, events
-            WHERE users.id = housepoints.student
-                AND housepoints.event = events.id
+            WHERE users.id = housepoints.userId
+                AND housepoints.eventId = events.id
                 AND users.id = ${userId}
                 AND events.id = ${eventId}
         `;
@@ -151,7 +151,7 @@ route('create/house-points/give', async ({ query, body }) => {
     const id = await generateUUId();
 
     await query`
-        INSERT INTO housepoints (id, student, quantity, event, description, status, completed)
+        INSERT INTO housepoints (id, userId, quantity, eventId, description, status, completed)
         VALUES (
             ${id},
             ${userId},
@@ -163,8 +163,8 @@ route('create/house-points/give', async ({ query, body }) => {
         )
     `;
 
-    let notifRes = await notifications.receivedHousePoint(query, userId, quantity);
-    if (notifRes !== true) return notifRes;
+    let notifyRes = await notifications.receivedHousePoint(query, userId, quantity);
+    if (notifyRes !== true) return notifyRes;
 
     return { status: 201, id };
 });
@@ -209,8 +209,8 @@ route('create/house-points/request', async ({ query, body }) => {
             SELECT users.id
             FROM users
             LEFT JOIN housepoints
-            ON housepoints.student = users.id
-            WHERE housepoints.event = ${event}
+            ON housepoints.userId = users.id
+            WHERE housepoints.eventId = ${event}
         `;
         if (usersInEvent.filter(u => u.id === userId).length) {
             return 'User is already in event';
@@ -220,7 +220,7 @@ route('create/house-points/request', async ({ query, body }) => {
     const id = await generateUUId();
 
     await query`
-        INSERT INTO housepoints (id, student, quantity, event, description, status)
+        INSERT INTO housepoints (id, userId, quantity, eventId, description, status)
         VALUES (
             ${id},
             ${userId},
@@ -260,7 +260,7 @@ route('update/house-points/accepted', async ({ query, body }) => {
             users.id as userId
         FROM housepoints, users
         WHERE housepoints.id = ${id}
-            AND housepoints.student = users.id
+            AND housepoints.userId = users.id
     `;
 
     if (!hps.length) return {
@@ -382,7 +382,7 @@ route('update/house-points/created', async ({ query, body }) => {
 });
 
 /**
- * @admin
+ * @account
  * Deletes a house point from a house point Id
  * @param housePointId
  */
@@ -398,7 +398,7 @@ route('delete/house-points', async ({ query, body }) => {
             SELECT users.id
             FROM housepoints, users
             WHERE housepoints.id = ${id}
-              AND housepoints.student = users.id
+              AND housepoints.userId = users.id
         `;
 
         // doesn't get to know if house point even exists or not
