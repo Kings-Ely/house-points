@@ -9,9 +9,12 @@ sshPass.txt
 
 !server/structure.env
 
+*.csv
+*.xlsx
+
 *.txt
 *.log
-*.csv
+
 *.js.map
 
 /server/index.js
