@@ -40,9 +40,9 @@ Dockerfile linguist-vendored=false
 Dockerfile linguist-language=Dockerfile
 Dockerfile linguist-detectable=true
 
-.gitignore linguist-vendored=false
-.gitignore linguist-language=Ignore List
-.gitignore linguist-detectable=true
+.*ignore linguist-vendored=false
+.*ignore linguist-language=Ignore List
+.*ignore linguist-detectable=true
 
 .gitattributes linguist-vendored=false
 .gitattributes linguist-language=Git Attributes
