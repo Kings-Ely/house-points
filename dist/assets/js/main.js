@@ -56,7 +56,7 @@ export const state = {
 };
 
 reservoir.set({
-    'house-name': HOUSE_NAME
+    'houseName': HOUSE_NAME
 });
 
 export { reservoir };

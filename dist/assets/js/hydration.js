@@ -1,30 +1,9 @@
 import { escapeHTML } from './main.js';
 
-/**
- * @param $el
- * @returns {void}
- */
-export function hydrate($el = document) {
-    if ($el.hasAttribute && $el.hasAttribute('pump-if')) {
-        if (!hydrateIf($el)) {
-            return;
-        }
-    }
-
-    if ($el.hasAttribute && $el.hasAttribute('pump')) {
-        hydrateDry($el);
-    }
-
-    for (const child of $el.children) {
-        hydrate(child);
-    }
-}
-
 class Reservoir {
     #data = {};
 
     /**
-     *
      * @param {string | {}} key
      * @param {any} [item=undefined]
      */
@@ -52,49 +31,80 @@ class Reservoir {
         }
         return current;
     }
+    
+    execute(key) {
+        const envVarNames = Object.keys(this.#data);
+        const envVarValues = Object.keys(this.#data).map(k => this.#data[k]);
+        const thisParam = this.#data;
+        const execBody = `return (${key});`;
+        
+        return new Function(...envVarNames, execBody).call(thisParam, ...envVarValues);
+    }
 
     has(key) {
         return this.get(key) !== undefined;
     }
-
-    static instance = new Reservoir();
+    
+    hydrateDry($el) {
+        const key = $el.getAttribute('pump');
+        const to = $el.getAttribute('pump-to');
+        let dry = $el.getAttribute('dry') ?? $el.innerHTML;
+        let value = this.execute(key);
+        
+        if (!$el.hasAttribute('pump-dirty')) {
+            value = escapeHTML(value);
+        }
+        
+        let html;
+        
+        if (to === 'end') {
+            html = dry + value;
+        } else if (to === 'replace') {
+            html = value;
+        } else {
+            html = value + dry;
+        }
+        
+        if (!$el.hasAttribute('dry')) {
+            $el.setAttribute('dry', dry);
+        }
+        
+        $el.innerHTML = html;
+    }
+    
+    hydrateIf($el) {
+        const key = $el.getAttribute('pump-if');
+        const value = !!this.execute(key);
+        
+        if (value) {
+            $el.style.visibility = 'visible';
+            $el.setAttribute('aria-hidden', 'false');
+        } else {
+            $el.setAttribute('aria-hidden', 'true');
+        }
+        return !!value;
+    }
 }
 
-export default Reservoir.instance;
+const reservoir = new Reservoir();
+export default reservoir;
 
-function hydrateDry($el) {
-    const key = $el.getAttribute('pump');
-    const to = $el.getAttribute('pump-to');
-    let dry = $el.getAttribute('dry') ?? $el.innerHTML;
-    let value = Reservoir.instance.get(key);
-
-    if (!$el.hasAttribute('pump-dirty')) {
-        value = escapeHTML(value);
+/**
+ * @param $el
+ * @returns {void}
+ */
+export function hydrate($el = document) {
+    if ($el.hasAttribute && $el.hasAttribute('pump-if')) {
+        if (!reservoir.hydrateIf($el)) {
+            return;
+        }
     }
-
-    let html;
-
-    if (to === 'end') {
-        html = dry + value;
-    } else if (to === 'replace') {
-        html = value;
-    } else {
-        html = value + dry;
+    
+    if ($el.hasAttribute && $el.hasAttribute('pump')) {
+        reservoir.hydrateDry($el);
     }
-
-    if (!$el.hasAttribute('dry')) {
-        $el.setAttribute('dry', dry);
+    
+    for (const child of $el.children) {
+        hydrate(child);
     }
-
-    $el.innerHTML = html;
-}
-
-function hydrateIf($el) {
-    const key = $el.getAttribute('pump-if');
-    let value = Reservoir.instance.get(key);
-
-    if (value) {
-        $el.style.visibility = 'visible';
-    }
-    return !!value;
 }

@@ -18,7 +18,7 @@ export async function handleUserInfo(info) {
     state.userInfoIsLoaded = true;
 
     core.reservoir.set({
-        'signed-in': state.isSignedIn,
+        signedIn: state.isSignedIn,
         user: state.userInfoJSON,
         admin: !!state.userInfoJSON.admin
     });
