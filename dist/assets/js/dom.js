@@ -248,3 +248,20 @@ export function getTheme () {
 export function getInverseTheme () {
 	return getTheme() === 'dark' ? 'light' : 'dark';
 }
+
+/**
+ * Turns a ComponentDefinition into a Component.
+ * @param {ComponentDefinition} cb
+ * @returns {Component}
+ */
+export function registerComponent (cb) {
+	return ($el, ...args) => {
+		if (typeof $el === 'string') {
+			$el = document.querySelector($el);
+		}
+		if (!($el instanceof HTMLElement)) {
+			throw new Error('Trying to insert component into not-HTMLElement');
+		}
+		return cb($el, currentComponentId++, ...args);
+	};
+}

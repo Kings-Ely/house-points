@@ -32,26 +32,26 @@ Test.test('Awards | Creating, getting and deleting', async api => {
     if (res?.data?.length !== 1) {
         return `4: ${JSON.stringify(res)}`;
     }
-    if (res.data?.[0]?.student !== userId) {
+    if (res.data?.[0]?.userId !== userId) {
+        return `5: ${JSON.stringify(res)}`;
+    }
+    if (res.data?.[0]?.awardTypeId !== awardTypeId) {
         return `6: ${JSON.stringify(res)}`;
     }
-    if (res.data?.[0]?.type !== awardTypeId) {
-        return `7: ${JSON.stringify(res)}`;
-    }
     if (res.data?.[0]?.description !== 'desc') {
-        return `8: ${JSON.stringify(res)}`;
+        return `7: ${JSON.stringify(res)}`;
     }
 
     res = await api(`delete/awards`, {
         awardId: res.data?.[0]?.id
     });
     if (res.ok !== true || res.status !== 200) {
-        return `9: ${JSON.stringify(res)}`;
+        return `8: ${JSON.stringify(res)}`;
     }
 
     res = await api(`get/awards`);
     if (res?.data?.length !== 0) {
-        return `10: ${JSON.stringify(res)}`;
+        return `9: ${JSON.stringify(res)}`;
     }
 
     await api(`delete/awardTypes`, { awardTypeId });

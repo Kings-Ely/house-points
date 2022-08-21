@@ -2,13 +2,13 @@ import { escapeHTML } from "./main.js";
 
 export function hydrate ($el=document) {
 
-	if ($el.hasAttribute('pump-if')) {
+	if ($el.hasAttribute && $el.hasAttribute('pump-if')) {
 		if (!hydrateIf($el)) {
 			return;
 		}
 	}
 
-	if ($el.hasAttribute('pump')) {
+	if ($el.hasAttribute && $el.hasAttribute('pump')) {
 		hydrateDry($el);
 	}
 

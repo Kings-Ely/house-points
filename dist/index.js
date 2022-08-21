@@ -2,9 +2,10 @@
 import * as core from "./assets/js/main.js";
 import FullPagePopup from "./assets/js/components/FullPagePopup.js";
 
-const $go = document.getElementById('go');
 const $email = document.getElementById('email');
 const $password = document.getElementById('password');
+
+window.doLogIn = doLogIn;
 
 (async () => {
 	await core.init('.');
@@ -17,6 +18,42 @@ const $password = document.getElementById('password');
 		await core.logoutAction();
 	}
 })();
+
+$password.addEventListener('keydown', async evt => {
+	if (evt.key === 'Enter') {
+		await doLogIn();
+	}
+});
+
+$email.addEventListener('keydown', async evt => {
+	if (evt.key === 'Enter') {
+		$password.focus();
+	}
+});
+
+document.getElementById('forgotten-password').onclick = async () => {
+	const email = $email.value;
+	if (email.length < 4) {
+		core.showError`You need to enter a valid email first!`;
+		return;
+	}
+	
+	if (!confirm(`Are you sure you want to reset the password for '${email}'?`)) {
+		return;
+	}
+	
+	const res = await core.api(`create/sessions/for-forgotten-password`, {
+		email
+	});
+	
+	if (!res.ok || res.error) {
+		return;
+	}
+	
+	FullPagePopup(document.body, `
+		An email has been sent to '${email}' with a link to reset your password.
+	`);
+};
 
 async function doLogIn () {
 	const email = $email.value;
@@ -61,32 +98,3 @@ async function doLogIn () {
 
 	await core.navigate(newPage);
 }
-
-$go.onclick = async () => {
-	await doLogIn();
-};
-
-document.getElementById('forgotten-password').onclick = async () => {
-	const email = $email.value;
-	if (email.length < 4) {
-		core.showError`You need to enter a valid email first!`;
-		return;
-	}
-
-	if (!confirm(`Are you sure you want to reset the password for '${email}'?`)) {
-		return;
-	}
-
-	const res = await core.api(`create/sessions/for-forgotten-password`, {
-		email
-	});
-
-	if (!res.ok || res.error) {
-		return;
-	}
-
-	FullPagePopup(document.body, `
-		An email has been sent to '${email}' with a link to reset your password.
-	`);
-
-};

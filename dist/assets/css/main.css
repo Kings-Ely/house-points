@@ -3,6 +3,10 @@
 
 /* --- GENERAL --- */
 
+:not([data-theme]) {
+    --bg: #838383;
+}
+
 :root, [data-theme='dark'] {
     --text-v-light: #909090;
 

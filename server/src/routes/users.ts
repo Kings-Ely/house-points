@@ -431,9 +431,7 @@ route('delete/users', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
     const { userId } = body;
-
-    log.error`${await idFromSession(query, body.session)} | ${userId}, ${body?.isown}`;
-
+    
     if ((await idFromSession(query, body.session)) === userId)
         return {
             status: 403,

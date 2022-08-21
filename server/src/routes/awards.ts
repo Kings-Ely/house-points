@@ -42,6 +42,7 @@ route('get/awards', async ({ query, body }) => {
             users.email as userEmail,
             users.year as userYear,
             
+            awardTypes.id as awardTypeId,
             awardTypes.name as awardName,
             awardTypes.description as awardDescription,
             awardTypes.hpsRequired as awardHpsRequired
@@ -98,9 +99,9 @@ route('create/awards', async ({ query, body }) => {
     let student = await userFromId(query, userId);
     if (!student) return `Student with Id '${userId}' not found`;
     if (!student['student']) return 'Can only give house points to students';
-
+    
     if (!awardTypeId) return 'Missing parameter awardTypeId';
-
+    
     let awardsData = await query`
         SELECT *
         FROM awardTypes
@@ -109,7 +110,7 @@ route('create/awards', async ({ query, body }) => {
     if (!awardsData.length) {
         return `Award type with that Id not found`;
     }
-
+    
     awardsData = await query`
         SELECT *
         FROM users, housepoints, events

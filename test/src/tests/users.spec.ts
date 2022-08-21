@@ -506,8 +506,7 @@ Test.test('Users | Deleting', async api => {
     // Deleting self
     res = await api(`delete/users`, {
         session: sessionId1,
-        userId: userId1,
-        isown: true
+        userId: userId1
     });
     if (res.ok || res.status !== 403 || res.code) {
         return `6: ${JSON.stringify(res)}`;
@@ -516,7 +515,7 @@ Test.test('Users | Deleting', async api => {
         sessionId: sessionId1
     });
     if (res.level !== 2) {
-        return `6: ${JSON.stringify(res)}`;
+        return `7: ${JSON.stringify(res)}`;
     }
 
     await api(`delete/users`, { userId: userId1 });

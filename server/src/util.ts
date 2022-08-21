@@ -177,7 +177,7 @@ export async function idFromSession(query: queryFunc, sessionId: string): Promis
 
     if (!res.length) return '';
 
-    return res?.[0]?.['user'] || '';
+    return res?.[0]?.['userId'] || '';
 }
 
 /**
