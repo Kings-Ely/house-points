@@ -1,13 +1,13 @@
-import route from "../";
+import route from '../';
 import { AUTH_ERR, generateUUId, isAdmin, isLoggedIn } from '../util';
-import mysql from "mysql2";
+import mysql from 'mysql2';
 
 /**
  * @account
  * No options as you always want all of them
  */
 route('get/award-types', async ({ query, body }) => {
-    if (!await isLoggedIn(body, query)) return AUTH_ERR;
+    if (!(await isLoggedIn(body, query))) return AUTH_ERR;
 
     return {
         data: await query`
@@ -21,7 +21,6 @@ route('get/award-types', async ({ query, body }) => {
     };
 });
 
-
 /**
  * @admin
  * @param name
@@ -29,9 +28,9 @@ route('get/award-types', async ({ query, body }) => {
  * @param description
  */
 route('create/award-types', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { name='', required=-1, description='' } = body;
+    const { name = '', required = -1, description = '' } = body;
 
     if (!name) return 'Missing parameter name';
     if (!Number.isInteger(required) || required < 0) {
@@ -60,16 +59,15 @@ route('create/award-types', async ({ query, body }) => {
     };
 });
 
-
 /**
  * @admin
  * @param awardTypeId
  * @param newName
  */
 route('update/award-types/name', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { awardTypeId: id='', name='' } = body;
+    const { awardTypeId: id = '', name = '' } = body;
 
     if (!id) return 'Missing parameter id';
     if (!name) return 'Missing parameter name';
@@ -80,10 +78,11 @@ route('update/award-types/name', async ({ query, body }) => {
         WHERE id = ${id}
     `;
 
-    if (queryRes.affectedRows === 0) return {
-        status: 406,
-        error: `No Award Types to delete with that Id`
-    }
+    if (queryRes.affectedRows === 0)
+        return {
+            status: 406,
+            error: `No Award Types to delete with that Id`
+        };
 });
 
 /**
@@ -92,9 +91,9 @@ route('update/award-types/name', async ({ query, body }) => {
  * @param {int} newQuantity
  */
 route('update/award-types/hps-required', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { awardTypeId:id='', quantity=-1 } = body;
+    const { awardTypeId: id = '', quantity = -1 } = body;
 
     if (!id) return 'Missing parameter id';
     if (!Number.isInteger(quantity) || quantity < 0) {
@@ -107,12 +106,12 @@ route('update/award-types/hps-required', async ({ query, body }) => {
         WHERE id = ${id}
     `;
 
-    if (queryRes.affectedRows === 0) return {
-        status: 406,
-        error: `No Award Types found that Id`
-    }
+    if (queryRes.affectedRows === 0)
+        return {
+            status: 406,
+            error: `No Award Types found that Id`
+        };
 });
-
 
 /**
  * @admin
@@ -120,9 +119,9 @@ route('update/award-types/hps-required', async ({ query, body }) => {
  * @param newDescription
  */
 route('update/award-types/description', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { awardTypeId: id ='', description='' } = body;
+    const { awardTypeId: id = '', description = '' } = body;
 
     if (!id) return 'Missing parameter id';
     if (!description) return 'Missing parameter description';
@@ -133,10 +132,11 @@ route('update/award-types/description', async ({ query, body }) => {
         WHERE id = ${id}
     `;
 
-    if (queryRes.affectedRows === 0) return {
-        status: 406,
-        error: `No Award Types to delete with that Id`
-    }
+    if (queryRes.affectedRows === 0)
+        return {
+            status: 406,
+            error: `No Award Types to delete with that Id`
+        };
 });
 
 /**
@@ -144,7 +144,7 @@ route('update/award-types/description', async ({ query, body }) => {
  * @param awardTypeId
  */
 route('delete/award-types', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
     if (!body.awardTypeId) return 'Missing parameter id';
 
@@ -153,8 +153,9 @@ route('delete/award-types', async ({ query, body }) => {
         WHERE id = ${body.awardTypeId}
     `;
 
-    if (queryRes.affectedRows === 0) return {
-        status: 406,
-        error: `No Award Types to delete with that Id`
-    };
+    if (queryRes.affectedRows === 0)
+        return {
+            status: 406,
+            error: `No Award Types to delete with that Id`
+        };
 });

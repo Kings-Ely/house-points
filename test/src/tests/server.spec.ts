@@ -1,7 +1,7 @@
 import Test from '../framework';
 import c from 'chalk';
 
-Test.test('Smoke | Ping server', async (api) => {
+Test.test('Smoke | Ping server', async api => {
     let res = await api('get/server/ping');
     if (res.ok !== true) {
         return `0: ${JSON.stringify(res)}`;
@@ -17,7 +17,7 @@ Test.test('Smoke | Ping server', async (api) => {
     return true;
 });
 
-Test.test('Smoke | echo from server', async (api) => {
+Test.test('Smoke | echo from server', async api => {
     let res = await api('get/server/echo', {
         msg: 'hello-world'
     });
@@ -39,7 +39,7 @@ Test.test('Smoke | echo from server', async (api) => {
     return true;
 });
 
-Test.test('Smoke | Check SQL status of server', async (api) => {
+Test.test('Smoke | Check SQL status of server', async api => {
     let res = await api('get/server/check');
     if (res.ok !== true) {
         return `echo failed: ${JSON.stringify(res)}`;
@@ -55,7 +55,7 @@ Test.test('Smoke | Check SQL status of server', async (api) => {
     return true;
 });
 
-Test.test('Smoke | Check performance of server', async (api) => {
+Test.test('Smoke | Check performance of server', async api => {
     const n = 50;
 
     let res = await api(`get/server/performance`, {
@@ -65,7 +65,7 @@ Test.test('Smoke | Check performance of server', async (api) => {
         return `performance test failed: ${JSON.stringify(res)}`;
     }
 
-    console.log(c.yellow(`PERFORMANCE (${n}): ${(res.time/n).toFixed(3)}ms/req`));
+    console.log(c.yellow(`PERFORMANCE (${n}): ${(res.time / n).toFixed(3)}ms/req`));
 
     if (res.time > 500) {
         return `Server db connection performance test failed: ${JSON.stringify(res)}ms`;
@@ -82,7 +82,7 @@ Test.test('Smoke | Check performance of server', async (api) => {
     return true;
 });
 
-Test.test('Smoke | 404', async (api) => {
+Test.test('Smoke | 404', async api => {
     let res = await api('get/something-that-does-not-exist');
     if (res.status !== 404 || res.ok) {
         return `Expected 404, got ${JSON.stringify(res)}`;

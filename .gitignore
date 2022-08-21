@@ -17,5 +17,5 @@ sshPass.txt
 
 *.js.map
 
-/server/index.js
+/server/*index.js
 /test/*index.js

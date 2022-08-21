@@ -1,20 +1,22 @@
 import mysql from 'mysql2';
 import c from 'chalk';
 
-import log from "./log";
-import { flags } from "./index";
+import log from './log';
+import { flags } from './index';
 
-export type queryRes = mysql.RowDataPacket[]
+export type queryRes =
+    | mysql.RowDataPacket[]
     | mysql.RowDataPacket[][]
     | mysql.OkPacket
     | mysql.OkPacket[]
     | mysql.ResultSetHeader;
 
 export type queryFunc = <Res extends queryRes = mysql.RowDataPacket[]>(
-    queryParts: TemplateStringsArray, ...params: any[]) => Promise<Res>;
+    queryParts: TemplateStringsArray,
+    ...params: any[]
+) => Promise<Res>;
 
 export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
-
     // define defaults from .env file
     const config: mysql.ConnectionOptions = {
         host: process.env.DB_HOST,
@@ -34,7 +36,7 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
     function handleDisconnect() {
         con = mysql.createConnection(config);
 
-        con.connect((err) => {
+        con.connect(err => {
             if (err) {
                 log.error`error when connecting to db: ${JSON.stringify(err)}`;
                 setTimeout(handleDisconnect, 500);
@@ -67,11 +69,9 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
                 let str = acc + cur;
                 if (params[i] === undefined) {
                     return str;
-
                 } else if (Array.isArray(params[i])) {
                     // so you have ?,?,...?,? in your query for each array element
-                    return str + '?,'.repeat(params[i].length-1) + '?';
-
+                    return str + '?,'.repeat(params[i].length - 1) + '?';
                 } else {
                     return str + '?';
                 }
@@ -95,6 +95,6 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
                 }
                 resolve(result);
             });
-        })
+        });
     };
 }

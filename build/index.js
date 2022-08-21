@@ -1,8 +1,8 @@
 #!/usr/bin/env zx
-import { $ } from "zx";
-import now from "performance-now";
+import { $ } from 'zx';
+import now from 'performance-now';
 import c from 'chalk';
-import * as fs from "fs";
+import * as fs from 'fs';
 
 $.verbose = true;
 
@@ -11,11 +11,13 @@ const REMOTE_FRONTEND_PATH = '/public_html/school/house-points';
 const REMOTE_BACKEND_PATH = '/hpsnea-server';
 const LOCAL_PATH = './dist/';
 
-async function upload (localPath, remotePath, args='') {
-    return await $`sshpass -f './sshPass.txt' rsync ${args.split(' ')} ${localPath} ${REMOTE_ADDRESS}:~${remotePath}`;
+async function upload(localPath, remotePath, args = '') {
+    return await $`sshpass -f './sshPass.txt' rsync ${args.split(
+        ' '
+    )} ${localPath} ${REMOTE_ADDRESS}:~${remotePath}`;
 }
 
-async function uploadFrontend () {
+async function uploadFrontend() {
     if (process.argv.includes('--no-front')) return;
 
     console.log('Uploading frontend...');
@@ -34,12 +36,12 @@ async function uploadFrontend () {
     }
 }
 
-async function buildBackend () {
+async function buildBackend() {
     console.log('Building backend...');
     await $`cd server; webpack`;
 }
 
-async function uploadBackend () {
+async function uploadBackend() {
     console.log('Uploading backend...');
 
     const paths = {
@@ -47,14 +49,16 @@ async function uploadBackend () {
         './server/index.js.map': '/index.js.map',
         './server/staging.Dockerfile': '/Dockerfile',
         './server/package.json': '/package.json',
-        './server/prod.env': '/.env',
+        './server/prod.env': '/.env'
     };
 
-    await Promise.all(Object.keys(paths).map(async (path) => {
-        if (fs.existsSync(path)) {
-            await upload(path, REMOTE_BACKEND_PATH + paths[path]);
-        }
-    }));
+    await Promise.all(
+        Object.keys(paths).map(async path => {
+            if (fs.existsSync(path)) {
+                await upload(path, REMOTE_BACKEND_PATH + paths[path]);
+            }
+        })
+    );
 }
 
 (async () => {
@@ -64,6 +68,6 @@ async function uploadBackend () {
     await uploadFrontend();
     await uploadBackend();
 
-    const duration = (now() - start)/1000;
+    const duration = (now() - start) / 1000;
     console.log(c.green(`Finished Building in ${duration.toFixed(3)}s`));
 })();

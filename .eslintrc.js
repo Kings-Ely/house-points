@@ -6,7 +6,7 @@ module.exports = {
         project: ['./tsconfig-eslint.json'],
         extraFileExtensions: ['.json']
     },
-    plugins: ['prettier'],
+    plugins: ['prettier', '@typescript-eslint'],
     env: {
         node: true
     },
@@ -21,5 +21,13 @@ module.exports = {
         'no-console': 'error',
         '@typescript-eslint/explicit-function-return-type': 'error',
         '@typescript-eslint/explicit-member-accessibility': 'error'
-    }
+    },
+    overrides: [
+        {
+            files: ['test/**/*.ts'],
+            rules: {
+                'no-console': 0
+            }
+        }
+    ]
 };

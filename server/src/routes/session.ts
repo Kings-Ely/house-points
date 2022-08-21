@@ -1,9 +1,9 @@
 import route from '../index';
 import log from '../log';
 import { AUTH_ERR, authLvl, generateUUId, isAdmin } from '../util';
-import emailValidator from "email-validator";
+import emailValidator from 'email-validator';
 import * as notifications from '../notifications';
-import type mysql from "mysql2";
+import type mysql from 'mysql2';
 
 /**
  * Gets the authorisation level of a session Id
@@ -13,7 +13,7 @@ import type mysql from "mysql2";
  * @returns 0 for invalid/expired, >= 1 for logged in, 2 for admin user
  */
 route('get/sessions/auth-level', async ({ query, body }) => {
-    const { sessionId='' } = body;
+    const { sessionId = '' } = body;
 
     return {
         level: await authLvl(sessionId, query)
@@ -26,9 +26,10 @@ route('get/sessions/auth-level', async ({ query, body }) => {
  * Not really any purpose other than monitoring the server.
  */
 route('get/sessions/active', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    return { data: await query`
+    return {
+        data: await query`
         SELECT 
             users.email,
             users.id as userId,
@@ -40,7 +41,8 @@ route('get/sessions/active', async ({ query, body }) => {
             AND UNIX_TIMESTAMP(sessions.opened) + sessions.expires > UNIX_TIMESTAMP()
             AND sessions.active = 1
         ORDER BY opened DESC
-    ` };
+    `
+    };
 });
 
 /**
@@ -53,9 +55,8 @@ route('get/sessions/active', async ({ query, body }) => {
  * @param password
  */
 route('create/sessions/from-login', async ({ query, body }) => {
-
     // password in plaintext
-    const { email='', password='', expires: expiresRaw = '86400'} = body;
+    const { email = '', password = '', expires: expiresRaw = '86400' } = body;
 
     if (!email || !password) {
         return 'Missing email or password';
@@ -83,7 +84,7 @@ route('create/sessions/from-login', async ({ query, body }) => {
             AND password = SHA2(CONCAT(${password}, salt), 256);
     `;
 
-    if (!res.length) return 'Invalid email or password';
+    if (!res[0]) return 'Invalid email or password';
     if (res.length > 1) {
         // don't tell the user about this, it's a security issue
         log.error`Multiple users found with email ${email}`;
@@ -113,9 +114,9 @@ route('create/sessions/from-login', async ({ query, body }) => {
  * @param userId
  */
 route('create/sessions/from-user-id', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { userId='', expires: expiresRaw = '86400'} = body;
+    const { userId = '', expires: expiresRaw = '86400' } = body;
 
     if (!userId) {
         return 'UserId not specified';
@@ -155,7 +156,7 @@ route('create/sessions/from-user-id', async ({ query, body }) => {
  * @param email
  */
 route('create/sessions/for-forgotten-password', async ({ query, body }) => {
-    const { email='' } = body;
+    const { email = '' } = body;
 
     if (!email) {
         return 'Email not specified';
@@ -175,12 +176,12 @@ route('create/sessions/for-forgotten-password', async ({ query, body }) => {
         log.error`Multiple users found with email '${email}'`;
         return 'Invalid email';
     }
-    const userId = res[0].id;
+    const userId = res[0]?.id;
     const sessionId = await generateUUId();
 
     await query`
         INSERT INTO sessions (id, userId, expires)
-        VALUES (${sessionId}, ${userId}, ${60*60});
+        VALUES (${sessionId}, ${userId}, ${60 * 60});
     `;
 
     await notifications.forgottenPasswordEmail(query, userId, sessionId);
@@ -191,7 +192,7 @@ route('create/sessions/for-forgotten-password', async ({ query, body }) => {
  * @param sessionId
  */
 route('delete/sessions/with-id', async ({ query, body }) => {
-    const { sessionId='' } = body;
+    const { sessionId = '' } = body;
 
     if (!sessionId) return 'Session Id not specified';
 
@@ -200,8 +201,9 @@ route('delete/sessions/with-id', async ({ query, body }) => {
         SET active = 0
         WHERE id = ${sessionId}
     `;
-    if (queryRes.affectedRows === 0) return {
-        status: 406,
-        error: `Session not found`
-    };
+    if (queryRes.affectedRows === 0)
+        return {
+            status: 406,
+            error: `Session not found`
+        };
 });

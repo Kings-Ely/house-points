@@ -1,17 +1,18 @@
 import emailValidator from 'email-validator';
-import mysql from "mysql2";
+import mysql from 'mysql2';
 
 import route from '../';
-import log from "../log";
+import log from '../log';
 import {
     addHousePointsToUser,
     AUTH_ERR,
     generateUUId,
     idFromSession,
     isAdmin,
-    isLoggedIn, passwordHash, validPassword
+    isLoggedIn,
+    passwordHash,
+    validPassword
 } from '../util';
-
 
 /**
  * @admin
@@ -21,7 +22,7 @@ import {
  * @param sessionId
  */
 route('get/users', async ({ query, body }) => {
-    const { userId='', email='', sessionId='' } = body;
+    const { userId = '', email = '', sessionId = '' } = body;
 
     if (sessionId) {
         if (userId) return `Invalid body: cannot specify both 'session' and 'id'`;
@@ -41,10 +42,11 @@ route('get/users', async ({ query, body }) => {
                 AND sessions.active = 1
         `;
 
-        if (!data.length) return {
-            status: 406,
-            error: 'User not found'
-        };
+        if (!data.length)
+            return {
+                status: 406,
+                error: 'User not found'
+            };
 
         const user = data[0];
 
@@ -55,7 +57,7 @@ route('get/users', async ({ query, body }) => {
 
     if (email) {
         if (userId) return `Invalid body: cannot specify both 'email' and 'id'`;
-        if (!await isLoggedIn(body, query)) return AUTH_ERR;
+        if (!(await isLoggedIn(body, query))) return AUTH_ERR;
 
         const { email } = body;
 
@@ -71,17 +73,18 @@ route('get/users', async ({ query, body }) => {
             FROM users
             WHERE email = ${email}
         `;
-        if (!data.length) return {
-            status: 406,
-            error: 'User not found'
-        };
+        if (!data[0])
+            return {
+                status: 406,
+                error: 'User not found'
+            };
 
         const user = data[0];
 
         await addHousePointsToUser(query, user);
 
         // censor the data if they don't have access
-        if (!await isAdmin(body, query)) {
+        if (!(await isAdmin(body, query))) {
             const id = await idFromSession(query, body.session);
             if (id !== user.id) {
                 delete user.id;
@@ -99,7 +102,7 @@ route('get/users', async ({ query, body }) => {
 
     // gets all users
     if (!userId) {
-        if (!await isAdmin(body, query)) return AUTH_ERR;
+        if (!(await isAdmin(body, query))) return AUTH_ERR;
 
         const data = await query`
             SELECT 
@@ -117,9 +120,11 @@ route('get/users', async ({ query, body }) => {
         `;
 
         // add house points to all users without waiting for one user to finish
-        await Promise.all(data.map(async (user: any) => {
-            await addHousePointsToUser(query, user);
-        }));
+        await Promise.all(
+            data.map(async (user: any) => {
+                await addHousePointsToUser(query, user);
+            })
+        );
 
         return { data };
     }
@@ -136,10 +141,11 @@ route('get/users', async ({ query, body }) => {
         WHERE id = ${userId}
     `;
 
-    if (!data.length) return {
-        status: 406,
-        error: 'User not found'
-    };
+    if (!data.length)
+        return {
+            status: 406,
+            error: 'User not found'
+        };
 
     const user = data[0];
 
@@ -155,14 +161,15 @@ route('get/users', async ({ query, body }) => {
  * @param {string[]} userIds
  */
 route('get/users/batch-info', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
     const { userIds: ids } = body;
 
-    if (!ids?.length) return {
-        status: 406,
-        error: 'No Ids'
-    };
+    if (!ids?.length)
+        return {
+            status: 406,
+            error: 'No Ids'
+        };
 
     const data = await query`
         SELECT 
@@ -187,9 +194,9 @@ route('get/users/batch-info', async ({ query, body }) => {
  * Gets the data required for to make the leaderboard.
  */
 route('get/users/leaderboard', async ({ query, body }) => {
-    if (!await isLoggedIn(body, query)) return AUTH_ERR;
+    if (!(await isLoggedIn(body, query))) return AUTH_ERR;
 
-    let data = (await query`
+    let data = await query`
         SELECT 
             email,
             year,
@@ -197,14 +204,14 @@ route('get/users/leaderboard', async ({ query, body }) => {
         FROM users
         WHERE student = true
         ORDER BY year DESC, email
-    `);
+    `;
 
     data.forEach((u: any) => addHousePointsToUser(query, u));
 
-    if (!await isAdmin(body, query)) {
+    if (!(await isAdmin(body, query))) {
         // remove id from each user
         for (let i = 0; i < data.length; i++) {
-            delete data[i]['id'];
+            delete data[i]?.['id'];
         }
     }
 
@@ -228,10 +235,9 @@ route('get/users/leaderboard', async ({ query, body }) => {
  * @param password
  */
 route('create/users', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { email='', year=9, password='' } = body;
-
+    const { email = '', year = 9, password = '' } = body;
 
     if (!Number.isInteger(year)) {
         return `Year is not a number`;
@@ -259,7 +265,7 @@ route('create/users', async ({ query, body }) => {
     const admin = year === 0 ? 1 : 0;
     const student = year === 0 ? 0 : 1;
 
-    const [ passHash, salt ] = passwordHash(password);
+    const [passHash, salt] = passwordHash(password);
 
     const userId = await generateUUId();
 
@@ -285,29 +291,31 @@ route('create/users', async ({ query, body }) => {
  * @param userId
  */
 route('update/users/admin', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { userId='', admin=false } = body;
+    const { userId = '', admin = false } = body;
 
     const mySession = body.session;
     if (!mySession) return 'No session Id found';
 
     if (!admin) return 'Must specify admin in body';
 
-    if (await idFromSession(query, mySession) === userId) return {
-        status: 403,
-        error: 'You cannot change your own admin status'
-    };
+    if ((await idFromSession(query, mySession)) === userId)
+        return {
+            status: 403,
+            error: 'You cannot change your own admin status'
+        };
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE users
         SET admin = ${admin}
         WHERE id = ${userId}
    `;
-    if (!queryRes.affectedRows) return {
-        status: 406,
-        error: 'User not found'
-    };
+    if (!queryRes.affectedRows)
+        return {
+            status: 406,
+            error: 'User not found'
+        };
 });
 
 /**
@@ -320,9 +328,9 @@ route('update/users/admin', async ({ query, body }) => {
  * @param {int} by
  */
 route('update/users/year', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { userId: user='', by: yearChange } = body;
+    const { userId: user = '', by: yearChange } = body;
 
     if (!Number.isInteger(yearChange)) {
         return `Year change is not an integer`;
@@ -336,10 +344,11 @@ route('update/users/year', async ({ query, body }) => {
         FROM users 
         WHERE id = ${user}
     `;
-    if (!currentYear.length) return {
-        status: 406,
-        error: 'User not found'
-    }
+    if (!currentYear[0])
+        return {
+            status: 406,
+            error: 'User not found'
+        };
     const year = currentYear[0].year;
     if (year === 0) {
         return `Cannot change year of user from '0'`;
@@ -357,10 +366,11 @@ route('update/users/year', async ({ query, body }) => {
         WHERE id = ${user}
     `;
 
-    if (!queryRes.affectedRows) return {
-        status: 406,
-        error: 'User not found'
-    };
+    if (!queryRes.affectedRows)
+        return {
+            status: 406,
+            error: 'User not found'
+        };
 });
 
 /**
@@ -372,21 +382,22 @@ route('update/users/year', async ({ query, body }) => {
  * @param newPassword
  */
 route('update/users/password', async ({ query, body }) => {
-    const { sessionId='', newPassword='' } = body;
+    const { sessionId = '', newPassword = '' } = body;
 
     const userId = await idFromSession(query, sessionId);
 
-    if (!userId) return {
-        status: 401,
-        error: 'Invalid session Id'
-    }
+    if (!userId)
+        return {
+            status: 401,
+            error: 'Invalid session Id'
+        };
 
     const validPasswordRes = validPassword(newPassword);
     if (typeof validPasswordRes === 'string') {
         return validPasswordRes;
     }
 
-    const [ passHash, salt ] = passwordHash(newPassword);
+    const [passHash, salt] = passwordHash(newPassword);
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE users
@@ -396,10 +407,11 @@ route('update/users/password', async ({ query, body }) => {
         WHERE id = ${userId}
     `;
 
-    if (!queryRes.affectedRows) return {
-        status: 406,
-        error: 'User not found'
-    };
+    if (!queryRes.affectedRows)
+        return {
+            status: 406,
+            error: 'User not found'
+        };
 
     await query`
         UPDATE sessions
@@ -415,17 +427,18 @@ route('update/users/password', async ({ query, body }) => {
  * Deletes a user from a user Id
  * @param userId
  */
-route('delete/users', async ({ query, body}) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+route('delete/users', async ({ query, body }) => {
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
     const { userId } = body;
-    
-    log.error`${await idFromSession(query, body.session)} ${userId}, ${body?.isown}`;
 
-    if (await idFromSession(query, body.session) === userId) return {
-        status: 403,
-        error: 'You cannot delete your own account'
-    };
+    log.error`${await idFromSession(query, body.session)} | ${userId}, ${body?.isown}`;
+
+    if ((await idFromSession(query, body.session)) === userId)
+        return {
+            status: 403,
+            error: 'You cannot delete your own account'
+        };
 
     await query`
         DELETE FROM housepoints
@@ -436,8 +449,9 @@ route('delete/users', async ({ query, body}) => {
         DELETE FROM users
         WHERE id = ${userId}
     `;
-    if (!queryRes.affectedRows) return {
-        status: 406,
-        error: 'User not found'
-    };
+    if (!queryRes.affectedRows)
+        return {
+            status: 406,
+            error: 'User not found'
+        };
 });

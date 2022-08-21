@@ -1,31 +1,29 @@
 import chalk from 'chalk';
 import { performance } from 'perf_hooks';
-import { API, testExecutor } from "./index";
-import { CommandLineOptions } from "command-line-args";
+import { API, testExecutor } from './index';
+import { CommandLineOptions } from 'command-line-args';
 const now = performance.now;
 
 export class TestResult {
-    failed = 0;
-    passed = 0;
-    fails: [any, any][] = [];
-    time = 0;
+    public failed = 0;
+    private passed = 0;
+    private fails: [any, any][] = [];
+    public time = 0;
 
-    register (res: any, test={batteryName: 'unknown'}) {
+    public register(res: any, test = { batteryName: 'unknown' }): void{
         if (res === true) {
             this.passed++;
-
         } else if (res instanceof TestResult) {
             this.failed += res.failed;
             this.passed += res.passed;
             this.fails = [...this.fails, ...res.fails];
-
         } else {
             this.fails.push([res, test]);
             this.failed++;
         }
     }
 
-    str () {
+    public str(): string {
         return `
             ---   TEST REPORT   ---
                 ${chalk[this.failed < 1 ? 'green' : 'red'](this.failed)} tests failed
@@ -35,41 +33,40 @@ export class TestResult {
             
             ${this.failed === 0 ? chalk.green('All tests passed!') : ''}
             
-            ${this.fails.map(([res, test], i) =>
-                `\n\n #${i} ${chalk.red(test.batteryName)}: ${res}`
+            ${this.fails.map(
+                ([res, test], i) => `\n\n #${i} ${chalk.red(test.batteryName)}: ${res}`
             )}
         `;
     }
 }
 
 export default class Test {
-    test;
-    id;
-    batteryName;
+    private readonly test;
+    private readonly id;
+    public readonly batteryName;
 
-    constructor(test: testExecutor, id: string | number = 'test', batteryName = '') {
+    public constructor(test: testExecutor, id: string | number = 'test', batteryName = '') {
         this.id = id;
         this.test = test;
         this.batteryName = batteryName;
     }
 
-    run (api: API, code: CommandLineOptions) {
+    public run(api: API, code: CommandLineOptions): Promise<string | boolean | Error> {
         return this.test(api, code);
     }
 
-    static currentId = 0;
+    public static currentId = 0;
 
-    static tests: Test[] = [];
+    public static tests: Test[] = [];
 
-
-    static test(name: string, test: testExecutor) {
+    public static test(name: string, test: testExecutor): void {
         Test.tests.push(new Test(test, Test.tests.length, name));
     }
 
     /**
      * @returns {TestResult}
      */
-    static async testAll (api: API, flags: CommandLineOptions) {
+    public static async testAll(api: API, flags: CommandLineOptions): Promise<TestResult> {
         let time = now();
 
         const res = new TestResult();
@@ -77,7 +74,7 @@ export default class Test {
         for (let test of Test.tests) {
             let testRes;
             try {
-                testRes = await test.run(api, flags)
+                testRes = await test.run(api, flags);
             } catch (e) {
                 testRes = e;
             }
@@ -89,7 +86,7 @@ export default class Test {
         return res;
     }
 
-    static eq (o1: Record<string, any>, o2: Record<string, any>) {
+    public static eq(o1: Record<string, any>, o2: Record<string, any>): boolean {
         const keys1 = Object.keys(o1);
         const keys2 = Object.keys(o2);
         if (keys1.length !== keys2.length) {
@@ -99,17 +96,14 @@ export default class Test {
             const val1 = o1[key];
             const val2 = o2[key];
             const areObjects = Test.isOb(val1) && Test.isOb(val2);
-            if (
-                areObjects && !Test.eq(val1, val2) ||
-                !areObjects && val1 !== val2
-            ) {
+            if ((areObjects && !Test.eq(val1, val2)) || (!areObjects && val1 !== val2)) {
                 return false;
             }
         }
         return true;
     }
 
-    static isOb (o: any) {
+    public static isOb(o: any): boolean {
         return o != null && typeof o === 'object';
     }
 }

@@ -4,13 +4,16 @@ import path from 'path';
 import { v4 as UUIdv4 } from 'uuid';
 
 import { queryFunc } from './sql';
-import crypto from "crypto";
+import crypto from 'crypto';
 
 /**
  * Object to return from a route if incorrect credentials were provided.
  * Frozen (immutable) and constant.
  * */
-export const AUTH_ERR: Readonly<{error: string, status: number}> = Object.freeze({
+export const AUTH_ERR: Readonly<{
+    error: string;
+    status: number;
+}> = Object.freeze({
     error: 'You are not authorized for this action',
     status: 401
 });
@@ -19,9 +22,9 @@ export const AUTH_ERR: Readonly<{error: string, status: number}> = Object.freeze
  * Limits the length of a string by cutting it and adding '...'
  * to the end if it's too long
  */
-export function limitStr (str:string, maxLength=50) {
+export function limitStr(str: string, maxLength = 50) {
     if (str.length > maxLength - 3) {
-        return str.substring(0, maxLength-3) + '...';
+        return str.substring(0, maxLength - 3) + '...';
     }
     return str;
 }
@@ -29,7 +32,7 @@ export function limitStr (str:string, maxLength=50) {
 /**
  * Reduces the parameters to a template string (tag) function into a single string
  */
-export function tagFuncParamsToString (msg: string | TemplateStringsArray, params: any[]): string {
+export function tagFuncParamsToString(msg: string | TemplateStringsArray, params: any[]): string {
     if (typeof msg === 'string') {
         return msg;
     }
@@ -47,7 +50,7 @@ export function tagFuncParamsToString (msg: string | TemplateStringsArray, param
  * Checks to see if an object is JSON-parsable.
  * Note that this is expensive for large JSON strings
  */
-export function isJson (item: unknown): boolean {
+export function isJson(item: unknown): boolean {
     if (typeof item !== 'string') {
         return false;
     }
@@ -64,15 +67,18 @@ export function isJson (item: unknown): boolean {
 /**
  * Removes ANSI escape codes from a string so that it is not coloured.
  */
-export function removeColour (str: string): string {
-    return str.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
+export function removeColour(str: string): string {
+    return str.replace(
+        /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,
+        ''
+    );
 }
 
 /**
  * Loads env from path
  * (relative to '/server'. or more specifically, the directory containing the server JS file)
  */
-export function loadEnv (filePath = ".env"): void {
+export function loadEnv(filePath = '.env'): void {
     const contents = fs.readFileSync(path.join(path.resolve(__dirname), filePath), 'utf8');
 
     process.env = {
@@ -89,7 +95,7 @@ export function loadEnv (filePath = ".env"): void {
  * 1: normal student
  * 2: admin
  */
-export async function authLvl (sessionId: string, query: queryFunc) {
+export async function authLvl(sessionId: string, query: queryFunc) {
     if (!sessionId) return 0;
 
     const res = await query`
@@ -103,55 +109,53 @@ export async function authLvl (sessionId: string, query: queryFunc) {
 
     if (!res.length) return 0;
 
-    const [ user ] = res;
+    const [user] = res;
 
-    return (user?.['admin'] === 1) ? 2 : 1;
+    return user?.['admin'] === 1 ? 2 : 1;
 }
 
 /**
  * True if user code is valid
  */
-export async function isLoggedIn (body: any, query: queryFunc): Promise<boolean> {
-    return await authLvl(body.session, query) > 0;
+export async function isLoggedIn(body: any, query: queryFunc): Promise<boolean> {
+    return (await authLvl(body.session, query)) > 0;
 }
 
 /**
  * True if user code is valid and an admin
  */
-export async function isAdmin (body: any, query: queryFunc): Promise<boolean> {
-    return await authLvl(body.session, query) >= 2;
+export async function isAdmin(body: any, query: queryFunc): Promise<boolean> {
+    return (await authLvl(body.session, query)) >= 2;
 }
 
 /**
  * Decode URL parameter
  * @param {string} param
  */
-export function decodeParam (param: string): string {
-    return decodeURIComponent(param.replace(/\+/g, ' '))
+export function decodeParam(param: string): string {
+    return decodeURIComponent(param.replace(/\+/g, ' '));
 }
 
 /**
  * Generate a random UUId using UUId v4 generator.
  * Does not check for collisions at the moment, but should be fine.
  */
-export async function generateUUId (): Promise<string> {
+export async function generateUUId(): Promise<string> {
     return UUIdv4();
 }
 
-export function passwordHash (password: string) {
-    const salt = crypto
-        .randomBytes(16)
-        .toString('base64');
+export function passwordHash(password: string) {
+    const salt = crypto.randomBytes(16).toString('base64');
 
     const passwordHash = crypto
         .createHash('sha256')
         .update(password + salt)
         .digest('hex');
 
-    return [ passwordHash, salt ];
+    return [passwordHash, salt];
 }
 
-export function validPassword (password: string): true | string {
+export function validPassword(password: string): true | string {
     if (!password) return 'No password';
     if (password.length < 5) return 'Password is too short, must be over 4 characters';
     if (password.length > 64) return 'Password is too long, must be under 64 characters';
@@ -162,7 +166,7 @@ export function validPassword (password: string): true | string {
 /**
  * Gets the userId from a session Id
  */
-export async function idFromSession (query: queryFunc, sessionId: string): Promise<string> {
+export async function idFromSession(query: queryFunc, sessionId: string): Promise<string> {
     const res = await query`
         SELECT userId
         FROM sessions
@@ -179,14 +183,17 @@ export async function idFromSession (query: queryFunc, sessionId: string): Promi
 /**
  * Gets the user Id from a body object
  */
-export async function userId (body: any, query: queryFunc) {
+export async function userId(body: any, query: queryFunc) {
     return idFromSession(query, body?.session || '');
 }
 
 /**
  * Gets the user details from a user Id
  */
-export async function userFromId (query: queryFunc, id: string): Promise<Record<string, any> | null> {
+export async function userFromId(
+    query: queryFunc,
+    id: string
+): Promise<Record<string, any> | null> {
     const res = await query`
         SELECT
             id,
@@ -198,7 +205,7 @@ export async function userFromId (query: queryFunc, id: string): Promise<Record<
         WHERE id = ${id}
     `;
 
-    if (!res.length) return null;
+    if (!res[0]) return null;
 
     await addHousePointsToUser(query, res[0]);
 
@@ -208,7 +215,10 @@ export async function userFromId (query: queryFunc, id: string): Promise<Record<
 /**
  * Gets the user details from a session token
  */
-export async function userFromSession (query: queryFunc, id: string): Promise<Record<string, any> | null> {
+export async function userFromSession(
+    query: queryFunc,
+    id: string
+): Promise<Record<string, any> | null> {
     const res = await query`
         SELECT
             users.id,
@@ -224,7 +234,7 @@ export async function userFromSession (query: queryFunc, id: string): Promise<Re
             AND UNIX_TIMESTAMP(opened) + expires > UNIX_TIMESTAMP()
     `;
 
-    if (!res.length) return null;
+    if (!res[0]) return null;
 
     await addHousePointsToUser(query, res[0]);
 
@@ -236,7 +246,7 @@ export async function userFromSession (query: queryFunc, id: string): Promise<Re
  * Adds 'housePoints', 'accepted', 'rejected', 'pending' keys to the user object.
  * Assumed admin level authentication, censor the data after if necessary.
  */
-export async function addHousePointsToUser (query: queryFunc, user: any & { id: string }) {
+export async function addHousePointsToUser(query: queryFunc, user: any & { id: string }) {
     if (!user['id']) {
         throw new Error('User has no Id');
     }
@@ -271,14 +281,20 @@ export async function addHousePointsToUser (query: queryFunc, user: any & { id: 
     `;
 
     // add the quick count stats
-    user['accepted'] ??= user['housePoints']
-        .reduce((acc: number, hp: any) => acc + (hp['status'] === 'Accepted' ? hp['quantity'] : 0), 0);
+    user['accepted'] ??= user['housePoints'].reduce(
+        (acc: number, hp: any) => acc + (hp['status'] === 'Accepted' ? hp['quantity'] : 0),
+        0
+    );
 
-    user['pending'] ??= user['housePoints']
-        .reduce((acc: number, hp: any) => acc + (hp['status'] === 'Pending' ? hp['quantity'] : 0), 0);
+    user['pending'] ??= user['housePoints'].reduce(
+        (acc: number, hp: any) => acc + (hp['status'] === 'Pending' ? hp['quantity'] : 0),
+        0
+    );
 
-    user['rejected'] ??= user['housePoints']
-        .reduce((acc: number, hp: any) => acc + (hp['status'] === 'Rejected' ? hp['quantity'] : 0), 0);
+    user['rejected'] ??= user['housePoints'].reduce(
+        (acc: number, hp: any) => acc + (hp['status'] === 'Rejected' ? hp['quantity'] : 0),
+        0
+    );
 
     // user passed by reference as it's an object so don't need to return anything
 }
@@ -288,7 +304,7 @@ export async function addHousePointsToUser (query: queryFunc, user: any & { id: 
  * Adds 'housePoints', 'accepted', 'rejected', 'pending' keys to the user object.
  * Assumed admin level authentication, censor the data after if necessary.
  */
-export async function addHousePointsToEvent (query: queryFunc, event: any & { id: string }) {
+export async function addHousePointsToEvent(query: queryFunc, event: any & { id: string }) {
     if (!event['id']) {
         throw new Error('User has no Id');
     }
@@ -322,8 +338,10 @@ export async function addHousePointsToEvent (query: queryFunc, event: any & { id
        ORDER BY created DESC
     `;
 
-    event['housePointCount'] = event['housePoints']
-        .reduce((acc: any, cur: any) => acc + cur['quantity'], 0);
+    event['housePointCount'] = event['housePoints'].reduce(
+        (acc: any, cur: any) => acc + cur['quantity'],
+        0
+    );
 
     // event passed by reference as it's an object so don't need to return anything
 }

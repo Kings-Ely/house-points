@@ -1,7 +1,6 @@
-import route from "../";
-import { AUTH_ERR, generateUUId, isAdmin, isLoggedIn, userFromId, userFromSession, userId } from "../util";
-import * as notifications from "../notifications";
-import mysql from "mysql2";
+import route from '../';
+import { AUTH_ERR, generateUUId, isAdmin, isLoggedIn, userFromId, userFromSession } from '../util';
+import mysql from 'mysql2';
 
 /**
  * @account
@@ -19,9 +18,9 @@ import mysql from "mysql2";
  * @param {number} to - house points created before this timestamp
  */
 route('get/awards', async ({ query, body }) => {
-    if (!await isLoggedIn(body, query)) return AUTH_ERR;
+    if (!(await isLoggedIn(body, query))) return AUTH_ERR;
 
-    let { awardId='', userId='', yearGroup=0, from=0, to=0 } = body;
+    let { awardId = '', userId = '', yearGroup = 0, from = 0, to = 0 } = body;
 
     if (!Number.isInteger(yearGroup) || yearGroup > 13 || yearGroup < 9) {
         if (yearGroup !== 0) return 'Invalid year group';
@@ -62,20 +61,20 @@ route('get/awards', async ({ query, body }) => {
     `;
 
     // either require admin or the house point to belong to the user
-    if (!await isAdmin(body, query)) {
+    if (!(await isAdmin(body, query))) {
         const user = await userFromSession(query, body.session);
         if (!user) return AUTH_ERR;
         if (!user['id']) return AUTH_ERR;
 
         for (let i = 0; i < res.length; i++) {
-            if (res[i]['userId'] === user['id']) {
+            if (res[i]?.['userId'] === user['id']) {
                 continue;
             }
 
             // if the house point does not belong to the user, censor it
-            delete res[i]['userId'];
-            delete res[i]['userEmail'];
-            delete res[i]['description'];
+            delete res[i]?.['userId'];
+            delete res[i]?.['userEmail'];
+            delete res[i]?.['description'];
         }
     }
 
@@ -92,9 +91,9 @@ route('get/awards', async ({ query, body }) => {
  * @param awardTypeId
  */
 route('create/awards', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { userId, description='', awardTypeId } = body;
+    const { userId, description = '', awardTypeId } = body;
 
     let student = await userFromId(query, userId);
     if (!student) return `Student with Id '${userId}' not found`;
@@ -146,9 +145,9 @@ route('create/awards', async ({ query, body }) => {
  * @param {int} description new description
  */
 route('update/awards/description', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { awardId: id='', description='' } = body;
+    const { awardId: id = '', description = '' } = body;
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE awards
@@ -156,10 +155,11 @@ route('update/awards/description', async ({ query, body }) => {
         WHERE id = ${id}
     `;
 
-    if (!queryRes.affectedRows) return {
-        status: 406,
-        error: `No award found with Id '${id}'`
-    };
+    if (!queryRes.affectedRows)
+        return {
+            status: 406,
+            error: `No award found with Id '${id}'`
+        };
 });
 
 /**
@@ -168,16 +168,17 @@ route('update/awards/description', async ({ query, body }) => {
  * @param awardId
  */
 route('delete/awards', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { awardId: id='' } = body;
+    const { awardId: id = '' } = body;
 
     const res = await query<mysql.OkPacket>`
         DELETE FROM awards
         WHERE id = ${id}
     `;
-    if (!res.affectedRows) return {
-        status: 406,
-        error: `No awards to delete with Id '${id}'`
-    }
+    if (!res.affectedRows)
+        return {
+            status: 406,
+            error: `No awards to delete with Id '${id}'`
+        };
 });

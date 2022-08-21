@@ -1,7 +1,7 @@
 import Test from '../framework';
-import { generateUser } from "../util";
+import { generateUser } from '../util';
 
-Test.test('Awards | Creating, getting and deleting', async (api) => {
+Test.test('Awards | Creating, getting and deleting', async api => {
     let res = await api(`get/awards`);
     if (res.ok !== true) {
         return `0: ${JSON.stringify(res)}`;
@@ -16,7 +16,7 @@ Test.test('Awards | Creating, getting and deleting', async (api) => {
     });
 
     const { userId } = await generateUser(api);
-    
+
     res = await api(`create/awards`, {
         userId,
         awardTypeId,

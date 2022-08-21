@@ -1,5 +1,5 @@
 import now from 'performance-now';
-import fetch from "node-fetch";
+import fetch from 'node-fetch';
 
 /**
  * Results for Apache server:
@@ -20,26 +20,35 @@ const rootPath = process.argv[2];
 
 let results = [];
 
-async function getFromPath (path, i) {
-	let start = now();
+async function getFromPath(path, i) {
+    let start = now();
 
-	await fetch(`${rootPath}/${path}`);
+    await fetch(`${rootPath}/${path}`);
 
-	let time = now() - start;
-	results.push([time, i]);
+    let time = now() - start;
+    results.push([time, i]);
 }
 
-async function run () {
-	await Promise.all(
-		Array.from({ length: N }, (x, i) => i)
-			.map(i => getFromPath(``, i))
-	);
+async function run() {
+    await Promise.all(Array.from({ length: N }, (x, i) => i).map(i => getFromPath(``, i)));
 
-	console.log(results.sort((a, b) => a[1] - b[1]));
+    console.log(results.sort((a, b) => a[1] - b[1]));
 
-	console.log('Average: ', results.reduce((a, b) => a + b[0], 0) / results.length, `ms (${results.length})`);
-	console.log('Min: ', results.reduce((a, b) => Math.min(a, b[0]), results[0][0]), `ms`);
-	console.log('Max: ', results.reduce((a, b) => Math.max(a, b[0]), results[0][0]), `ms`);
+    console.log(
+        'Average: ',
+        results.reduce((a, b) => a + b[0], 0) / results.length,
+        `ms (${results.length})`
+    );
+    console.log(
+        'Min: ',
+        results.reduce((a, b) => Math.min(a, b[0]), results[0][0]),
+        `ms`
+    );
+    console.log(
+        'Max: ',
+        results.reduce((a, b) => Math.max(a, b[0]), results[0][0]),
+        `ms`
+    );
 }
 
 run().catch(console.error);

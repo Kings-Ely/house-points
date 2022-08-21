@@ -1,8 +1,8 @@
 import fs from 'fs';
 import c from 'chalk';
-import { removeColour, tagFuncParamsToString } from "./util";
-import { IFlags, query } from "./index";
-import mysql from "mysql2";
+import { removeColour, tagFuncParamsToString } from './util';
+import { IFlags, query } from './index';
+import mysql from 'mysql2';
 
 export enum LogLvl {
     NONE,
@@ -23,7 +23,7 @@ class Logger {
     /**
      * Outputs a message to the console and/or file
      */
-    output (level: LogLvl, type: string, ...messages: any[]): void {
+    output(level: LogLvl, type: string, ...messages: any[]): void {
         if (!this.active) {
             return;
         }
@@ -32,13 +32,15 @@ class Logger {
             return;
         }
 
-        const message = `[${type}] ` + messages
-            .map(m => {
-                // make sure it is all a string
-                if (typeof m === 'string') return m;
-                return JSON.stringify(m, null, 5);
-            })
-            .join(' ');
+        const message =
+            `[${type}] ` +
+            messages
+                .map(m => {
+                    // make sure it is all a string
+                    if (typeof m === 'string') return m;
+                    return JSON.stringify(m, null, 5);
+                })
+                .join(' ');
 
         if (this.useConsole) {
             console.log(message);
@@ -51,7 +53,7 @@ class Logger {
         }
     }
 
-    private async logToDB (message: string, from='server'): Promise<mysql.OkPacket | undefined> {
+    private async logToDB(message: string, from = 'server'): Promise<mysql.OkPacket | undefined> {
         if (!query) return;
         return await query<mysql.OkPacket>`
             INSERT INTO logs (msg, madeBy)
@@ -62,14 +64,14 @@ class Logger {
     /**
      * Logs a message but only if the 'verbose' flag is set
      */
-    verbose (msg: string | TemplateStringsArray, ...params: any[]) {
+    verbose(msg: string | TemplateStringsArray, ...params: any[]) {
         this.output(LogLvl.VERBOSE, c.grey`VERB`, tagFuncParamsToString(msg, params));
     }
 
     /**
      * Logs a message
      */
-    log (msg: string | TemplateStringsArray, ...params: any[]) {
+    log(msg: string | TemplateStringsArray, ...params: any[]) {
         const message = tagFuncParamsToString(msg, params);
 
         if (this.dbLogLevel >= LogLvl.INFO) {
@@ -82,28 +84,28 @@ class Logger {
     /**
      * Logs a warning
      */
-    warning (msg: string | TemplateStringsArray, ...params: any[]) {
+    warning(msg: string | TemplateStringsArray, ...params: any[]) {
         this.output(LogLvl.WARN, c.yellow`WARN`, tagFuncParamsToString(msg, params));
     }
 
     /**
      * Logs an error
      */
-    error (msg: string | TemplateStringsArray, ...params: any[]) {
+    error(msg: string | TemplateStringsArray, ...params: any[]) {
         this.output(LogLvl.ERROR, c.red`ERR`, tagFuncParamsToString(msg, params));
     }
 
     /**
      * Closes any active file handles
      */
-    async close (): Promise<unknown> {
+    async close(): Promise<unknown> {
         this.active = false;
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
             this.fileHandle?.close?.(resolve);
         });
     }
 
-    setLogOptions (options: IFlags) {
+    setLogOptions(options: IFlags) {
         this.level = options.logLevel;
         this.level = options.dbLogLevel;
         this.useConsole = !options.logTo;
@@ -127,7 +129,7 @@ class Logger {
     static instance: Logger = new Logger();
 }
 
-export function setupLogger (options: IFlags) {
+export function setupLogger(options: IFlags) {
     Logger.instance.setLogOptions(options);
 }
 

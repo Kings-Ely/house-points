@@ -1,8 +1,7 @@
 import Test from '../framework';
-import { generateUser } from "../util";
+import { generateUser } from '../util';
 
-
-Test.test('HPs | Creating house points by giving', async (api) => {
+Test.test('HPs | Creating house points by giving', async api => {
     const { sessionId, userId } = await generateUser(api);
 
     // check no hps at start
@@ -68,7 +67,7 @@ Test.test('HPs | Creating house points by giving', async (api) => {
     // can't give with negative quantity
     res = await api(`create/house-points/give`, {
         userId,
-        quantity: -1,
+        quantity: -1
     });
     if (res.ok || res.status !== 400) {
         return `12: ${JSON.stringify(res)}`;
@@ -77,7 +76,7 @@ Test.test('HPs | Creating house points by giving', async (api) => {
     // can't give with 0 quantity
     res = await api(`create/house-points/give`, {
         userId,
-        quantity: 0,
+        quantity: 0
     });
     if (res.ok || res.status !== 400) {
         return `13: ${JSON.stringify(res)}`;
@@ -86,7 +85,7 @@ Test.test('HPs | Creating house points by giving', async (api) => {
     // can't give with invalid quantity
     res = await api(`create/house-points/give`, {
         userId,
-        quantity: 'invalid',
+        quantity: 'invalid'
     });
     if (res.ok || res.status !== 400) {
         return `14: ${JSON.stringify(res)}`;
@@ -120,7 +119,7 @@ Test.test('HPs | Creating house points by giving', async (api) => {
     return true;
 });
 
-Test.test('HPs | Creating house point requests', async (api) => {
+Test.test('HPs | Creating house point requests', async api => {
     const { userId, email } = await generateUser(api);
 
     let res = await api(`create/house-points/request`, {
@@ -195,7 +194,7 @@ Test.test('HPs | Creating house point requests', async (api) => {
     return true;
 });
 
-Test.test('HPs | Accepting house points', async (api) => {
+Test.test('HPs | Accepting house points', async api => {
     const { userId } = await generateUser(api);
 
     await api(`create/house-points/request`, {
@@ -229,7 +228,7 @@ Test.test('HPs | Accepting house points', async (api) => {
     return true;
 });
 
-Test.test('HPs | Rejecting house points', async (api) => {
+Test.test('HPs | Rejecting house points', async api => {
     const { userId } = await generateUser(api);
 
     await api(`create/house-points/request`, {
@@ -260,7 +259,7 @@ Test.test('HPs | Rejecting house points', async (api) => {
     return true;
 });
 
-Test.test('HPs | Rejecting house points', async (api) => {
+Test.test('HPs | Rejecting house points', async api => {
     const { userId: userId1, sessionId: sessionId1 } = await generateUser(api);
     const { userId: userId2, sessionId: sessionId2 } = await generateUser(api);
 
@@ -272,11 +271,11 @@ Test.test('HPs | Rejecting house points', async (api) => {
     });
 
     let res = await api(`get/house-points`);
-    const [ hp1 ] = res.data;
+    const [hp1] = res.data;
 
     // delete with admin code
     res = await api(`delete/house-points`, {
-        housePointId: hp1.id,
+        housePointId: hp1.id
     });
     if (res.ok !== true || res.status !== 200) {
         return `0: ${JSON.stringify(res)}`;
@@ -294,12 +293,12 @@ Test.test('HPs | Rejecting house points', async (api) => {
     });
 
     res = await api(`get/house-points`);
-    const [ hp2 ] = res.data;
+    const [hp2] = res.data;
 
     // delete with non-admin code
     res = await api(`delete/house-points`, {
         session: sessionId2,
-        housePointId: hp2.id,
+        housePointId: hp2.id
     });
     if (res.ok || res.status !== 401) {
         return `2: ${JSON.stringify(res)}`;
@@ -314,7 +313,7 @@ Test.test('HPs | Rejecting house points', async (api) => {
     // now delete with same code as owns the house point
     res = await api(`delete/house-points`, {
         session: sessionId1,
-        housePointId: hp2.id,
+        housePointId: hp2.id
     });
     if (res.ok !== true || res.status !== 200) {
         return `4: ${JSON.stringify(res)}`;
@@ -332,7 +331,7 @@ Test.test('HPs | Rejecting house points', async (api) => {
     return true;
 });
 
-Test.test('HPs | Making sure hps are deleted when event is deleted', async (api) => {
+Test.test('HPs | Making sure hps are deleted when event is deleted', async api => {
     const now = Math.ceil(Date.now() / 1000);
 
     const { userId } = await generateUser(api);
@@ -340,7 +339,7 @@ Test.test('HPs | Making sure hps are deleted when event is deleted', async (api)
     // create event, assumed to be ok
     await api(`create/events`, {
         name: 'doing something 2022',
-        time: now,
+        time: now
     });
 
     let res = await api(`get/events`);

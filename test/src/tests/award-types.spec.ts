@@ -1,7 +1,7 @@
 import Test from '../framework';
-import { generateUser } from "../util";
+import { generateUser } from '../util';
 
-Test.test('Award Types | Creating, getting and deleting', async (api) => {
+Test.test('Award Types | Creating, getting and deleting', async api => {
     let res = await api(`get/award-types`);
     if (res.ok !== true) {
         return `0: ${JSON.stringify(res)}`;
@@ -49,7 +49,7 @@ Test.test('Award Types | Creating, getting and deleting', async (api) => {
     return true;
 });
 
-Test.test('Award Types | Creating, getting and deleting auth', async (api) => {
+Test.test('Award Types | Creating, getting and deleting auth', async api => {
     const { sessionId, userId } = await generateUser(api);
 
     let res = await api(`get/award-types`, {
@@ -101,7 +101,7 @@ Test.test('Award Types | Creating, getting and deleting auth', async (api) => {
     return true;
 });
 
-Test.test('Award  Types | Updating name', async (api) => {
+Test.test('Award  Types | Updating name', async api => {
     const { sessionId, userId } = await generateUser(api);
 
     await api(`create/award-types`, {
@@ -159,7 +159,7 @@ Test.test('Award  Types | Updating name', async (api) => {
     return true;
 });
 
-Test.test('Award  Types | Updating quantity', async (api) => {
+Test.test('Award  Types | Updating quantity', async api => {
     const { sessionId, userId } = await generateUser(api);
 
     await api(`create/award-types`, {
@@ -208,7 +208,9 @@ Test.test('Award  Types | Updating quantity', async (api) => {
         return `7: ${JSON.stringify(res)}`;
     }
 
-    await api(`delete/award-types`, { id: res.data?.[0]?.id });
+    await api(`delete/award-types`, {
+        id: res.data?.[0]?.id
+    });
 
     await api(`delete/users`, { userId });
 

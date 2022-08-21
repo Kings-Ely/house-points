@@ -1,11 +1,11 @@
 import mailer from 'nodemailer';
-import { queryFunc } from "./sql";
-import log from "./log";
-import { limitStr } from "./util";
+import { queryFunc } from './sql';
+import log from './log';
+import { limitStr } from './util';
 
-let transporter:  mailer.Transporter | undefined;
+let transporter: mailer.Transporter | undefined;
 
-function setUpTransporter () {
+function setUpTransporter() {
     transporter = mailer.createTransport({
         service: 'gmail',
         auth: {
@@ -21,22 +21,21 @@ function setUpTransporter () {
     log.log`Gmail user: ${process.env.GMAIL_USER}`;
 }
 
-async function mail ({
+async function mail({
     to,
     subject,
     html,
-    attachments = [],
+    attachments = []
 }: {
-    to: string,
-    subject: string,
-    html: string,
+    to: string;
+    subject: string;
+    html: string;
     attachments?: Array<{
-        filename: string,
-        content: string,
-        contentType: string,
-    }>,
+        filename: string;
+        content: string;
+        contentType: string;
+    }>;
 }): Promise<true | string> {
-
     if (process.env.ALLOW_MAIL !== '1') {
         log.warning`Cannot send emails because ALLOW_MAIL is not set`;
         log.log`Tried to send email to ${to} '${subject}' with html: ${limitStr(html)}`;
@@ -67,50 +66,61 @@ async function mail ({
     `;
 
     return await new Promise((resolve, reject) => {
-        transporter?.sendMail({
-            from: process.env.GMAIL_USER,
-            to,
-            subject,
-            html: html + emailFooter,
-            attachments
-        }, (err, info) => {
-            if (err) {
-                log.error`Error sending email: ${JSON.stringify(err)}`;
-                reject(`Error sending email: ${JSON.stringify(err)}`);
-                return;
+        transporter?.sendMail(
+            {
+                from: process.env.GMAIL_USER,
+                to,
+                subject,
+                html: html + emailFooter,
+                attachments
+            },
+            (err, info) => {
+                if (err) {
+                    log.error`Error sending email: ${JSON.stringify(err)}`;
+                    reject(`Error sending email: ${JSON.stringify(err)}`);
+                    return;
+                }
+                if (!info['accepted'].includes(to)) {
+                    reject(`Email failed to send`);
+                    log.warning`Sent email to ${to} failed: ${JSON.stringify(info)}`;
+                    return;
+                }
+                log.log`Sent email to ${to}`;
+                resolve(true);
             }
-            if (!info['accepted'].includes(to)) {
-                reject(`Email failed to send`);
-                log.warning`Sent email to ${to} failed: ${JSON.stringify(info)}`;
-                return;
-            }
-            log.log`Sent email to ${to}`;
-            resolve(true);
-        });
+        );
     });
 }
 
-async function sendEmailToUser (query: queryFunc, userId: string, subject: string, html: string) {
-    const users  = await query`
+async function sendEmailToUser(query: queryFunc, userId: string, subject: string, html: string) {
+    const users = await query`
         SELECT email
         FROM users
         WHERE id = ${userId}
     `;
-    if (!users.length) {
+    if (!users[0] || !users.length) {
         return 'Invalid userId';
     }
     const email = users[0].email;
     return await mail({
         to: email,
         subject,
-        html,
+        html
     });
 }
 
 // Exposed
 
-export async function forgottenPasswordEmail (query: queryFunc, userId: string, newSessionId: string): Promise <string | true> {
-    return await sendEmailToUser(query, userId, 'Forgotten Password', `
+export async function forgottenPasswordEmail(
+    query: queryFunc,
+    userId: string,
+    newSessionId: string
+): Promise<string | true> {
+    return await sendEmailToUser(
+        query,
+        userId,
+        'Forgotten Password',
+        `
         <h3>You have requested to reset your password.</h3>
         <p style="padding: 20px;">
             To reset your password, click the link, which will expire in 1 hour.
@@ -119,15 +129,20 @@ export async function forgottenPasswordEmail (query: queryFunc, userId: string, 
                 Reset Password
             </a>
         </p>
-    `);
+    `
+    );
 }
 
-export async function receivedHousePoint (query: queryFunc, userId: string, quantity: number) {
+export async function receivedHousePoint(query: queryFunc, userId: string, quantity: number) {
     let title = 'Received House Point';
     if (quantity > 1) {
         title = `Received ${quantity} House Points`;
     }
-    return await sendEmailToUser(query, userId, title, `
+    return await sendEmailToUser(
+        query,
+        userId,
+        title,
+        `
         <h3>
             You have received ${quantity} house point${quantity > 1 ? 's' : ''}!
         </h3>
@@ -136,19 +151,32 @@ export async function receivedHousePoint (query: queryFunc, userId: string, quan
                 See my house points
             </a>
         </p>
-    `);
+    `
+    );
 }
 
-export async function housePointRequestAcceptedOrRejected (query: queryFunc, userId: string, hpReason: string, rejectMessage='') {
+export async function housePointRequestAcceptedOrRejected(
+    query: queryFunc,
+    userId: string,
+    hpReason: string,
+    rejectMessage = ''
+) {
     const title = `Your House Point Request has been ${rejectMessage ? 'Rejected' : 'Accepted'}`;
-    return await sendEmailToUser(query, userId, title, `
+    return await sendEmailToUser(
+        query,
+        userId,
+        title,
+        `
         <h3>
-            Your house point request for '${hpReason}' has been ${rejectMessage ? 'rejected.' : 'accepted!'}
+            Your house point request for '${hpReason}' has been ${
+            rejectMessage ? 'rejected.' : 'accepted!'
+        }
         </h3>
         <p>
             <a href="${process.env.SITE_ROOT}/user">
                 See my house points
             </a>
         </p>
-    `);
+    `
+    );
 }

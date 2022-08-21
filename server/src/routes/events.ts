@@ -1,6 +1,13 @@
-import route from "../";
-import { addHousePointsToEvent, AUTH_ERR, generateUUId, isAdmin, isLoggedIn, userFromSession } from '../util';
-import mysql from "mysql2";
+import route from '../';
+import {
+    addHousePointsToEvent,
+    AUTH_ERR,
+    generateUUId,
+    isAdmin,
+    isLoggedIn,
+    userFromSession
+} from '../util';
+import mysql from 'mysql2';
 
 /**
  * @account
@@ -12,9 +19,9 @@ import mysql from "mysql2";
  * @param {string} userId - events which have house points which belong to this user
  */
 route('get/events', async ({ query, body }) => {
-    if (!await isLoggedIn(body, query)) return AUTH_ERR;
+    if (!(await isLoggedIn(body, query))) return AUTH_ERR;
 
-    let { eventId='', userId='', from=0, to=0 } = body;
+    let { eventId = '', userId = '', from = 0, to = 0 } = body;
 
     let data = await query`
         SELECT
@@ -43,14 +50,14 @@ route('get/events', async ({ query, body }) => {
         await addHousePointsToEvent(query, data[i]);
 
         if (!admin) {
-            for (let j = 0; j < data[i]['housePoints'].length; j++) {
-                if (data[i]['housePoints'][j]['userId'] === user['id']) {
+            for (let j = 0; j < data[i]?.['housePoints']?.length; j++) {
+                if (data[i]?.['housePoints']?.[j]?.['userId'] === user['id']) {
                     continue;
                 }
 
                 // if the house point does not belong to the user, censor it
-                delete data[i]['housePoints'][j]['userId'];
-                delete data[i]['housePoints'][j]['rejectMessage'];
+                delete data[i]?.['housePoints']?.[j]?.['userId'];
+                delete data[i]?.['housePoints']?.[j]?.['rejectMessage'];
             }
         }
     }
@@ -79,9 +86,9 @@ route('get/events', async ({ query, body }) => {
  * @param description
  */
 route('create/events', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { name='', time=Math.ceil(Date.now()/1000), description='' } = body;
+    const { name = '', time = Math.ceil(Date.now() / 1000), description = '' } = body;
 
     if (name.length < 3) {
         return `Event name must be more than 3 characters, got '${name}'`;
@@ -116,9 +123,9 @@ route('create/events', async ({ query, body }) => {
  * @param name
  */
 route('update/events/name', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { eventId='', name='' } = body;
+    const { eventId = '', name = '' } = body;
 
     if (!eventId) return 'EventId is not in body of request';
     if (!name) return 'Event must have name';
@@ -128,10 +135,11 @@ route('update/events/name', async ({ query, body }) => {
         SET name = ${name}
         WHERE id = ${eventId}
    `;
-    if (queryRes.affectedRows === 0) return {
-        status: 406,
-        error: `Event not found`
-    };
+    if (queryRes.affectedRows === 0)
+        return {
+            status: 406,
+            error: `Event not found`
+        };
 });
 
 /**
@@ -141,9 +149,9 @@ route('update/events/name', async ({ query, body }) => {
  * @param description
  */
 route('update/events/description', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { eventId='', description='' } = body;
+    const { eventId = '', description = '' } = body;
 
     if (!eventId) return 'EventId is not in body of request';
 
@@ -152,10 +160,11 @@ route('update/events/description', async ({ query, body }) => {
         SET description = ${description}
         WHERE id = ${eventId}
    `;
-    if (queryRes.affectedRows === 0) return {
-        status: 406,
-        error: `Event not found`
-    };
+    if (queryRes.affectedRows === 0)
+        return {
+            status: 406,
+            error: `Event not found`
+        };
 });
 
 /**
@@ -165,9 +174,9 @@ route('update/events/description', async ({ query, body }) => {
  * @param {int} time
  */
 route('update/events/time', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { eventId='', time=Math.ceil(Date.now()/1000) } = body;
+    const { eventId = '', time = Math.ceil(Date.now() / 1000) } = body;
 
     if (!eventId) return 'EventId is not in body of request';
     if (!Number.isInteger(time)) {
@@ -179,10 +188,11 @@ route('update/events/time', async ({ query, body }) => {
         SET time = FROM_UNIXTIME(${time})
         WHERE id = ${eventId}
    `;
-    if (!queryRes.affectedRows) return {
-        status: 406,
-        error: `Event with Id '${eventId}' not found`
-    };
+    if (!queryRes.affectedRows)
+        return {
+            status: 406,
+            error: `Event with Id '${eventId}' not found`
+        };
 });
 
 /**
@@ -192,9 +202,9 @@ route('update/events/time', async ({ query, body }) => {
  * @param {1|0} deleteHps - if true, also deletes all house points with an event Id of this event
  */
 route('delete/events', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { eventId='', deleteHps=true } = body;
+    const { eventId = '', deleteHps = true } = body;
     if (!eventId) return 'EventId is not in body of request';
 
     if (deleteHps) {
@@ -208,8 +218,9 @@ route('delete/events', async ({ query, body }) => {
         DELETE FROM events
         WHERE id = ${eventId}
     `;
-    if (!res.affectedRows) return {
-        status: 406,
-        error: `No events to delete with that Id`
-    }
+    if (!res.affectedRows)
+        return {
+            status: 406,
+            error: `No events to delete with that Id`
+        };
 });

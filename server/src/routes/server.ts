@@ -1,18 +1,17 @@
-import now from "performance-now";
+import now from 'performance-now';
 import { cpuUsage } from 'node:process';
 
-import route from "../";
-import { AUTH_ERR, isAdmin, isLoggedIn } from "../util";
+import route from '../';
+import { AUTH_ERR, isAdmin, isLoggedIn } from '../util';
 import log from '../log';
-
 
 /**
  * Hello World route
  * Mainly for debugging, should remove at some point
  * TODO: remove
  */
-route('', async ()  => {
-    return { 'message': 'Hello World' };
+route('', async () => {
+    return { message: 'Hello World' };
 });
 
 /**
@@ -25,7 +24,7 @@ route('get/server/ping', async () => {});
  * Get the process Id of the Node process running this server
  */
 route('get/server/pid', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
     return { pid: process.pid };
 });
@@ -35,7 +34,7 @@ route('get/server/pid', async ({ query, body }) => {
  * Runs a basic SQL query and returns an error if the query fails
  */
 route('get/server/check', async ({ query, body }) => {
-    if (!await isLoggedIn(body, query)) return AUTH_ERR;
+    if (!(await isLoggedIn(body, query))) return AUTH_ERR;
 
     if ((await query`SELECT * FROM users LIMIT 1`).length !== 1) {
         return 'Something went wrong';
@@ -47,7 +46,7 @@ route('get/server/check', async ({ query, body }) => {
  * Echos the body of the request back
  */
 route('get/server/echo', async ({ body, query }) => {
-    if (!await isLoggedIn(body, query)) return AUTH_ERR;
+    if (!(await isLoggedIn(body, query))) return AUTH_ERR;
 
     return body;
 });
@@ -58,7 +57,7 @@ route('get/server/echo', async ({ body, query }) => {
  * @param {int} [logLevel=2]
  */
 route('create/server/logs', async ({ body }) => {
-    let { message, logLevel=2 } = body;
+    let { message, logLevel = 2 } = body;
 
     if (typeof message !== 'string') {
         message = JSON.stringify(message);
@@ -81,7 +80,7 @@ route('create/server/logs', async ({ body }) => {
  * @param {int} [iterations=100]
  */
 route('get/server/performance', async ({ query, body }) => {
-    if (!await isLoggedIn(body, query)) return AUTH_ERR;
+    if (!(await isLoggedIn(body, query))) return AUTH_ERR;
 
     const start = now();
 
@@ -105,7 +104,7 @@ route('get/server/performance', async ({ query, body }) => {
 });
 
 route('get/server/health', async ({ query, body }) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
     return {
         cpu: cpuUsage(),
@@ -118,7 +117,7 @@ route('get/server/health', async ({ query, body }) => {
         arch: process.arch,
         versions: process.versions,
         build: process.env.npm_package_version,
-        node: process.version,
+        node: process.version
     };
 });
 
@@ -128,8 +127,8 @@ route('get/server/health', async ({ query, body }) => {
  * Note that this doesn't immediately kill the process, just sends a kill signal
  * This allows the server to close any connections and shutdown gracefully
  */
-route('delete/server', async ({ query, body}) => {
-    if (!await isAdmin(body, query)) return AUTH_ERR;
+route('delete/server', async ({ query, body }) => {
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
 
     process.kill(process.pid, 'SIGTERM');
 });

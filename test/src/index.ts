@@ -1,14 +1,13 @@
 import c from 'chalk';
-import fetch from "node-fetch";
+import fetch from 'node-fetch';
 import commandLineArgs, { CommandLineOptions } from 'command-line-args';
 import childProcess from 'child_process';
 import now from 'performance-now';
 
-import setup from "./setup";
+import setup from './setup';
 import Test from './framework';
 
 import './tests/server.spec';
-
 import './tests/self.spec';
 import './tests/users.spec';
 import './tests/events.spec';
@@ -17,12 +16,25 @@ import './tests/award-types.spec';
 import './tests/awards.spec';
 
 const flags = commandLineArgs([
-    { name: 'verbose', alias: 'v', type: Boolean, defaultValue: false },
-    { name: 'deploy', alias: 'd', type: Boolean, defaultValue: false },
+    {
+        name: 'verbose',
+        alias: 'v',
+        type: Boolean,
+        defaultValue: false
+    },
+    {
+        name: 'deploy',
+        alias: 'd',
+        type: Boolean,
+        defaultValue: false
+    }
 ]);
 
 export type API = (path: string, body?: any) => Promise<any>;
-export type testExecutor = (api: API, args: CommandLineOptions) => Promise<boolean | Error | string>;
+export type testExecutor = (
+    api: API,
+    args: CommandLineOptions
+) => Promise<boolean | Error | string>;
 
 const adminPassword = 'password';
 const adminEmail = 'admin@example.com';
@@ -33,7 +45,7 @@ let adminSessionId: string | null = null;
  * Makes API request to localhost API server
  * Uses http, and the port stored in the .env file
  */
-async function api (path: string, body: Record<string, any> = {}): Promise<any> {
+async function api(path: string, body: Record<string, any> = {}): Promise<any> {
     // assume host is localhost
     const url = `http://localhost:${process.env.PORT}/${path}`;
 
@@ -55,9 +67,9 @@ async function api (path: string, body: Record<string, any> = {}): Promise<any> 
 
     // get request to api server
     const res = await fetch(url, {
-        'method': 'POST',
-        'body': JSON.stringify(body),
-        'headers': {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: {
             'Content-Type': 'application/json'
         }
     }).catch(e => {
@@ -81,9 +93,8 @@ async function api (path: string, body: Record<string, any> = {}): Promise<any> 
     return JSON.parse(resBody);
 }
 
-export async function deploy () {
+export async function deploy(): Promise<void> {
     return await new Promise<void>((resolve, reject) => {
-
         let invoked = false;
 
         let process = childProcess.fork('./build/index.js');
@@ -109,13 +120,12 @@ export async function deploy () {
 }
 
 (async () => {
-
     let start = now();
 
-    const timeSinceStart = () => {
+    const timeSinceStart = (): string => {
         const t = now() - start;
         return t.toFixed(2);
-    }
+    };
 
     await setup(flags);
 
