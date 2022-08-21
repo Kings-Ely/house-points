@@ -17,10 +17,10 @@ module.exports = {
         }
     },
     rules: {
-        'prettier/prettier': 'error',
-        'no-console': 'error',
-        '@typescript-eslint/explicit-function-return-type': 'error',
-        '@typescript-eslint/explicit-member-accessibility': 'error'
+        'prettier/prettier': 'warn',
+        'no-console': 'warn',
+        '@typescript-eslint/explicit-function-return-type': 'warn',
+        '@typescript-eslint/explicit-member-accessibility': 'warn'
     },
     overrides: [
         {
