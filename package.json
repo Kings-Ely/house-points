@@ -1,29 +1,18 @@
 {
     "scripts": {
-        "lint:fixall": "npm run prettier:fix && npm run lint:fix && npm run mdlint:fix",
-        "lint": "eslint --quiet \"{**/*,*}.{js,ts,json}\"",
-        "lint:fix": "npm run lint -- --fix",
-        "mdlint": "markdownlint --dot \"{**/*,*}.md\"",
-        "mdlint:fix": "npm run mdlint --fix",
-        "prettier": "prettier --check --loglevel warn \"{**/*,*}.{js,ts,json,md,yml,yaml}\"",
-        "prettier:fix": "npm run prettier -- --write"
+        "lint-all": "npm run prettier && npm run lint",
+        "lint": "eslint --quiet \"{**/*,*}.{js,ts}\" --fix",
+        "prettier": "prettier --check --loglevel warn \"{**/*,*}.{js,ts}\" --write"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "5.33.1",
         "@typescript-eslint/parser": "5.33.1",
         "eslint": "8.22.0",
-        "markdownlint-cli": "0.32.2",
-        "prettier": "2.7.1",
-        "typescript": "4.7.4",
         "eslint-config-prettier": "^8.5.0",
         "eslint-import-resolver-typescript": "^3.4.2",
         "eslint-plugin-import": "^2.26.0",
         "eslint-plugin-prettier": "^4.2.1",
-        "eslint-plugin-simple-import-sort": "^7.0.0",
-        "eslint-plugin-unicorn": "^43.0.1"
-    },
-    "lint-staged": {
-        "*.{js,ts,json,md,yml,yaml}": "prettier --loglevel warn --write ",
-        "*.{md}": "markdownlint --dot --fix"
+        "prettier": "2.7.1",
+        "typescript": "4.7.4"
     }
 }

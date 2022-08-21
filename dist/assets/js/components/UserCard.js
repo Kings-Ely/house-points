@@ -1,7 +1,6 @@
 'use strict';
-import { registerComponent } from "./components.js";
-import * as core from "../main.js";
-import HousePoint from "./HousePoint.js";
+import * as core from '../main.js';
+import HousePoint from './HousePoint.js';
 
 /** @typedef {{
  * 		id?: string,
@@ -19,33 +18,35 @@ import HousePoint from "./HousePoint.js";
  * @param {() => User} getEvent getter for event data
  * @param {boolean} admin should be admin options be shown
  */
-const UserCard = registerComponent(($el, id, getUser) => {
+const UserCard = core.registerComponent(($el, id, getUser) => {
+    /** @type User */
+    let user;
 
-	/** @type User */
-	let user;
+    let userCard = document.createElement('div');
+    userCard.classList.add('user-card');
+    $el.appendChild(userCard);
 
-	let userCard = document.createElement('div');
-	userCard.classList.add('user-card');
-	$el.appendChild(userCard);
+    window[`_UserCard${id}__signInAs`] = async (...args) => {
+        await core.signInAs(...args);
+    };
 
-	window[`_UserCard${id}__signInAs`] = async (...args) => {
-		await core.signInAs(...args);
-	}
+    async function render() {
+        const admin = core.isAdmin();
 
-	async function render () {
-
-		const admin = core.isAdmin();
-
-		userCard.innerHTML = `
+        userCard.innerHTML = `
 			<h2>
-				${admin ? `
+				${
+                    admin
+                        ? `
 					<button 
 						class="icon medium"
 						svg="account.svg"
 						onclick="_UserCard${id}__signInAs('${user.id}', '${user.email}')"
 						data-label="Sign in as"
 					></button>
-				` : ''}
+				`
+                        : ''
+                }
 				<a href="${core.ROOT_PATH}/user/?email=${user.email}">
 					${core.escapeHTML(user.email)}
 				</a>
@@ -57,28 +58,37 @@ const UserCard = registerComponent(($el, id, getUser) => {
 				<p>(${core.escapeHTML(user.pending)} pending, ${core.escapeHTML(user.rejected)} rejected)</p>
 				<div class="user-card-housepoints">
 					${user['housePoints']
-						.map((point, i) => core.inlineComponent(HousePoint, point, async () => {
-							user = await getUser();
-							await render();
-						}, {
-							admin,
-							showBorderBottom: i !== (user['housePoints'].length - 1),
-							showEmail: false,
-							showReason: true,
-							showNumPoints: true,
-							showDate: true,
-							showRelativeTime: true,
-							showStatusHint: true,
-							showStatusIcon: true,
-							showDeleteButton: true,
-							showPendingOptions: true,
-							reasonEditable: true,
-							pointsEditable: true,
-							dateEditable: false
-						}))
-						.join('')}
+                        .map((point, i) =>
+                            core.inlineComponent(
+                                HousePoint,
+                                point,
+                                async () => {
+                                    user = await getUser();
+                                    await render();
+                                },
+                                {
+                                    admin,
+                                    showBorderBottom: i !== user['housePoints'].length - 1,
+                                    showEmail: false,
+                                    showReason: true,
+                                    showNumPoints: true,
+                                    showDate: true,
+                                    showRelativeTime: true,
+                                    showStatusHint: true,
+                                    showStatusIcon: true,
+                                    showDeleteButton: true,
+                                    showPendingOptions: true,
+                                    reasonEditable: true,
+                                    pointsEditable: true,
+                                    dateEditable: false
+                                }
+                            )
+                        )
+                        .join('')}
 					
-					${admin ? `
+					${
+                        admin
+                            ? `
 						<div class="add-hp">
 							<input
 								placeholder="New house point description"
@@ -98,52 +108,54 @@ const UserCard = registerComponent(($el, id, getUser) => {
 								class="icon small new-hp-create"
 							></button>
 						</div>
-					` : ''}
+					`
+                            : ''
+                    }
 				</div>
 			</div>
 		`;
 
-		if (admin) {
-			const $newHpQuantity = userCard.querySelector('.new-hp-quantity');
-			const $newHpDescription = userCard.querySelector('.new-hp-description');
-			const $newHpCreate = userCard.querySelector('.new-hp-create');
+        if (admin) {
+            const $newHpQuantity = userCard.querySelector('.new-hp-quantity');
+            const $newHpDescription = userCard.querySelector('.new-hp-description');
+            const $newHpCreate = userCard.querySelector('.new-hp-create');
 
-			$newHpCreate.addEventListener('click', async () => {
-				const quantity = parseInt($newHpQuantity.value);
-				const description = $newHpDescription.value;
+            $newHpCreate.addEventListener('click', async () => {
+                const quantity = parseInt($newHpQuantity.value);
+                const description = $newHpDescription.value;
 
-				if (quantity < 1) {
-					await core.showError('Quantity must be 1 or more');
-					return;
-				}
+                if (quantity < 1) {
+                    await core.showError('Quantity must be 1 or more');
+                    return;
+                }
 
-				if (!description) {
-					await core.showError('Description is required');
-					return;
-				}
+                if (!description) {
+                    await core.showError('Description is required');
+                    return;
+                }
 
-				await core.api(`create/house-points/give`, {
-					userId: user.id,
-					quantity,
-					description
-				});
-				await hardReload();
-			});
-		}
-	}
+                await core.api(`create/house-points/give`, {
+                    userId: user.id,
+                    quantity,
+                    description
+                });
+                await hardReload();
+            });
+        }
+    }
 
-	async function hardReload () {
-		const newUser = await getUser();
-		if (!newUser) {
-			await core.showError('Event not found');
-			return;
-		}
-		user = newUser;
-		await render();
-		core.reloadDOM();
-	}
+    async function hardReload() {
+        const newUser = await getUser();
+        if (!newUser) {
+            await core.showError('Event not found');
+            return;
+        }
+        user = newUser;
+        await render();
+        core.reloadDOM();
+    }
 
-	hardReload().then();
+    hardReload().then();
 });
 
 export default UserCard;

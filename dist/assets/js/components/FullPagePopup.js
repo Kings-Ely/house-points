@@ -1,6 +1,5 @@
 'use strict';
-import { registerComponent } from "./components.js";
-import { state } from "../main.js";
+import * as core from '../main.js';
 
 /**
  * Makes a full page popup which can be closed by clicking on the background.
@@ -9,12 +8,12 @@ import { state } from "../main.js";
  * @param {string} content
  * @param {boolean} showHeader
  */
-const FullPagePopup = registerComponent(($el, id, content, showHeader=true) => {
-	const $p = document.createElement('div');
-	$p.classList.add('full-page-popup');
-	$p.id = `full-page-popup-${id}`;
+const FullPagePopup = core.registerComponent(($el, id, content, showHeader = true) => {
+    const $p = document.createElement('div');
+    $p.classList.add('full-page-popup');
+    $p.id = `full-page-popup-${id}`;
 
-	$p.innerHTML = `
+    $p.innerHTML = `
 		<div class="popup-content">
 			<div class="popup-header" style="display: ${showHeader ? 'flex' : 'none'}">
 				<div>
@@ -36,37 +35,37 @@ const FullPagePopup = registerComponent(($el, id, content, showHeader=true) => {
 		</div>
 	`;
 
-	// add to page
-	$el.appendChild($p);
+    // add to page
+    $el.appendChild($p);
 
-	function hide () {
-		$p.remove();
-		state.popupStack.splice(state.popupStack.indexOf(id), 1);
-		removeEventListener('keydown', keyDownListener);
-	}
+    function hide() {
+        $p.remove();
+        core.state.popupStack.splice(core.state.popupStack.indexOf(id), 1);
+        removeEventListener('keydown', keyDownListener);
+    }
 
-	window[`_FullPagePopup${id}__hide`] = hide;
+    window[`_FullPagePopup${id}__hide`] = hide;
 
-	$p.addEventListener('click', (evt => {
-		// check that we clicked on the background not the popup content
-		if (evt.target.classList.contains('full-page-popup')) {
-			hide();
-		}
-	}));
+    $p.addEventListener('click', evt => {
+        // check that we clicked on the background not the popup content
+        if (evt.target.classList.contains('full-page-popup')) {
+            hide();
+        }
+    });
 
-	function keyDownListener (evt) {
-		if (evt.key === 'Escape') {
-			if (state.popupStack[state.popupStack.length - 1] === id) {
-				hide();
-			}
-		}
-	}
+    function keyDownListener(evt) {
+        if (evt.key === 'Escape') {
+            if (core.state.popupStack[core.state.popupStack.length - 1] === id) {
+                hide();
+            }
+        }
+    }
 
-	addEventListener('keydown', keyDownListener);
+    addEventListener('keydown', keyDownListener);
 
-	state.popupStack.push(id);
+    core.state.popupStack.push(id);
 
-	return hide;
+    return hide;
 });
 
 export default FullPagePopup;

@@ -3,7 +3,7 @@
 
 /* --- GENERAL --- */
 
-:not([data-theme]) {
+body:not([data-theme]) {
     --bg: #838383;
 }
 

@@ -1,8 +1,8 @@
-import * as core from "./main.js";
-import FullPagePopup from "./components/FullPagePopup.js";
-import { inlineComponent } from "./main.js";
-import EventCard from "./components/EventCard.js";
-import UserCard from "./components/UserCard.js";
+import * as core from './main.js';
+import FullPagePopup from './components/FullPagePopup.js';
+import { inlineComponent } from './main.js';
+import EventCard from './components/EventCard.js';
+import UserCard from './components/UserCard.js';
 
 /**
  * Shows a popup with the event detail from the given event id.
@@ -10,17 +10,21 @@ import UserCard from "./components/UserCard.js";
  * @param {boolean | null} [admin=null]
  * @returns {Promise<void>}
  */
-export async function eventPopup (id, admin=null) {
-	admin = admin === null ? (await core.userInfo())['admin'] : admin;
-	FullPagePopup(document.body, inlineComponent(EventCard,
-	async () => {
-			const events = await core.api(`get/events`, {
-				eventId: id
-			});
-			return events?.['data']?.[0];
-		},
-		admin
-	));
+export async function eventPopup(id, admin = null) {
+    admin = admin === null ? (await core.userInfo())['admin'] : admin;
+    FullPagePopup(
+        document.body,
+        inlineComponent(
+            EventCard,
+            async () => {
+                const events = await core.api(`get/events`, {
+                    eventId: id
+                });
+                return events?.['data']?.[0];
+            },
+            admin
+        )
+    );
 }
 
 /**
@@ -29,12 +33,12 @@ export async function eventPopup (id, admin=null) {
  * @param {boolean | null} [admin=null]
  * @returns {Promise<void>}
  */
-export async function userPopupFromId (id, admin=null) {
-	admin = admin === null ? (await core.userInfo())['admin'] : admin;
-	FullPagePopup(document.body, inlineComponent(UserCard,
-		async () => (await core.api(`get/users`, { userId: id })),
-		admin,
-	));
+export async function userPopupFromId(id, admin = null) {
+    admin = admin === null ? (await core.userInfo())['admin'] : admin;
+    FullPagePopup(
+        document.body,
+        inlineComponent(UserCard, async () => await core.api(`get/users`, { userId: id }), admin)
+    );
 }
 
 /**
@@ -43,10 +47,10 @@ export async function userPopupFromId (id, admin=null) {
  * @param {boolean | null} [admin=null]
  * @returns {Promise<void>}
  */
-export async function userPopup (email, admin=null) {
-	admin = admin === null ? (await core.userInfo())['admin'] : admin;
-	FullPagePopup(document.body, inlineComponent(UserCard,
-		async () => (await core.api(`get/users`, { email })),
-		admin,
-	));
+export async function userPopup(email, admin = null) {
+    admin = admin === null ? (await core.userInfo())['admin'] : admin;
+    FullPagePopup(
+        document.body,
+        inlineComponent(UserCard, async () => await core.api(`get/users`, { email }), admin)
+    );
 }

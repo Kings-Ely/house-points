@@ -1,6 +1,0 @@
-.idea
-node_modules
-bin
-dist
-coverage
-.webpack

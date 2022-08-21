@@ -1,31 +1,29 @@
-import { ROOT_PATH, svgCache } from "./main.js";
+import { ROOT_PATH, svgCache } from './main.js';
 
 /**
  * Looks at all DOM elements with an 'svg' attribute and loads the SVG
  * file into that element.
  */
-export function loadSVGs () {
-	const allInBody = document.querySelectorAll('[svg]');
-	for (const element of allInBody) {
-		// don't await, because we don't want to block the page load
-		loadSVG(element)
-			.then();
-	}
+export function loadSVGs() {
+    const allInBody = document.querySelectorAll('[svg]');
+    for (const element of allInBody) {
+        // don't await, because we don't want to block the page load
+        loadSVG(element).then();
+    }
 }
 
 /**
  * Caches the SVG file content
  * @param {string} uris
  */
-export function preloadSVGs (...uris) {
-	for (const uri of uris) {
-		if (svgCache[uri]) {
-			continue;
-		}
-		// don't await, because we want to load them all at the same time
-		getSVGFromURI(ROOT_PATH + '/assets/img/' + uri)
-			.then();
-	}
+export function preloadSVGs(...uris) {
+    for (const uri of uris) {
+        if (svgCache[uri]) {
+            continue;
+        }
+        // don't await, because we want to load them all at the same time
+        getSVGFromURI(ROOT_PATH + '/assets/img/' + uri).then();
+    }
 }
 
 /**
@@ -35,23 +33,23 @@ export function preloadSVGs (...uris) {
  * @param {HTMLElement} $el
  * @returns {Promise<void>}
  */
-export async function loadSVG ($el) {
-	// if the SVG has already been loaded then skip
-	if ($el.hasAttribute('svg-loaded')) {
-		return;
-	}
-	// set before loading, so we don't load twice while waiting for the svg to load
-	$el.setAttribute('svg-loaded', '1');
+export async function loadSVG($el) {
+    // if the SVG has already been loaded then skip
+    if ($el.hasAttribute('svg-loaded')) {
+        return;
+    }
+    // set before loading, so we don't load twice while waiting for the svg to load
+    $el.setAttribute('svg-loaded', '1');
 
-	const uri = ROOT_PATH + '/assets/img/' + $el.attributes['svg'].value;
+    const uri = ROOT_PATH + '/assets/img/' + $el.attributes['svg'].value;
 
-	let svgContent = await getSVGFromURI(uri);
+    let svgContent = await getSVGFromURI(uri);
 
-	if (!svgContent) {
-		return;
-	}
+    if (!svgContent) {
+        return;
+    }
 
-	$el.innerHTML = svgContent + $el.innerHTML;
+    $el.innerHTML = svgContent + $el.innerHTML;
 }
 
 /**
@@ -59,19 +57,19 @@ export async function loadSVG ($el) {
  * @param {string} uri
  * @returns {Promise<string|void>}
  */
-export async function getSVGFromURI (uri) {
-	if (svgCache[uri]) {
-		return svgCache[uri];
-	}
+export async function getSVGFromURI(uri) {
+    if (svgCache[uri]) {
+        return svgCache[uri];
+    }
 
-	// if not cached, then go get it
-	const raw = await fetch(uri);
-	if (!raw.ok) {
-		console.error(`Failed to load SVG at '${uri}' for `, self);
-		return;
-	}
-	let svg = await raw.text();
+    // if not cached, then go get it
+    const raw = await fetch(uri);
+    if (!raw.ok) {
+        console.error(`Failed to load SVG at '${uri}' for `, self);
+        return;
+    }
+    let svg = await raw.text();
 
-	svgCache[uri] = svg;
-	return svg;
+    svgCache[uri] = svg;
+    return svg;
 }

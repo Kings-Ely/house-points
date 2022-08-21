@@ -1,6 +1,6 @@
-import * as core from "../assets/js/main.js";
-import AddEventPopup from "../assets/js/components/AddEventPopup.js";
-import SelectableList from "../assets/js/components/SelectableList.js";
+import * as core from '../assets/js/main.js';
+import AddEventPopup from '../assets/js/components/AddEventPopup.js';
+import SelectableList from '../assets/js/components/SelectableList.js';
 
 const selected = [];
 
@@ -8,35 +8,33 @@ window.eventPopup = core.eventPopup;
 window.deleteEvents = deleteEvents;
 
 (async () => {
-	await core.init('..', true);
+    await core.init('..', true);
 
-	await showAllEvents();
+    await showAllEvents();
 
-	if (core.GETParam('id')) {
-		await eventPopup(core.GETParam('id'));
-	}
+    if (core.GETParam('id')) {
+        await eventPopup(core.GETParam('id'));
+    }
 })();
 
-async function showAllEvents () {
+async function showAllEvents() {
+    if (await core.isAdmin()) {
+        core.show('#add-event-button', 'flex');
+    }
 
-	if (await core.isAdmin()) {
-		core.show('#add-event-button', 'flex');
-	}
+    const { data: items } = await core.api(`get/events`);
 
-	const { data: items } = await core.api(`get/events`);
-
-	if (await core.isAdmin()) {
-
-		SelectableList('#events', {
-			name: 'Events',
-			items,
-			searchKey: 'name',
-			uniqueKey: 'id',
-			selected,
-			titleBar: `
+    if (await core.isAdmin()) {
+        SelectableList('#events', {
+            name: 'Events',
+            items,
+            searchKey: 'name',
+            uniqueKey: 'id',
+            selected,
+            titleBar: `
 				<div class="list-title"></div>
 			`,
-			withAllMenu: `
+            withAllMenu: `
 				<button
 					onclick="deleteEvents()"
 					svg="bin.svg"
@@ -45,26 +43,30 @@ async function showAllEvents () {
 					class="icon"
 				></button>
 			`,
-			itemGenerator: eventHTML
-		});
-	} else {
-		document.getElementById('events').innerHTML = `
+            itemGenerator: eventHTML
+        });
+    } else {
+        document.getElementById('events').innerHTML = `
 			<h2>Events</h2>
 			<div style="padding: 20px;">
-				${items.map(event => `
+				${items
+                    .map(
+                        event => `
 					<div class="flex-center" style="justify-content: space-between">
 						${eventHTML(event)}
 					</div>
-				`).join('')}
+				`
+                    )
+                    .join('')}
 			</div>
 		`;
-	}
+    }
 
-	core.reloadDOM();
+    core.reloadDOM();
 }
 
-function eventHTML (event) {
-	return `
+function eventHTML(event) {
+    return `
 		<div 
 			class="flex-center"
 			style="justify-content: left"
@@ -76,7 +78,7 @@ function eventHTML (event) {
 			>
 				${core.escapeHTML(event.name)}
 				<span style="font-size: 0.9em; color: var(--text-light); padding-left: 5px">
-					(${new Date(event.time*1000).toLocaleDateString()})
+					(${new Date(event.time * 1000).toLocaleDateString()})
 				</span>
 			</button>
 		</div>
@@ -90,22 +92,28 @@ function eventHTML (event) {
 	`;
 }
 
-async function deleteEvents () {
-	if (!selected.length) {
-		await core.showError('No events selected');
-		return;
-	}
-	if (!confirm(
-		`Are you sure you want to delete ${selected.length} event${selected.length > 1 ? 's' : ''}?`)) {
-		return;
-	}
-	await Promise.all(selected.map(async eventId => {
-		await core.api(`delete/events`, { eventId });
-	}));
-	await showAllEvents();
+async function deleteEvents() {
+    if (!selected.length) {
+        await core.showError('No events selected');
+        return;
+    }
+    if (
+        !confirm(
+            `Are you sure you want to delete ${selected.length} event${
+                selected.length > 1 ? 's' : ''
+            }?`
+        )
+    ) {
+        return;
+    }
+    await Promise.all(
+        selected.map(async eventId => {
+            await core.api(`delete/events`, { eventId });
+        })
+    );
+    await showAllEvents();
 }
 
-document.getElementById('add-event-button')
-	.addEventListener('click', () => {
-		AddEventPopup(document.body, showAllEvents)
-	});
+document.getElementById('add-event-button').addEventListener('click', () => {
+    AddEventPopup(document.body, showAllEvents);
+});

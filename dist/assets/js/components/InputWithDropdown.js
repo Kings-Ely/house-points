@@ -1,6 +1,5 @@
 'use strict';
-import { registerComponent } from "./components.js";
-import * as core from "../main.js";
+import * as core from '../main.js';
 
 /**
  * Component for student email input with dropdown for autocompletion of emails in the DB.
@@ -10,20 +9,13 @@ import * as core from "../main.js";
  * @param {() => Promise<T[]>} getData
  * @param {(item: T, inputValue: string) => boolean} filter
  */
-const InputWithDropdown = registerComponent((
-	$el,
-	id,
-	placeholder,
-	getData,
-	filter,
-	maxDropdownItems=10
-) => {
+const InputWithDropdown = core.registerComponent(
+    ($el, id, placeholder, getData, filter, maxDropdownItems = 10) => {
+        let data;
 
-	let data;
+        getData().then(d => (data = d));
 
-	getData().then(d => data = d);
-
-	$el.innerHTML += `
+        $el.innerHTML += `
 		<span>
 			<span class="dropdowninp-wrapper">
 				<input
@@ -42,46 +34,43 @@ const InputWithDropdown = registerComponent((
 		</span>
 	`;
 
-	const $input = document.getElementById(`dropdowninp${id}-input`);
-	const $dropdown = document.getElementById(`dropdowninp${id}-dropdown`);
+        const $input = document.getElementById(`dropdowninp${id}-input`);
+        const $dropdown = document.getElementById(`dropdowninp${id}-dropdown`);
 
-	window[`_InputWithDropdown${id}__setValue`] = (value) => {
-		$input.value = value;
-	};
+        window[`_InputWithDropdown${id}__setValue`] = value => {
+            $input.value = value;
+        };
 
-	addEventListener('click', evt => {
-		if ($dropdown.contains(evt.target)) return;
+        addEventListener('click', evt => {
+            if ($dropdown.contains(evt.target)) return;
 
-		if ($dropdown.classList.contains('dropdowninp-show-dropdown')) {
-			$dropdown.classList.remove('dropdowninp-show-dropdown');
+            if ($dropdown.classList.contains('dropdowninp-show-dropdown')) {
+                $dropdown.classList.remove('dropdowninp-show-dropdown');
+            } else if (evt.target.id === `dropdowninp${id}-input`) {
+                $dropdown.classList.add('dropdowninp-show-dropdown');
+            }
+        });
 
-		} else if (evt.target.id === `dropdowninp${id}-input`) {
-			$dropdown.classList.add('dropdowninp-show-dropdown');
-		}
-	});
+        $input.addEventListener('input', async () => {
+            let items = data.filter(item => filter(item, $input.value));
 
+            if (items.length === 0) {
+                $dropdown.classList.remove('student-email-input-show-dropdown');
+                return;
+            }
 
-	$input.addEventListener('input', async () => {
+            let extra = false;
+            if (items.length > maxDropdownItems) {
+                extra = items.length - maxDropdownItems > 0;
+                items = items.slice(0, maxDropdownItems);
+            }
 
-		let items = data.filter(item => filter(item, $input.value));
+            $dropdown.classList.add('student-email-input-show-dropdown');
 
-		if (items.length === 0) {
-			$dropdown.classList.remove('student-email-input-show-dropdown');
-			return;
-		}
+            $dropdown.innerHTML = '';
 
-		let extra = false;
-		if (items.length > maxDropdownItems) {
-			extra = (items.length - maxDropdownItems) > 0;
-			items = items.slice(0, maxDropdownItems);
-		}
-
-		$dropdown.classList.add('student-email-input-show-dropdown');
-
-		$dropdown.innerHTML = '';
-
-		for (let row of items) {
-			$dropdown.innerHTML += `
+            for (let row of items) {
+                $dropdown.innerHTML += `
 			<p 
 				onclick="window['_InputWithDropdown${id}__setValue']('${row}')"
 				class="item"
@@ -89,18 +78,19 @@ const InputWithDropdown = registerComponent((
 				${row} 
 			</p>
 		`;
-		}
+            }
 
-		if (extra) {
-			$dropdown.innerHTML += `
+            if (extra) {
+                $dropdown.innerHTML += `
 			<p class="no-hover">
 				(and ${extra} more)
 			</p>
 		`;
-		}
-	});
+            }
+        });
 
-	return $input;
-});
+        return $input;
+    }
+);
 
 export default InputWithDropdown;

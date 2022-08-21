@@ -1,8 +1,7 @@
 'use strict';
-import { registerComponent } from "./components.js";
-import * as core from "../main.js";
-import StudentEmailInputWithIntellisense from "./StudentEmailInputWithIntellisense.js";
-import FullPagePopup from "./FullPagePopup.js";
+import * as core from '../main.js';
+import StudentEmailInputWithIntellisense from './StudentEmailInputWithIntellisense.js';
+import FullPagePopup from './FullPagePopup.js';
 
 /**
  * The popup showing 'allow' and 'reject' options for cookies.
@@ -11,67 +10,65 @@ import FullPagePopup from "./FullPagePopup.js";
  * @param {El} $el
  * @param {() => *} reload
  */
-const AddEventPopup = registerComponent(($el, id, reload) => {
+const AddEventPopup = core.registerComponent(($el, id, reload) => {
+    let studentsInEvent = {};
 
-	let studentsInEvent = {};
+    let $nameInp;
+    let $descInp;
+    let $dateInp;
+    let $addEventAddStudent;
+    let $addEventAddStudentsHTML;
 
-	let $nameInp;
-	let $descInp;
-	let $dateInp;
-	let $addEventAddStudent;
-	let $addEventAddStudentsHTML;
+    window._AddEventPopup__addStudentToEvent = async () => {
+        const email = $addEventAddStudent.value;
 
-	window._AddEventPopup__addStudentToEvent = async () => {
-		const email = $addEventAddStudent.value;
+        if (!email) {
+            core.showError('Need an email to add student to event').then();
+            return;
+        }
 
-		if (!email) {
-			core.showError('Need an email to add student to event').then();
-			return;
-		}
+        const user = await core.api(`get/users`, { email });
 
-		const user = await core.api(`get/users`, { email });
+        if (!user.ok) {
+            // error automatically shown
+            return;
+        }
 
-		if (!user.ok) {
-			// error automatically shown
-			return;
-		}
+        studentsInEvent[user['id']] = 1;
 
-		studentsInEvent[user['id']] = 1;
+        $addEventAddStudent.value = '';
 
-		$addEventAddStudent.value = '';
+        await window._AddEventPopup__showStudentsInAddEvent();
+        reload();
+    };
 
-		await window._AddEventPopup__showStudentsInAddEvent();
-		reload();
-	}
+    window._AddEventPopup__removeStudentFromEvent = async id => {
+        delete studentsInEvent[id];
+        await window._AddEventPopup__showStudentsInAddEvent();
+        reload();
+    };
 
-	window._AddEventPopup__removeStudentFromEvent = async (id) => {
-		delete studentsInEvent[id];
-		await window._AddEventPopup__showStudentsInAddEvent();
-		reload();
-	}
+    window._AddEventPopup__updateStudentPoints = async (id, points) => {
+        // can't go below 1 hp
+        studentsInEvent[id] = Math.max(points, 1);
+        await window._AddEventPopup__showStudentsInAddEvent();
+        reload();
+    };
 
-	window._AddEventPopup__updateStudentPoints = async (id, points) => {
-		// can't go below 1 hp
-		studentsInEvent[id] = Math.max(points, 1);
-		await window._AddEventPopup__showStudentsInAddEvent();
-		reload();
-	}
+    window._AddEventPopup__showStudentsInAddEvent = async () => {
+        if (!Object.keys(studentsInEvent).length) {
+            $addEventAddStudentsHTML.innerHTML = 'No students selected';
+            return;
+        }
 
-	window._AddEventPopup__showStudentsInAddEvent = async () => {
+        const { data } = await core.api(`get/users/batch-info`, {
+            userIds: Object.keys(studentsInEvent)
+        });
 
-		if (!Object.keys(studentsInEvent).length) {
-			$addEventAddStudentsHTML.innerHTML = 'No students selected';
-			return;
-		}
-
-		const { data } = await core.api(`get/users/batch-info`, {
-			userIds: Object.keys(studentsInEvent)
-		});
-
-		let html = '';
-		for (let user of data) {
-			const { email, id, year } = user;
-			html += `
+        let html = '';
+        for (let user of data) {
+            const { email, id, year } = user;
+            html += `
 				<div class="add-student-to-event-student">
 					<div style="display: block">
 						${core.escapeHTML(email)} 
@@ -97,13 +94,15 @@ const AddEventPopup = registerComponent(($el, id, reload) => {
 					</div>
 				</div>
 			`;
-		}
+        }
 
-		$addEventAddStudentsHTML.innerHTML = html;
-		core.reloadDOM();
-	}
+        $addEventAddStudentsHTML.innerHTML = html;
+        core.reloadDOM();
+    };
 
-	const hide = FullPagePopup($el, `
+    const hide = FullPagePopup(
+        $el,
+        `
 		<h1>Add Event</h1>
 		<div>
 			<label>
@@ -150,79 +149,79 @@ const AddEventPopup = registerComponent(($el, id, reload) => {
 				Create Event
 			</button>
 		</div>
-	`);
+	`
+    );
 
-	document.getElementById(`add-event-submit`).onclick = async () => {
+    document.getElementById(`add-event-submit`).onclick = async () => {
+        if ($nameInp.value.length < 3) {
+            await core.showError('Event name is too short');
+            return;
+        }
 
-		if ($nameInp.value.length < 3) {
-			await core.showError('Event name is too short');
-			return;
-		}
+        if ($nameInp.value.length > 50) {
+            await core.showError('Event name too long - keep it simple!');
+            return;
+        }
 
-		if ($nameInp.value.length > 50) {
-			await core.showError('Event name too long - keep it simple!');
-			return;
-		}
+        if ($nameInp.value.length > 25) {
+            if (!confirm(`That's quite a long name, remember to keep it short!`)) {
+                return;
+            }
+        }
 
-		if ($nameInp.value.length > 25) {
-			if (!confirm(`That's quite a long name, remember to keep it short!`)) {
-				return;
-			}
-		}
+        if (!$dateInp.value) {
+            await core.showError('Event time is required');
+            return;
+        }
 
-		if (!$dateInp.value) {
-			await core.showError('Event time is required');
-			return;
-		}
+        if (Object.keys(studentsInEvent).length < 1) {
+            if (!confirm(`Are you sure you want to proceed with 0 students in the event?`)) {
+                return;
+            }
+        }
 
-		if (Object.keys(studentsInEvent).length < 1) {
-			if (!confirm(`Are you sure you want to proceed with 0 students in the event?`)) {
-				return;
-			}
-		}
+        const time = new Date($dateInp.value).getTime();
 
-		const time = new Date($dateInp.value).getTime();
+        // event before the year 2000 is not allowed
+        if (time <= 946684800) {
+            await core.showError('Event time is before the year 2000');
+            return;
+        }
 
-		// event before the year 2000 is not allowed
-		if (time <= 946684800) {
-			await core.showError('Event time is before the year 2000');
-			return;
-		}
+        const { id: eventId } = await core.api(`create/events`, {
+            name: $nameInp.value,
+            time,
+            description: $descInp.value
+        });
 
-		const { id: eventId } =
-			await core.api(`create/events`, {
-				name: $nameInp.value,
-				time,
-				description: $descInp.value,
-			});
+        $nameInp.value = '';
+        $descInp.value = '';
 
-		$nameInp.value = '';
-		$descInp.value = '';
+        await Promise.all(
+            Object.keys(studentsInEvent).map(async userId => {
+                await core.api(`create/house-points/give`, {
+                    eventId,
+                    userId,
+                    quantity: studentsInEvent[userId]
+                });
+            })
+        );
 
-		await Promise.all(Object.keys(studentsInEvent).map(async userId => {
-			await core.api(`create/house-points/give`, {
-				eventId,
-				userId,
-				quantity: studentsInEvent[userId],
-			});
-		}));
+        studentsInEvent = {};
 
-		studentsInEvent = {};
+        hide();
+        reload();
+    };
 
-		hide();
-		reload();
-	};
+    $nameInp = document.querySelector('#add-event-name');
+    $descInp = document.querySelector('#add-event-description');
+    $dateInp = document.querySelector('#add-event-date');
+    $addEventAddStudentsHTML = document.querySelector('#add-event-students');
+    $addEventAddStudent = StudentEmailInputWithIntellisense('#add-event-student-inp');
 
-	$nameInp = document.querySelector('#add-event-name');
-	$descInp = document.querySelector('#add-event-description');
-	$dateInp = document.querySelector('#add-event-date');
-	$addEventAddStudentsHTML = document.querySelector('#add-event-students');
-	$addEventAddStudent = StudentEmailInputWithIntellisense('#add-event-student-inp');
+    $dateInp.valueAsDate = new Date();
 
-	$dateInp.valueAsDate = new Date();
-
-	window._AddEventPopup__showStudentsInAddEvent()
-		.then(() => reload());
+    window._AddEventPopup__showStudentsInAddEvent().then(() => reload());
 });
 
 export default AddEventPopup;

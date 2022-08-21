@@ -1,7 +1,7 @@
 'use strict';
-import { getSession, handleUserInfo, testApiCon, userInfo, signInAs, logout } from "./auth.js";
-import { rawAPI } from "./backendAPI.js";
-import { cookiePopUp } from "./cookies.js";
+import { getSession, handleUserInfo, testApiCon, userInfo, signInAs, logout } from './auth.js';
+import { rawAPI } from './backendAPI.js';
+import { cookiePopUp } from './cookies.js';
 import {
     domIsLoaded,
     loadFooter,
@@ -10,8 +10,8 @@ import {
     scrollToTop,
     showError,
     waitForReady
-} from "./dom.js";
-import reservoir from "./hydration.js";
+} from './dom.js';
+import reservoir from './hydration.js';
 
 export * from './auth.js';
 export * from './backendAPI.js';
@@ -23,8 +23,7 @@ export * from './popups.js';
 // Utility script imported by all pages
 
 // Global constants and variables
-export const
-    API_ROOT = 'https://josephcoppin.com/school/house-points/api',
+export const API_ROOT = 'https://josephcoppin.com/school/house-points/api',
     COOKIE_SESSION = 'hpnea_SessionId',
     COOKIE_ALLOW_COOKIES_KEY = 'hpnea_AllowedCookies',
     LS_THEME = 'hpnea_Theme',
@@ -35,8 +34,7 @@ export const
     NOTIFICATION_SHOW_TIME = 5000;
 
 // should be const but is set once at the start of the script
-export let
-    ROOT_PATH = '';
+export let ROOT_PATH = '';
 
 export const state = {
     $nav: null,
@@ -54,10 +52,11 @@ export const state = {
     spinnerQueue: [],
     spinnerFrameId: 0,
     popupStack: [],
-}
+    currentComponentId: 0,
+};
 
 reservoir.set({
-    'house-name': HOUSE_NAME,
+    'house-name': HOUSE_NAME
 });
 
 export { reservoir };
@@ -70,10 +69,10 @@ window.state = state;
 // for making relative dates
 /** @type {{[ k: 'month'|'hour'|'year'|'day'|'minute'|'second' ]: number}} */
 const timeUnits = {
-    year  : 24 * 60 * 60 * 1000 * 365,
-    month : 24 * 60 * 60 * 1000 * 365 / 12,
-    day   : 24 * 60 * 60 * 1000,
-    hour  : 60 * 60 * 1000,
+    year: 24 * 60 * 60 * 1000 * 365,
+    month: (24 * 60 * 60 * 1000 * 365) / 12,
+    day: 24 * 60 * 60 * 1000,
+    hour: 60 * 60 * 1000,
     minute: 60 * 1000,
     second: 1000
 };
@@ -99,7 +98,12 @@ const relativeTimeFormat = new Intl.RelativeTimeFormat('en', {
  * @param {boolean} [requireAdmin=false] session cookies must be valid and admin
  * @param {boolean} [noApiTest=false] don't test the API connection
  */
-export async function init (rootPath, requireLoggedIn=false, requireAdmin=false, noApiTest=false) {
+export async function init(
+    rootPath,
+    requireLoggedIn = false,
+    requireAdmin = false,
+    noApiTest = false
+) {
     ROOT_PATH = rootPath;
 
     if (!noApiTest) {
@@ -107,9 +111,11 @@ export async function init (rootPath, requireLoggedIn=false, requireAdmin=false,
     }
 
     if (getSession()) {
-        await handleUserInfo(await rawAPI(`get/users`, {
-            sessionId: getSession()
-        }));
+        await handleUserInfo(
+            await rawAPI(`get/users`, {
+                sessionId: getSession()
+            })
+        );
     } else {
         await handleUserInfo({});
     }
@@ -146,8 +152,6 @@ export async function init (rootPath, requireLoggedIn=false, requireAdmin=false,
     scrollToTop();
 }
 
-
-
 /**
  * Gets the difference in the timestamps as a human-readable string, like '2 days' (ago)
  * Timestamps are in milliseconds.
@@ -155,7 +159,7 @@ export async function init (rootPath, requireLoggedIn=false, requireAdmin=false,
  * @param {number?} [d2=Date.now()]
  * @returns {string}
  */
-export function getRelativeTime (d1, d2) {
+export function getRelativeTime(d1, d2) {
     if (isNaN(d1)) {
         console.error(`getRelativeTime: d1 '${d1}' is not a number`);
         return 'In the Past';
@@ -166,7 +170,7 @@ export function getRelativeTime (d1, d2) {
     // "Math.abs" accounts for both "past" & "future" scenarios
     for (const u in timeUnits) {
         if (Math.abs(elapsed) > timeUnits[u] || u === 'second') {
-            return relativeTimeFormat.format(Math.round(elapsed/timeUnits[u]), u);
+            return relativeTimeFormat.format(Math.round(elapsed / timeUnits[u]), u);
         }
     }
 }
@@ -176,7 +180,7 @@ export function getRelativeTime (d1, d2) {
  * @param {string} name
  * @returns {string|null}
  */
-export function GETParam (name) {
+export function GETParam(name) {
     let temp = GETParamRaw(name);
     if (temp !== null) {
         temp = decodeURIComponent(temp);
@@ -190,14 +194,14 @@ export function GETParam (name) {
  * @param {string} name
  * @returns {string|null}
  */
-export function GETParamRaw (name) {
+export function GETParamRaw(name) {
     let result = null;
 
     location.search
         .substring(1)
-        .split("&")
+        .split('&')
         .forEach(function (item) {
-            let tmp = item.split("=");
+            let tmp = item.split('=');
             if (tmp[0] === name) {
                 result = tmp[1];
             }
@@ -211,7 +215,7 @@ export function GETParamRaw (name) {
  * @param {string} url
  * @returns {Promise<never>}
  */
-export const navigate = async (url) => {
+export const navigate = async url => {
     await waitForReady();
 
     if (url[0] === '/') {
@@ -221,17 +225,16 @@ export const navigate = async (url) => {
     window.location.assign(url);
     // never resolve promise as just wait for the page to load
     await new Promise(() => {});
-}
+};
 
 /**
  * Returns a promise which resolves after a set amount of time
  * @param {number} ms
  * @returns {Promise<void>}
  */
-export async function sleep (ms) {
+export async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-
 
 /**
  * Limits the length of a string by cutting it and adding '...'
@@ -240,9 +243,9 @@ export async function sleep (ms) {
  * @param {number} [maxLength=50]
  * @returns {string}
  */
-export function limitStrLength (str, maxLength=50) {
+export function limitStrLength(str, maxLength = 50) {
     if (str.length > maxLength - 3) {
-        return str.substring(0, maxLength-3) + '...';
+        return str.substring(0, maxLength - 3) + '...';
     }
     return str;
 }
@@ -253,7 +256,7 @@ export function limitStrLength (str, maxLength=50) {
  * @param {string} encoding
  * @returns {Promise<string>}
  */
-export async function getFileContent ($el, encoding='UTF-8') {
+export async function getFileContent($el, encoding = 'UTF-8') {
     if (typeof $el === 'string') {
         $el = document.querySelector($el);
     }
@@ -269,11 +272,11 @@ export async function getFileContent ($el, encoding='UTF-8') {
     return await new Promise((resolve, reject) => {
         reader.onload = evt => {
             resolve(evt.target.result);
-        }
+        };
         reader.onerror = async () => {
-            await showError("Error reading file, please try again");
-            reject("Error reading file");
-        }
+            await showError('Error reading file, please try again');
+            reject('Error reading file');
+        };
     });
 }
 
@@ -286,24 +289,24 @@ export async function getFileContent ($el, encoding='UTF-8') {
  * @param {string} [strDelimiter=undefined]
  * @returns {*[][]}
  */
-export function CSVToArray (strData, strDelimiter) {
+export function CSVToArray(strData, strDelimiter) {
     // Check to see if the delimiter is defined. If not,
     // then default to comma.
     strDelimiter ||= ',';
 
     // Create a regular expression to parse the CSV values.
     const objPattern = new RegExp(
-        (
-            // Delimiters.
-            "(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
-
+        // Delimiters.
+        '(\\' +
+            strDelimiter +
+            '|\\r?\\n|\\r|^)' +
             // Quoted fields.
-            "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
-
+            '(?:"([^"]*(?:""[^"]*)*)"|' +
             // Standard fields.
-            "([^\"\\" + strDelimiter + "\\r\\n]*))"
-        ),
-        "gi"
+            '([^"\\' +
+            strDelimiter +
+            '\\r\\n]*))',
+        'gi'
     );
 
     // Create an array to hold our data. Give the array
@@ -316,7 +319,7 @@ export function CSVToArray (strData, strDelimiter) {
 
     // Keep looping over the regular expression matches
     // until we can no longer find a match.
-    while (arrMatches = objPattern.exec(strData)) {
+    while ((arrMatches = objPattern.exec(strData))) {
         // Get the delimiter that was found.
         let strMatchedDelimiter = arrMatches[1];
 
@@ -324,11 +327,7 @@ export function CSVToArray (strData, strDelimiter) {
         // (is not the start of string) and if it matches
         // field delimiter. If id does not, then we know
         // that this delimiter is a row delimiter.
-        if (
-            strMatchedDelimiter.length &&
-            strMatchedDelimiter !== strDelimiter
-        ) {
-
+        if (strMatchedDelimiter.length && strMatchedDelimiter !== strDelimiter) {
             // Since we have reached a new row of data,
             // add an empty row to our data array.
             arrData.push([]);
@@ -340,14 +339,9 @@ export function CSVToArray (strData, strDelimiter) {
         // let's check to see which kind of value we
         // captured (quoted or unquoted).
         if (arrMatches[2]) {
-
             // We found a quoted value. When we capture
             // this value, unescape any double quotes.
-            strMatchedValue = arrMatches[2].replace(
-                new RegExp( "\"\"", "g" ),
-                "\""
-            );
-
+            strMatchedValue = arrMatches[2].replace(new RegExp('""', 'g'), '"');
         } else {
             // We found a non-quoted value.
             strMatchedValue = arrMatches[3];
@@ -369,8 +363,11 @@ export function CSVToArray (strData, strDelimiter) {
  * @param {string} charset
  * @returns {string}
  */
-export function genRandomString (len=10, charset="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") {
-    let text = "";
+export function genRandomString(
+    len = 10,
+    charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+) {
+    let text = '';
     for (let _ = 0; _ < len; _++) {
         text += charset.charAt(Math.floor(Math.random() * charset.length));
     }
@@ -382,11 +379,14 @@ export function genRandomString (len=10, charset="ABCDEFGHIJKLMNOPQRSTUVWXYZabcd
  * @param {number} seconds
  * @returns {string}
  */
-export function formatTimeStampForInput (seconds) {
+export function formatTimeStampForInput(seconds) {
     const date = new Date(seconds * 1000);
-    return `${date.getFullYear()}-`+
-        ("0" + (date.getMonth() + 1)).slice(-2) + '-' +
-        ("0" + date.getDate()).slice(-2);
+    return (
+        `${date.getFullYear()}-` +
+        ('0' + (date.getMonth() + 1)).slice(-2) +
+        '-' +
+        ('0' + date.getDate()).slice(-2)
+    );
 }
 
 /**
@@ -395,12 +395,12 @@ export function formatTimeStampForInput (seconds) {
  * @param {*} unsafe
  * @returns {*}
  */
-export function escapeHTML (unsafe) {
+export function escapeHTML(unsafe) {
     return (unsafe ?? '')
         .toString()
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }

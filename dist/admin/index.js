@@ -1,5 +1,5 @@
-import * as core from "../assets/js/main.js";
-import HousePoint from "../assets/js/components/HousePoint.js";
+import * as core from '../assets/js/main.js';
+import HousePoint from '../assets/js/components/HousePoint.js';
 
 const $pendingHPs = document.getElementById('pending');
 const $numPendingHPs = document.getElementById('num-pending');
@@ -9,11 +9,10 @@ window.userPopupFromId = core.userPopupFromId;
 (async () => {
     await core.init('..', true, true);
 
-
     await main();
 })();
 
-async function main () {
+async function main() {
     const { data: pending } = await core.api(`get/house-points`, {
         status: 'Pending'
     });
@@ -46,7 +45,7 @@ async function main () {
         if (i === 4) {
             $pendingHPs.innerHTML += `
                 <div style="text-align: center; padding: 20px">
-                    And ${pending.length-5} more...
+                    And ${pending.length - 5} more...
                 </div>
             `;
             break;

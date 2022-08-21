@@ -1,5 +1,5 @@
-import * as core from "../assets/js/main.js";
-import HousePoint from "../assets/js/components/HousePoint.js";
+import * as core from '../assets/js/main.js';
+import HousePoint from '../assets/js/components/HousePoint.js';
 
 const $hps = document.getElementById('hps');
 const $hpReasonInp = document.getElementById('hp-reason');
@@ -26,13 +26,11 @@ window.eventPopup = core.eventPopup;
     me = (await core.userInfo())['email'] === core.GETParam('email');
 
     if (theUsersInfo.student) {
-
-        if (me || await core.isAdmin()) {
+        if (me || (await core.isAdmin())) {
             core.show('#submit-hp-request');
         }
 
         await reloadHousePoints();
-
     } else {
         await title();
 
@@ -50,7 +48,7 @@ window.eventPopup = core.eventPopup;
     core.reloadDOM();
 })();
 
-async function reloadUserInfoFromEmail () {
+async function reloadUserInfoFromEmail() {
     const email = core.GETParam('email');
 
     theUsersInfo = await core.api(`get/users`, { email });
@@ -58,7 +56,7 @@ async function reloadUserInfoFromEmail () {
     core.reservoir.set('the-user', theUsersInfo);
 }
 
-async function housePoints () {
+async function housePoints() {
     const { housePoints: hps, accepted } = theUsersInfo;
     const admin = await core.isAdmin();
 
@@ -78,41 +76,45 @@ async function housePoints () {
     let html = '';
 
     for (let hp of hps) {
-        html += core.inlineComponent(HousePoint, hp, async () => {
-            await reloadUserInfoFromEmail();
-            await housePoints();
-        }, {
-            admin,
-            showBorderBottom: hp !== hps[hps.length - 1],
-            showEmail: false,
-            showReason: true,
-            showNumPoints: true,
-            showDate: true,
-            showRelativeTime: true,
-            showStatusHint: true,
-            showStatusIcon: true,
-            showDeleteButton: !me,
-            showPendingOptions: !me,
-            reasonEditable: !me,
-            pointsEditable: !me,
-            dateEditable: !me,
-            large: true
-        });
+        html += core.inlineComponent(
+            HousePoint,
+            hp,
+            async () => {
+                await reloadUserInfoFromEmail();
+                await housePoints();
+            },
+            {
+                admin,
+                showBorderBottom: hp !== hps[hps.length - 1],
+                showEmail: false,
+                showReason: true,
+                showNumPoints: true,
+                showDate: true,
+                showRelativeTime: true,
+                showStatusHint: true,
+                showStatusIcon: true,
+                showDeleteButton: !me,
+                showPendingOptions: !me,
+                reasonEditable: !me,
+                pointsEditable: !me,
+                dateEditable: !me,
+                large: true
+            }
+        );
     }
     $hps.innerHTML += html;
 }
 
-async function title () {
-
-    const [ username, emailExt ] = theUsersInfo['email'].split('@');
+async function title() {
+    const [username, emailExt] = theUsersInfo['email'].split('@');
 
     core.reservoir.set({
-        'email0': username,
-        'email1': emailExt
+        email0: username,
+        email1: emailExt
     });
 }
 
-async function showInfo () {
+async function showInfo() {
     $info.innerHTML = `
         <p>
             <b>${core.escapeHTML(theUsersInfo['accepted'])}</b> accepted, 
@@ -124,8 +126,7 @@ async function showInfo () {
     // TODO: goals info here
 }
 
-async function reloadHousePoints () {
-
+async function reloadHousePoints() {
     await reloadUserInfoFromEmail();
     await title();
     await housePoints();
@@ -133,8 +134,8 @@ async function reloadHousePoints () {
     core.reloadDOM();
 }
 
-function reloadThemeButton () {
-    const svg = core.getTheme() === 'dark' ? 'light-theme.svg' : 'dark-theme.svg'
+function reloadThemeButton() {
+    const svg = core.getTheme() === 'dark' ? 'light-theme.svg' : 'dark-theme.svg';
     $themeButton.setAttribute('svg', svg);
 }
 

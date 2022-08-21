@@ -1,6 +1,5 @@
 'use strict';
-import { registerComponent } from "./components.js";
-import * as core from "../main.js";
+import * as core from '../main.js';
 
 /**
  * A list of elements with select icons next to them.
@@ -21,51 +20,56 @@ import * as core from "../main.js";
 
  * @returns {{ reload: () => void }}
  */
-const SelectableList = registerComponent(($el, id, {
-	name,
-	items,
-	uniqueKey='id',
-	searchKey,
-	searchBarHint=searchKey,
-	titleBar='',
-	withAllMenu='',
-	itemGenerator,
-	gridTemplateColsCSS = '1fr 1fr',
-	selected,
-	filter = () => true,
-}) => {
-	core.preloadSVGs('selected-checkbox.svg', 'unselected-checkbox.svg');
+const SelectableList = core.registerComponent(
+    (
+        $el,
+        id,
+        {
+            name,
+            items,
+            uniqueKey = 'id',
+            searchKey,
+            searchBarHint = searchKey,
+            titleBar = '',
+            withAllMenu = '',
+            itemGenerator,
+            gridTemplateColsCSS = '1fr 1fr',
+            selected,
+            filter = () => true
+        }
+    ) => {
+        core.preloadSVGs('selected-checkbox.svg', 'unselected-checkbox.svg');
 
-	window[`_SelectableList${id}__selectAll`] = async (select) => {
-		selected.splice(0, selected.length);
+        window[`_SelectableList${id}__selectAll`] = async select => {
+            selected.splice(0, selected.length);
 
-		if (select) {
-			for (let item of items) {
-				selected.push(item[uniqueKey]);
-			}
-		}
-		await reload();
-	};
+            if (select) {
+                for (let item of items) {
+                    selected.push(item[uniqueKey]);
+                }
+            }
+            await reload();
+        };
 
-	window[`_SelectableList${id}__select`] = async (id, select) => {
-		if (select) {
-			if (selected.indexOf(id) !== -1) {
-				console.error('Cannot reselect ' + id);
-				return;
-			}
-			selected.push(id);
-		} else {
-			const index = selected.indexOf(id);
-			if (index !== -1) {
-				selected.splice(index, 1);
-			} else {
-				console.error('Cannot unselect ' + id);
-			}
-		}
-		await reload();
-	}
+        window[`_SelectableList${id}__select`] = async (id, select) => {
+            if (select) {
+                if (selected.indexOf(id) !== -1) {
+                    console.error('Cannot reselect ' + id);
+                    return;
+                }
+                selected.push(id);
+            } else {
+                const index = selected.indexOf(id);
+                if (index !== -1) {
+                    selected.splice(index, 1);
+                } else {
+                    console.error('Cannot unselect ' + id);
+                }
+            }
+            await reload();
+        };
 
-	$el.innerHTML = `
+        $el.innerHTML = `
 		<div class="selectable-list" id="selectable-list-${id}">
 			<h2>${core.escapeHTML(name)}</h2>
 			<div class="with-all-menu">
@@ -110,46 +114,46 @@ const SelectableList = registerComponent(($el, id, {
 		</div>
 	`;
 
-	const $items = document.querySelector(`#selectable-list-${id} .items`);
-	const $search = document.querySelector(`#selectable-list-${id} .search`);
+        const $items = document.querySelector(`#selectable-list-${id} .items`);
+        const $search = document.querySelector(`#selectable-list-${id} .search`);
 
-	async function reload (newItems = null) {
-		if (newItems) {
-			items = newItems;
-		}
+        async function reload(newItems = null) {
+            if (newItems) {
+                items = newItems;
+            }
 
-		$items.innerHTML = '';
+            $items.innerHTML = '';
 
-		const searchValue = $search.value.toLowerCase();
+            const searchValue = $search.value.toLowerCase();
 
-		for (let item of items) {
-			if (searchValue) {
-				let found = false;
-				if (typeof searchKey === 'string') {
-					if (item[searchKey]?.toLowerCase()?.includes(searchValue)) {
-						found = true;
-					}
-				} else if (Array.isArray(searchKey)) {
-					for (let key of searchKey) {
-						if (item[key]?.toLowerCase()?.includes(searchValue)) {
-							found = true;
-							break;
-						}
-					}
-				}
+            for (let item of items) {
+                if (searchValue) {
+                    let found = false;
+                    if (typeof searchKey === 'string') {
+                        if (item[searchKey]?.toLowerCase()?.includes(searchValue)) {
+                            found = true;
+                        }
+                    } else if (Array.isArray(searchKey)) {
+                        for (let key of searchKey) {
+                            if (item[key]?.toLowerCase()?.includes(searchValue)) {
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
 
-				if (!found) continue;
-			}
+                    if (!found) continue;
+                }
 
-			if (!filter(item)) {
-				continue;
-			}
+                if (!filter(item)) {
+                    continue;
+                }
 
-			const itemId = item[uniqueKey];
+                const itemId = item[uniqueKey];
 
-			const isSelected = selected.includes(itemId);
+                const isSelected = selected.includes(itemId);
 
-			$items.innerHTML += `
+                $items.innerHTML += `
 				<div class="item">
 					<button
 						class="icon medium no-scale"
@@ -162,16 +166,17 @@ const SelectableList = registerComponent(($el, id, {
 					</div>
 				</div>
 			`;
-		}
+            }
 
-		core.reloadDOM();
-	}
+            core.reloadDOM();
+        }
 
-	window[`_SelectableList${id}__reloadItems`] = reload;
+        window[`_SelectableList${id}__reloadItems`] = reload;
 
-	reload().then();
+        reload().then();
 
-	return { reload };
-});
+        return { reload };
+    }
+);
 
-export default SelectableList
+export default SelectableList;

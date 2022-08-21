@@ -2,7 +2,7 @@ import emailValidator from 'email-validator';
 import mysql from 'mysql2';
 
 import route from '../';
-import log from '../log';
+
 import {
     addHousePointsToUser,
     AUTH_ERR,
@@ -431,7 +431,7 @@ route('delete/users', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
     const { userId } = body;
-    
+
     if ((await idFromSession(query, body.session)) === userId)
         return {
             status: 403,

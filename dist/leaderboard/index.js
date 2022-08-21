@@ -1,5 +1,4 @@
-import * as core from "../assets/js/main.js";
-import { escapeHTML } from "../assets/js/main.js";
+import * as core from '../assets/js/main.js';
 
 // Slightly horrible with 1st, 2nd and 3rd place on the leaderboard...
 // could do an array or something but with always exactly 3 it's a bit pointless.
@@ -22,15 +21,14 @@ window.userPopup = core.userPopup;
     const { year } = await core.userInfo();
 
     if (year) {
-        showYears = [ year ];
+        showYears = [year];
         $whichYears.value = year.toString();
     }
 
     await main();
 })();
 
-
-function showStudent (student) {
+function showStudent(student) {
     return `
         <div class="student">
             <button onclick="userPopup('${student['email']}')">
@@ -44,7 +42,7 @@ function showStudent (student) {
     `;
 }
 
-function resetPodium () {
+function resetPodium() {
     $podium1st.style.height = `80%`;
     $podium2nd.style.height = `60%`;
     $podium3rd.style.height = `40%`;
@@ -53,8 +51,7 @@ function resetPodium () {
     $podium3rd.innerHTML = ``;
 }
 
-function leaderboard (users) {
-
+function leaderboard(users) {
     users = users.filter(user => showYears.includes(parseInt(user['year'])));
 
     resetPodium();
@@ -76,9 +73,8 @@ function leaderboard (users) {
         // if no-one has any house points, or there aren't any people,
         // then show empty podium and put everyone in '4th' place visually
         start = 0;
-
     } else {
-        function podiumHTMl (idx) {
+        function podiumHTMl(idx) {
             return `
                 <button
                     onclick="userPopup('${users[idx]['email']}')"
@@ -96,8 +92,8 @@ function leaderboard (users) {
 
         // proportional heights
 
-        const height2 = Math.max(parseInt(users[1]['accepted']) / users[0]['accepted'] * 100, 10);
-        const height3 = Math.max(parseInt(users[2]['accepted']) / users[0]['accepted'] * 100, 10);
+        const height2 = Math.max((parseInt(users[1]['accepted']) / users[0]['accepted']) * 100, 10);
+        const height3 = Math.max((parseInt(users[2]['accepted']) / users[0]['accepted']) * 100, 10);
 
         $podium1st.style.height = `100%`;
         $podium2nd.style.height = `${height2}%`;
@@ -113,8 +109,7 @@ function leaderboard (users) {
     }
 }
 
-async function yearGroups (users) {
-
+async function yearGroups(users) {
     const data = {
         series: [0, 0, 0, 0, 0],
         labels: [9, 10, 11, 12, 13]
@@ -146,7 +141,7 @@ async function yearGroups (users) {
     new Chartist.Pie('.ct-chart', data, options);
 }
 
-async function main (reload=true) {
+async function main(reload = true) {
     if (reload || !leaderboardData) {
         leaderboardData = (await core.api(`get/users/leaderboard`))['data'];
     }
@@ -161,4 +156,3 @@ $whichYears.onchange = async () => {
         .map(y => parseInt(y));
     await main(false);
 };
-

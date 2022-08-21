@@ -10,7 +10,7 @@ export class TestResult {
     private fails: [any, any][] = [];
     public time = 0;
 
-    public register(res: any, test = { batteryName: 'unknown' }): void{
+    public register(res: any, test = { batteryName: 'unknown' }): void {
         if (res === true) {
             this.passed++;
         } else if (res instanceof TestResult) {

@@ -1,25 +1,23 @@
 'use strict';
-import { registerComponent } from "./components.js";
-import * as core from "../main.js";
+import * as core from '../main.js';
 
 /**
  * The popup showing 'allow' and 'reject' options for cookies
  */
-const CookieCard = registerComponent(($el) => {
+const CookieCard = core.registerComponent($el => {
+    /**
+     * The user has either allowed or not allowed cookies
+     * @param {boolean} value
+     */
+    window._CookiePopup__allowedCookies = async value => {
+        core.hide($el);
+        if (!value) {
+            return;
+        }
+        await core.setCookie(core.COOKIE_ALLOW_COOKIES_KEY, '1', 365);
+    };
 
-	/**
-	 * The user has either allowed or not allowed cookies
-	 * @param {boolean} value
-	 */
-	window._CookiePopup__allowedCookies = async value => {
-		core.hide($el);
-		if (!value) {
-			return;
-		}
-		await core.setCookie(core.COOKIE_ALLOW_COOKIES_KEY, '1', 365);
-	};
-
-	$el.innerHTML += `
+    $el.innerHTML += `
 		<h2>Cookies</h2>
 		<p>
 			We and selected third parties use cookies or similar technologies for

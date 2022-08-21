@@ -1,7 +1,7 @@
-import * as core from "../assets/js/main.js";
-import SelectableList from "../assets/js/components/SelectableList.js";
-import { inlineComponent, reloadDOM } from "../assets/js/main.js";
-import HousePoint from "../assets/js/components/HousePoint.js";
+import * as core from '../assets/js/main.js';
+import SelectableList from '../assets/js/components/SelectableList.js';
+import { inlineComponent, reloadDOM } from '../assets/js/main.js';
+import HousePoint from '../assets/js/components/HousePoint.js';
 
 /** @typedef {{
  *     id: string,
@@ -20,8 +20,7 @@ import HousePoint from "../assets/js/components/HousePoint.js";
  *     eventTime: number
 }} HP  */
 
-const
-    filters = {
+const filters = {
         years: [0, 9, 10, 11, 12, 13],
         status: 'All'
     },
@@ -34,12 +33,18 @@ window.eventPopup = core.eventPopup;
 
 (async () => {
     await core.init('..', true, true);
-    core.preloadSVGs('bin.svg', 'cross.svg', 'pending.svg', 'selected-checkbox.svg', 'unselected-checkbox.svg');
+    core.preloadSVGs(
+        'bin.svg',
+        'cross.svg',
+        'pending.svg',
+        'selected-checkbox.svg',
+        'unselected-checkbox.svg'
+    );
 
     await showHousePointList();
 })();
 
-async function showHousePointList () {
+async function showHousePointList() {
     const { data: hps } = await core.api(`get/house-points`);
     const admin = await core.isAdmin();
 
@@ -62,12 +67,16 @@ async function showHousePointList () {
                     </span>
                 </span>
                 <div id="filters-dropdown">
-                    ${[9, 10, 11, 12, 13].map(year => `
+                    ${[9, 10, 11, 12, 13]
+                        .map(
+                            year => `
                         <button onclick="toggleYearGroup(${year})"> 
                             ${filters.years.includes(year) ? 'Hide' : 'Show'} 
                             Y${year}
                         </button>
-                    `).join('')}
+                    `
+                        )
+                        .join('')}
                 </div>
             </span>
             <button
@@ -78,11 +87,12 @@ async function showHousePointList () {
                 svg="bin.svg"
             ></button>
         `,
-        itemGenerator: (hp) => inlineComponent(HousePoint, hp, admin, true, showHousePointList, true),
+        itemGenerator: hp => inlineComponent(HousePoint, hp, admin, true, showHousePointList, true),
         gridTemplateColsCSS: '1fr',
-        filter: (item) => {
-            return filters.years.includes(item['userYear']) &&
-                (filters.admin ? item['admin'] : true);
+        filter: item => {
+            return (
+                filters.years.includes(item['userYear']) && (filters.admin ? item['admin'] : true)
+            );
         }
     });
 
@@ -90,7 +100,7 @@ async function showHousePointList () {
 }
 
 // Filters
-function toggleYearGroup (age) {
+function toggleYearGroup(age) {
     if (filters.years.includes(age)) {
         filters.years.splice(filters.years.indexOf(age), 1);
     } else {
@@ -99,15 +109,17 @@ function toggleYearGroup (age) {
     showHousePointList();
 }
 
-async function deleteSelected () {
+async function deleteSelected() {
     if (!confirm(`Are you sure you want to delete ${selected.length} house points?`)) {
         return;
     }
 
     // send API requests at the same time and wait for all to finish
-    await Promise.all(selected.map(async housePointId => {
-        await core.api(`delete/house-points`, { housePointId });
-    }));
+    await Promise.all(
+        selected.map(async housePointId => {
+            await core.api(`delete/house-points`, { housePointId });
+        })
+    );
 
     selected.splice(0, selected.length);
 

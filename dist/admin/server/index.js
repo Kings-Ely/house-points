@@ -1,6 +1,5 @@
-import * as core from "../../assets/js/main.js";
-import SelectableList from "../../assets/js/components/SelectableList.js";
-import { escapeHTML } from "../../assets/js/main.js";
+import * as core from '../../assets/js/main.js';
+import SelectableList from '../../assets/js/components/SelectableList.js';
 
 const $status = document.getElementById('status');
 const $stats = document.getElementById('server-stats');
@@ -16,141 +15,144 @@ let lastPingOk;
 window.deleteSelectedSessions = deleteSelectedSessions;
 
 (async () => {
-	await core.init('../..', false, false, true);
+    await core.init('../..', false, false, true);
 
-	await refresh();
+    await refresh();
 })();
 
-async function refresh () {
-	if (!await serverStatusAndPing()) return;
-	showServerStats();
-	await activeSessions();
+async function refresh() {
+    if (!(await serverStatusAndPing())) return;
+    showServerStats();
+    await activeSessions();
 }
 
-function serverDown (message = 'Server is down!') {
-	$status.innerText = message;
-	$status.style.borderColor = 'red';
-	lastPingOk = false;
-	$startServerButton.style.opacity = '1';
-	setTimeout(serverStatusAndPing, 3000);
+function serverDown(message = 'Server is down!') {
+    $status.innerText = message;
+    $status.style.borderColor = 'red';
+    lastPingOk = false;
+    $startServerButton.style.opacity = '1';
+    setTimeout(serverStatusAndPing, 3000);
 }
 
-async function serverStatusAndPing () {
-	let pingTimes = [];
-	let start = performance.now();
+async function serverStatusAndPing() {
+    let pingTimes = [];
+    let start = performance.now();
 
-	let res = await core.rawAPI(`get/server/ping`);
-	if (res.status === 502) {
-		serverDown();
-		console.error('get/server/check: ', res);
-		return;
-	}
-	if (res.status !== 200 || !res.ok) {
-		serverDown('Something went wrong with the server');
-		console.error('get/server/ping: ', res);
-		return;
-	}
+    let res = await core.rawAPI(`get/server/ping`);
+    if (res.status === 502) {
+        serverDown();
+        console.error('get/server/check: ', res);
+        return;
+    }
+    if (res.status !== 200 || !res.ok) {
+        serverDown('Something went wrong with the server');
+        console.error('get/server/ping: ', res);
+        return;
+    }
 
-	pingTimes.push(performance.now() - start);
-	start = performance.now();
+    pingTimes.push(performance.now() - start);
+    start = performance.now();
 
-	res = await core.rawAPI(`get/server/check`);
-	if (res.status === 401) {
-		await core.navigate(`/?error=auth&cb=${location.href}`);
-		return;
-	}
-	if (res.status !== 200 || !res.ok) {
-		serverDown();
-		console.error('get/server/check: ', res);
-		return;
-	}
+    res = await core.rawAPI(`get/server/check`);
+    if (res.status === 401) {
+        await core.navigate(`/?error=auth&cb=${location.href}`);
+        return;
+    }
+    if (res.status !== 200 || !res.ok) {
+        serverDown();
+        console.error('get/server/check: ', res);
+        return;
+    }
 
-	pingTimes.push(performance.now() - start);
-	start = performance.now();
+    pingTimes.push(performance.now() - start);
+    start = performance.now();
 
-	res = await core.rawAPI(`get/server/performance`);
-	if (res.status !== 200 || !res.ok) {
-		serverDown();
-		console.error('get/server/performance: ', res);
-		return;
-	}
+    res = await core.rawAPI(`get/server/performance`);
+    if (res.status !== 200 || !res.ok) {
+        serverDown();
+        console.error('get/server/performance: ', res);
+        return;
+    }
 
-	stats['DB Query Performance'] = res.avPerIteration.toFixed(1) + 'ms/query';
+    stats['DB Query Performance'] = res.avPerIteration.toFixed(1) + 'ms/query';
 
-	pingTimes.push(performance.now() - start);
-	start = performance.now();
+    pingTimes.push(performance.now() - start);
+    start = performance.now();
 
-	res = await core.rawAPI(`get/server/pid`);
-	if (res.status !== 200 || !res.ok) {
-		serverDown();
-		console.error('get/server/pid: ', res);
-		return;
-	}
+    res = await core.rawAPI(`get/server/pid`);
+    if (res.status !== 200 || !res.ok) {
+        serverDown();
+        console.error('get/server/pid: ', res);
+        return;
+    }
 
-	stats['Process Id'] = res.pid;
+    stats['Process Id'] = res.pid;
 
-	pingTimes.push(performance.now() - start);
-	start = performance.now();
+    pingTimes.push(performance.now() - start);
+    start = performance.now();
 
-	res = await core.rawAPI(`get/server/health`);
-	if (res.status !== 200 || !res.ok) {
-		serverDown();
-		console.error('get/server/performance: ', res);
-		return;
-	}
+    res = await core.rawAPI(`get/server/health`);
+    if (res.status !== 200 || !res.ok) {
+        serverDown();
+        console.error('get/server/performance: ', res);
+        return;
+    }
 
-	stats['CPU Usage'] = JSON.stringify(res.cpu, null, 10);
-	stats['Memory Usage'] = (res.memory.heapUsed / (1000 * 1000)).toFixed(1) + 'MB';
-	stats['Last Restarted'] = core.getRelativeTime(Date.now() - (res.uptime*1000));
-	stats['Uptime'] = res.uptime.toFixed(0) + ' seconds';
-	stats['Versions'] = JSON.stringify({
-		node: res.versions.node,
-		v8: res.versions.v8,
-		openssl: res.versions.openssl,
-	}, null, 10);
+    stats['CPU Usage'] = JSON.stringify(res.cpu, null, 10);
+    stats['Memory Usage'] = (res.memory.heapUsed / (1000 * 1000)).toFixed(1) + 'MB';
+    stats['Last Restarted'] = core.getRelativeTime(Date.now() - res.uptime * 1000);
+    stats['Uptime'] = res.uptime.toFixed(0) + ' seconds';
+    stats['Versions'] = JSON.stringify(
+        {
+            node: res.versions.node,
+            v8: res.versions.v8,
+            openssl: res.versions.openssl
+        },
+        null,
+        10
+    );
 
-	pingTimes.push(performance.now() - start);
+    pingTimes.push(performance.now() - start);
 
+    const avPing = pingTimes.reduce((a, b) => a + b, 0) / pingTimes.length;
 
-	const avPing = pingTimes.reduce((a, b) => a + b, 0) / pingTimes.length;
+    $status.innerHTML = `Server is working fine! Ping: ${avPing.toFixed(1)}ms`;
+    $status.style.borderColor = 'green';
 
-	$status.innerHTML = `Server is working fine! Ping: ${avPing.toFixed(1)}ms`;
-	$status.style.borderColor = 'green';
+    if (lastPingOk === false) {
+        location.reload();
+    }
 
-	if (lastPingOk === false) {
-		location.reload();
-	}
+    lastPingOk = true;
 
-	lastPingOk = true;
+    $restartServerButton.style.opacity = '1';
+    $killServerButton.style.opacity = '1';
 
-	$restartServerButton.style.opacity = '1';
-	$killServerButton.style.opacity = '1';
-
-	setTimeout(serverStatusAndPing, 5000);
-	return true;
+    setTimeout(serverStatusAndPing, 5000);
+    return true;
 }
 
-function showServerStats () {
-	$stats.innerHTML = ``;
+function showServerStats() {
+    $stats.innerHTML = ``;
 
-	for (const key in stats) {
-		$stats.innerHTML += `
+    for (const key in stats) {
+        $stats.innerHTML += `
 			<div>
 				<p>${core.escapeHTML(key)}</p>
 				<p>${core.escapeHTML(stats[key])}</p>
 			</div>
 		`;
-	}
+    }
 }
 
-async function activeSessions () {
-	SelectableList('#sessions', {
-		name: 'Active Sessions (Users currently logged in)',
-		items: (await core.rawAPI(`get/sessions/active`))['data'],
-		uniqueKey: 'id',
-		searchKey: 'email',
-		selected: selectedSessions,
-		withAllMenu: `
+async function activeSessions() {
+    SelectableList('#sessions', {
+        name: 'Active Sessions (Users currently logged in)',
+        items: (await core.rawAPI(`get/sessions/active`))['data'],
+        uniqueKey: 'id',
+        searchKey: 'email',
+        selected: selectedSessions,
+        withAllMenu: `
             <button
                 onclick="deleteSelectedSessions()"
                 class="icon"
@@ -159,94 +161,97 @@ async function activeSessions () {
                 svg="bin.svg"
             ></button>
         `,
-		itemGenerator: session => `
+        itemGenerator: session => `
 			<p>
-				${session['id'] === core.getSession() ? `
+				${
+                    session['id'] === core.getSession()
+                        ? `
 					<b>${core.escapeHTML(session['email'])}</b> (Your current session)
-				` : `
+				`
+                        : `
 					<button
 						onclick="signInAs('${session['userId']}', '${session['email']}')"
 						data-label="Sign in as"
 						style="font-size: 1em; cursor: pointer;"
 					>${session['email']}</button>
-				`}
+				`
+                }
 			</p>
 			<p>
 				Created
-				${core.escapeHTML(core.getRelativeTime(session['opened']*1000))}
-				(${core.escapeHTML(new Date(session['opened']*1000).toLocaleString())})
+				${core.escapeHTML(core.getRelativeTime(session['opened'] * 1000))}
+				(${core.escapeHTML(new Date(session['opened'] * 1000).toLocaleString())})
 			</p>
 		`,
-		gridTemplateColsCSS: '1fr 1fr',
-	});
+        gridTemplateColsCSS: '1fr 1fr'
+    });
 }
 
 // Actions
-async function deleteSelectedSessions () {
+async function deleteSelectedSessions() {
+    if (selectedSessions.includes(core.getSession())) {
+        await core.showError('You cannot log out yourself!');
+        return;
+    }
 
-	if (selectedSessions.includes(core.getSession())) {
-		await core.showError('You cannot log out yourself!');
-		return;
-	}
+    for (let sessionId of selectedSessions) {
+        await core.api(`delete/sessions`, { sessionId });
+    }
 
-	for (let sessionId of selectedSessions) {
-		await core.api(`delete/sessions`, { sessionId });
-	}
-
-	await activeSessions();
+    await activeSessions();
 }
 
 $killServerButton.onclick = async () => {
-	if (!confirm('Are you sure you want to kill the server?')) {
-		return;
-	}
+    if (!confirm('Are you sure you want to kill the server?')) {
+        return;
+    }
 
-	$startServerButton.disabled = true;
-	$killServerButton.disabled = true;
-	$restartServerButton.disabled = true;
+    $startServerButton.disabled = true;
+    $killServerButton.disabled = true;
+    $restartServerButton.disabled = true;
 
-	await core.showSpinner();
+    await core.showSpinner();
 
-	await core.api(`delete/server`);
+    await core.api(`delete/server`);
 
-	location.reload();
-}
+    location.reload();
+};
 
 $startServerButton.onclick = async () => {
-	$startServerButton.disabled = true;
-	$killServerButton.disabled = true;
-	$restartServerButton.disabled = true;
+    $startServerButton.disabled = true;
+    $killServerButton.disabled = true;
+    $restartServerButton.disabled = true;
 
-	await core.showSpinner();
+    await core.showSpinner();
 
-	await fetch(core.ROOT_PATH + '/api/start-server');
+    await fetch(core.ROOT_PATH + '/api/start-server');
 
-	location.reload();
-}
+    location.reload();
+};
 
 $restartServerButton.onclick = async () => {
-	if (!confirm('Are you sure you want to restart the server?')) {
-		return;
-	}
+    if (!confirm('Are you sure you want to restart the server?')) {
+        return;
+    }
 
-	await core.showSpinner();
+    await core.showSpinner();
 
-	let res = await core.api(`delete/server`);
-	if (res.status !== 200 || !res.ok) {
-		await core.showError('Failed to stop server');
-		return;
-	}
+    let res = await core.api(`delete/server`);
+    if (res.status !== 200 || !res.ok) {
+        await core.showError('Failed to stop server');
+        return;
+    }
 
-	await core.showSpinner();
+    await core.showSpinner();
 
-	await core.sleep(100);
+    await core.sleep(100);
 
-	res = await fetch(core.ROOT_PATH + '/api/start-server');
+    res = await fetch(core.ROOT_PATH + '/api/start-server');
 
-	if (await res.text() !== '1') {
-		await core.showError('Failed to start server');
-		await core.sleep(2000);
-	}
+    if ((await res.text()) !== '1') {
+        await core.showError('Failed to start server');
+        await core.sleep(2000);
+    }
 
-	location.reload();
-}
+    location.reload();
+};

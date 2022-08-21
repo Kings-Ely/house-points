@@ -1,10 +1,8 @@
-import * as core from "../../assets/js/main.js";
-import SelectableList from "../../assets/js/components/SelectableList.js";
-import fullPagePopup from "../../assets/js/components/FullPagePopup.js";
-import { escapeHTML } from "../../assets/js/main.js";
+import * as core from '../../assets/js/main.js';
+import SelectableList from '../../assets/js/components/SelectableList.js';
+import fullPagePopup from '../../assets/js/components/FullPagePopup.js';
 
-const
-    $addStudentButton = document.getElementById('add-student'),
+const $addStudentButton = document.getElementById('add-student'),
     filters = {
         years: [0, 9, 10, 11, 12, 13],
         admin: false
@@ -24,13 +22,20 @@ window.userPopupFromId = core.userPopupFromId;
 
 (async () => {
     await core.init('../..', true, true);
-    await core.preloadSVGs('star-filled.svg', 'star-empty.svg', 'bin.svg', 'circle-up-arrow.svg',
-        'circle-down-arrow.svg', 'plus.svg', 'unselected-checkbox.svg');
+    await core.preloadSVGs(
+        'star-filled.svg',
+        'star-empty.svg',
+        'bin.svg',
+        'circle-up-arrow.svg',
+        'circle-down-arrow.svg',
+        'plus.svg',
+        'unselected-checkbox.svg'
+    );
 
     await showStudentsList();
 })();
 
-async function showStudentsList () {
+async function showStudentsList() {
     SelectableList('#students', {
         name: 'Students',
         items: (await core.api(`get/users`))['data'],
@@ -50,19 +55,25 @@ async function showStudentsList () {
                 </span>
                 <div id="filters-dropdown">
                     <button onclick="toggleYearGroup(0)">
-                        Show ${!filters.years.includes(0) ? 'teachers and students' : 'only students'}
+                        Show ${
+                            !filters.years.includes(0) ? 'teachers and students' : 'only students'
+                        }
                     </button>
                     <br>
                     <button onclick="toggleAdmin()">
                         Show ${filters.admin ? 'non-admins too' : 'only admins'}
                     </button>
                     <hr>
-                    ${[9, 10, 11, 12, 13].map(year => `
+                    ${[9, 10, 11, 12, 13]
+                        .map(
+                            year => `
                         <button onclick="toggleYearGroup(${year})"> 
                             ${filters.years.includes(year) ? 'Hide' : 'Show'} 
                             Y${year}
                         </button>
-                    `).join('')}
+                    `
+                        )
+                        .join('')}
                 </div>
             </span>
             <button
@@ -99,23 +110,22 @@ async function showStudentsList () {
         `,
         itemGenerator: showStudent,
         gridTemplateColsCSS: '50% 1fr 1fr',
-        filter: (item) => {
-            return filters.years.includes(item['year']) &&
-                (filters.admin ? item['admin'] : true);
+        filter: item => {
+            return filters.years.includes(item['year']) && (filters.admin ? item['admin'] : true);
         }
     });
 }
 
-
-async function showStudent (student) {
-
+async function showStudent(student) {
     const { id, email, year, student: isStudent, admin: isAdmin } = student;
 
-    const isMe = (id === (await core.userInfo())['id']);
+    const isMe = id === (await core.userInfo())['id'];
 
     return `
         <div class="flex-center" style="justify-content: left">
-            ${isAdmin ? `
+            ${
+                isAdmin
+                    ? `
                 <button 
                     class="icon medium ${isStudent ? 'icon-accent' : ''}"
                     onclick="revokeAdmin('${id}', '${email}')"
@@ -123,7 +133,8 @@ async function showStudent (student) {
                     svg="star-filled.svg"
                     aria-label="Revoke Admin"
                 ></button>
-            ` : `
+            `
+                    : `
                 <button
                     class="icon medium ${isStudent ? 'icon-accent' : ''}" 
                     onclick="makeAdmin('${id}', '${email}')"
@@ -131,7 +142,8 @@ async function showStudent (student) {
                     data-label="Make Admin"
                     svg="star-empty.svg"
                 ></button>                
-            `}
+            `
+            }
             
             <button 
                 svg="account.svg"
@@ -142,12 +154,15 @@ async function showStudent (student) {
                 ${!isMe ? `data-label="Sign in as ${email}"` : ''}
             ></button>
             
-            ${isMe ? `
+            ${
+                isMe
+                    ? `
                 <span class="student-link">
                    <b>${email}</b>
                    (You${isStudent ? `, Y${year || ''}` : ''})
                 </span>
-            ` : `
+            `
+                    : `
                 <button 
                     onclick="userPopupFromId('${id}')" 
                     class="student-link"
@@ -157,16 +172,25 @@ async function showStudent (student) {
                     ${email}
                 </button>
                 
-                ${isStudent ? `
+                ${
+                    isStudent
+                        ? `
                     (Y${year || ''})
-                ` : ''}
-            `}
+                `
+                        : ''
+                }
+            `
+            }
         </div>
        
         <div class="flex-center">
-            ${isStudent ? `
+            ${
+                isStudent
+                    ? `
                 ${student['accepted']} House Points
-            ` : ''}
+            `
+                    : ''
+            }
         </div>
         
         <div class="flex-center" style="justify-content: right">
@@ -182,7 +206,7 @@ async function showStudent (student) {
 }
 
 // Filters
-function toggleYearGroup (age) {
+function toggleYearGroup(age) {
     if (filters.years.includes(age)) {
         filters.years.splice(filters.years.indexOf(age), 1);
     } else {
@@ -191,13 +215,15 @@ function toggleYearGroup (age) {
     showStudentsList();
 }
 
-function toggleAdmin () {
+function toggleAdmin() {
     filters.admin = !filters.admin;
     showStudentsList();
 }
 
 $addStudentButton.addEventListener('click', () => {
-    const hide = fullPagePopup(document.body, `
+    const hide = fullPagePopup(
+        document.body,
+        `
     
         <h2 style="padding: 0">Add Student</h2>
         <div id="add-student-by-email">
@@ -249,14 +275,13 @@ $addStudentButton.addEventListener('click', () => {
             </div>
         </div>
     
-    `);
+    `
+    );
 
-    const
-        $emailInp = document.querySelector('#add-student-email'),
+    const $emailInp = document.querySelector('#add-student-email'),
         $yearInp = document.querySelector('#add-student-year');
 
     document.getElementById(`add-student-submit`).onclick = async () => {
-
         if (!$emailInp.value) {
             await core.showError('Email Required');
             return;
@@ -270,8 +295,11 @@ $addStudentButton.addEventListener('click', () => {
         }
 
         if (userYear === 0) {
-            if (!confirm(
-                'Are you sure you want this to be an non-student, admin account? If not, please provide a year.')) {
+            if (
+                !confirm(
+                    'Are you sure you want this to be an non-student, admin account? If not, please provide a year.'
+                )
+            ) {
                 return;
             }
         }
@@ -292,7 +320,7 @@ $addStudentButton.addEventListener('click', () => {
     core.reloadDOM();
 });
 
-async function deleteUser (id, email) {
+async function deleteUser(id, email) {
     if (!confirm(`Are you sure you want to delete ${email} and all their house points?`)) {
         return;
     }
@@ -306,49 +334,60 @@ async function deleteUser (id, email) {
     await showStudentsList();
 }
 
-async function deleteSelected () {
-    if (!confirm(
-        `Are you sure you want to delete ${selected.length} students and their house points? This is irreversible.`)) {
+async function deleteSelected() {
+    if (
+        !confirm(
+            `Are you sure you want to delete ${selected.length} students and their house points? This is irreversible.`
+        )
+    ) {
         return;
     }
 
     // send API requests at the same time and wait for all to finish
-    await Promise.all(selected.map(async id => {
-        await core.api(`delete/users`, { userId: id });
-    }));
+    await Promise.all(
+        selected.map(async id => {
+            await core.api(`delete/users`, { userId: id });
+        })
+    );
 
     selected.splice(0, selected.length);
 
     await showStudentsList();
 }
 
-async function ageSelected (amount) {
-    if (!confirm(`Are you sure you want to change ${selected.length} students years by ${amount}?`)) {
+async function ageSelected(amount) {
+    if (
+        !confirm(`Are you sure you want to change ${selected.length} students years by ${amount}?`)
+    ) {
         return;
     }
 
-    await Promise.all(selected.map(async id => {
-        await core.api(`update/users/year`, {
-            userId: id, by: amount
-        });
-    }));
+    await Promise.all(
+        selected.map(async id => {
+            await core.api(`update/users/year`, {
+                userId: id,
+                by: amount
+            });
+        })
+    );
 
     await showStudentsList();
 }
 
-async function giveHPToSelected () {
-
+async function giveHPToSelected() {
     let reason = prompt(`Reason to give ${selected.length} people a house point`);
 
     if (!reason) return;
 
-    await Promise.all(selected.map(async id => {
-        await core.api(`create/house-points/give`, {
-            description: reason,
-            userId: id,
-            quantity: 1
-        });
-    }));
+    await Promise.all(
+        selected.map(async id => {
+            await core.api(`create/house-points/give`, {
+                description: reason,
+                userId: id,
+                quantity: 1
+            });
+        })
+    );
 
     await showStudentsList();
 }
@@ -359,13 +398,14 @@ async function giveHPToSelected () {
  * @param {string} email
  * @returns {Promise<void>}
  */
-async function revokeAdmin (userId, email) {
+async function revokeAdmin(userId, email) {
     if (!confirm(`Are you sure you want to revoke '${email}'s admin access?`)) {
         return;
     }
 
     await core.api(`update/users/admin`, {
-        userId, admin: false
+        userId,
+        admin: false
     });
 
     await showStudentsList();
@@ -377,19 +417,20 @@ async function revokeAdmin (userId, email) {
  * @param {string} email
  * @returns {Promise<void>}
  */
-async function makeAdmin (userId, email) {
+async function makeAdmin(userId, email) {
     if (!confirm(`Are you sure you want to make '${email}' an admin?`)) {
         return;
     }
 
     await core.api(`update/users/admin`, {
-        userId, admin: true
+        userId,
+        admin: true
     });
 
     await showStudentsList();
 }
 
-async function uploadAddStudentsFile () {
+async function uploadAddStudentsFile() {
     const fileContent = await core.getFileContent('#drop-file-inp');
 
     core.hide('#drop-file-inp');
@@ -403,9 +444,9 @@ async function uploadAddStudentsFile () {
     let resolved = 0;
 
     const $loadBar = document.getElementById('loading-bar');
-    $loadBar.style.width = `${100/numPromisesResolve}%`;
+    $loadBar.style.width = `${100 / numPromisesResolve}%`;
 
-    function finishedAll () {
+    function finishedAll() {
         core.hide('#loading-bar');
         core.show('#drop-file-zone');
         document.getElementById('drop-file-zone').innerHTML = `
@@ -413,24 +454,30 @@ async function uploadAddStudentsFile () {
                     Finished adding 
                     ${csv.length}
                     students with
-                    <span style="color: ${errors.length ? 'var(--text-warning)' : 'rgb(118,255,103)'}">
+                    <span style="color: ${
+                        errors.length ? 'var(--text-warning)' : 'rgb(118,255,103)'
+                    }">
                         ${core.escapeHTML(errors.length)}
                     </span>
                     errors.
                 </p>
-                ${errors.length ? `
+                ${
+                    errors.length
+                        ? `
                     <br>Errors:<br>
                     <p style="color: var(--text-warning)">
                         ${errors.join('<br>')}
                     </p>
-                ` : ''}
+                `
+                        : ''
+                }
             `;
 
         showStudentsList();
     }
 
     // called at the end of each student being done
-    function finishedOne () {
+    function finishedOne() {
         resolved++;
 
         let percentDone = (resolved / numPromisesResolve) * 100;
@@ -443,7 +490,6 @@ async function uploadAddStudentsFile () {
 
     for (let i = 0; i < csv.length; i++) {
         (async () => {
-
             if (csv[i][0].toLowerCase() === 'email') {
                 // skip header row
                 finishedOne();
@@ -451,23 +497,25 @@ async function uploadAddStudentsFile () {
             }
 
             if (csv[i].length !== 3 && csv[i].length !== 2) {
-                errors.push(`Row ${i+1}: wrong length. Expected 2 or 3 columns, got ${csv[i].length}`);
+                errors.push(
+                    `Row ${i + 1}: wrong length. Expected 2 or 3 columns, got ${csv[i].length}`
+                );
                 finishedOne();
                 return;
             }
 
-            const [ email, yearRaw, hpsRaw = '0' ] = csv[i];
+            const [email, yearRaw, hpsRaw = '0'] = csv[i];
 
             const hps = parseInt(hpsRaw || '0');
             if (isNaN(hps)) {
-                errors.push(`Row ${i+1}: invalid house point count (col 3)`);
+                errors.push(`Row ${i + 1}: invalid house point count (col 3)`);
                 finishedOne();
                 return;
             }
 
             const year = parseInt(yearRaw);
             if (isNaN(year)) {
-                errors.push(`Row ${i+1}: invalid year (col 2)`);
+                errors.push(`Row ${i + 1}: invalid year (col 2)`);
                 finishedOne();
                 return;
             }
@@ -478,7 +526,7 @@ async function uploadAddStudentsFile () {
                 password: core.genPassword()
             });
             if (res['error']) {
-                errors.push(`Error on row ${i+1}: ${res['error']}`);
+                errors.push(`Error on row ${i + 1}: ${res['error']}`);
                 finishedOne();
                 return;
             }
@@ -486,7 +534,11 @@ async function uploadAddStudentsFile () {
             const { userId } = res;
 
             if (!userId) {
-                errors.push(`Error on row ${i+1}: Not sure what went wrong :/. User wasn't created - I don't think?`);
+                errors.push(
+                    `Error on row ${
+                        i + 1
+                    }: Not sure what went wrong :/. User wasn't created - I don't think?`
+                );
                 finishedOne();
                 return;
             }
@@ -498,7 +550,7 @@ async function uploadAddStudentsFile () {
                     quantity: hps
                 });
                 if (res['error']) {
-                    errors.push(`Error on row ${i+1}: ${res['error']}`);
+                    errors.push(`Error on row ${i + 1}: ${res['error']}`);
                     finishedOne();
                     return;
                 }
@@ -506,7 +558,7 @@ async function uploadAddStudentsFile () {
 
             finishedOne();
         })().catch(err => {
-            errors.push(`Something went wrong on row ${i+1}: ${err}`);
+            errors.push(`Something went wrong on row ${i + 1}: ${err}`);
             finishedOne();
         });
     }
