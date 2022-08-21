@@ -32,8 +32,6 @@ window.eventPopup = core.eventPopup;
 
         await reloadHousePoints();
     } else {
-        await title();
-
         if (!theUsersInfo['admin']) {
             core.hide('#hps');
         }
@@ -53,7 +51,7 @@ async function reloadUserInfoFromEmail() {
 
     theUsersInfo = await core.api(`get/users`, { email });
 
-    core.reservoir.set('the-user', theUsersInfo);
+    core.reservoir.set('theUser', theUsersInfo);
 }
 
 async function housePoints() {
@@ -105,15 +103,6 @@ async function housePoints() {
     $hps.innerHTML += html;
 }
 
-async function title() {
-    const [username, emailExt] = theUsersInfo['email'].split('@');
-
-    core.reservoir.set({
-        email0: username,
-        email1: emailExt
-    });
-}
-
 async function showInfo() {
     $info.innerHTML = `
         <p>
@@ -128,7 +117,6 @@ async function showInfo() {
 
 async function reloadHousePoints() {
     await reloadUserInfoFromEmail();
-    await title();
     await housePoints();
 
     core.reloadDOM();

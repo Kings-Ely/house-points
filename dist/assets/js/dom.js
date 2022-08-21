@@ -1,6 +1,6 @@
 import * as core from './main.js';
 import { loadSVGs } from './svg.js';
-import { hydrate } from './hydration.js';
+import reservoir from './hydration.js';
 
 /**
  * Kind of ew way of doing it. But it works.
@@ -186,9 +186,10 @@ export async function loadNav() {
 /**
  * Traverses the DOM and runs some checks and stuff
  * Actually only adds new SVGs at the moment but might do more later.
+ * @param {Node} $from
  */
-export function reloadDOM() {
-    hydrate();
+export function reloadDOM($from=document) {
+    reservoir.hydrate($from);
     loadSVGs();
 }
 

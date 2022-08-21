@@ -17,7 +17,7 @@ class Reservoir {
         } else {
             throw 'Invalid key type - cannot add to reservoir';
         }
-        hydrate();
+        this.hydrate();
     }
 
     get(key) {
@@ -36,7 +36,16 @@ class Reservoir {
         const envVarNames = Object.keys(this.#data);
         const envVarValues = Object.keys(this.#data).map(k => this.#data[k]);
         const thisParam = this.#data;
-        const execBody = `return (${key});`;
+        const execBody = `
+            try {
+                return (${key});
+            } catch (e) {
+                if (!(e instanceof ReferenceError)) {
+                    console.error(e);
+                }
+                return null;
+            }
+        `;
         
         return new Function(...envVarNames, execBody).call(thisParam, ...envVarValues);
     }
@@ -84,27 +93,34 @@ class Reservoir {
         }
         return !!value;
     }
+    
+    /**
+     * @param {Node} $el
+     */
+    hydrate($el = document) {
+        if ($el?.hasAttribute?.('pump-if')) {
+            if (!reservoir.hydrateIf($el)) {
+                return;
+            }
+        }
+        
+        if ($el?.getAttribute?.('aria-hidden') === 'true') {
+            return;
+        }
+    
+        if ($el?.hasAttribute?.('waterproof')) {
+            return;
+        }
+        
+        if ($el?.hasAttribute?.('pump')) {
+            reservoir.hydrateDry($el);
+        }
+        
+        for (const child of $el?.children || []) {
+            this.hydrate(child);
+        }
+    }
 }
 
 const reservoir = new Reservoir();
 export default reservoir;
-
-/**
- * @param $el
- * @returns {void}
- */
-export function hydrate($el = document) {
-    if ($el.hasAttribute && $el.hasAttribute('pump-if')) {
-        if (!reservoir.hydrateIf($el)) {
-            return;
-        }
-    }
-    
-    if ($el.hasAttribute && $el.hasAttribute('pump')) {
-        reservoir.hydrateDry($el);
-    }
-    
-    for (const child of $el.children) {
-        hydrate(child);
-    }
-}
