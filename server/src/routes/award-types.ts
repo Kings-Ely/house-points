@@ -28,7 +28,7 @@ route('get/award-types', async ({ query, body }) => {
  * @param description
  */
 route('create/award-types', async ({ query, body }) => {
-    if (!(await isAdmin(body, query))) return AUTH_ERR;
+    if (!await isAdmin(body, query)) return AUTH_ERR;
 
     const { name = '', required = -1, description = '' } = body;
 
@@ -145,12 +145,14 @@ route('update/award-types/description', async ({ query, body }) => {
  */
 route('delete/award-types', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
+    
+    const { awardTypeId: id } = body;
 
-    if (!body.awardTypeId) return 'Missing parameter id';
+    if (!id) return 'Missing parameter id';
 
     const queryRes = await query<mysql.OkPacket>`
         DELETE FROM awardTypes
-        WHERE id = ${body.awardTypeId}
+        WHERE id = ${id}
     `;
 
     if (queryRes.affectedRows === 0)

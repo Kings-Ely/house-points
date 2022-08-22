@@ -1,4 +1,5 @@
 'use strict';
+import { registerComponent } from "../dom.js";
 import * as core from '../main.js';
 
 /**
@@ -9,7 +10,7 @@ import * as core from '../main.js';
  * @param {() => Promise<T[]>} getData
  * @param {(item: T, inputValue: string) => boolean} filter
  */
-const InputWithDropdown = core.registerComponent(
+export default registerComponent('InputWithDropdown',
     ($el, id, placeholder, getData, filter, maxDropdownItems = 10) => {
         let data;
 
@@ -92,5 +93,3 @@ const InputWithDropdown = core.registerComponent(
         return $input;
     }
 );
-
-export default InputWithDropdown;

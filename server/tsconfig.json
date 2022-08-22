@@ -9,11 +9,9 @@
         "noImplicitThis": true,
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,
-        "noUncheckedIndexedAccess": true,
         "noImplicitOverride": true,
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
-        "esModuleInterop": true,
-        "resolveJsonModule": true
+        "esModuleInterop": true
     }
 }

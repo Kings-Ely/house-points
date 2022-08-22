@@ -18,10 +18,14 @@
     <section id="name">
         <p style="font-size: 3em">
             <span pump="theUser.email.split('@')[0]"></span>
-            <span style="color: var(--text-v-light)" pump="theUser.email.split('@')[1]" pump-to="end">
+            <span
+                style="color: var(--text-v-light)"
+                pump="theUser.email.split('@')[1]"
+                pump-to="end"
+            >
                 @
             </span>
-            <span pump-if="admin">(Admin)</span>
+            <span pump-if="user.admin">(Admin)</span>
         </p>
     </section>
 
@@ -40,7 +44,7 @@
             href="../admin/"
             class="big-link"
             svg="admin.svg"
-            pump-if="admin"
+            pump-if="user.admin"
         >Admin Dashboard</a>
     </section>
 

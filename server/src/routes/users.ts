@@ -190,6 +190,81 @@ route('get/users/batch-info', async ({ query, body }) => {
 });
 
 /**
+ * @admin
+ */
+route('get/users/wants-award', async ({ query, body }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
+    
+    const data = await query`
+    
+        SELECT
+            table2.id,
+            table2.email,
+            table2.year,
+            table2.awardType AS awardTypeId,
+            table2.hpsRequired AS awardRequires,
+            table2.points AS accepted,
+            table2.topAward AS awardName
+        FROM
+            (
+                SELECT
+                    users.id,
+                    users.email,
+                    users.year,
+                    SUM(housepoints.quantity) AS points,
+                    table1.name AS topAward,
+                    table1.hpsRequired AS hpsRequired,
+                    table1.awardType
+                FROM
+                    housepoints,
+                    users
+                        LEFT JOIN (
+                        SELECT
+                            users.id,
+                            awardTypes.id AS awardType,
+                            awardTypes.name,
+                            MAX(hpsRequired) AS hpsRequired
+                        FROM
+                            awardTypes,
+                            users
+                                LEFT JOIN awards
+                                    ON users.id = awards.userid
+                        GROUP BY
+                            users.id,
+                            awardType,
+                            awardTypes.name
+                    ) AS table1
+                        ON table1.id = users.id
+                WHERE
+                    housepoints.status = 'Accepted'
+                  AND housepoints.userId = users.id
+                  AND table1.id = users.id
+                GROUP BY
+                    users.id,
+                    users.email,
+                    users.year,
+                    table1.name,
+                    table1.hpsRequired,
+                    table1.awardType
+            ) AS table2
+        WHERE
+            points >= hpsRequired
+          AND (table2.id, table2.awardType) NOT IN (
+            SELECT awards.userId, awards.awardTypeId
+            FROM awards
+        )
+        ORDER BY hpsRequired - points DESC
+    `;
+    
+    // stupid thing: https://github.com/sidorares/node-mysql2/issues/935
+    for (let i = 0; i < data.length; i++) {
+        data[i].accepted = parseInt(data[i]?.accepted);
+    }
+    
+    return { data };
+});
+
+/**
  * @account
  * Gets the data required for to make the leaderboard.
  */

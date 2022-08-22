@@ -1,4 +1,5 @@
 'use strict';
+import { registerComponent } from "../dom.js";
 import * as core from '../main.js';
 import InputWithDropdown from './InputWithDropdown.js';
 
@@ -10,7 +11,7 @@ import InputWithDropdown from './InputWithDropdown.js';
  * @param {boolean} [allowNonStudents=false] filters on 'student' property of  users
  * @returns {HTMLElement} the HTMLInputElement
  */
-const StudentEmailInputWithIntellisense = core.registerComponent(
+export default registerComponent('StudentEmailInputWithIntellisense',
     ($el, id, placeholder = 'Email', allowNonStudents = false) => {
         let data;
 
@@ -33,5 +34,3 @@ const StudentEmailInputWithIntellisense = core.registerComponent(
         );
     }
 );
-
-export default StudentEmailInputWithIntellisense;

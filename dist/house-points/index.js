@@ -3,22 +3,6 @@ import SelectableList from '../assets/js/components/SelectableList.js';
 import { inlineComponent, reloadDOM } from '../assets/js/main.js';
 import HousePoint from '../assets/js/components/HousePoint.js';
 
-/** @typedef {{
- *     id: string,
- *     quantity: number,
- *     description: string,
- *     status: string,
- *     created: number,
- *     completed: number,
- *     rejectMessage: string,
- *     userId: string,
- *     userEmail: string,
- *     userYear: number,
- *     eventId: string,
- *     eventName: string,
- *     eventDescription: string,
- *     eventTime: number
-}} HP  */
 
 const filters = {
         years: [0, 9, 10, 11, 12, 13],

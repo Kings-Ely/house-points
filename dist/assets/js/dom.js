@@ -2,6 +2,8 @@ import * as core from './main.js';
 import { loadSVGs } from './svg.js';
 import reservoir from './hydration.js';
 
+export const COMPONENT_BUILDERS = {};
+
 /**
  * Kind of ew way of doing it. But it works.
  * Allows components to be inserted inline.
@@ -109,7 +111,7 @@ export async function showError(message) {
 export function showErrorFromCode(code) {
     return showError(
         {
-            auth: 'You are not authorized for this action',
+            auth: 'You need to log in',
             'api-con': 'Lost connection to server',
             cookies: 'You have not accepted cookies'
         }[code] || 'An Unknown Error has Occurred'
@@ -150,8 +152,6 @@ export async function loadNav() {
     state.$nav.innerHTML = await navRes.text();
 
     const $adminLink = document.getElementById('admin-link');
-    const $username = document.getElementById('nav-username');
-    const $homeLink = document.getElementById('home-link');
 
     // replace links in nav relative to this page
     document.querySelectorAll('nav a').forEach(a => {
@@ -169,10 +169,6 @@ export async function loadNav() {
     const user = await core.userInfo();
 
     if (!user) return;
-
-    $homeLink.href += `?email=${user.email}`;
-
-    $username.innerText = user['email']?.split('@')?.[0] || 'Unknown Name';
 
     if (user['admin']) {
         $adminLink.style.display = 'block';
@@ -244,11 +240,12 @@ export function getInverseTheme() {
 
 /**
  * Turns a ComponentDefinition into a Component.
+ * @param {string} name
  * @param {ComponentDefinition} cb
  * @returns {Component}
  */
-export function registerComponent(cb) {
-    return ($el, ...args) => {
+export function registerComponent(name, cb) {
+    const component = ($el, ...args) => {
         if (typeof $el === 'string') {
             $el = document.querySelector($el);
         }
@@ -257,4 +254,8 @@ export function registerComponent(cb) {
         }
         return cb($el, core.state.currentComponentId++, ...args);
     };
+    
+    COMPONENT_BUILDERS[name] = component;
+    
+    return component;
 }

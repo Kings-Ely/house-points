@@ -1,4 +1,5 @@
 'use strict';
+import { registerComponent } from "../dom.js";
 import * as core from '../main.js';
 
 /**
@@ -8,7 +9,7 @@ import * as core from '../main.js';
  * @param {string} content
  * @param {boolean} showHeader
  */
-const FullPagePopup = core.registerComponent(($el, id, content, showHeader = true) => {
+export default registerComponent('FullPagePopup', ($el, id, content, showHeader = true) => {
     const $p = document.createElement('div');
     $p.classList.add('full-page-popup');
     $p.id = `full-page-popup-${id}`;
@@ -67,5 +68,3 @@ const FullPagePopup = core.registerComponent(($el, id, content, showHeader = tru
 
     return hide;
 });
-
-export default FullPagePopup;

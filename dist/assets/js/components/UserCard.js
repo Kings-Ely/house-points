@@ -1,24 +1,14 @@
 'use strict';
+import { registerComponent } from "../dom.js";
 import * as core from '../main.js';
 import HousePoint from './HousePoint.js';
 
-/** @typedef {{
- * 		id?: string,
- * 		email: string,
- * 		year: number,
- * 		accepted: number,
- * 		rejected: number,
- * 		pending: number,
- * 		housePoints: HP[],
- * }} User */
-
 /**
- *
  * @param {El} $el
  * @param {() => User} getEvent getter for event data
  * @param {boolean} admin should be admin options be shown
  */
-const UserCard = core.registerComponent(($el, id, getUser) => {
+export default registerComponent('UserCard', ($el, id, getUser) => {
     /** @type User */
     let user;
 
@@ -157,5 +147,3 @@ const UserCard = core.registerComponent(($el, id, getUser) => {
 
     hardReload().then();
 });
-
-export default UserCard;

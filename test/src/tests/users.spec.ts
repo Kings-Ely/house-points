@@ -587,3 +587,86 @@ Test.test(`Users | Updating year`, async api => {
 
     return true;
 });
+
+Test.test('Users | wants-award', async api => {
+    const { userId, email } = await generateUser(api);
+    
+    let res = await api('get/users/wants-award');
+    if (res?.data?.length !== 0) {
+        return `0: ${JSON.stringify(res)}`;
+    }
+    
+    const { id: awardTypeId } = await api('create/award-types', {
+        name: 'Test',
+        description: 'Testing AT',
+        required: 1
+    });
+    
+    const { id: awardTypeId2 } = await api('create/award-types', {
+        name: 'requires 2',
+        required: 2
+    });
+    
+    res = await api('get/users/wants-award');
+    if (res?.data?.length !== 0) {
+        return `1: ${JSON.stringify(res)}`;
+    }
+    
+    const { id: housePointId } = await api('create/house-points/give', {
+        userId
+    });
+    
+    res = await api('get/users/wants-award');
+    if (res?.data?.length !== 1) {
+        return `2: ${JSON.stringify(res)}`;
+    }
+    if (res.data[0].id !== userId) {
+        return `3: ${JSON.stringify(res)}`;
+    }
+    if (res.data[0].awardTypeId !== awardTypeId) {
+        return `4: ${JSON.stringify(res)}`;
+    }
+    if (typeof res.data[0].year !== 'number') {
+        return `5: ${JSON.stringify(res)}`;
+    }
+    if (res.data[0].email !== email) {
+        return `6: ${JSON.stringify(res)}`;
+    }
+    if (res.data[0].awardRequires !== 1) {
+        return `7: ${JSON.stringify(res)}`;
+    }
+    if (res.data[0].accepted !== 1) {
+        return `8: ${JSON.stringify(res)}`;
+    }
+    if (res.data[0].awardName !== 'Test') {
+        return `9: ${JSON.stringify(res)}`;
+    }
+    
+    const { id: awardId } = await api('create/awards', {
+        userId,
+        awardTypeId
+    });
+    
+    res = await api('get/users/wants-award');
+    if (res?.data?.length !== 0) {
+        return `10: ${JSON.stringify(res)}`;
+    }
+    
+    const { id: hpRequestId } = await api('create/house-points/request', {
+        userId
+    });
+    
+    res = await api('get/users/wants-award');
+    if (res?.data?.length !== 0) {
+        return `11: ${JSON.stringify(res)}`;
+    }
+    
+    await api(`delete/awards`, { awardId });
+    await api(`delete/award-types`, { awardTypeId });
+    await api(`delete/award-types`, { awardTypeId: awardTypeId2 });
+    await api(`delete/users`, { userId });
+    await api(`delete/house-points`, { hpRequestId });
+    await api(`delete/house-points`, { housePointId });
+    
+    return true;
+});

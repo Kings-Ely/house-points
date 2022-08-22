@@ -16,21 +16,27 @@
 <!-- note no nav here -->
 <main>
     <div id="content" class="flex-center fill-screen">
-        <label for="email"></label>
+        <div class="label-container">
+            <label for="email">Email</label>
+        </div>
         <input
             type="email"
             id="email"
-            autocomplete="on"
+            autocomplete="email"
             autofocus
             aria-label="email"
+            bind="email"
         >
-        <label for="email"></label>
+        <br>
+        <div class="label-container">
+            <label for="password">Password</label>
+        </div>
         <input
             type="password"
             id="password"
-            placeholder="Password"
-            autocomplete="on"
+            autocomplete="current-password"
             aria-label="password"
+            bind="password"
         >
         <button id="forgotten-password">
             Forgotten Password?

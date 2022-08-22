@@ -1,23 +1,23 @@
-<div id="nav-left">
+<div id="nav-left" pump-if="signedIn">
     <button
         id="sign-out"
         aria-label="logout"
         svg="logout.svg"
         onclick="logout()"
         class="icon"
-         data-label="Logout"
+        data-label="Logout"
     ></button>
     <a
         id="home-link"
         aria-label="home"
-        href="/user/"
+        pump-if="user && rootPath"
+        pump.href="${rootPath}/user/?email=${user.email}"
         class="icon"
         data-label="Home"
         svg="account.svg"
     >
-        <span id="nav-username"></span>
+        <span pump="user.email.split('@')[0]"></span>
     </a>
-
 </div>
 
 <div id="nav-center"></div>
@@ -31,6 +31,7 @@
         style="display: none"
         class="icon"
         data-label="Admin Dashboard"
+        pump-if="user.admin"
     ></button>
     <a
         id="leaderboard-link"

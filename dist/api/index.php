@@ -9,6 +9,8 @@ ini_set('display_errors', true);
 error_reporting(E_ALL);
 //*/
 
+$start = floor(microtime(true) * 1000);
+
 // Use the raw string over a $_GET param to avoid auto-decoding of URI parameter
 // this method is not very good though, meaning no GET parameters can be stripped from the request,
 // but makes everything easier with escaping stuff
@@ -78,11 +80,12 @@ foreach($headerArray as $header)
         if (trim($headerName) == 'Content-Length') continue;
         if (trim($headerName) == 'Transfer-Encoding') continue;
         if (trim($headerName) == 'Location') continue;
-
     }
     header($header, FALSE);
 }
 
-curl_close ($ch);
+curl_close($ch);
+
+header('Internal-Request-Time: '.strval(floor(microtime(true) * 1000)- $start).'ms');
 
 echo $body;

@@ -19,6 +19,7 @@ export * from './cookies.js';
 export * from './dom.js';
 export * from './svg.js';
 export * from './popups.js';
+export { reservoir };
 
 // Utility script imported by all pages
 
@@ -27,6 +28,7 @@ export const API_ROOT = 'https://josephcoppin.com/school/house-points/api',
     COOKIE_SESSION = 'hpnea_SessionId',
     COOKIE_ALLOW_COOKIES_KEY = 'hpnea_AllowedCookies',
     LS_THEME = 'hpnea_Theme',
+    LS_RESERVOIR = 'hpnea_Reservoir',
     HOUSE_NAME = 'Osmond',
     svgCache = {},
     SPINNER_STOP_DELAY = 500,
@@ -55,11 +57,7 @@ export const state = {
     currentComponentId: 0,
 };
 
-reservoir.set({
-    'houseName': HOUSE_NAME
-});
-
-export { reservoir };
+reservoir.localStorageKey = LS_RESERVOIR;
 
 // polluting the global namespace
 window.logout = logout;
@@ -105,6 +103,12 @@ export async function init(
     noApiTest = false
 ) {
     ROOT_PATH = rootPath;
+    
+    reservoir.loadFromLocalStorage();
+    reservoir.set({
+        houseName: HOUSE_NAME,
+        rootPath
+    }, true);
 
     if (!noApiTest) {
         await testApiCon();
@@ -117,7 +121,7 @@ export async function init(
             })
         );
     } else {
-        await handleUserInfo({});
+        await handleUserInfo(null);
     }
 
     const user = await userInfo();
@@ -143,7 +147,9 @@ export async function init(
     if (state.$nav) {
         await loadNav();
     }
-    await loadFooter();
+    if (state.$footer) {
+        await loadFooter();
+    }
 
     cookiePopUp();
 

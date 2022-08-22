@@ -25,18 +25,14 @@ const $password = document.getElementById('password'),
         await core.navigate(`../?error=auth`);
         return;
     }
+    
+    core.reservoir.set('theUser', user);
 
     showChangePassword(user);
 })();
 
-function showChangePassword(user) {
+function showChangePassword() {
     document.getElementById('content').style.display = 'block';
-    document.getElementById('email').innerHTML = `
-		${core.escapeHTML(user.email.split('@')[0])}
-		<span style="color: var(--text-v-light)">
-			@${core.escapeHTML(user.email.split('@')[1])}
-		</span>
-	`;
 }
 
 $submit.addEventListener('click', async () => {

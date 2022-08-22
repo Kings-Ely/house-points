@@ -1,5 +1,6 @@
 'use strict';
 import * as core from '../main.js';
+import { registerComponent } from "../dom.js";
 import StudentEmailInputWithIntellisense from './StudentEmailInputWithIntellisense.js';
 import FullPagePopup from './FullPagePopup.js';
 
@@ -10,7 +11,7 @@ import FullPagePopup from './FullPagePopup.js';
  * @param {El} $el
  * @param {() => *} reload
  */
-const AddEventPopup = core.registerComponent(($el, id, reload) => {
+export default registerComponent('AddEventPopup', ($el, id, reload) => {
     let studentsInEvent = {};
 
     let $nameInp;
@@ -223,5 +224,3 @@ const AddEventPopup = core.registerComponent(($el, id, reload) => {
 
     window._AddEventPopup__showStudentsInAddEvent().then(() => reload());
 });
-
-export default AddEventPopup;

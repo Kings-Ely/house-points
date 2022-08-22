@@ -1,4 +1,5 @@
 'use strict';
+import { registerComponent } from "../dom.js";
 import * as core from '../main.js';
 
 /**
@@ -24,7 +25,7 @@ import * as core from '../main.js';
  *     dateEditable: boolean
  * }} options
  */
-const HousePoint = core.registerComponent(
+export default registerComponent('HousePoint',
     (
         $el,
         id,
@@ -359,7 +360,4 @@ const HousePoint = core.registerComponent(
 	`;
 
         core.reloadDOM();
-    }
-);
-
-export default HousePoint;
+});

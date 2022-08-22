@@ -1,4 +1,5 @@
 'use strict';
+import { registerComponent } from "../dom.js";
 import * as core from '../main.js';
 
 /**
@@ -20,7 +21,7 @@ import * as core from '../main.js';
 
  * @returns {{ reload: () => void }}
  */
-const SelectableList = core.registerComponent(
+export default registerComponent('SelectableList',
     (
         $el,
         id,
@@ -178,5 +179,3 @@ const SelectableList = core.registerComponent(
         return { reload };
     }
 );
-
-export default SelectableList;

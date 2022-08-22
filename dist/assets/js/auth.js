@@ -9,19 +9,18 @@ import { api } from './backendAPI.js';
  * @returns {Promise<void>}
  */
 export async function handleUserInfo(info) {
-    state.isSignedIn = info.ok;
+    state.isSignedIn = info?.ok;
 
     if (!state.isSignedIn) {
-        info = {};
+        info = null;
     }
     state.userInfoJSON = info;
     state.userInfoIsLoaded = true;
 
     core.reservoir.set({
-        signedIn: state.isSignedIn,
         user: state.userInfoJSON,
-        admin: !!state.userInfoJSON.admin
-    });
+        signedIn: state.isSignedIn
+    }, true);
 
     for (const cb of state.userInfoCallbacks) {
         cb(info);

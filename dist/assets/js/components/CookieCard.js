@@ -1,10 +1,11 @@
 'use strict';
+import { registerComponent } from "../dom.js";
 import * as core from '../main.js';
 
 /**
  * The popup showing 'allow' and 'reject' options for cookies
  */
-const CookieCard = core.registerComponent($el => {
+export default registerComponent('CookieCard', $el => {
     /**
      * The user has either allowed or not allowed cookies
      * @param {boolean} value
@@ -43,5 +44,3 @@ const CookieCard = core.registerComponent($el => {
 		</button>
 	`;
 });
-
-export default CookieCard;

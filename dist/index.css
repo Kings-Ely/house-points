@@ -45,6 +45,15 @@ input {
     padding: 0;
 }
 
+.label-container {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    width: 50%;
+    min-width: 300px;
+    max-width: 500px;
+}
+
 @media only screen and (max-aspect-ratio: 6/5) {
     input {
         font-size: 1.5em;

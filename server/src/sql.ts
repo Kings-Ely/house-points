@@ -24,7 +24,8 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
         password: process.env.DB_PASS,
         database: process.env.DB,
         port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
-        ...(dbConfig ?? {})
+        ...(dbConfig ?? {}),
+        decimalNumbers: true
     };
 
     let con: mysql.Connection;

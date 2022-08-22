@@ -32,7 +32,7 @@ $email.addEventListener('keydown', async evt => {
 });
 
 document.getElementById('forgotten-password').onclick = async () => {
-    const email = $email.value;
+    const email = core.reservoir.get('email');
     if (email.length < 4) {
         core.showError`You need to enter a valid email first!`;
         return;
@@ -52,24 +52,22 @@ document.getElementById('forgotten-password').onclick = async () => {
 
     FullPagePopup(
         document.body,
-        `
-		An email has been sent to '${email}' with a link to reset your password.
-	`
+        `An email has been sent to '${core.escapeHTML(email)}' with a link to reset your password.`
     );
 };
 
 async function doLogIn() {
-    const email = $email.value;
+    const email = core.reservoir.get('email');
 
     if (!email) {
-        core.showError`You need to enter a valid email first!`;
+        await core.showError(`You need to enter a valid email first!`);
         return;
     }
 
-    const password = $password.value;
+    const password = core.reservoir.get('password');
 
     if (!password) {
-        core.showError`You need to enter a password first!`;
+        await core.showError(`You need to enter a password first!`);
         return;
     }
 

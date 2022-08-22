@@ -1,21 +1,14 @@
 'use strict';
+import { registerComponent } from "../dom.js";
 import * as core from '../main.js';
 import StudentEmailInputWithIntellisense from './StudentEmailInputWithIntellisense.js';
 import HousePoint from './HousePoint.js';
-
-/** @typedef {{
- * 		id: string,
- * 		time: number,
- * 		name: string,
- * 		description: string,
- * 		userEmail: string
- * }} Event */
 
 /**
  * @param {El} $el
  * @param {() => Event} getEvent getter for event data
  */
-const EventCard = core.registerComponent(($el, id, getEvent) => {
+export default registerComponent('EventCard', ($el, id, getEvent) => {
     /** @type Event */
     let event;
 
@@ -187,5 +180,3 @@ const EventCard = core.registerComponent(($el, id, getEvent) => {
 
     hardReload().then();
 });
-
-export default EventCard;
