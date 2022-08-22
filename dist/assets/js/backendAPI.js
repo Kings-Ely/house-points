@@ -55,7 +55,7 @@ export function stopSpinner(id) {
  * @param {any} [body=null]
  * @returns {Promise<Record<string, any>>}
  */
-export async function rawAPI(path, body) {
+export async function rawAPI(path, body={}) {
     return await new Promise(async resolve => {
         let res;
 
