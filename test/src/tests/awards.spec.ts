@@ -54,7 +54,7 @@ Test.test('Awards | Creating, getting and deleting', async api => {
         return `9: ${JSON.stringify(res)}`;
     }
 
-    await api(`delete/awardTypes`, { awardTypeId });
+    await api(`delete/award-types`, { awardTypeId });
     await api(`delete/users`, { userId });
 
     return true;
