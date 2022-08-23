@@ -25,7 +25,7 @@
             >
                 @
             </span>
-            <span if="user.admin">(Admin)</span>
+            <span hidden if="user.admin">(Admin)</span>
         </p>
     </section>
 
@@ -44,13 +44,13 @@
             href="../admin/"
             class="big-link"
             svg="admin.svg"
-            if="user.admin"
+            hidden if="user.admin"
         >Admin Dashboard</a>
     </section>
 
     <section id="info">Loading...</section>
 
-    <section id="submit-hp-request">
+    <section hidden if="(user.email === theUser.email || user.admin) && theUser.student">
         <label>
             <textarea
                 id="hp-reason"

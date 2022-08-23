@@ -84,7 +84,7 @@ class Logger {
     /**
      * Logs a warning
      */
-    warning(msg: string | TemplateStringsArray, ...params: any[]) {
+    warn(msg: string | TemplateStringsArray, ...params: any[]) {
         this.output(LogLvl.WARN, c.yellow`WARN`, tagFuncParamsToString(msg, params));
     }
 

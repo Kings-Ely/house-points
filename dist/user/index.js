@@ -26,15 +26,7 @@ window.eventPopup = core.eventPopup;
     me = (await core.userInfo())['email'] === core.GETParam('email');
 
     if (theUsersInfo.student) {
-        if (me || (await core.isAdmin())) {
-            core.show('#submit-hp-request');
-        }
-
         await reloadHousePoints();
-    } else {
-        if (!theUsersInfo['admin']) {
-            core.hide('#hps');
-        }
     }
 
     if (!theUsersInfo.admin) {

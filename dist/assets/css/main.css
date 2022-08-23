@@ -1,5 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300&family=Quicksand&family=Raleway:wght@200&family=Roboto:wght@300&family=Saira:wght@200&display=swap');
-@import "reservoir.css";
 
 /* --- GENERAL --- */
 
@@ -47,6 +46,12 @@ body:not([data-theme]) {
 
 * {
     transition: 200ms;
+}
+
+/** Reservoir */
+
+[foreach] {
+    visibility: collapse;
 }
 
 /* --- STRUCTURE --- */

@@ -40,7 +40,7 @@ function getBody(req: IncomingMessage): Promise<Record<any, any> | string> {
             try {
                 body = JSON.parse(data);
             } catch (E) {
-                log.warning`Error parsing JSON data from URL ${req.url} with JSON ${data}: ${E}`;
+                log.warn`Error parsing JSON data from URL ${req.url} with JSON ${data}: ${E}`;
                 resolve('Cannot parse body');
                 return;
             }
@@ -80,7 +80,7 @@ export default async function (
     const handler = routes[path || ''];
 
     if (!path || !(path in routes) || !handler) {
-        log.warning`404: ${req.method} '${path}'`;
+        log.warn`404: ${req.method} '${path}'`;
         res.writeHead(404);
         res.end(
             JSON.stringify({
@@ -172,10 +172,12 @@ export default async function (
 
     const strResponse = JSON.stringify(apiRes);
 
+    res.setHeader('Handle-Time', `${(now() - start).toPrecision(2)}ms`);
     res.writeHead(apiRes.status);
-    res.end(strResponse);
+    
+    await new Promise<void>(r => res.end(strResponse, 'utf8', r));
 
     let time = now() - start;
 
-    log.verbose`[${req.method}] ${time.toPrecision(2)}ms '${req.url}' => '${strResponse}'`;
+    log.warn`[${req.method}] ${time.toPrecision(2)}ms '${req.url}' => '${strResponse}'`;
 }

@@ -37,7 +37,7 @@ async function mail({
     }>;
 }): Promise<true | string> {
     if (process.env.ALLOW_MAIL !== '1') {
-        log.warning`Cannot send emails because ALLOW_MAIL is not set`;
+        log.warn`Cannot send emails because ALLOW_MAIL is not set`;
         log.log`Tried to send email to ${to} '${subject}' with html: ${limitStr(html)}`;
         return true;
     }
@@ -82,7 +82,7 @@ async function mail({
                 }
                 if (!info['accepted'].includes(to)) {
                     reject(`Email failed to send`);
-                    log.warning`Sent email to ${to} failed: ${JSON.stringify(info)}`;
+                    log.warn`Sent email to ${to} failed: ${JSON.stringify(info)}`;
                     return;
                 }
                 log.log`Sent email to ${to}`;

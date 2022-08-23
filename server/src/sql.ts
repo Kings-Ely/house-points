@@ -49,7 +49,7 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
 
         con.on('error', (err: any) => {
             if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-                log.warning`Lost connection to SQL server`;
+                log.warn`Lost connection to SQL server`;
                 handleDisconnect();
             } else {
                 throw err;

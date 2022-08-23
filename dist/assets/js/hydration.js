@@ -183,11 +183,11 @@ class Reservoir {
         const value = this.execute(key, $el);
         
         if (!!value) {
-            $el.style.visibility = 'visible';
-            $el.setAttribute('aria-hidden', 'false');
+            $el.removeAttribute('aria-hidden');
+            $el.removeAttribute('hidden');
         } else {
-            $el.style.visibility = 'collapse';
             $el.setAttribute('aria-hidden', 'true');
+            $el.setAttribute('hidden', '1');
         }
         return !!value;
     }

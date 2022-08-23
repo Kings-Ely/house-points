@@ -1,7 +1,7 @@
 <?php
 
 const PORT = 4464;
-const HOST = 'https://localhost';
+const HOST = 'https://127.0.0.1';
 
 /* For debugging:
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);

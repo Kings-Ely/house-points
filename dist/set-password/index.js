@@ -27,13 +27,7 @@ const $password = document.getElementById('password'),
     }
     
     core.reservoir.set('theUser', user);
-
-    showChangePassword(user);
 })();
-
-function showChangePassword() {
-    document.getElementById('content').style.display = 'block';
-}
 
 $submit.addEventListener('click', async () => {
     const s = decodeURIComponent(core.GETParam('s'));
