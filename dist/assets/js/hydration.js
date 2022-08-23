@@ -184,12 +184,36 @@ class Reservoir {
         $el.setAttribute(attrName.split('.', 2)[1], value);
     }
     
+    hydrateFor ($el) {
+        const key = $el.getAttribute('pump-for');
+        
+        let dry = $el.getAttribute('pump-for-dry') ?? $el.innerHTML;
+        if (!$el.hasAttribute('pump-for-dry')) {
+            $el.setAttribute('pump-for-dry', dry);
+        }
+        
+        const [ symbol, value ] = key.split(' in ');
+        let iterator = this.execute(value);
+        
+        let html = '';
+        
+        if (!Array.isArray(iterator)) {
+            throw 'pump-for requires an array';
+        }
+        
+        for (let item of iterator) {
+            html += dry.replace(symbol, JSON.stringify(value));
+        }
+    
+        $el.innerHTML = html;
+    }
+    
     /**
      * @param {Node} $el
      */
     hydrate($el = document) {
         if ($el?.hasAttribute?.('pump-if')) {
-            if (!reservoir.hydrateIf($el)) {
+            if (!this.hydrateIf($el)) {
                 return;
             }
         }
@@ -203,18 +227,22 @@ class Reservoir {
         }
     
         if ($el?.hasAttribute?.('bind')) {
-            reservoir.bind($el);
+            this.bind($el);
         }
         
         if ($el?.hasAttribute?.('pump')) {
-            reservoir.hydrateDry($el);
+            this.hydrateDry($el);
         }
         
         for (let attr of $el?.getAttributeNames?.() || []) {
             if (attr.startsWith('pump.')) {
-                reservoir.hydrateAttribute($el, attr);
+                this.hydrateAttribute($el, attr);
                 break;
             }
+        }
+        
+        if ($el?.hasAttribute?.('pump-for')) {
+            this.hydrateFor($el);
         }
         
         for (const child of $el?.children || []) {

@@ -13,6 +13,10 @@ window.userPopupFromId = core.userPopupFromId;
 })();
 
 async function main() {
+    
+    core.api(`get/users/wants-award`)
+        .then(({ data }) => core.reservoir.set('usersWaitingForAward', data));
+    
     const { data: pending } = await core.api(`get/house-points`, {
         status: 'Pending'
     });

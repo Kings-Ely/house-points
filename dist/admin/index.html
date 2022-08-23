@@ -61,6 +61,20 @@
         </h2>
         <div id="pending"></div>
     </section>
+    
+    <section>
+        <h2>Waiting for Award</h2>
+        <div
+            pump-if="usersWaitingForAward"
+            pump-for="data in usersWaitingForAward"
+        >
+            <div
+                pump="data.email"
+                pump.onclick="userPopupFromId(${data.id})"
+            ></div>
+            <div pump="data.awardName"></div>
+        </div>
+    </section>
 
 </main>
 <footer></footer>
