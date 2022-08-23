@@ -36,12 +36,12 @@ export const flags = commandLineArgs([
 ]);
 
 /**
- * Handlers for the server
+ * Handlers for the api routes
  */
 const handlers: Record<string, Handler> = {};
 
 /**
- * Queries the database
+ * Queries the database. Must check if query is available before calling.
  */
 export let query: queryFunc | null;
 
@@ -86,7 +86,7 @@ function startServer() {
 
     let server: http.Server | https.Server;
 
-    function handle(req: IncomingMessage, res: ServerResponse) {
+    async function handle(req: IncomingMessage, res: ServerResponse) {
         if (!query) {
             log.error`No query function available`;
             res.statusCode = 503;
@@ -97,7 +97,7 @@ function startServer() {
                 })
             );
         }
-        requestHandler(req, res, query, handlers);
+        await requestHandler(req, res, query, handlers);
     }
 
     if (process.env.PROD !== '1') {

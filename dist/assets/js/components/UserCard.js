@@ -142,7 +142,7 @@ export default registerComponent('UserCard', ($el, id, getUser) => {
         }
         user = newUser;
         await render();
-        core.reloadDOM();
+        core.reloadDOM(userCard);
     }
 
     hardReload().then();

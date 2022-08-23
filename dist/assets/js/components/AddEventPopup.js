@@ -98,7 +98,7 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
         }
 
         $addEventAddStudentsHTML.innerHTML = html;
-        core.reloadDOM();
+        core.reloadDOM($addEventAddStudentsHTML);
     };
 
     const hide = FullPagePopup(
@@ -150,8 +150,7 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
 				Create Event
 			</button>
 		</div>
-	`
-    );
+	`);
 
     document.getElementById(`add-event-submit`).onclick = async () => {
         if ($nameInp.value.length < 3) {

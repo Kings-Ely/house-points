@@ -179,7 +179,7 @@ class Reservoir {
     }
     
     #hydrateIf($el) {
-        const key = $el.getAttribute('pump-if');
+        const key = $el.getAttribute('if');
         const value = this.execute(key, $el);
         
         if (!!value) {
@@ -222,11 +222,11 @@ class Reservoir {
     }
     
     #hydrateFor ($el) {
-        const key = $el.getAttribute('pump-for');
+        const key = $el.getAttribute('foreach');
         
-        let dry = $el.getAttribute('pump-for-dry') ?? $el.innerHTML;
-        if (!$el.hasAttribute('pump-for-dry')) {
-            $el.setAttribute('pump-for-dry', dry);
+        let dry = $el.getAttribute('foreach-dry') ?? $el.innerHTML;
+        if (!$el.hasAttribute('foreach-dry')) {
+            $el.setAttribute('foreach-dry', dry);
         }
         
         const [ symbol, value ] = key.split(' in ');
@@ -235,7 +235,8 @@ class Reservoir {
         if (iterator === null) return;
         
         if (!Array.isArray(iterator)) {
-            throw 'pump-for requires an array';
+            console.error(`foreach '${key}' requires an array: ${iterator} is not an array`);
+            return;
         }
         
         const eachAttrs = [];
@@ -270,7 +271,7 @@ class Reservoir {
      * @param {HTMLElement|Document|Body} $el
      */
     hydrate($el = document) {
-        if ($el?.hasAttribute?.('pump-if')) {
+        if ($el?.hasAttribute?.('if')) {
             if (!this.#hydrateIf($el)) {
                 return;
             }
@@ -299,8 +300,12 @@ class Reservoir {
             }
         }
         
-        if ($el?.hasAttribute?.('pump-for')) {
+        if ($el?.hasAttribute?.('foreach')) {
             this.#hydrateFor($el);
+        }
+    
+        if ($el?.hasAttribute?.('args') && 'reloadComponent' in $el) {
+            //$el.reloadComponent();
         }
         
         for (const child of $el?.children || []) {

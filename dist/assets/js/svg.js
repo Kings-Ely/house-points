@@ -3,9 +3,14 @@ import * as core from './main.js';
 /**
  * Looks at all DOM elements with an 'svg' attribute and loads the SVG
  * file into that element.
+ * @param {HTMLElement|Document} [$el=document]
  */
-export function loadSVGs() {
-    const allInBody = document.querySelectorAll('[svg]');
+export function loadSVGs($el=document) {
+    if (!('querySelectorAll' in $el)) {
+        console.error('loadSVGs: $el must be a document or HTMLElement: ', $el);
+        return;
+    }
+    const allInBody = $el.querySelectorAll('[svg]');
     for (const element of allInBody) {
         // don't await, because we don't want to block the page load
         loadSVG(element).then();

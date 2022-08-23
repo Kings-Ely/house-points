@@ -1,6 +1,6 @@
-import * as core from './main.js';
-import { loadSVGs } from './svg.js';
-import reservoir from './hydration.js';
+import * as core from "./main.js";
+import { loadSVGs } from "./svg.js";
+import reservoir from "./hydration.js";
 import { getComponentId } from "./componentIdx.js";
 
 /**
@@ -181,11 +181,11 @@ export async function loadNav() {
 /**
  * Traverses the DOM and runs some checks and stuff
  * Actually only adds new SVGs at the moment but might do more later.
- * @param {Node} $from
+ * @param {HTMLElement|Document} $from
  */
 export function reloadDOM($from=document) {
     reservoir.hydrate($from);
-    loadSVGs();
+    loadSVGs($from);
 }
 
 export async function domIsLoaded() {
@@ -251,11 +251,8 @@ export function registerComponent(name, cb) {
         if (!($el instanceof HTMLElement)) {
             throw new Error('Trying to insert component into not-HTMLElement');
         }
-        let res = cb($el, getComponentId(), ...args);
-        for (let child of $el.childNodes) {
-            core.reloadDOM(child);
-        }
-        return res;
+        // don't reload children as this is up to the component to deal with
+        return cb($el, getComponentId(), ...args);
     };
     
     class Component extends HTMLElement {
@@ -269,27 +266,21 @@ export function registerComponent(name, cb) {
         }
         
         reloadComponent () {
-            let args;
-            try {
-                args = JSON.parse(this.getAttribute('args'));
-            } catch (e) {
-                args = [];
-            }
-            
-            if (!args) args = [];
+            const args = core.reservoir.execute((this.getAttribute('args') || ''), this);
+            if (args === null) return;
     
             if (!Array.isArray(args)) {
-                throw `args must be an array: ${args}`;
+                throw `args for '${name}' must be an array: ${JSON.stringify(args)}`;
             }
     
             addComponentToDOM(this, ...args);
         }
     }
     
+    // abide by naming requirements for custom elements
     let componentName = name
         .replace(/([a-z0–9])([A-Z])/g, "$1-$2")
         .toLowerCase();
-    
     if (!componentName.includes('-')) {
         componentName += '-';
     }
