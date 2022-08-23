@@ -100,3 +100,4 @@ async function doLogIn() {
 
     await core.navigate(newPage);
 }
+export { getComponentId } from "./assets/js/componentIdx.js";

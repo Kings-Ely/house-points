@@ -1,8 +1,7 @@
 import * as core from './main.js';
 import { loadSVGs } from './svg.js';
 import reservoir from './hydration.js';
-
-export const COMPONENT_BUILDERS = {};
+import { getComponentId } from "./componentIdx.js";
 
 /**
  * Kind of ew way of doing it. But it works.
@@ -245,17 +244,57 @@ export function getInverseTheme() {
  * @returns {Component}
  */
 export function registerComponent(name, cb) {
-    const component = ($el, ...args) => {
+    const addComponentToDOM = ($el, ...args) => {
         if (typeof $el === 'string') {
             $el = document.querySelector($el);
         }
         if (!($el instanceof HTMLElement)) {
             throw new Error('Trying to insert component into not-HTMLElement');
         }
-        return cb($el, core.state.currentComponentId++, ...args);
+        let res = cb($el, getComponentId(), ...args);
+        for (let child of $el.childNodes) {
+            core.reloadDOM(child);
+        }
+        return res;
     };
     
-    COMPONENT_BUILDERS[name] = component;
+    class Component extends HTMLElement {
+        constructor() {
+            super();
+            this.style.display = 'contents';
+        }
+        
+        connectedCallback() {
+            this.reloadComponent();
+        }
+        
+        reloadComponent () {
+            let args;
+            try {
+                args = JSON.parse(this.getAttribute('args'));
+            } catch (e) {
+                args = [];
+            }
+            
+            if (!args) args = [];
     
-    return component;
+            if (!Array.isArray(args)) {
+                throw `args must be an array: ${args}`;
+            }
+    
+            addComponentToDOM(this, ...args);
+        }
+    }
+    
+    let componentName = name
+        .replace(/([a-z0–9])([A-Z])/g, "$1-$2")
+        .toLowerCase();
+    
+    if (!componentName.includes('-')) {
+        componentName += '-';
+    }
+    
+    customElements.define(componentName, Component);
+    
+    return addComponentToDOM;
 }

@@ -1,7 +1,23 @@
-import { escapeHTML } from './main.js';
+import { escapeHTML } from "./main.js";
 
 // for debugging
 window.reservoirErrors = [];
+
+/**
+ *
+ * @param {HTMLElement} $el
+ * @param {string} start
+ * @returns {string[]}
+ */
+function attrsStartWith ($el, start) {
+    const result = [];
+    for (let attr of $el.attributes) {
+        if (attr.name.startsWith(start)) {
+            result.push(attr.name);
+        }
+    }
+    return result;
+}
 
 class Reservoir {
     #data;
@@ -93,10 +109,25 @@ class Reservoir {
         return current;
     }
     
-    execute(key) {
+    /**
+     * @param {string} key
+     * @param {HTMLElement|Document|Body} $el
+     * @returns {*}
+     */
+    execute(key, $el) {
         const parameters = {
             ...this.#data,
         }
+        
+        let parent = $el;
+        while (parent) {
+            for (let attr of attrsStartWith(parent, 'pour.')) {
+                const key = attr.split('.', 2)[1];
+                parameters[key] = JSON.parse(parent.getAttribute(attr));
+            }
+            parent = parent.parentElement;
+        }
+        
         const envVarNames = Object.keys(parameters);
         const envVarValues = Object.keys(parameters).map(k => parameters[k]);
         const thisParam = this;
@@ -110,8 +141,9 @@ class Reservoir {
             if (e instanceof ReferenceError || e instanceof TypeError) {
                 reservoirErrors.push([key, e]);
             } else {
-                console.error(`Error executing ${key}: ${e}`);
+                console.error(`Error executing '${key}': ${e}`);
             }
+            return null;
         }
     }
 
@@ -119,11 +151,11 @@ class Reservoir {
         return this.get(key) !== undefined;
     }
     
-    hydrateDry($el) {
+    #hydrateDry($el) {
         const key = $el.getAttribute('pump');
         const to = $el.getAttribute('pump-to');
         let dry = $el.getAttribute('dry') ?? $el.innerHTML;
-        let value = this.execute(key);
+        let value = this.execute(key, $el);
         
         if (!$el.hasAttribute('pump-dirty')) {
             value = escapeHTML(value);
@@ -146,9 +178,9 @@ class Reservoir {
         $el.innerHTML = html;
     }
     
-    hydrateIf($el) {
+    #hydrateIf($el) {
         const key = $el.getAttribute('pump-if');
-        const value = this.execute(key);
+        const value = this.execute(key, $el);
         
         if (!!value) {
             $el.style.visibility = 'visible';
@@ -160,7 +192,7 @@ class Reservoir {
         return !!value;
     }
     
-    bind($el) {
+    #bind($el) {
         if (!($el instanceof HTMLInputElement)) {
             throw 'Cannot bind to non-input element';
         }
@@ -178,13 +210,18 @@ class Reservoir {
         reservoir.set(key, $el.value);
     }
     
-    hydrateAttribute ($el, attrName) {
+    #hydrateAttribute ($el, attrName) {
         const key = '`' + $el.getAttribute(attrName) + '`';
-        const value = this.execute(key);
-        $el.setAttribute(attrName.split('.', 2)[1], value);
+        let value = this.execute(key, $el);
+        const attr = attrName.split('.', 2)[1]
+        $el.setAttribute(attr, value);
+        
+        if (attr === 'args' && 'reloadComponent' in $el) {
+            $el.reloadComponent();
+        }
     }
     
-    hydrateFor ($el) {
+    #hydrateFor ($el) {
         const key = $el.getAttribute('pump-for');
         
         let dry = $el.getAttribute('pump-for-dry') ?? $el.innerHTML;
@@ -193,27 +230,48 @@ class Reservoir {
         }
         
         const [ symbol, value ] = key.split(' in ');
-        let iterator = this.execute(value);
+        let iterator = this.execute(value, $el);
         
-        let html = '';
+        if (iterator === null) return;
         
         if (!Array.isArray(iterator)) {
             throw 'pump-for requires an array';
         }
         
-        for (let item of iterator) {
-            html += dry.replace(symbol, JSON.stringify(value));
+        const eachAttrs = [];
+    
+        for (let attr of $el?.getAttributeNames?.() || []) {
+            if (attr.startsWith('each.')) {
+                eachAttrs.push(attr);
+            }
         }
     
-        $el.innerHTML = html;
+        $el.innerHTML = '';
+        
+        for (let item of iterator) {
+            const itemDiv = document.createElement('div');
+            itemDiv.style.display = 'contents';
+            itemDiv.innerHTML = dry;
+            itemDiv.setAttribute(`pour.${symbol}`, JSON.stringify(item));
+            
+            for (let attr of eachAttrs) {
+                const key = '`' + $el.getAttribute(attr) + '`';
+                const value = this.execute(key, itemDiv);
+                itemDiv.setAttribute(attr.split('.', 2)[1], value);
+            }
+            
+            $el.appendChild(itemDiv);
+        }
+        
+        $el.style.visibility = 'visible';
     }
     
     /**
-     * @param {Node} $el
+     * @param {HTMLElement|Document|Body} $el
      */
     hydrate($el = document) {
         if ($el?.hasAttribute?.('pump-if')) {
-            if (!this.hydrateIf($el)) {
+            if (!this.#hydrateIf($el)) {
                 return;
             }
         }
@@ -227,22 +285,22 @@ class Reservoir {
         }
     
         if ($el?.hasAttribute?.('bind')) {
-            this.bind($el);
+            this.#bind($el);
         }
         
         if ($el?.hasAttribute?.('pump')) {
-            this.hydrateDry($el);
+            this.#hydrateDry($el);
         }
         
         for (let attr of $el?.getAttributeNames?.() || []) {
             if (attr.startsWith('pump.')) {
-                this.hydrateAttribute($el, attr);
+                this.#hydrateAttribute($el, attr);
                 break;
             }
         }
         
         if ($el?.hasAttribute?.('pump-for')) {
-            this.hydrateFor($el);
+            this.#hydrateFor($el);
         }
         
         for (const child of $el?.children || []) {

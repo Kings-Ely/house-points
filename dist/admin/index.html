@@ -65,14 +65,17 @@
     <section>
         <h2>Waiting for Award</h2>
         <div
-            pump-if="usersWaitingForAward"
             pump-for="data in usersWaitingForAward"
+            each.style="display: grid; grid-template-columns: 1fr 1fr;"
         >
-            <div
-                pump="data.email"
-                pump.onclick="userPopupFromId(${data.id})"
-            ></div>
-            <div pump="data.awardName"></div>
+            <p>
+                <email- pump.args="[${JSON.stringify(data)}]"></email->
+                wants a
+                <b pump="data.awardName"></b>
+                (<span pump="data.awardRequires"></span> required)
+                as they have <span pump="data.accepted"></span>
+            </p>
+            <button></button>
         </div>
     </section>
 

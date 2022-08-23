@@ -1,3 +1,7 @@
 [pump-if] {
     visibility: collapse;
 }
+
+[pump-for] {
+    visibility: collapse;
+}

@@ -37,7 +37,7 @@ route('get/sessions/active', async ({ query, body }) => {
             UNIX_TIMESTAMP(sessions.opened) as opened
         FROM sessions, users
         WHERE
-            sessions.user = users.id
+            sessions.userId = users.id
             AND UNIX_TIMESTAMP(sessions.opened) + sessions.expires > UNIX_TIMESTAMP()
             AND sessions.active = 1
         ORDER BY opened DESC

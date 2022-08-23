@@ -1,30 +1,9 @@
 'use strict';
-import { getSession, handleUserInfo, testApiCon, userInfo, signInAs, logout } from './auth.js';
-import { rawAPI } from './backendAPI.js';
-import { cookiePopUp } from './cookies.js';
-import {
-    domIsLoaded,
-    loadFooter,
-    loadNav,
-    reloadDOM,
-    scrollToTop,
-    showError,
-    waitForReady
-} from './dom.js';
-import reservoir from './hydration.js';
-
-export * from './auth.js';
-export * from './backendAPI.js';
-export * from './cookies.js';
-export * from './dom.js';
-export * from './svg.js';
-export * from './popups.js';
-export { reservoir };
-
 // Utility script imported by all pages
 
 // Global constants and variables
-export const API_ROOT = 'https://josephcoppin.com/school/house-points/api',
+export const
+    API_ROOT = 'https://josephcoppin.com/school/house-points/api',
     COOKIE_SESSION = 'hpnea_SessionId',
     COOKIE_ALLOW_COOKIES_KEY = 'hpnea_AllowedCookies',
     LS_THEME = 'hpnea_Theme',
@@ -53,8 +32,7 @@ export const state = {
     inlineComponentIndex: 0,
     spinnerQueue: [],
     spinnerFrameId: 0,
-    popupStack: [],
-    currentComponentId: 0,
+    popupStack: []
 };
 
 reservoir.localStorageKey = LS_RESERVOIR;
@@ -79,6 +57,29 @@ const timeUnits = {
 const relativeTimeFormat = new Intl.RelativeTimeFormat('en', {
     numeric: 'auto'
 });
+
+import './components';
+import {
+    domIsLoaded,
+    loadFooter,
+    loadNav,
+    reloadDOM,
+    scrollToTop,
+    showError,
+    waitForReady
+} from './dom.js';
+import { getSession, handleUserInfo, testApiCon, userInfo, signInAs, logout } from './auth.js';
+import { rawAPI } from './backendAPI.js';
+import { cookiePopUp } from './cookies.js';
+import reservoir from './hydration.js';
+
+export * from './auth.js';
+export * from './backendAPI.js';
+export * from './cookies.js';
+export * from './dom.js';
+export * from './svg.js';
+export * from './popups.js';
+export { reservoir };
 
 (async () => {
     // main function - don't put top-level code anywhere else
@@ -139,6 +140,7 @@ export async function init(
     }
 
     await waitForReady();
+    const start = performance.now();
 
     // load footer and nav bar
     state.$nav = document.querySelector(`nav`);
@@ -156,6 +158,8 @@ export async function init(
     reloadDOM();
 
     scrollToTop();
+    
+    console.log(`init took ${performance.now() - start}ms`);
 }
 
 /**
