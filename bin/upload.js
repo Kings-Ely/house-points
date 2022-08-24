@@ -1,4 +1,5 @@
 #!/usr/bin/env zx
+
 import { $ } from 'zx';
 import now from 'performance-now';
 import c from 'chalk';
@@ -36,11 +37,6 @@ async function uploadFrontend() {
     }
 }
 
-async function buildBackend() {
-    console.log('Building backend...');
-    await $`cd server; webpack`;
-}
-
 async function uploadBackend() {
     console.log('Uploading backend...');
 
@@ -63,8 +59,7 @@ async function uploadBackend() {
 
 (async () => {
     const start = now();
-
-    await buildBackend();
+    
     await uploadFrontend();
     await uploadBackend();
 

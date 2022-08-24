@@ -97,7 +97,7 @@ export async function deploy(): Promise<void> {
     return await new Promise<void>((resolve, reject) => {
         let invoked = false;
 
-        let process = childProcess.fork('./build/index.js');
+        let process = childProcess.fork('./bin/upload.js');
 
         // listen for errors as they may prevent the exit event from firing
         process.on('error', err => {
@@ -131,19 +131,19 @@ export async function deploy(): Promise<void> {
 
     const testRes = await Test.testAll(api, flags);
     console.log(testRes.str());
-
-    if (testRes.failed === 0 && flags.deploy) {
-        console.log('All tests passed, Deploying...');
-        deploy().then(() => {
-            console.log(c.green('Finished in ' + timeSinceStart() + 'ms'));
-        });
-    }
-
+    
     // stop the server process by sending it a 'kill signal'
     const killServerRes = await api(`delete/server`);
     if (killServerRes.ok) {
         console.log(c.green(`Server Killed, finished testing in ${timeSinceStart()}ms`));
     } else {
         console.log(c.red(`Server not killed: ${JSON.stringify(killServerRes)}`));
+    }
+
+    if (testRes.failed === 0 && flags.deploy) {
+        console.log('All tests passed, Deploying...');
+        deploy().then(() => {
+            console.log(c.green('Finished in ' + timeSinceStart() + 'ms'));
+        });
     }
 })();
