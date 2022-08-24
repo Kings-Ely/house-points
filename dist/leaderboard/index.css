@@ -12,6 +12,19 @@ main {
     text-align: center;
 }
 
+.podium-student {
+    font-weight: bold;
+    color: var(--border);
+    border-radius: 10px 10px 0 0;
+    align-items: flex-start;
+    justify-content: center;
+    margin: 5px;
+    padding: 0;
+    transition: 500ms;
+    border: 3px solid var(--border);
+    border-bottom: none;
+}
+
 #podium {
     display: flex;
     justify-content: center;
@@ -21,40 +34,15 @@ main {
 }
 
 #podium > div {
-    width: 10vw;
-    border-radius: 10px 10px 0 0;
+    height: 100%;
+    width: 12vw;
     display: flex;
-    align-items: flex-start;
     justify-content: center;
-    margin: 0;
-    box-shadow: 0 -5px 6px 5px rgba(0, 0, 0, 0.1);
-    padding: 30px 10px;
-    height: 0;
-    transition: 500ms;
-}
-
-#podium > div > div {
-    text-align: center;
-}
-
-#podium-2nd {
-    background: silver;
-}
-
-#podium-1st {
-    background: gold;
-    box-shadow: 0 -5px 6px 5px rgba(0, 0, 0, 0.1);
-    z-index: 5;
-}
-
-#podium-3rd {
-    background: #CD7F32;
 }
 
 #show-year {
     width: 40px;
 }
-
 
 #split {
     display: grid;
@@ -71,4 +59,9 @@ main {
 .ct-chart {
     width: 100%;
     height: 100%;
+}
+
+.podium-place {
+    font-size: 30px;
+    margin: 10px;
 }

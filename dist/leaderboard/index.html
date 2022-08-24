@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="../assets/lib/chartist/chartist.min.css">
 </head>
 <body>
-<div class="spinner"><div><div></div><div></div><div></div><div></div></div></div>
 <nav></nav>
 <main>
     <div id="split">
@@ -23,7 +22,12 @@
             <div>
                 <label>
                     Only show for
-                    <select id="show-year" aria-label="what years to show">
+                    <select
+                        id="show-year"
+                        aria-label="what years to show"
+                        bind="showYears"
+                        bind-persist
+                    >
                         <option value="9,10,11,12,13">All</option>
                         <option value="9">9</option>
                         <option value="10">10</option>
@@ -34,13 +38,36 @@
                     </select>
                 </label>
             </div>
-            <div id="podium">
-                <div id="podium-2nd"></div>
-                <div id="podium-1st"></div>
-                <div id="podium-3rd"></div>
+            <div id="podium" foreach="i in [1, 0, 2]">
+                <div>
+                    <p pump="students[i].email.split('@')[0]"></p>
+                    <div
+                        class="student podium-student"
+                        pump.style="height: ${['80','60','40'][i]}%"
+                    >
+                        <p
+                            class="podium-place"
+                            pump.style="color: ${['gold','silver','#CD7F32'][i]}"
+                            pump="['1st', '2nd', '3rd'][i]"
+                        ></p>
+                        <div
+                            pump="students[i].accepted"
+                            style="font-size: 1.5em"
+                        ></div>
+                    </div>
+                </div>
             </div>
 
-            <div id="leaderboard"></div>
+            <div
+                id="leaderboard"
+                foreach="student in students.slice(3)"
+                each.hidden="!showYears.includes(parseInt(student.year))"
+            >
+                <div class="student">
+                    <email- args="student"></email->
+                    <div pump="student.accepted"></div>
+                </div>
+            </div>
         </div>
         <div>
             <div id="year-group-comparison">

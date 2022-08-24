@@ -54,6 +54,10 @@ body:not([data-theme]) {
     visibility: collapse;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 /* --- STRUCTURE --- */
 
 html, body {

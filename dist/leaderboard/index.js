@@ -1,17 +1,7 @@
 import * as core from '../assets/js/main.js';
 
-// Slightly horrible with 1st, 2nd and 3rd place on the leaderboard...
-// could do an array or something but with always exactly 3 it's a bit pointless.
-
 const $leaderboard = document.getElementById('leaderboard');
-const $podium1st = document.getElementById('podium-1st');
-const $podium2nd = document.getElementById('podium-2nd');
-const $podium3rd = document.getElementById('podium-3rd');
 const $whichYears = document.getElementById('show-year');
-
-// show all by default
-let showYears = [9, 10, 11, 12, 13];
-let leaderboardData;
 
 window.userPopup = core.userPopup;
 
@@ -21,40 +11,21 @@ window.userPopup = core.userPopup;
     const { year } = await core.userInfo();
 
     if (year) {
-        showYears = [year];
-        $whichYears.value = year.toString();
+        core.reservoir.set('showYears', [year], true);
+    } else {
+        core.reservoir.set('showYears', [9, 10, 11, 12, 13], true);
     }
-
-    await main();
+    
+    await core.api(`get/users/leaderboard`).then(({ data }) => {
+        core.reservoir.set('students', data.filter(s => {
+            return core.reservoir.get('showYears').includes(parseInt(s.year))
+        }));
+        yearGroups(data);
+    });
 })();
 
-function showStudent(student) {
-    return `
-        <div class="student">
-            <button onclick="userPopup('${student['email']}')">
-                ${core.escapeHTML(student['email'])} 
-                (Y${core.escapeHTML(student['year'])})
-            </button>
-            <div>
-                ${core.escapeHTML(student['accepted'])}
-            </div>
-        </div>
-    `;
-}
-
-function resetPodium() {
-    $podium1st.style.height = `80%`;
-    $podium2nd.style.height = `60%`;
-    $podium3rd.style.height = `40%`;
-    $podium1st.innerHTML = ``;
-    $podium2nd.innerHTML = ``;
-    $podium3rd.innerHTML = ``;
-}
 
 function leaderboard(users) {
-    users = users.filter(user => showYears.includes(parseInt(user['year'])));
-
-    resetPodium();
 
     if (users.length === 0) {
         $leaderboard.innerHTML = `
@@ -109,7 +80,7 @@ function leaderboard(users) {
     }
 }
 
-async function yearGroups(users) {
+function yearGroups(users) {
     const data = {
         series: [0, 0, 0, 0, 0],
         labels: [9, 10, 11, 12, 13]
@@ -140,19 +111,3 @@ async function yearGroups(users) {
 
     new Chartist.Pie('.ct-chart', data, options);
 }
-
-async function main(reload = true) {
-    if (reload || !leaderboardData) {
-        leaderboardData = (await core.api(`get/users/leaderboard`))['data'];
-    }
-    leaderboard(leaderboardData);
-    await yearGroups(leaderboardData);
-}
-
-$whichYears.onchange = async () => {
-    showYears = $whichYears.value
-        .split(',')
-        .filter(Boolean)
-        .map(y => parseInt(y));
-    await main(false);
-};

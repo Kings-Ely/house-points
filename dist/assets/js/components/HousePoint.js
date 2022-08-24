@@ -151,9 +151,7 @@ export default registerComponent('HousePoint',
             });
             reload();
         };
-
-
-
+        
         const dateFormattedForInp = core.formatTimeStampForInput(hp['created']);
         
         const housePointEl = document.createElement('div');
@@ -168,7 +166,7 @@ export default registerComponent('HousePoint',
             ${showDeleteButton ? '30px' : ''}
             ${showPendingOptions ? '125px' : '0'}
         `;
-    
+        
         housePointEl.innerHTML = `
 			${showEmail ? `
 				<div>
@@ -237,19 +235,15 @@ export default registerComponent('HousePoint',
 	            	
 	                ${showDate ? `
 	                   	<p data-label="${core.escapeHTML(core.getRelativeTime(submittedTime))}">
-			                ${
-                                dateEditable
-                                    ? `
+			                ${dateEditable ? `
 				                <input
 				                    type="date"
 				                    value="${dateFormattedForInp}"
 				                    onchange="_HousePoint${id}__changeDate(this.value)"
 				                >
-			                `
-                                    : `
+			                ` : `
 				                ${core.escapeHTML(new Date(submittedTime).toDateString())}
-			                `
-                            }
+			                `}
 		                </p>
 		            ` : ''}
 					<p>
@@ -299,6 +293,9 @@ export default registerComponent('HousePoint',
                 </div>
             ` : '' }
 	    `;
+        
+        $el.innerHTML = '';
+        $el.appendChild(housePointEl);
 
         core.reloadDOM(housePointEl);
 });

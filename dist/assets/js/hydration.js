@@ -179,29 +179,36 @@ class Reservoir {
     }
     
     #hydrateIf($el) {
-        const key = $el.getAttribute('if');
+        let key = $el.getAttribute('hidden-dry');
+        
+        if (!key) {
+            key = $el.getAttribute('hidden');
+            $el.setAttribute('hidden-dry', key);
+        }
+        
         const value = this.execute(key, $el);
         
-        if (!!value) {
+        if (!value) {
             $el.removeAttribute('aria-hidden');
             $el.removeAttribute('hidden');
         } else {
             $el.setAttribute('aria-hidden', 'true');
-            $el.setAttribute('hidden', '1');
+            $el.setAttribute('hidden', '');
         }
-        return !!value;
+        return !value;
     }
     
     #bind($el) {
-        if (!($el instanceof HTMLInputElement)) {
-            throw 'Cannot bind to non-input element';
+        if (!('value' in $el)) {
+            throw 'Cannot bind to element without value attribute';
         }
         
         const key = $el.getAttribute('bind');
+        const persist = $el.hasAttribute('bind-persist');
         
         if (!$el.getAttribute('bound')) {
             $el.addEventListener('change', () => {
-                reservoir.set(key, $el.value);
+                reservoir.set(key, $el.value, persist);
             });
         }
     
@@ -271,7 +278,7 @@ class Reservoir {
      * @param {HTMLElement|Document|Body} $el
      */
     hydrate($el = document) {
-        if ($el?.hasAttribute?.('if')) {
+        if ($el?.hasAttribute?.('hidden') || $el?.hasAttribute?.('hidden-dry')) {
             if (!this.#hydrateIf($el)) {
                 return;
             }
@@ -305,7 +312,7 @@ class Reservoir {
         }
     
         if ($el?.hasAttribute?.('args') && 'reloadComponent' in $el) {
-            //$el.reloadComponent();
+            $el.reloadComponent();
         }
         
         for (const child of $el?.children || []) {

@@ -61,9 +61,9 @@
         </h2>
         <div foreach="hp in pending.slice(0, 5)">
             <house-point
-                args="[hp, main, {
+                args="hp, main, {
                     admin: user.admin,
-                    showBorderBottom: hp !== pending[pending.length - 1],
+                    showBorderBottom: hp !== pending.slice(0, 5)[pending.slice(0, 5).length - 1],
                     showEmail: true,
                     showReason: true,
                     showNumPoints: true,
@@ -76,13 +76,13 @@
                     reasonEditable: false,
                     pointsEditable: true,
                     dateEditable: false
-                }]"
+                }"
             ></house-point>
         </div>
-        <div if="pending.length > 4" style="text-align: center; padding: 20px">
+        <div hidden="pending.length <= 4" style="text-align: center; padding: 20px">
             And <span pump="pending.length - 5"></span> more...
         </div>
-        <div if="pending.length < 1" style="text-align: center; padding: 20px">
+        <div hidden="pending.length > 0" style="text-align: center; padding: 20px">
             No Pending House Points
         </div>
     </section>
@@ -94,7 +94,7 @@
             each.style="display: grid; grid-template-columns: 1fr 1fr;"
         >
             <p>
-                <email- args="[data]"></email->
+                <email- args="data"></email->
                 wants a
                 <b pump="data.awardName"></b>
                 (<span pump="data.awardRequires"></span> required)
