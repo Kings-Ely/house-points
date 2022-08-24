@@ -5,7 +5,7 @@ import now from 'performance-now';
 import c from 'chalk';
 import * as fs from 'fs';
 
-$.verbose = true;
+$.verbose = false;
 
 const REMOTE_ADDRESS = 'josephcoppin@josephcoppin.com';
 const REMOTE_FRONTEND_PATH = '/public_html/school/house-points';
@@ -21,14 +21,16 @@ async function upload(localPath, remotePath, args = '') {
 async function uploadFrontend() {
     if (process.argv.includes('--no-front')) return;
 
-    console.log('Uploading frontend...');
+    console.log(c.green('Uploading frontend...'));
 
     const paths = fs.readdirSync(LOCAL_PATH);
 
     for (const path of paths) {
         // skip hidden files and directories
         if (path[0] === '.') continue;
-
+    
+        console.log(c.yellow(LOCAL_PATH + path));
+    
         if (fs.statSync(LOCAL_PATH + path).isDirectory()) {
             await upload(LOCAL_PATH + path, REMOTE_FRONTEND_PATH, "-r --exclude='*.env'");
             continue;
@@ -38,7 +40,9 @@ async function uploadFrontend() {
 }
 
 async function uploadBackend() {
-    console.log('Uploading backend...');
+    if (process.argv.includes('--no-back')) return;
+    
+    console.log(c.green('Uploading backend...'));
 
     const paths = {
         './server/index.js': '/index.js',
@@ -51,6 +55,7 @@ async function uploadBackend() {
     await Promise.all(
         Object.keys(paths).map(async path => {
             if (fs.existsSync(path)) {
+                console.log(c.yellow(path));
                 await upload(path, REMOTE_BACKEND_PATH + paths[path]);
             }
         })
