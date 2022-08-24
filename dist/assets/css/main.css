@@ -54,6 +54,11 @@ body:not([data-theme]) {
     visibility: collapse;
 }
 
+/*
+ This won't interfere with the element's display as the hidden attribute is
+ only present on elements which are either yet to be parsed, or have been parsed
+ and decided that they should be hidden.
+*/
 [hidden] {
     display: none !important;
 }

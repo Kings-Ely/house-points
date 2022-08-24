@@ -24,3 +24,11 @@ async function main() {
             core.reservoir.set('pending', data, true)
         });
 }
+
+window.giveAward = async (userId, awardTypeId) => {
+    const description = prompt('Add an optional note to the award');
+    await core.api(`create/awards`, {
+        userId, awardTypeId, description
+    });
+    await main();
+};

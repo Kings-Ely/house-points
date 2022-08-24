@@ -253,7 +253,7 @@ route('get/users/wants-award', async ({ query, body }) => {
             SELECT awards.userId, awards.awardTypeId
             FROM awards
         )
-        ORDER BY hpsRequired - points DESC
+        ORDER BY hpsRequired - points, year DESC, email
     `;
     
     // stupid thing: https://github.com/sidorares/node-mysql2/issues/935

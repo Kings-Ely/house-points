@@ -1,5 +1,5 @@
 'use strict';
-import { registerComponent } from "../dom.js";
+import { registerComponent } from '../dom.js';
 import * as core from '../main.js';
 
 /**
@@ -7,24 +7,21 @@ import * as core from '../main.js';
  * @param {User} user
  * @returns {HTMLElement} the HTMLInputElement
  */
-export default registerComponent('Email', ($el, id, user) => {
-    
+export default registerComponent('Email', ($el, id, user, { fontsize = 'inherit' } = {}) => {
     if (!user) return;
-    
+
     window[`_Email${id}__onclick`] = async () => {
         await core.userPopup(user.email);
     };
-    
+
     $el.innerHTML = `
         <button
-            data-label="View User"
+            data-label="View ${user.email.replace('"','\\"')}"
             onclick="_Email${id}__onclick()"
+            style="font-size: ${fontsize}"
         >
             ${core.escapeHTML(user.email.split('@')[0])}
-            <span style="font-size: 0.8em; color: var(--text-v-light)">
-                @${user.email.split('@')[1]}
-            </span>
-            (Y${core.escapeHTML(user.year)})
+            (${user.year ? `Y${core.escapeHTML(user.year)}` : 'Admin'})
         </button>
     `;
 });

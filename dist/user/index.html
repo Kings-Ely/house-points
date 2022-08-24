@@ -16,16 +16,8 @@
 <nav></nav>
 <main>
     <section id="name">
-        <p style="font-size: 3em">
-            <span pump="theUser.email.split('@')[0]"></span>
-            <span
-                style="color: var(--text-v-light)"
-                pump="theUser.email.split('@')[1]"
-                pump-to="end"
-            >
-                @
-            </span>
-            <span hidden="!user.admin">(Admin)</span>
+        <p style="font-size: 2em">
+            <email- args="user, { fontsize: '50px' }"></email->
         </p>
     </section>
 
@@ -50,20 +42,19 @@
 
     <section id="info">Loading...</section>
 
-    <section hidden="!((user.email === theUser.email || user.admin) && theUser.student)">
+    <section
+        hidden="!((user.email === theUser.email || user.admin) && theUser.student)">
         <label>
-            <textarea
-                id="hp-reason"
+            <textarea id="hp-reason"
                 placeholder="House Point Requests (separate multiple by new line)"
-                rows="2"
-            ></textarea>
+                rows="2"></textarea>
         </label>
         <button
             id="submit-hp"
             class="icon"
             svg="plus.svg"
             aria-label="submit house point"
-           data-label="Request House Points"
+            data-label="Request House Points"
         ></button>
     </section>
 

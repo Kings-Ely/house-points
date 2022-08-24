@@ -57,7 +57,7 @@
     <section>
         <h2>
             Pending House Points
-            (<span pump="pending.length" pump-to="replace">0</span>)
+            (<span pump="pending.length" pump-to="replace">loading...</span>)
         </h2>
         <div foreach="hp in pending.slice(0, 5)">
             <house-point
@@ -79,7 +79,7 @@
                 }"
             ></house-point>
         </div>
-        <div hidden="pending.length <= 4" style="text-align: center; padding: 20px">
+        <div hidden="pending.length < 5" style="text-align: center; padding: 20px">
             And <span pump="pending.length - 5"></span> more...
         </div>
         <div hidden="pending.length > 0" style="text-align: center; padding: 20px">
@@ -88,10 +88,19 @@
     </section>
     
     <section>
-        <h2>Waiting for Award</h2>
+        <h2>
+            Waiting for Award
+            (<span pump="usersWaitingForAward.length" pump-to="replace">loading...</span>)
+        </h2>
+        <p
+            hidden="usersWaitingForAward.length < 1"
+            style="color: var(--text-light)"
+        >
+            This list is automated list of students who are eligible for an award.
+        </p>
         <div
-            foreach="data in usersWaitingForAward"
-            each.style="display: grid; grid-template-columns: 1fr 1fr;"
+            foreach="data in usersWaitingForAward.slice(0, 5)"
+            each.style="display: grid; grid-template-columns: 1fr 1fr; font-size: 18px"
         >
             <p>
                 <email- args="data"></email->
@@ -101,11 +110,26 @@
                 as they have <span pump="data.accepted"></span>
             </p>
             <button
-            
-            ></button>
+                pump.onclick="giveAward('${data.id}', '${data.awardTypeId}')"
+                class="icon big-link"
+                style="font-size: 85%"
+                svg="accent-tick.svg"
+            >
+                <span>
+                    I have <i>actually</i> given
+                    <b pump="data.email.split('@')[0]"></b>
+                    their
+                    <b pump="data.awardName"></b>
+                </span>
+            </button>
+        </div>
+        <div hidden="usersWaitingForAward.length < 5" style="text-align: center; padding: 20px">
+            And <span pump="usersWaitingForAward.length - 5"></span> more...
+        </div>
+        <div hidden="usersWaitingForAward.length > 0" style="text-align: center; padding: 20px">
+            No-one waiting for award
         </div>
     </section>
-
 </main>
 <footer></footer>
 </body>

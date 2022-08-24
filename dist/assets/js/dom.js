@@ -270,7 +270,7 @@ export function registerComponent(name, cb) {
             rawArgs = '[' + rawArgs + ']';
             
             const args = core.reservoir.execute(rawArgs, this);
-            if (args === null) return;
+            if (args === core.reservoir.executeError) return;
     
             if (!Array.isArray(args)) {
                 throw `args for '${name}' must be an array: ${JSON.stringify(args)}`;
