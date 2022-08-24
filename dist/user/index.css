@@ -7,7 +7,7 @@
     border-bottom-width: 1px;
     background: none;
     width: 50%;
-    font-size: 20px
+    font-size: 20px;
 }
 
 #hps {
@@ -31,8 +31,4 @@
 .evt-link {
     font-size: 1.2em;
     width: fit-content;
-}
-
-#submit-hp-request {
-    display: none;
 }

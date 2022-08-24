@@ -3,6 +3,8 @@ import { escapeHTML } from "./main.js";
 // for debugging
 window.reservoirErrors = [];
 
+const executeError = Symbol('executeError');
+
 /**
  *
  * @param {HTMLElement} $el
@@ -143,7 +145,7 @@ class Reservoir {
             } else {
                 console.error(`Error executing '${key}': ${e}`);
             }
-            return null;
+            return executeError;
         }
     }
 
@@ -156,6 +158,7 @@ class Reservoir {
         const to = $el.getAttribute('pump-to');
         let dry = $el.getAttribute('dry') ?? $el.innerHTML;
         let value = this.execute(key, $el);
+        if (value === executeError) return;
         
         if (!$el.hasAttribute('pump-dirty')) {
             value = escapeHTML(value);
@@ -183,19 +186,21 @@ class Reservoir {
         
         if (!key) {
             key = $el.getAttribute('hidden');
+            console.log(key);
+            if (key === '') return;
             $el.setAttribute('hidden-dry', key);
         }
         
         const value = this.execute(key, $el);
         
-        if (!value) {
+        if (!value && value !== executeError) {
             $el.removeAttribute('aria-hidden');
             $el.removeAttribute('hidden');
         } else {
             $el.setAttribute('aria-hidden', 'true');
             $el.setAttribute('hidden', '');
         }
-        return !value;
+        return !value && value !== executeError;
     }
     
     #bind($el) {
@@ -220,6 +225,8 @@ class Reservoir {
     #hydrateAttribute ($el, attrName) {
         const key = '`' + $el.getAttribute(attrName) + '`';
         let value = this.execute(key, $el);
+        if (value === executeError) return;
+        
         const attr = attrName.split('.', 2)[1]
         $el.setAttribute(attr, value);
         
@@ -238,8 +245,7 @@ class Reservoir {
         
         const [ symbol, value ] = key.split(' in ');
         let iterator = this.execute(value, $el);
-        
-        if (iterator === null) return;
+        if (iterator === executeError) return;
         
         if (!Array.isArray(iterator)) {
             console.error(`foreach '${key}' requires an array: ${iterator} is not an array`);
@@ -265,6 +271,7 @@ class Reservoir {
             for (let attr of eachAttrs) {
                 const key = '`' + $el.getAttribute(attr) + '`';
                 const value = this.execute(key, itemDiv);
+                if (value === executeError) continue;
                 itemDiv.setAttribute(attr.split('.', 2)[1], value);
             }
             
