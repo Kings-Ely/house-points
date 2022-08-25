@@ -2,6 +2,6 @@
 
 let currentComponentId = 0;
 
-export function getComponentId () {
+export function getComponentId() {
     return currentComponentId++;
 }

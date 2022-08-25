@@ -1,5 +1,5 @@
 'use strict';
-import { registerComponent } from "../dom.js";
+import { registerComponent } from '../dom.js';
 import * as core from '../main.js';
 
 /**
@@ -21,7 +21,8 @@ import * as core from '../main.js';
 
  * @returns {{ reload: () => void }}
  */
-export default registerComponent('SelectableList',
+export default registerComponent(
+    'SelectableList',
     (
         $el,
         id,
@@ -36,7 +37,7 @@ export default registerComponent('SelectableList',
             itemGenerator,
             gridTemplateColsCSS = '1fr 1fr',
             selected,
-            filter = () => true
+            filter = () => true,
         }
     ) => {
         core.preloadSVGs('selected-checkbox.svg', 'unselected-checkbox.svg');

@@ -1,5 +1,5 @@
 'use strict';
-import { registerComponent } from "../dom.js";
+import { registerComponent } from '../dom.js';
 import * as core from '../main.js';
 
 /**
@@ -10,7 +10,8 @@ import * as core from '../main.js';
  * @param {() => Promise<T[]>} getData
  * @param {(item: T, inputValue: string) => boolean} filter
  */
-export default registerComponent('InputWithDropdown',
+export default registerComponent(
+    'InputWithDropdown',
     ($el, id, placeholder, getData, filter, maxDropdownItems = 10) => {
         let data;
 
@@ -51,25 +52,25 @@ export default registerComponent('InputWithDropdown',
                 $dropdown.classList.add('dropdowninp-show-dropdown');
             }
         });
-        
-        async function reloadDropDown () {
+
+        async function reloadDropDown() {
             let items = data.filter(item => filter(item, $input.value));
-    
+
             if (items.length === 0) {
                 $dropdown.classList.remove('student-email-input-show-dropdown');
                 return;
             }
-    
+
             let extra = false;
             if (items.length > maxDropdownItems) {
                 extra = items.length - maxDropdownItems > 0;
                 items = items.slice(0, maxDropdownItems);
             }
-    
+
             $dropdown.classList.add('student-email-input-show-dropdown');
-    
+
             $dropdown.innerHTML = '';
-    
+
             for (let row of items) {
                 $dropdown.innerHTML += `
                     <button
@@ -81,7 +82,7 @@ export default registerComponent('InputWithDropdown',
 			        </button>
 		        `;
             }
-    
+
             if (extra) {
                 $dropdown.innerHTML += `
 			        <p class="no-hover">

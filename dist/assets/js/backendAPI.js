@@ -55,7 +55,7 @@ export function stopSpinner(id) {
  * @param {any} [body=null]
  * @returns {Promise<Record<string, any>>}
  */
-export async function rawAPI(path, body={}) {
+export async function rawAPI(path, body = {}) {
     return await new Promise(async resolve => {
         let res;
 
@@ -72,15 +72,15 @@ export async function rawAPI(path, body={}) {
                 mode: 'cors',
                 cache: 'no-cache',
                 redirect: 'follow',
-                body: JSON.stringify(body)
+                body: JSON.stringify(body),
             }).catch(e => {
                 resolve({
-                    error: `Failed to fetch ${path}: ${e}`
+                    error: `Failed to fetch ${path}: ${e}`,
                 });
             });
         } catch (e) {
             resolve({
-                error: `Failed to fetch ${path}: ${e}`
+                error: `Failed to fetch ${path}: ${e}`,
             });
         }
 
@@ -89,7 +89,7 @@ export async function rawAPI(path, body={}) {
             asJSON = await res.json();
         } catch (e) {
             asJSON = {
-                error: 'Failed to parse response as JSON'
+                error: 'Failed to parse response as JSON',
             };
         }
 
@@ -123,7 +123,7 @@ export async function api(path, body = null) {
         mode: 'cors',
         cache: 'no-cache',
         redirect: 'follow',
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
     }).catch(async err => {
         console.error(`Error with API request (${path}): `, err);
         stopSpinner(spinnerId);

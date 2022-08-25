@@ -17,10 +17,13 @@ export async function handleUserInfo(info) {
     state.userInfoJSON = info;
     state.userInfoIsLoaded = true;
 
-    core.reservoir.set({
-        user: state.userInfoJSON,
-        signedIn: state.isSignedIn
-    }, true);
+    core.reservoir.set(
+        {
+            user: state.userInfoJSON,
+            signedIn: state.isSignedIn,
+        },
+        true
+    );
 
     for (const cb of state.userInfoCallbacks) {
         cb(info);
@@ -159,7 +162,7 @@ export async function signInAs(id, email) {
     }
 
     const { sessionId } = await api(`create/sessions/from-user-id`, {
-        userId: id
+        userId: id,
     });
 
     if (!sessionId) {

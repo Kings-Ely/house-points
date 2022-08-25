@@ -1,4 +1,5 @@
-#add-hp-code, #add-hp-reason {
+#add-hp-code,
+#add-hp-reason {
     background: none;
 }
 
@@ -9,7 +10,8 @@
     width: calc(100% - 300px);
 }
 
-#add-hp-error, #add-student-error {
+#add-hp-error,
+#add-student-error {
     text-align: center;
     color: var(--text-warning);
 }

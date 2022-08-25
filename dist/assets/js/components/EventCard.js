@@ -1,5 +1,5 @@
 'use strict';
-import { registerComponent } from "../dom.js";
+import { registerComponent } from '../dom.js';
 import * as core from '../main.js';
 import StudentEmailInputWithIntellisense from './StudentEmailInputWithIntellisense.js';
 import HousePoint from './HousePoint.js';
@@ -42,7 +42,7 @@ export default registerComponent('EventCard', ($el, id, getEvent) => {
         await core.api(`create/house-points/give`, {
             eventId: event['id'],
             userId,
-            quantity: 1
+            quantity: 1,
         });
 
         await hardReload();
@@ -51,7 +51,7 @@ export default registerComponent('EventCard', ($el, id, getEvent) => {
     window[`_EventCard${id}__changeHpQuantity`] = async (housePointId, value) => {
         await core.api(`update/house-points/quantity`, {
             housePointId,
-            quantity: value
+            quantity: value,
         });
         await hardReload();
     };
@@ -59,7 +59,7 @@ export default registerComponent('EventCard', ($el, id, getEvent) => {
     window[`_EventCard${id}__changeName`] = async value => {
         await core.api(`update/events/name`, {
             eventId: event.id,
-            name: value
+            name: value,
         });
         await hardReload();
     };
@@ -67,7 +67,7 @@ export default registerComponent('EventCard', ($el, id, getEvent) => {
     window[`_HousePoint${id}__changeTime`] = async value => {
         await core.api(`update/events/time`, {
             eventId: event.id,
-            time: new Date(value).getTime() / 1000 + (60 * 60) + 1
+            time: new Date(value).getTime() / 1000 + 60 * 60 + 1,
         });
         await hardReload();
     };
@@ -89,19 +89,24 @@ export default registerComponent('EventCard', ($el, id, getEvent) => {
 							onchange="_EventCard${id}__changeName(this.value)"
 							class="editable-text event-title-editable"
 						>
-					` : `
+					`
+                            : `
 						${core.escapeHTML(event.name)}
-					`}
+					`
+                    }
 				</h1>
 				<p data-label="${ago}">
-					${admin
+					${
+                        admin
                             ? `
 		                <input
 		                    type="date"
 		                    value="${core.formatTimeStampForInput(event.time)}"
 		                    onchange="_HousePoint${id}__changeTime(this.value)"
 		                >
-					` : core.escapeHTML(date)}
+					`
+                            : core.escapeHTML(date)
+                    }
 				</p>
 				<p style="font-size: 1.2em">
 					${core.escapeHTML(event.description)}
@@ -110,28 +115,31 @@ export default registerComponent('EventCard', ($el, id, getEvent) => {
 					<h2>
 						${core.escapeHTML(event['housePointCount'])} House Points Awarded
 					</h2>
-					${event['housePoints'].map(point =>
-                        core.inlineComponent(HousePoint, point, hardReload, {
-                            admin,
-                            showBorderBottom:
-                                point === event['housePoints'][event['housePoints'].length - 1],
-                            showEmail: true,
-                            showReason: true,
-                            allowEventReason: false,
-                            showNumPoints: true,
-                            showDate: false,
-                            showStatusHint: false,
-                            showStatusIcon: true,
-                            showDeleteButton: true,
-                            showPendingOptions: false,
-                            reasonEditable: true,
-                            pointsEditable: true,
-                            dateEditable: false
-                        })
-                    )
-                    .join('')}
+					${event['housePoints']
+                        .map(point =>
+                            core.inlineComponent(HousePoint, point, hardReload, {
+                                admin,
+                                showBorderBottom:
+                                    point === event['housePoints'][event['housePoints'].length - 1],
+                                showEmail: true,
+                                showReason: true,
+                                allowEventReason: false,
+                                showNumPoints: true,
+                                showDate: false,
+                                showStatusHint: false,
+                                showStatusIcon: true,
+                                showDeleteButton: true,
+                                showPendingOptions: false,
+                                reasonEditable: true,
+                                pointsEditable: true,
+                                dateEditable: false,
+                            })
+                        )
+                        .join('')}
 					
-					${admin ? `
+					${
+                        admin
+                            ? `
 						<div style="margin: 20px 0">
 							 <span class="add-student-to-event"></span>
 							 <button
@@ -143,7 +151,9 @@ export default registerComponent('EventCard', ($el, id, getEvent) => {
 								style="border: none"
 							 ></button>
 						<div>
-					` : ''}
+					`
+                            : ''
+                    }
 				</div>
 			</div>
 		`;

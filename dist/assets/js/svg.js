@@ -5,7 +5,7 @@ import * as core from './main.js';
  * file into that element.
  * @param {HTMLElement|Document} [$el=document]
  */
-export function loadSVGs($el=document) {
+export function loadSVGs($el = document) {
     if (!('querySelectorAll' in $el)) {
         console.error('loadSVGs: $el must be a document or HTMLElement: ', $el);
         return;
@@ -41,7 +41,7 @@ export function preloadSVGs(...uris) {
 export async function loadSVG($el) {
     // allow modules to finish loading... not a very nice solution :P
     await core.sleep(0);
-    
+
     // if the SVG has already been loaded then skip
     if ($el.hasAttribute('svg-loaded')) {
         return;

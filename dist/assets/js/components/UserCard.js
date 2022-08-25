@@ -1,5 +1,5 @@
 'use strict';
-import { registerComponent } from "../dom.js";
+import { registerComponent } from '../dom.js';
 import * as core from '../main.js';
 import HousePoint from './HousePoint.js';
 
@@ -25,14 +25,18 @@ export default registerComponent('UserCard', ($el, id, getUser) => {
 
         userCard.innerHTML = `
 			<h2>
-				${admin ? `
+				${
+                    admin
+                        ? `
 					<button 
 						class="icon medium"
 						svg="account.svg"
 						onclick="_UserCard${id}__signInAs('${user.id}', '${user.email}')"
 						data-label="Sign in as"
 					></button>
-				` : ''}
+				`
+                        : ''
+                }
 				<a href="${core.ROOT_PATH}/user/?email=${user.email}">
 					${core.escapeHTML(user.email)}
 				</a>
@@ -43,7 +47,8 @@ export default registerComponent('UserCard', ($el, id, getUser) => {
 				</h3>
 				<p>(${core.escapeHTML(user.pending)} pending, ${core.escapeHTML(user.rejected)} rejected)</p>
 				<div class="user-card-housepoints">
-					${user['housePoints'].map((point, i) =>
+					${user['housePoints']
+                        .map((point, i) =>
                             core.inlineComponent(
                                 HousePoint,
                                 point,
@@ -65,13 +70,15 @@ export default registerComponent('UserCard', ($el, id, getUser) => {
                                     showPendingOptions: true,
                                     reasonEditable: true,
                                     pointsEditable: true,
-                                    dateEditable: false
+                                    dateEditable: false,
                                 }
                             )
                         )
                         .join('')}
 					
-					${admin ? `
+					${
+                        admin
+                            ? `
 						<div class="add-hp">
 							<input
 								placeholder="New house point description"
@@ -91,7 +98,9 @@ export default registerComponent('UserCard', ($el, id, getUser) => {
 								class="icon small new-hp-create"
 							></button>
 						</div>
-					` : ''}
+					`
+                            : ''
+                    }
 				</div>
 			</div>
 		`;
@@ -118,7 +127,7 @@ export default registerComponent('UserCard', ($el, id, getUser) => {
                 await core.api(`create/house-points/give`, {
                     userId: user.id,
                     quantity,
-                    description
+                    description,
                 });
                 await hardReload();
             });

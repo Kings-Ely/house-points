@@ -1,6 +1,6 @@
 'use strict';
 import * as core from '../main.js';
-import { registerComponent } from "../dom.js";
+import { registerComponent } from '../dom.js';
 import StudentEmailInputWithIntellisense from './StudentEmailInputWithIntellisense.js';
 import FullPagePopup from './FullPagePopup.js';
 
@@ -63,7 +63,7 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
         }
 
         const { data } = await core.api(`get/users/batch-info`, {
-            userIds: Object.keys(studentsInEvent)
+            userIds: Object.keys(studentsInEvent),
         });
 
         let html = '';
@@ -148,7 +148,8 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
 				Create Event
 			</button>
 		</div>
-	`);
+	`
+    );
 
     document.getElementById(`add-event-submit`).onclick = async () => {
         if ($nameInp.value.length < 3) {
@@ -179,7 +180,7 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
         }
 
         // offset by an hour
-        const time = new Date($dateInp.value).getTime() + (60 * 60) + 1;
+        const time = new Date($dateInp.value).getTime() + 60 * 60 + 1;
 
         // event before the year 2000 is not allowed
         if (time <= 946684800) {
@@ -190,7 +191,7 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
         const { id: eventId } = await core.api(`create/events`, {
             name: $nameInp.value,
             time,
-            description: $descInp.value
+            description: $descInp.value,
         });
 
         $nameInp.value = '';
@@ -201,7 +202,7 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
                 await core.api(`create/house-points/give`, {
                     eventId,
                     userId,
-                    quantity: studentsInEvent[userId]
+                    quantity: studentsInEvent[userId],
                 });
             })
         );

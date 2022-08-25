@@ -2,8 +2,7 @@
 // Utility script imported by all pages
 
 // Global constants and variables
-export const
-    API_ROOT = 'https://josephcoppin.com/school/house-points/api',
+export const API_ROOT = 'https://josephcoppin.com/school/house-points/api',
     COOKIE_SESSION = 'hpnea_SessionId',
     COOKIE_ALLOW_COOKIES_KEY = 'hpnea_AllowedCookies',
     LS_THEME = 'hpnea_Theme',
@@ -32,7 +31,7 @@ export const state = {
     inlineComponentIndex: 0,
     spinnerQueue: [],
     spinnerFrameId: 0,
-    popupStack: []
+    popupStack: [],
 };
 
 reservoir.localStorageKey = LS_RESERVOIR;
@@ -50,12 +49,12 @@ const timeUnits = {
     day: 24 * 60 * 60 * 1000,
     hour: 60 * 60 * 1000,
     minute: 60 * 1000,
-    second: 1000
+    second: 1000,
 };
 
 // for making relative dates
 const relativeTimeFormat = new Intl.RelativeTimeFormat('en', {
-    numeric: 'auto'
+    numeric: 'auto',
 });
 
 import './components';
@@ -66,7 +65,7 @@ import {
     reloadDOM,
     scrollToTop,
     showError,
-    waitForReady
+    waitForReady,
 } from './dom.js';
 import { getSession, handleUserInfo, testApiCon, userInfo, signInAs, logout } from './auth.js';
 import { rawAPI } from './backendAPI.js';
@@ -104,7 +103,7 @@ export async function init(
     noApiTest = false
 ) {
     const start = performance.now();
-    
+
     ROOT_PATH = rootPath;
 
     if (!noApiTest) {
@@ -114,7 +113,7 @@ export async function init(
     if (getSession()) {
         await handleUserInfo(
             await rawAPI(`get/users`, {
-                sessionId: getSession()
+                sessionId: getSession(),
             })
         );
     } else {
@@ -134,14 +133,17 @@ export async function init(
         await navigate(`/?error=auth&cb=${encodeURIComponent(location.href)}`);
         return;
     }
-    
+
     // after made sure that the user has the right permissions,
     // load the rest of the page
     reservoir.loadFromLocalStorage(false);
-    reservoir.set({
-        houseName: HOUSE_NAME,
-        rootPath
-    }, true);
+    reservoir.set(
+        {
+            houseName: HOUSE_NAME,
+            rootPath,
+        },
+        true
+    );
 
     await waitForReady();
 
@@ -161,7 +163,7 @@ export async function init(
     reloadDOM();
 
     scrollToTop();
-    
+
     const time = performance.now() - start;
     console.log(`Initialised page in ${time.toPrecision(3)}ms`);
 }

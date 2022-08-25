@@ -18,7 +18,7 @@ export async function eventPopup(id, admin = null) {
             EventCard,
             async () => {
                 const events = await core.api(`get/events`, {
-                    eventId: id
+                    eventId: id,
                 });
                 return events?.['data']?.[0];
             },
@@ -37,9 +37,13 @@ export async function userPopupFromId(id, admin = null) {
     admin = admin === null ? (await core.userInfo())['admin'] : admin;
     FullPagePopup(
         document.body,
-        inlineComponent(UserCard, async () => {
-            return await core.api(`get/users`, { userId: id });
-        }, admin)
+        inlineComponent(
+            UserCard,
+            async () => {
+                return await core.api(`get/users`, { userId: id });
+            },
+            admin
+        )
     );
 }
 
@@ -57,8 +61,12 @@ export async function userPopup(email, admin = null) {
     admin = admin === null ? (await core.userInfo())['admin'] : admin;
     FullPagePopup(
         document.body,
-        inlineComponent(UserCard, async () => {
-            return await core.api(`get/users`, { email });
-        }, admin)
+        inlineComponent(
+            UserCard,
+            async () => {
+                return await core.api(`get/users`, { email });
+            },
+            admin
+        )
     );
 }

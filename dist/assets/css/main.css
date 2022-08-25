@@ -14,7 +14,8 @@ body:not([data-theme]) {
 /*
     Dark mode styles, also default.
  */
-:root, [data-theme='dark'] {
+:root,
+[data-theme='dark'] {
     --text-v-light: #909090;
 
     --label-bg: #c0c0c0;
@@ -80,7 +81,8 @@ body:not([data-theme]) {
 
 /* --- STRUCTURE --- */
 
-html, body {
+html,
+body {
     padding: 0;
     margin: 0;
     background: var(--bg);
@@ -91,7 +93,9 @@ main {
     padding: 10px;
 }
 
-html, body, main {
+html,
+body,
+main {
     margin: 0;
 }
 
@@ -131,7 +135,9 @@ hr {
 }
 
 /* --- INPUT --- */
-input, button, textarea {
+input,
+button,
+textarea {
     border: none;
     background: none;
     font-size: 17px;
@@ -181,30 +187,6 @@ textarea {
     transition: 0s;
 }
 
-/*
-.big-link {
-    margin: 20px;
-    font-size: 20px;
-    text-decoration: none;
-    border-radius: 10px;
-    border: 1px solid var(--border) !important;
-    height: fit-content;
-    width: fit-content;
-    padding: 10px;
-    display: grid;
-    /* assumed one svg icon and then text *
-    grid-template-columns: 55px 1fr;
-    align-items: center;
-    align-content: center;
-    cursor: pointer;
-}
-
-.big-link:hover {
-    color: var(--text-light);
-    background: var(--bg-accent);
-}
- */
-
 .big-link {
     margin: 20px;
     font-size: 20px;
@@ -229,26 +211,35 @@ textarea {
     fill: var(--accent);
 }
 
-input, button, textarea {
+input,
+button,
+textarea {
     font-family: 'Quicksand', sans-serif;
 }
 
-a:hover, a:focus,
-button:hover, button:focus,
-input:hover, input:focus,
-textarea:hover, textarea:focus {
+a:hover,
+a:focus,
+button:hover,
+button:focus,
+input:hover,
+input:focus,
+textarea:hover,
+textarea:focus {
     color: var(--text-light);
 }
 
-input, textarea {
+input,
+textarea {
     font-size: 18px;
 }
 
-button, a {
+button,
+a {
     cursor: pointer;
 }
 
-input, textarea {
+input,
+textarea {
     cursor: text;
 }
 
@@ -275,7 +266,8 @@ h2 {
     color: var(--text-light);
 }
 
-h2, h3 {
+h2,
+h3 {
     font-family: 'Raleway', sans-serif;
 }
 
@@ -289,13 +281,16 @@ h2, h3 {
         position: static;
     }
 
-    html, body, main {
+    html,
+    body,
+    main {
         padding: 0;
         margin: 0;
         width: 100%;
     }
 
-    html, body {
+    html,
+    body {
         min-height: 100vh;
     }
 }
@@ -324,7 +319,8 @@ nav {
     border-bottom: 2px solid var(--nav-border-bottom);
 }
 
-#nav-left, #nav-right {
+#nav-left,
+#nav-right {
     min-width: 50px;
     width: fit-content;
     display: flex;
@@ -443,7 +439,6 @@ nav {
     transition: 0.3s;
 }
 
-
 /* loading animation */
 
 .spinner {
@@ -516,7 +511,6 @@ nav {
     }
 }
 
-
 /* icons and labels */
 
 svg {
@@ -533,7 +527,8 @@ svg {
     align-items: center;
 }
 
-.icon svg, .icon img {
+.icon svg,
+.icon img {
     height: 50px;
     width: 50px;
     border: none;
@@ -616,7 +611,6 @@ svg {
     }
 }
 
-
 /* CookieCard */
 
 #cookie-popup {
@@ -671,7 +665,6 @@ svg {
     border: 1px solid var(--border) !important;
     background: var(--bg) !important;
 }
-
 
 /* FullPagePopup */
 
@@ -734,7 +727,6 @@ svg {
         opacity: 1;
     }
 }
-
 
 /* AddEventPopup */
 
@@ -855,7 +847,8 @@ svg {
     background: none;
 }
 
-.event-card :not(h1) > button, .event-card :not(h1) > input {
+.event-card :not(h1) > button,
+.event-card :not(h1) > input {
     font-size: 16px;
 }
 
@@ -916,7 +909,7 @@ svg {
     display: block;
 }
 
-.house-point input[type=date] {
+.house-point input[type='date'] {
     font-size: 16px;
 }
 

@@ -9,20 +9,20 @@ import * as core from '../main.js';
  */
 export default registerComponent('Email', ($el, id, user, { fontsize = 'inherit' } = {}) => {
     if (!user) return;
-    
+
     const email = user.email ?? user.userEmail;
     const year = user.year ?? user.userYear;
-    
+
     if (!email || typeof email !== 'string') {
         console.error('Trying to show invalid user (email): ', user);
         return;
     }
-    
+
     if (year !== 0 && (year > 13 || year < 9)) {
         console.error('Trying to show invalid user (year): ', user);
         return;
     }
-    
+
     window[`_Email${id}__onclick`] = async () => {
         await core.userPopup(email);
     };

@@ -16,7 +16,8 @@
     background: var(--bg-accent);
 }
 
-#award-types label, #award-types input {
+#award-types label,
+#award-types input {
     width: 100%;
 }
 
@@ -38,6 +39,7 @@
     background: var(--bg-accent);
 }
 
-.awards label, .awards input {
+.awards label,
+.awards input {
     width: 100%;
 }

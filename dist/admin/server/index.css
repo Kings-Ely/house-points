@@ -12,7 +12,7 @@
 }
 
 #server-stats * {
-    font-family: 'Space Mono', monospace
+    font-family: 'Space Mono', monospace;
 }
 
 #server-stats > div {
@@ -46,6 +46,8 @@
     border-bottom: 1px solid var(--border-light);
 }
 
-#kill, #restart, #start {
+#kill,
+#restart,
+#start {
     opacity: 0;
 }
