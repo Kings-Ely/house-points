@@ -51,3 +51,7 @@ Dockerfile linguist-detectable=true
 *.yml linguist-vendored=false
 *.yml linguist-language=YAML
 *.yml linguist-detectable=true
+
+*.md linguist-vendored=false
+*.md linguist-language=Markdown
+*.md linguist-detectable=true
