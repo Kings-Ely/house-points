@@ -37,7 +37,9 @@ export async function userPopupFromId(id, admin = null) {
     admin = admin === null ? (await core.userInfo())['admin'] : admin;
     FullPagePopup(
         document.body,
-        inlineComponent(UserCard, async () => await core.api(`get/users`, { userId: id }), admin)
+        inlineComponent(UserCard, async () => {
+            return await core.api(`get/users`, { userId: id });
+        }, admin)
     );
 }
 
@@ -48,9 +50,15 @@ export async function userPopupFromId(id, admin = null) {
  * @returns {Promise<void>}
  */
 export async function userPopup(email, admin = null) {
+    if (typeof email !== 'string' || !email.includes('@')) {
+        await core.showError('Invalid email: ' + email);
+        return;
+    }
     admin = admin === null ? (await core.userInfo())['admin'] : admin;
     FullPagePopup(
         document.body,
-        inlineComponent(UserCard, async () => await core.api(`get/users`, { email }), admin)
+        inlineComponent(UserCard, async () => {
+            return await core.api(`get/users`, { email });
+        }, admin)
     );
 }

@@ -74,6 +74,10 @@ body:not([data-theme]) {
     display: none !important;
 }
 
+.reservoir-container {
+    display: contents;
+}
+
 /* --- STRUCTURE --- */
 
 html, body {
@@ -177,6 +181,7 @@ textarea {
     transition: 0s;
 }
 
+/*
 .big-link {
     margin: 20px;
     font-size: 20px;
@@ -187,7 +192,7 @@ textarea {
     width: fit-content;
     padding: 10px;
     display: grid;
-    /* assumed one svg icon and then text */
+    /* assumed one svg icon and then text *
     grid-template-columns: 55px 1fr;
     align-items: center;
     align-content: center;
@@ -197,6 +202,31 @@ textarea {
 .big-link:hover {
     color: var(--text-light);
     background: var(--bg-accent);
+}
+ */
+
+.big-link {
+    margin: 20px;
+    font-size: 20px;
+    text-decoration: none;
+    border-radius: 10px;
+    background-color: var(--accent);
+    height: fit-content;
+    width: fit-content;
+    padding: 10px;
+    display: grid;
+    /* assumed one svg icon and then text */
+    grid-template-columns: 60px 1fr;
+    align-items: center;
+    cursor: pointer;
+}
+
+.big-link:hover {
+    background-color: var(--bg-accent);
+}
+
+.big-link:hover svg {
+    fill: var(--accent);
 }
 
 input, button, textarea {
@@ -659,12 +689,9 @@ svg {
     align-items: center;
     flex-direction: column;
     transition: 0.3s;
-    color: var(--text);
     margin: 0;
-    border-radius: 10px;
-    border: 2px solid var(--border);
-    text-align: center;
-    animation: full-page-popup-fadeIn 0.3s ease;
+    padding: 0;
+    animation: full-page-popup-fadeIn 300ms ease;
 }
 
 .full-page-popup .popup-header {

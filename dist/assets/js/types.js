@@ -1,12 +1,10 @@
 /** @typedef {HTMLElement|string} El */
 
 /**
- *  Reusable function for inserting components into the DOM.
  *  @typedef {($el: El, ...args: *) => *} Component
  */
 
 /**
- *  Reusable function for inserting components into the DOM.
  *  @typedef {($el: El, id: number, ...args: *) => *} ComponentDefinition
  */
 
@@ -18,7 +16,8 @@
  * 		rejected: number,
  * 		pending: number,
  * 		housePoints: HP[],
- * }} User */
+ * }} User
+ */
 
 /** @typedef {{
  *     id: string,
@@ -35,7 +34,8 @@
  *     eventName: string,
  *     eventDescription: string,
  *     eventTime: number
-}} HP  */
+ * }} HP
+ */
 
 /** @typedef {{
  * 		id: string,
@@ -43,4 +43,5 @@
  * 		name: string,
  * 		description: string,
  * 		userEmail: string
- * }} Event */
+ * }} Event
+ */

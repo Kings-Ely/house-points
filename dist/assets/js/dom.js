@@ -258,7 +258,6 @@ export function registerComponent(name, cb) {
     class Component extends HTMLElement {
         constructor() {
             super();
-            this.style.display = 'contents';
         }
         
         connectedCallback() {
@@ -277,6 +276,7 @@ export function registerComponent(name, cb) {
             }
             
             addComponentToDOM(this, ...args);
+            this.classList.add('reservoir-container');
         }
     }
     

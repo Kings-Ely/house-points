@@ -23,7 +23,7 @@ class Reservoir {
     #data = {};
     #lsData = {};
     localStorageKey = 'reservoir';
-    executeError = Symbol('executeError');
+    executeError = Symbol('__reservoirExecuteError');
     
     loadFromLocalStorage (hydrate=true) {
         const lsDataRaw = localStorage.getItem(this.localStorageKey);
@@ -54,7 +54,7 @@ class Reservoir {
     }
 
     /**
-     * @param {string | {}} key
+     * @param {string | Record<string, *>} key
      * @param {any} [item=undefined]
      * @param {boolean} [persist=false]
      */
@@ -262,7 +262,7 @@ class Reservoir {
         }
         
         if (!Array.isArray(iterator)) {
-            console.error(`foreach '${key}' requires an array: ${iterator} is not an array`);
+            console.error(`foreach '${key}' value is not an array: `, iterator);
             return;
         }
         
@@ -278,7 +278,6 @@ class Reservoir {
         
         for (let item of iterator) {
             const itemDiv = document.createElement('div');
-            itemDiv.style.display = 'contents';
             itemDiv.innerHTML = dry;
             itemDiv.setAttribute(`pour.${symbol}`, JSON.stringify(item));
             
@@ -289,6 +288,7 @@ class Reservoir {
                 itemDiv.setAttribute(attr.split('.', 2)[1], value);
             }
             
+            $el.classList.add('reservoir-container');
             $el.appendChild(itemDiv);
         }
     

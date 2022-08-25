@@ -12,7 +12,7 @@ import CookieCard from './components/CookieCard.js';
  * @param {number} [days=1]
  */
 export async function setCookie(name, value, days = 1) {
-    if (!cookiesAllowed() && name !== COOKIE_ALLOW_COOKIES_KEY) {
+    if (!cookiesAllowed() && name !== core.COOKIE_ALLOW_COOKIES_KEY) {
         await core.showError('You must allow cookies to use this site.');
         return new Error('Cookies not allowed');
     }

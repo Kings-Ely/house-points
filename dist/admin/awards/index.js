@@ -1,7 +1,7 @@
 import * as core from '../../assets/js/main.js';
 
 (async () => {
-    await core.init('../..', false, false, true);
+    await core.init('../..', true, false);
     core.preloadSVGs('bin.svg');
     
     core.reservoir.set({
@@ -10,7 +10,8 @@ import * as core from '../../assets/js/main.js';
         awardTypeUpdateDesc,
         awardTypeUpdateRequired,
         awardTypeDelete,
-        newAwardType
+        newAwardType,
+        awardUpdateDesc
     });
     
     refreshAwardTypes().then();
@@ -70,4 +71,11 @@ async function refreshAwards() {
         .then(({ data }) => {
             core.reservoir.set('awards', data);
         });
+}
+
+async function awardUpdateDesc (awardId, description) {
+    await core.api('update/awards/description', {
+        awardId, description
+    });
+    await refreshAwards();
 }

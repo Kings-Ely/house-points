@@ -78,14 +78,36 @@
             ></button>
         </div>
     </section>
-    <section>
-        <h2>Awards</h2>
+    <section class="awards">
+        <h2>
+            Awards
+            (<span pump="awards.length" pump-to="replace">loading...</span>)
+        </h2>
         <div
             foreach="award in awards"
             each.class="item"
         >
             <email- args="award"></email->
             <p pump="award.awardName"></p>
+            <div>
+                <label>
+                    <input
+                        pump.value="${award.description}"
+                        bind.change="awardUpdateDesc(award.id, $el.value)"
+                        class="editable-text"
+                        placeholder="Click to edit description"
+                    >
+                </label>
+            </div>
+            <div>
+                <button
+                    bind.click="awardDelete(award.id)"
+                    data-label="delete"
+                    svg="bin.svg"
+                    class="icon medium"
+                    aria-label="delete"
+                ></button>
+            </div>
         </div>
     </section>
 </main>

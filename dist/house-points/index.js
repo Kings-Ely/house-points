@@ -71,7 +71,22 @@ async function showHousePointList() {
                 svg="bin.svg"
             ></button>
         `,
-        itemGenerator: hp => inlineComponent(HousePoint, hp, admin, true, showHousePointList, true),
+        itemGenerator: hp => inlineComponent(HousePoint, hp, showHousePointList, {
+            admin,
+            showBorderBottom: hp === hps[hps.length - 1],
+            showEmail: true,
+            showReason: true,
+            allowEventsReason: true,
+            showNumHousePoints: true,
+            showDate: true,
+            showStatusHint: true,
+            showStatusIcon: false,
+            showDeleteButton: true,
+            showPendingOptions: false,
+            reasonEditable: true,
+            pointsEditable: true,
+            dateEditable: true,
+        }),
         gridTemplateColsCSS: '1fr',
         filter: item => {
             return (
