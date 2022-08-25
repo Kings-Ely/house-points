@@ -688,7 +688,7 @@ svg {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    transition: 0.3s;
+    transition: 0ms;
     margin: 0;
     padding: 0;
     animation: full-page-popup-fadeIn 300ms ease;

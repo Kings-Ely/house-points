@@ -110,7 +110,7 @@ export default registerComponent('SelectableList',
 					</label>
 				</div>
 			</div>
-			<div>${core.escapeHTML(titleBar)}</div>
+			<div>${titleBar}</div>
 			<div class="items"></div>
 		</div>
 	`;

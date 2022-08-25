@@ -68,17 +68,15 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
 
         let html = '';
         for (let user of data) {
-            const { email, id, year } = user;
             html += `
 				<div class="add-student-to-event-student">
 					<div style="display: block">
-						${core.escapeHTML(email)} 
-						(Y${core.escapeHTML(year)})
+						<email- args="${core.escapeHTML(JSON.stringify(user))}"></email->
 						gets
 						<input
 							type="number"
-							value="${studentsInEvent[id]}"
-							onchange="_AddEventPopup__updateStudentPoints('${id}', this.value)"
+							value="${studentsInEvent[user.id]}"
+							onchange="_AddEventPopup__updateStudentPoints('${user.id}', this.value)"
 							style="width: 40px"
 						>
 						house points
@@ -86,7 +84,7 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
 					</div>
 					<div style="display: block">
 						<button
-							onclick="_AddEventPopup__removeStudentFromEvent('${id}')"
+							onclick="_AddEventPopup__removeStudentFromEvent('${user.id}')"
 						   data-label="Remove from new event"
 							aria-label="Remove from new event"
 							svg="cross.svg"
@@ -180,7 +178,8 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
             }
         }
 
-        const time = new Date($dateInp.value).getTime();
+        // offset by an hour
+        const time = new Date($dateInp.value).getTime() + (60 * 60) + 1;
 
         // event before the year 2000 is not allowed
         if (time <= 946684800) {

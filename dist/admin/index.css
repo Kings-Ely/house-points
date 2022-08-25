@@ -29,3 +29,13 @@
 #signout:hover {
     color: var(--text-light);
 }
+
+.award-given-button {
+    font-size: 90%;
+    padding: 4px 20px 4px;
+}
+
+.award-given-button svg {
+    height: 35px;
+    width: 35px;
+}

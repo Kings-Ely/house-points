@@ -114,7 +114,7 @@ export default registerComponent('HousePoint',
 
         window[`_HousePoint${id}__changeDate`] = async value => {
             // +1 to make sure it is on the right side of the date boundary
-            const timestamp = Math.ceil(new Date(value).getTime() / 1000) + 1;
+            const timestamp = Math.ceil(new Date(value).getTime() / 1000) + (60 * 60) + 1;
             if (timestamp <= 1) {
                 await core.showError('Invalid date!');
                 return;

@@ -67,7 +67,7 @@ export default registerComponent('EventCard', ($el, id, getEvent) => {
     window[`_HousePoint${id}__changeTime`] = async value => {
         await core.api(`update/events/time`, {
             eventId: event.id,
-            time: new Date(value).getTime() / 1000
+            time: new Date(value).getTime() / 1000 + (60 * 60) + 1
         });
         await hardReload();
     };
@@ -89,24 +89,19 @@ export default registerComponent('EventCard', ($el, id, getEvent) => {
 							onchange="_EventCard${id}__changeName(this.value)"
 							class="editable-text event-title-editable"
 						>
-					`
-                            : `
+					` : `
 						${core.escapeHTML(event.name)}
-					`
-                    }
+					`}
 				</h1>
 				<p data-label="${ago}">
-					${
-                        admin
+					${admin
                             ? `
 		                <input
 		                    type="date"
 		                    value="${core.formatTimeStampForInput(event.time)}"
 		                    onchange="_HousePoint${id}__changeTime(this.value)"
 		                >
-					`
-                            : escapeHTML(date)
-                    }
+					` : core.escapeHTML(date)}
 				</p>
 				<p style="font-size: 1.2em">
 					${core.escapeHTML(event.description)}
@@ -115,31 +110,28 @@ export default registerComponent('EventCard', ($el, id, getEvent) => {
 					<h2>
 						${core.escapeHTML(event['housePointCount'])} House Points Awarded
 					</h2>
-					${event['housePoints']
-                        .map(point =>
-                            inlineComponent(HousePoint, point, hardReload, {
-                                admin,
-                                showBorderBottom:
-                                    point === event['housePoints'][event['housePoints'].length - 1],
-                                showEmail: true,
-                                showReason: true,
-                                allowEventReason: false,
-                                showNumPoints: true,
-                                showDate: false,
-                                showStatusHint: false,
-                                showStatusIcon: true,
-                                showDeleteButton: true,
-                                showPendingOptions: false,
-                                reasonEditable: true,
-                                pointsEditable: true,
-                                dateEditable: false
-                            })
-                        )
-                        .join('')}
+					${event['housePoints'].map(point =>
+                        core.inlineComponent(HousePoint, point, hardReload, {
+                            admin,
+                            showBorderBottom:
+                                point === event['housePoints'][event['housePoints'].length - 1],
+                            showEmail: true,
+                            showReason: true,
+                            allowEventReason: false,
+                            showNumPoints: true,
+                            showDate: false,
+                            showStatusHint: false,
+                            showStatusIcon: true,
+                            showDeleteButton: true,
+                            showPendingOptions: false,
+                            reasonEditable: true,
+                            pointsEditable: true,
+                            dateEditable: false
+                        })
+                    )
+                    .join('')}
 					
-					${
-                        admin
-                            ? `
+					${admin ? `
 						<div style="margin: 20px 0">
 							 <span class="add-student-to-event"></span>
 							 <button
@@ -151,9 +143,7 @@ export default registerComponent('EventCard', ($el, id, getEvent) => {
 								style="border: none"
 							 ></button>
 						<div>
-					`
-                            : ''
-                    }
+					` : ''}
 				</div>
 			</div>
 		`;
