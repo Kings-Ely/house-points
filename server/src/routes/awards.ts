@@ -101,6 +101,7 @@ route('create/awards', async ({ query, body }) => {
     if (!student['student']) return 'Can only give house points to students';
 
     if (!awardTypeId) return 'Missing parameter awardTypeId';
+    if (typeof awardTypeId !== 'string') return 'Invalid parameter awardTypeId';
 
     let awardsData = await query`
         SELECT *
@@ -109,6 +110,10 @@ route('create/awards', async ({ query, body }) => {
     `;
     if (!awardsData.length) {
         return `Award type with that Id not found`;
+    }
+    
+    if (typeof description !== 'string') {
+        return 'Invalid description';
     }
 
     awardsData = await query`

@@ -192,8 +192,11 @@ export async function userId(body: any, query: queryFunc) {
  */
 export async function userFromId(
     query: queryFunc,
-    id: string
+    id: unknown
 ): Promise<Record<string, any> | null> {
+    if (typeof id !== 'string') return null;
+    if (!id) return null;
+    
     const res = await query`
         SELECT
             id,
@@ -217,8 +220,11 @@ export async function userFromId(
  */
 export async function userFromSession(
     query: queryFunc,
-    id: string
+    id: unknown
 ): Promise<Record<string, any> | null> {
+    if (typeof id !== 'string') return null;
+    if (!id) return null;
+    
     const res = await query`
         SELECT
             users.id,

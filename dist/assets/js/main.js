@@ -103,13 +103,9 @@ export async function init(
     requireAdmin = false,
     noApiTest = false
 ) {
-    ROOT_PATH = rootPath;
+    const start = performance.now();
     
-    reservoir.loadFromLocalStorage();
-    reservoir.set({
-        houseName: HOUSE_NAME,
-        rootPath
-    }, true);
+    ROOT_PATH = rootPath;
 
     if (!noApiTest) {
         await testApiCon();
@@ -138,9 +134,16 @@ export async function init(
         await navigate(`/?error=auth&cb=${encodeURIComponent(location.href)}`);
         return;
     }
+    
+    // after made sure that the user has the right permissions,
+    // load the rest of the page
+    reservoir.loadFromLocalStorage(false);
+    reservoir.set({
+        houseName: HOUSE_NAME,
+        rootPath
+    }, true);
 
     await waitForReady();
-    const start = performance.now();
 
     // load footer and nav bar
     state.$nav = document.querySelector(`nav`);
@@ -159,7 +162,8 @@ export async function init(
 
     scrollToTop();
     
-    console.log(`init took ${performance.now() - start}ms`);
+    const time = performance.now() - start;
+    console.log(`Initialised page in ${time.toPrecision(3)}ms`);
 }
 
 /**

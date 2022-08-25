@@ -179,5 +179,5 @@ export default async function (
 
     let time = now() - start;
 
-    log.warn`[${req.method}] ${time.toPrecision(2)}ms '${req.url}' => '${strResponse}'`;
+    log.verbose`[${req.method}] ${time.toPrecision(2)}ms '${req.url}' => '${strResponse}'`;
 }

@@ -99,7 +99,7 @@
             This list is automated list of students who are eligible for an award.
         </p>
         <div
-            foreach="data in usersWaitingForAward.slice(0, 5)"
+            foreach="data in usersWaitingForAward.slice(0, showCountUsersWaitingForAward)"
             each.style="display: grid; grid-template-columns: 1fr 1fr; font-size: 18px"
         >
             <p>
@@ -110,7 +110,7 @@
                 as they have <span pump="data.accepted"></span>
             </p>
             <button
-                pump.onclick="giveAward('${data.id}', '${data.awardTypeId}')"
+                bind.click="giveAward(data.id, data.awardTypeId)"
                 class="icon big-link"
                 style="font-size: 85%"
                 svg="accent-tick.svg"
@@ -123,10 +123,23 @@
                 </span>
             </button>
         </div>
-        <div hidden="usersWaitingForAward.length < 5" style="text-align: center; padding: 20px">
-            And <span pump="usersWaitingForAward.length - 5"></span> more...
+        <div
+            hidden="usersWaitingForAward.length <= showCountUsersWaitingForAward"
+            style="text-align: center; padding: 20px"
+        >
+            <button
+                bind.click="this.set('showCountUsersWaitingForAward', usersWaitingForAward.length)"
+                data-label="Show All"
+            >
+                And
+                <span pump="usersWaitingForAward.length - showCountUsersWaitingForAward"></span>
+                more...
+            </button>
         </div>
-        <div hidden="usersWaitingForAward.length > 0" style="text-align: center; padding: 20px">
+        <div
+            hidden="usersWaitingForAward.length > 0"
+            style="text-align: center; padding: 20px"
+        >
             No-one waiting for award
         </div>
     </section>

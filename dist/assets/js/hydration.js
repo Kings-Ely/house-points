@@ -1,4 +1,4 @@
-import { escapeHTML, loadSVGs } from "./main.js";
+import { escapeHTML, reloadDOM } from "./main.js";
 
 // for debugging
 window.reservoirErrors = [];
@@ -87,7 +87,7 @@ class Reservoir {
             if (persist) {
                 this.saveToLocalStorage();
             }
-            this.hydrate();
+            reloadDOM();
         }
     }
 
@@ -122,6 +122,8 @@ class Reservoir {
             }
             parent = parent.parentElement;
         }
+        
+        parameters['$el'] = $el;
         
         const envVarNames = Object.keys(parameters);
         const envVarValues = Object.keys(parameters).map(k => parameters[k]);
@@ -214,6 +216,21 @@ class Reservoir {
         reservoir.set(key, $el.value);
     }
     
+    #bindListener ($el, name) {
+        const onEvent = $el.getAttribute(`bind.${name}`);
+        const self = this;
+        
+        if ($el.hasAttribute(`bound-${name}`)) {
+            return;
+        }
+        
+        $el.setAttribute(`bound-${name}`, 'true');
+        
+        $el.addEventListener(name, () => {
+            self.execute(onEvent, $el);
+        });
+    }
+    
     #hydrateAttribute ($el, attrName) {
         const key = '`' + $el.getAttribute(attrName) + '`';
         let value = this.execute(key, $el);
@@ -231,13 +248,18 @@ class Reservoir {
         const key = $el.getAttribute('foreach');
         
         let dry = $el.getAttribute('foreach-dry') ?? $el.innerHTML;
-        if (!$el.hasAttribute('foreach-dry')) {
-            $el.setAttribute('foreach-dry', dry);
-        }
         
         const [ symbol, value ] = key.split(' in ');
+        
         let iterator = this.execute(value, $el);
-        if (iterator === this.executeError) return;
+        
+        if (iterator === this.executeError) {
+            $el.innerHTML = '';
+            if (!$el.hasAttribute('foreach-dry')) {
+                $el.setAttribute('foreach-dry', dry);
+            }
+            return;
+        }
         
         if (!Array.isArray(iterator)) {
             console.error(`foreach '${key}' requires an array: ${iterator} is not an array`);
@@ -269,14 +291,20 @@ class Reservoir {
             
             $el.appendChild(itemDiv);
         }
-        
-        $el.style.visibility = 'visible';
+    
+        // do at end so that the element stays hidden until it has been
+        // fully initialised.
+        if (!$el.hasAttribute('foreach-dry')) {
+            $el.setAttribute('foreach-dry', dry);
+        }
     }
     
     /**
      * @param {HTMLElement|Document|Body} $el
      */
     hydrate($el = document) {
+        const start = performance.now();
+        
         if ($el?.hasAttribute?.('hidden') || $el?.hasAttribute?.('hidden-dry')) {
             if (!this.#hydrateIf($el)) {
                 return;
@@ -302,7 +330,9 @@ class Reservoir {
         for (let attr of $el?.getAttributeNames?.() || []) {
             if (attr.startsWith('pump.')) {
                 this.#hydrateAttribute($el, attr);
-                break;
+                
+            } else if (attr.startsWith('bind.')) {
+                this.#bindListener($el, attr.split('.', 2)[1]);
             }
         }
         
@@ -314,9 +344,12 @@ class Reservoir {
             $el.reloadComponent();
         }
         
-        for (const child of $el?.children || []) {
-            this.hydrate(child);
-            loadSVGs(child);
+        for (const child of $el.children) {
+            reloadDOM(child);
+        }
+        
+        if ($el === document) {
+            //console.trace('Hydrated document in ' + (performance.now() - start) + 'ms');
         }
     }
 }

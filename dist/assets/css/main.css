@@ -2,10 +2,18 @@
 
 /* --- GENERAL --- */
 
+/*
+    Prevents flash of white on dark mode.
+    Cannot pre-emptively check for dark mode as the theme
+    is not known until it is too late
+ */
 body:not([data-theme]) {
     --bg: #838383;
 }
 
+/*
+    Dark mode styles, also default.
+ */
 :root, [data-theme='dark'] {
     --text-v-light: #909090;
 
@@ -50,14 +58,17 @@ body:not([data-theme]) {
 
 /** Reservoir */
 
-[foreach] {
-    visibility: collapse;
+/*
+    Only hide when the component is a for loop and has not been initialised yet
+ */
+[foreach]:not([foreach-dry]) {
+    display: none !important;
 }
 
 /*
- This won't interfere with the element's display as the hidden attribute is
- only present on elements which are either yet to be parsed, or have been parsed
- and decided that they should be hidden.
+    This won't interfere with the element's display as the hidden attribute is
+    only present on elements which are either yet to be parsed, or have been parsed
+    and decided that they should be hidden.
 */
 [hidden] {
     display: none !important;

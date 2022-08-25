@@ -1,25 +1,27 @@
 import * as core from '../../assets/js/main.js';
 
-const $awardTypeRequired = document.querySelector('#award-type-required'),
-    $awardTypeName = document.querySelector('#award-type-name'),
-    $awardTypeDescription = document.querySelector('#award-type-description'),
-    $awardTypeSubmit = document.querySelector('#award-type-submit'),
-    $awardTypes = document.querySelector('#award-types');
-
-window.awardTypeUpdateName = awardTypeUpdateName;
-window.awardTypeUpdateDesc = awardTypeUpdateDesc;
-window.awardTypeUpdateRequired = awardTypeUpdateRequired;
-window.awardTypeDelete = awardTypeDelete;
-
 (async () => {
     await core.init('../..', false, false, true);
     core.preloadSVGs('bin.svg');
-
-    await refresh();
+    
+    core.reservoir.set({
+        awardTypes: [],
+        awardTypeUpdateName,
+        awardTypeUpdateDesc,
+        awardTypeUpdateRequired,
+        awardTypeDelete,
+        newAwardType
+    });
+    
+    refreshAwardTypes().then();
+    refreshAwards().then();
 })();
 
-async function refresh() {
-    await awardTypeList();
+async function refreshAwardTypes() {
+    await core.api(`get/award-types`)
+        .then(({ data }) => {
+            core.reservoir.set('awardTypes', data);
+        });
 }
 
 async function awardTypeUpdateName(id, name) {
@@ -27,7 +29,7 @@ async function awardTypeUpdateName(id, name) {
         awardTypeId: id,
         name
     });
-    await refresh();
+    await refreshAwardTypes();
 }
 
 async function awardTypeUpdateDesc(awardTypeId, description) {
@@ -35,7 +37,7 @@ async function awardTypeUpdateDesc(awardTypeId, description) {
         awardTypeId,
         description
     });
-    await refresh();
+    await refreshAwardTypes();
 }
 
 async function awardTypeUpdateRequired(id, value) {
@@ -43,7 +45,7 @@ async function awardTypeUpdateRequired(id, value) {
         awardTypeId: id,
         quantity: parseInt(value)
     });
-    await refresh();
+    await refreshAwardTypes();
 }
 
 async function awardTypeDelete(awardTypeId) {
@@ -51,89 +53,21 @@ async function awardTypeDelete(awardTypeId) {
         return;
     }
     await core.api(`delete/award-types`, { awardTypeId });
-    await refresh();
+    await refreshAwardTypes();
 }
 
-async function awardTypeList() {
-    const { data } = await core.api(`get/award-types`);
 
-    // No SelectableList as there are going to be so few it's not worth it
-    $awardTypes.innerHTML = `
-		<h2>Award Types</h2>
-	`;
-
-    for (let awardType of data) {
-        $awardTypes.innerHTML += `
-			<div class="item">
-				<div>
-					<label>
-						<input
-							value="${core.escapeHTML(awardType.name)}"
-							onchange="awardTypeUpdateName('${awardType.id}', this.value)"
-							class="editable-text"
-						>
-					</label>
-				</div>
-				<div>
-					<label>
-						<input
-							value="${core.escapeHTML(awardType.hpsRequired)}"
-							onchange="awardTypeUpdateRequired('${awardType.id}', this.value)"
-							data-label="House Points Required"
-							class="editable-text"
-							type="number"
-						>
-					</label>
-				</div>
-				<div>
-					<label>
-						<input
-							value="${core.escapeHTML(awardType.description)}"
-							onchange="awardTypeUpdateDesc('${awardType.id}', this.value)"
-							class="editable-text"
-						>
-					</label>
-				</div>
-				<div>
-					<button
-						onclick="awardTypeDelete('${awardType.id}')"
-						data-label="delete"
-						svg="bin.svg"
-						class="icon medium"
-						aria-label="delete"
-					></button>
-				</div>
-			</div>
-		`;
-    }
-
-    core.reloadDOM();
-}
-
-$awardTypeSubmit.addEventListener('click', async () => {
-    const name = $awardTypeName.value,
-        description = $awardTypeDescription.value,
-        required = parseInt($awardTypeRequired.value);
-
-    if (name.length < 3) {
-        await core.showError('Name must be at least 3 characters long');
-        return;
-    }
-
-    if (required < 0) {
-        await core.showError('Required must be 0 or greater');
-        return;
-    }
-
+async function newAwardType () {
     await core.api(`create/award-types`, {
-        name,
-        description,
-        required
+        name: 'New Award Type',
+        required: 10
     });
+    await refreshAwardTypes();
+}
 
-    $awardTypeName.value = '';
-    $awardTypeDescription.value = '';
-    $awardTypeRequired.value = 0;
-
-    await refresh();
-});
+async function refreshAwards() {
+    await core.api(`get/awards`)
+        .then(({ data }) => {
+            core.reservoir.set('awards', data);
+        });
+}
