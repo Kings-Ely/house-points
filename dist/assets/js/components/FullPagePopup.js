@@ -9,24 +9,24 @@ import * as core from '../main.js';
  * @param {string} content
  * @param {boolean} showHeader
  */
-export default registerComponent('FullPagePopup', ($el, id, content, showHeader = true) => {
+export default registerComponent('FullPagePopup', ($el, id, content, title = ' ') => {
     const $p = document.createElement('div');
     $p.classList.add('full-page-popup');
     $p.id = `full-page-popup-${id}`;
 
     $p.innerHTML = `
 		<div class="popup-content">
-			<div class="popup-header" style="display: ${showHeader ? 'flex' : 'none'}">
+			<div class="popup-header" style="display: ${title ? 'flex' : 'none'}">
 				<div>
 					<!-- left -->
 					<button
 						class="icon"
-						svg="back-arrow.svg"
+						svg="cross.svg"
 						onclick="_FullPagePopup${id}__hide()"
 					></button>
 				</div>				
 				<div>
-					<!-- center -->
+					<h1>${title}</h1>
 				</div>				
 				<div>
 					<!-- right -->
@@ -38,6 +38,7 @@ export default registerComponent('FullPagePopup', ($el, id, content, showHeader 
 
     // add to page
     $el.appendChild($p);
+    core.reloadDOM($p);
 
     function hide() {
         $p.remove();

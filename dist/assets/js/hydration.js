@@ -1,4 +1,4 @@
-import { escapeHTML, reloadDOM } from './main.js';
+import { escapeHTML, loadSVG, reloadDOM } from "./main.js";
 
 // for debugging
 window.reservoirErrors = [];
@@ -341,8 +341,13 @@ class Reservoir {
         if ($el?.hasAttribute?.('args') && 'reloadComponent' in $el) {
             $el.reloadComponent();
         }
+        
+        if ($el?.hasAttribute?.('svg')) {
+            loadSVG($el).then();
+        }
 
         for (const child of $el.children) {
+            // don't await, because we don't want to block the page load
             reloadDOM(child);
         }
 

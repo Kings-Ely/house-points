@@ -3,8 +3,6 @@ import HousePoint from '../assets/js/components/HousePoint.js';
 
 const $hps = document.getElementById('hps');
 const $hpReasonInp = document.getElementById('hp-reason');
-const $info = document.getElementById('info');
-const $themeButton = document.getElementById('switch-theme');
 
 let theUsersInfo = null;
 let me = false;
@@ -13,8 +11,6 @@ window.eventPopup = core.eventPopup;
 
 (async () => {
     await core.init('..', true);
-
-    reloadThemeButton();
 
     if (!core.GETParam('email')) {
         await core.navigate(`?email=${(await core.userInfo())['email']}`);
@@ -27,12 +23,6 @@ window.eventPopup = core.eventPopup;
 
     if (theUsersInfo.student) {
         await reloadHousePoints();
-    }
-
-    if (!theUsersInfo.admin) {
-        await showInfo();
-    } else {
-        core.hide('#info');
     }
 
     core.reloadDOM();
@@ -95,28 +85,11 @@ async function housePoints() {
     $hps.innerHTML += html;
 }
 
-async function showInfo() {
-    $info.innerHTML = `
-        <p>
-            <b>${core.escapeHTML(theUsersInfo['accepted'])}</b> accepted, 
-            <b>${core.escapeHTML(theUsersInfo['pending'])}</b> pending and 
-            <b>${core.escapeHTML(theUsersInfo['rejected'])}</b> rejected house points.
-        </p>
-    `;
-
-    // TODO: goals info here
-}
-
 async function reloadHousePoints() {
     await reloadUserInfoFromEmail();
     await housePoints();
 
     core.reloadDOM();
-}
-
-function reloadThemeButton() {
-    const svg = core.getTheme() === 'dark' ? 'light-theme.svg' : 'dark-theme.svg';
-    $themeButton.setAttribute('svg', svg);
 }
 
 document.getElementById('submit-hp').onclick = async () => {
@@ -132,10 +105,4 @@ document.getElementById('submit-hp').onclick = async () => {
     }
     await reloadHousePoints();
     $hpReasonInp.value = '';
-};
-
-$themeButton.onclick = async () => {
-    core.setTheme(core.getInverseTheme());
-    reloadThemeButton();
-    core.reloadDOM();
 };

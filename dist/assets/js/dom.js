@@ -1,7 +1,7 @@
 import * as core from './main.js';
-import { loadSVGs } from './svg.js';
 import reservoir from './hydration.js';
 import { getComponentId } from './componentIdx.js';
+import FullPagePopup from "./components/FullPagePopup.js";
 
 /**
  * Kind of ew way of doing it. But it works.
@@ -185,7 +185,6 @@ export async function loadNav() {
  */
 export function reloadDOM($from = document) {
     reservoir.hydrate($from);
-    loadSVGs($from);
 }
 
 export async function domIsLoaded() {
@@ -289,4 +288,35 @@ export function registerComponent(name, cb) {
     customElements.define(componentName, Component);
 
     return addComponentToDOM;
+}
+
+export function loadSettings () {
+    const settingsButton = document.createElement('div');
+    settingsButton.classList.add('settings-button');
+    settingsButton.classList.add('icon');
+    settingsButton.setAttribute('svg', 'settings.svg');
+    
+    core.reservoir.set({
+        switchTheme: () => {
+            core.setTheme(core.getInverseTheme());
+            const svg = getTheme() === 'light' ? 'dark-theme.svg' : 'light-theme.svg';
+            core.reservoir.set('themeButtonSVG', svg);
+        },
+        themeButtonSVG: 'light-theme.svg',
+    });
+    
+    settingsButton.onclick = () => {
+        FullPagePopup(document.body, `
+            <button
+                aria-label="Switch theme"
+                id="switch-theme"
+                class="icon bordered"
+                pump.svg="\${themeButtonSVG}"
+                bind.click="switchTheme()"
+            ></button>
+        `, 'Settings');
+    };
+    
+    document.body.appendChild(settingsButton);
+    reloadDOM(settingsButton);
 }

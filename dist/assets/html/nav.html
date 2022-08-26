@@ -1,23 +1,34 @@
-<div id="nav-left" if="signedIn">
-    <button
-        id="sign-out"
-        aria-label="logout"
-        svg="logout.svg"
-        onclick="logout()"
-        class="icon"
-        data-label="Logout"
-    ></button>
-    <a
-        id="home-link"
-        aria-label="home"
-        if="user && rootPath"
-        pump.href="${rootPath}/user/?email=${user.email}"
-        class="icon"
-        data-label="Home"
-        svg="account.svg"
-    >
-        <span pump="user.email.split('@')[0]"></span>
-    </a>
+<div id="nav-left" hidden="!user.email">
+    <div class="nav-item">
+        <a
+            id="home-link"
+            aria-label="home"
+            hidden="!user || !rootPath"
+            pump.href="${rootPath}/user/?email=${user.email}"
+            class="icon"
+            svg="account.svg"
+        >
+            <span pump="user.email.split('@')[0]"></span>
+        </a>
+        <div class="nav-item-dropdown">
+            <span pump="user.email"></span>
+            <hr>
+            <a
+                id="sign-out"
+                aria-label="logout"
+                svg="logout.svg"
+                onclick="logout()"
+                class="icon medium"
+                data-label="Logout"
+            >Log Out</a>
+            <a
+                pump.href="${rootPath}/set-password"
+                class="icon medium"
+                data-label="Change Password"
+                svg="key.svg"
+            >Change Password</a>
+        </div>
+    </div>
 </div>
 
 <div id="nav-center"></div>
@@ -31,7 +42,7 @@
         style="display: none"
         class="icon"
         data-label="Admin Dashboard"
-        if="user.admin"
+        hidden="!user.admin"
     ></button>
     <a
         id="leaderboard-link"

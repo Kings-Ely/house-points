@@ -114,11 +114,10 @@
                 class="big-link award-given-button"
                 svg="accent-tick.svg"
             >
-                <span>
-                    I have <i>actually</i> given
-                    <b pump="data.email.split('@')[0]"></b>
-                    their
-                    <b pump="data.awardName"></b>
+                <span
+                    pump.data-label="${data.email.split('@')[0]} has been given their ${data.awardName}"
+                >
+                    Mark as complete
                 </span>
             </button>
         </div>

@@ -61,12 +61,12 @@ import './components';
 import {
     domIsLoaded,
     loadFooter,
-    loadNav,
+    loadNav, loadSettings,
     reloadDOM,
     scrollToTop,
     showError,
-    waitForReady,
-} from './dom.js';
+    waitForReady
+} from "./dom.js";
 import { getSession, handleUserInfo, testApiCon, userInfo, signInAs, logout } from './auth.js';
 import { rawAPI } from './backendAPI.js';
 import { cookiePopUp } from './cookies.js';
@@ -157,6 +157,8 @@ export async function init(
     if (state.$footer) {
         await loadFooter();
     }
+    
+    loadSettings();
 
     cookiePopUp();
 

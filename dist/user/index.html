@@ -15,23 +15,24 @@
 <body>
 <nav></nav>
 <main>
-    <section id="name">
-        <p style="font-size: 2em">
+    <button
+        id="sign-out"
+        aria-label="logout"
+        svg="logout.svg"
+        onclick="logout()"
+        class="icon"
+        data-label="Logout"
+    ></button>
+    <section>
+        <p style="font-size: 2em; text-align: center;">
             <email- args="user, { fontsize: '50px' }"></email->
         </p>
-    </section>
-
-    <section id="settings">
         <a href="../set-password">
             Change Password
         </a>
+    </section>
 
-        <button
-            aria-label="Switch theme"
-            id="switch-theme"
-            class="icon bordered"
-        ></button>
-
+    <section>
         <a
             href="../admin/"
             class="big-link"
@@ -40,10 +41,17 @@
         >Admin Dashboard</a>
     </section>
 
-    <section id="info">Loading...</section>
+    <section hidden="!user.year">
+        <p>
+            <b>${core.escapeHTML(theUsersInfo['accepted'])}</b> accepted,
+            <b>${core.escapeHTML(theUsersInfo['pending'])}</b> pending and
+            <b>${core.escapeHTML(theUsersInfo['rejected'])}</b> rejected house points.
+        </p>
+    </section>
 
     <section
-        hidden="!((user.email === theUser.email || user.admin) && theUser.student)">
+        hidden="!((user.email === theUser.email || user.admin) && theUser.student)"
+    >
         <label>
             <textarea id="hp-reason"
                 placeholder="House Point Requests (separate multiple by new line)"
