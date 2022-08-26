@@ -8,7 +8,7 @@ import HousePoint from './HousePoint.js';
  * @param {() => User} getEvent getter for event data
  * @param {boolean} admin should be admin options be shown
  */
-export default registerComponent('UserCard', ($el, id, getUser) => {
+export default registerComponent('UserCard', ($el, id, getUser, includeTitle=true) => {
     /** @type User */
     let user;
 
@@ -24,19 +24,15 @@ export default registerComponent('UserCard', ($el, id, getUser) => {
         const admin = core.isAdmin();
 
         userCard.innerHTML = `
-			<h2>
-				${
-                    admin
-                        ? `
+			<h2 hidden="${!includeTitle}">
+				${admin ? `
 					<button 
 						class="icon medium"
 						svg="account.svg"
 						onclick="_UserCard${id}__signInAs('${user.id}', '${user.email}')"
 						data-label="Sign in as"
 					></button>
-				`
-                        : ''
-                }
+				` : ''}
 				<a href="${core.ROOT_PATH}/user/?email=${user.email}">
 					${core.escapeHTML(user.email)}
 				</a>

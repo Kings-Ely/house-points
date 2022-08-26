@@ -299,7 +299,7 @@ export function loadSettings () {
     core.reservoir.set({
         switchTheme: () => {
             core.setTheme(core.getInverseTheme());
-            const svg = getTheme() === 'light' ? 'dark-theme.svg' : 'light-theme.svg';
+            const svg = getTheme() === 'light' ? 'light-theme.svg' : 'dark-theme.svg';
             core.reservoir.set('themeButtonSVG', svg);
         },
         themeButtonSVG: 'light-theme.svg',

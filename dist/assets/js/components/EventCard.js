@@ -7,8 +7,9 @@ import HousePoint from './HousePoint.js';
 /**
  * @param {El} $el
  * @param {() => Event} getEvent getter for event data
+ * @param {boolean} showHeader
  */
-export default registerComponent('EventCard', ($el, id, getEvent) => {
+export default registerComponent('EventCard', ($el, id, getEvent, showHeader) => {
     /** @type Event */
     let event;
 
@@ -63,6 +64,14 @@ export default registerComponent('EventCard', ($el, id, getEvent) => {
         });
         await hardReload();
     };
+    
+    window[`_EventCard${id}__changeDesc`] = async value => {
+        await core.api(`update/events/description`, {
+            eventId: event.id,
+            description: value,
+        });
+        await hardReload();
+    };
 
     window[`_HousePoint${id}__changeTime`] = async value => {
         await core.api(`update/events/time`, {
@@ -80,36 +89,34 @@ export default registerComponent('EventCard', ($el, id, getEvent) => {
 
         $el.innerHTML = `
 			<div class="event-card" id="event-card-${id}">
-				<h1>
-					${
-                        admin
-                            ? `
+				<h1 hidden="${!showHeader}">
+					${admin ? `
 						<input
-							value="${event.name}"
+							value="${core.escapeHTML(event.name)}"
 							onchange="_EventCard${id}__changeName(this.value)"
 							class="editable-text event-title-editable"
 						>
-					`
-                            : `
+					` : `
 						${core.escapeHTML(event.name)}
-					`
-                    }
+					`}
 				</h1>
-				<p data-label="${ago}">
-					${
-                        admin
-                            ? `
+				<p data-label="${ago}" style="text-align: left">
+					${admin ? `
 		                <input
 		                    type="date"
 		                    value="${core.formatTimeStampForInput(event.time)}"
 		                    onchange="_HousePoint${id}__changeTime(this.value)"
 		                >
-					`
-                            : core.escapeHTML(date)
-                    }
+					` : core.escapeHTML(date)}
 				</p>
 				<p style="font-size: 1.2em">
-					${core.escapeHTML(event.description)}
+					${admin ? `
+						<input
+							value="${core.escapeHTML(event.description)}"
+							onchange="_EventCard${id}__changeDesc(this.value)"
+							class="editable-text"
+						>
+					` : core.escapeHTML(event.description)}
 				</p>
 				<div>
 					<h2>
@@ -137,9 +144,7 @@ export default registerComponent('EventCard', ($el, id, getEvent) => {
                         )
                         .join('')}
 					
-					${
-                        admin
-                            ? `
+					${admin ? `
 						<div style="margin: 20px 0">
 							 <span class="add-student-to-event"></span>
 							 <button
@@ -151,9 +156,7 @@ export default registerComponent('EventCard', ($el, id, getEvent) => {
 								style="border: none"
 							 ></button>
 						<div>
-					`
-                            : ''
-                    }
+					` : ''}
 				</div>
 			</div>
 		`;

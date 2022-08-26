@@ -303,6 +303,7 @@ h3 {
 }
 
 /* Settings Button */
+
 .settings-button {
     position: fixed;
     bottom: 10%;
@@ -369,7 +370,7 @@ nav {
     display: none;
     position: absolute;
     background-color: #f9f9f9;
-    width: 160px;
+    width: 200px;
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
     padding: 12px 16px;
     z-index: 2;
@@ -383,6 +384,11 @@ nav {
 .nav-item .nav-item-dropdown > * {
     width: 100%;
     background: transparent;
+    display: grid;
+    /* assumed one svg icon and then text */
+    grid-template-columns: 40px 1fr;
+    align-items: center;
+    cursor: pointer;
 }
 
 /* to stop the page expanding to the right when hovered */

@@ -3,6 +3,7 @@ import * as core from '../main.js';
 import { registerComponent } from '../dom.js';
 import StudentEmailInputWithIntellisense from './StudentEmailInputWithIntellisense.js';
 import FullPagePopup from './FullPagePopup.js';
+import { escapeHTML } from "../main.js";
 
 /**
  * The popup showing 'allow' and 'reject' options for cookies.
@@ -75,7 +76,7 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
 						gets
 						<input
 							type="number"
-							value="${studentsInEvent[user.id]}"
+							value="${escapeHTML(studentsInEvent[user.id])}"
 							onchange="_AddEventPopup__updateStudentPoints('${user.id}', this.value)"
 							style="width: 40px"
 						>

@@ -26,7 +26,9 @@ export default registerComponent('FullPagePopup', ($el, id, content, title = ' '
 					></button>
 				</div>				
 				<div>
-					<h1>${title}</h1>
+					<h2 style="margin: 0; padding: 0" class="vertical-flex-center">
+                        ${title}
+                    </h2>
 				</div>				
 				<div>
 					<!-- right -->

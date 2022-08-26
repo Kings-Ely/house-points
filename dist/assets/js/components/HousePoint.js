@@ -1,6 +1,7 @@
 'use strict';
 import { registerComponent } from '../dom.js';
 import * as core from '../main.js';
+import { escapeHTML } from "../main.js";
 
 /**
  * A house point ready to go in a list.
@@ -91,10 +92,10 @@ export default registerComponent(
         // Preserve the 'admin' of this component rather than use the admin of the user,
         // as the user may be overriden with another user on the /user?email=someone-else
         window[`_HousePoint${id}__eventPopup`] = id => {
-            return core.eventPopup(id, admin);
+            return core.eventPopup(id);
         };
         window[`_HousePoint${id}__userPopup`] = id => {
-            return core.userPopup(id, admin);
+            return core.userPopup(id);
         };
 
         // definitely used 'namespaced' keys for functions specific to this component
@@ -156,9 +157,7 @@ export default registerComponent(
         const dateFormattedForInp = core.formatTimeStampForInput(hp['created']);
 
         const housePointEl = document.createElement('div');
-        housePointEl.className = `house-point ${!showBorderBottom ? 'last' : ''} ${
-            large ? 'large' : ''
-        }`;
+        housePointEl.className = `house-point ${!showBorderBottom ? 'last' : ''} ${large ? 'large' : ''}`;
         // Dynamically determine the width of each column based on which columns are shown
         housePointEl.style.gridTemplateColumns = `
             ${showEmail ? '320px' : ''}
@@ -171,31 +170,12 @@ export default registerComponent(
         `;
 
         housePointEl.innerHTML = `
-			${
-                showEmail
-                    ? `
+			${showEmail ? `
+                <email- args="${core.escapeHTML(JSON.stringify(hp))}"></email->
+            ` : ''}
+			${showReason ? `
 				<div>
-					<button
-						data-label="View User"
-						onclick="_HousePoint${id}__userPopup('${hp.userEmail}')"
-					>
-						${core.escapeHTML(hp.userEmail.split('@')[0])}
-						<span class="email-second-half">
-							@${hp.userEmail.split('@')[1]}
-						</span>
-						(Y${core.escapeHTML(hp.userYear)})
-					</button>
-				</div>
-			`
-                    : ''
-            }
-			${
-                showReason
-                    ? `
-				<div>
-		            ${
-                        hp.eventName && allowEventReason
-                            ? `
+		            ${hp.eventName && allowEventReason ? `
 						<button
 							svg="event.svg"
 							class="icon small"
@@ -205,54 +185,38 @@ export default registerComponent(
 							${core.escapeHTML(hp.eventName)}
 						</button>
 						
-						${
-                            hp.description
-                                ? `
+						${hp.description ? `
 							<p
 								style="padding-left: 5px; color: var(--text-light)"
 								data-label="${core.escapeHTML(hp.description)}"
 							>
 								(${core.escapeHTML(core.limitStrLength(hp.description, 20))})
 							</p>
-						`
-                                : ''
-                        }
-					`
-                            : reasonEditable
-                            ? `
+						` : ''}
+                    ` : reasonEditable ? `
 						<input
 							class="editable-text"
-							value="${hp.description}"
+							value="${core.escapeHTML(hp.description)}"
 							onchange="_HousePoint${id}__changeDescription(this.value)"
 							style="width: 100%"
 						>
-					`
-                            : core.escapeHTML(hp.description)
-                    }
+					` : core.escapeHTML(hp.description)}
 	            </div>
-			`
-                    : ''
-            }
-			${
-                showNumPoints
-                    ? `
+			` : ''}
+			${showNumPoints ? `
 	            <div>
-	                ${
-                        pointsEditable
-                            ? `
+	                ${pointsEditable ? `
 	                    <input
 	                        class="editable-text"
 	                        type="number"
 	                        min="1"
-	                        value="${hp['quantity']}"
+	                        value="${escapeHTML(hp['quantity'])}"
 	                        onchange="_HousePoint${id}__changeHpQuantity(this.value)"
 	                        style="width: 40px"
 	                    > points
-	                `
-                            : `
+	                ` : `
 	                    ${core.escapeHTML(hp['quantity'])} pts
-	                `
-                    }
+	                `}
 				</div>
 			`
                     : ''
@@ -271,47 +235,29 @@ export default registerComponent(
                                     ? `
 				                <input
 				                    type="date"
-				                    value="${dateFormattedForInp}"
+				                    value="${escapeHTML(dateFormattedForInp)}"
 				                    onchange="_HousePoint${id}__changeDate(this.value)"
 				                >
-			                `
-                                    : `
-				                ${core.escapeHTML(new Date(submittedTime).toDateString())}
-			                `
-                            }
+			                ` : core.escapeHTML(new Date(submittedTime).toDateString())}
 		                </p>
-		            `
-                            : ''
-                    }
+		            ` : ''}
 					<p>
 						${showStatusHint ? acceptedHTML : ''}
 					</p>
 	            </div>
-            `
-                    : ''
-            }
-			${
-                showStatusIcon
-                    ? `
+            ` : ''}
+			${showStatusIcon ? `
 	            <div>
-		            ${
-                        icon
-                            ? `
+		            ${icon ? `
 		                <span
 		                    svg="${icon}"
 			                data-label="${core.escapeHTML(hp['status'])}"
 			                class="icon medium icon-info-only"
 		                ></span>
-		            `
-                            : ''
-                    }
+		            ` : ''}
 	            </div>
-            `
-                    : ''
-            }
-			${
-                showDeleteButton
-                    ? `
+            ` : ''}
+			${showDeleteButton ? `
 				<div>
 					<button
 					    data-label="Delete house point"
@@ -320,16 +266,10 @@ export default registerComponent(
 						class="icon small"
 					></button>
 				</div>
-			`
-                    : ''
-            }
-			${
-                showPendingOptions
-                    ? `
+			` : ''}
+			${showPendingOptions ? `
 				<div>
-					${
-                        hp.status === 'Pending'
-                            ? `
+					${hp.status === 'Pending' ? `
 		                <button
 		                    onclick="_HousePoint${id}__reject()"
 		                    class="icon icon-hover-warning"
@@ -344,13 +284,9 @@ export default registerComponent(
 		                    aria-label="Accept"
 		                    data-label="Accept"
 		                ></button>
-                	`
-                            : ''
-                    }
+                	` : ''}
                 </div>
-            `
-                    : ''
-            }
+            ` : ''}
 	    `;
 
         $el.innerHTML = '';
