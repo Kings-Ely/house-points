@@ -15,25 +15,27 @@ export interface IFlags {
     port: number;
 }
 
-export const flags = commandLineArgs([
-    {
-        name: 'logLevel',
-        type: Number,
-        defaultValue: LogLvl.INFO
-    },
-    {
-        name: 'dbLogLevel',
-        type: Number,
-        defaultValue: LogLvl.WARN
-    },
-    { name: 'logTo', type: String },
-    {
-        name: 'port',
-        alias: 'p',
-        type: Number,
-        defaultValue: 0
-    }
-]);
+export const flags = {
+    logLevel: LogLvl.INFO,
+    dbLogLevel: LogLvl.WARN,
+    port: 4464,
+    ...commandLineArgs([
+        {
+            name: 'logLevel',
+            type: Number,
+        },
+        {
+            name: 'dbLogLevel',
+            type: Number,
+        },
+        { name: 'logTo', type: String },
+        {
+            name: 'port',
+            alias: 'p',
+            type: Number,
+        },
+    ]),
+};
 
 /**
  * Handlers for the api routes
@@ -69,11 +71,11 @@ function startServer() {
     if (process.env.PROD === '1') {
         options = {
             key: fs.readFileSync('./privatekey.pem'),
-            cert: fs.readFileSync('./certificate.pem')
+            cert: fs.readFileSync('./certificate.pem'),
         };
     }
 
-    let port = process.env.PORT;
+    let port: number | string | undefined = process.env.PORT;
 
     if (flags.port) {
         port = flags.port;
@@ -93,7 +95,7 @@ function startServer() {
             return res.end(
                 JSON.stringify({
                     status: 503,
-                    error: 'Waiting for server to start...'
+                    error: 'Waiting for server to start...',
                 })
             );
         }

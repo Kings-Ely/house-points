@@ -15,30 +15,73 @@
 <body>
 <nav></nav>
 <main>
-    <button
-        id="sign-out"
-        aria-label="logout"
-        svg="logout.svg"
-        onclick="logout()"
-        class="icon"
-        data-label="Logout"
-    ></button>
     <section>
         <p style="font-size: 2em; text-align: center;">
             <email- args="user, { fontsize: '50px' }"></email->
         </p>
-        <a href="../set-password">
-            Change Password
-        </a>
+        <div class="flex-wrap">
+            <a class="big-link" href="../set-password" svg="key.svg">
+                Change Password
+            </a>
+            <button
+                id="sign-out"
+                aria-label="logout"
+                svg="logout.svg"
+                onclick="logout()"
+                class="big-link"
+                data-label="Logout"
+            >Log Out</button>
+        </div>
     </section>
 
-    <section>
+    <section hidden="!user.admin" class="flex-wrap">
         <a
             href="../admin/"
             class="big-link"
             svg="admin.svg"
-            hidden="!user.admin"
         >Admin Dashboard</a>
+        <a
+            href="./students"
+            class="big-link"
+            svg="student.svg"
+        >
+            Students
+        </a>
+        <a
+            href="../house-points"
+            class="big-link"
+            svg="student.svg"
+        >
+            House Points
+        </a>
+        <a
+            href="../events"
+            class="big-link"
+            svg="event.svg"
+        >
+            Events
+        </a>
+        <a
+            href="./server"
+            class="big-link"
+            svg="server.svg"
+        >
+            Server
+        </a>
+        <a
+            href="./awards"
+            class="big-link"
+            svg="award.svg"
+        >
+            Awards
+        </a>
+        <a
+            href="../leaderboard"
+            class="big-link"
+            svg="leaderboard.svg"
+        >
+            Leaderboard
+        </a>
     </section>
 
     <section hidden="!user.year">

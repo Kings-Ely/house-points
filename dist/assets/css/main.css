@@ -42,7 +42,7 @@ body:not([data-theme]) {
 
     --bg: #eeeeee;
     --bg-accent: white;
-    --accent: #14a914;
+    --accent: #15cb15;
 
     --text-warning: red;
 
@@ -108,6 +108,13 @@ main {
 .vertical-flex-center {
     display: flex;
     align-items: center;
+}
+
+.flex-wrap {
+    display: flex;
+    align-content: flex-start;
+    max-width: 100%;
+    flex-wrap: wrap;
 }
 
 .fill-screen {
