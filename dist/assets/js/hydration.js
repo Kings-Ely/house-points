@@ -177,8 +177,8 @@ class Reservoir {
 
     #hydrateIf($el) {
         let key = $el.getAttribute('hidden-dry');
-
-        if (!key) {
+        
+        if (!key || typeof key !== 'string') {
             key = $el.getAttribute('hidden');
             if (key === '') return;
             $el.setAttribute('hidden-dry', key);
