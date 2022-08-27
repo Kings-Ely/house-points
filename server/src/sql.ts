@@ -77,10 +77,8 @@ export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
                     return str + '?';
                 }
             }, '');
-
-            if (flags.verbose) {
-                log.log`QUERY: ${con.escape(query)} ${JSON.stringify(params)}`;
-            }
+            
+            log.verbose`QUERY: ${con.escape(query)} ${JSON.stringify(params)}`;
 
             // if it's an array, add all the elements of the array in place as params
             for (let i = 0; i < params.length; i++) {

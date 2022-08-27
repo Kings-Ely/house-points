@@ -92,7 +92,7 @@ export default registerComponent(
         // Preserve the 'admin' of this component rather than use the admin of the user,
         // as the user may be overriden with another user on the /user?email=someone-else
         window[`_HousePoint${id}__eventPopup`] = id => {
-            return core.eventPopup(id);
+            return core.eventPopup(id, reload);
         };
         window[`_HousePoint${id}__userPopup`] = id => {
             return core.userPopup(id);

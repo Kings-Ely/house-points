@@ -30,7 +30,6 @@ function serverDown(message = 'Server is down!') {
     $status.innerText = message;
     $status.style.borderColor = 'red';
     lastPingOk = false;
-    $startServerButton.style.opacity = '1';
     setTimeout(serverStatusAndPing, 3000);
 }
 
@@ -124,9 +123,6 @@ async function serverStatusAndPing() {
     }
 
     lastPingOk = true;
-
-    $restartServerButton.style.opacity = '1';
-    $killServerButton.style.opacity = '1';
 
     setTimeout(serverStatusAndPing, 5000);
     return true;
@@ -224,8 +220,8 @@ $startServerButton.onclick = async () => {
 
     await core.showSpinner();
 
-    await fetch(core.ROOT_PATH + '/api/start-server');
-
+    await fetch(core.ROOT_PATH + '/api/start-server?session=' + core.getSession());
+    
     location.reload();
 };
 
@@ -233,25 +229,10 @@ $restartServerButton.onclick = async () => {
     if (!confirm('Are you sure you want to restart the server?')) {
         return;
     }
-
+    
     await core.showSpinner();
-
-    let res = await core.api(`delete/server`);
-    if (res.status !== 200 || !res.ok) {
-        await core.showError('Failed to stop server');
-        return;
-    }
-
-    await core.showSpinner();
-
-    await core.sleep(100);
-
-    res = await fetch(core.ROOT_PATH + '/api/start-server');
-
-    if ((await res.text()) !== '1') {
-        await core.showError('Failed to start server');
-        await core.sleep(2000);
-    }
+    
+    await fetch(core.ROOT_PATH + '/api/start-server?session=' + core.getSession());
 
     location.reload();
 };

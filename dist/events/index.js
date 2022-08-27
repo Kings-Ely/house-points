@@ -6,6 +6,7 @@ const selected = [];
 
 window.eventPopup = core.eventPopup;
 window.deleteEvents = deleteEvents;
+window.showAllEvents = showAllEvents;
 
 (async () => {
     await core.init('..', true);
@@ -13,7 +14,7 @@ window.deleteEvents = deleteEvents;
     await showAllEvents();
 
     if (core.GETParam('id')) {
-        await eventPopup(core.GETParam('id'));
+        await eventPopup(core.GETParam('id'), showAllEvents);
     }
 })();
 
@@ -70,7 +71,7 @@ function eventHTML(event) {
 		<div 
 			class="flex-center"
 			style="justify-content: left"
-			onclick="eventPopup('${event.id}')"
+			onclick="eventPopup('${event.id}', showAllEvents)"
 		>
 			<button
 				style="text-decoration: none; font-weight: bold"
@@ -83,9 +84,9 @@ function eventHTML(event) {
 			</button>
 		</div>
 		<p 
-			class="flex-center" 
+			class="flex-center"
 			style="justify-content: right"
-			onclick="eventPopup('${event.id}')"
+			onclick="eventPopup('${event.id}', showAllEvents)"
 		>
 			${core.escapeHTML(core.limitStrLength(event.description))}
 		</p>

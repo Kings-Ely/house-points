@@ -253,8 +253,8 @@ export async function userFromSession(
  * Assumed admin level authentication, censor the data after if necessary.
  */
 export async function addHousePointsToUser(query: queryFunc, user: any & { id: string }) {
-    if (!user['id']) {
-        throw new Error('User has no Id');
+    if (!user['id'] || typeof user.id !== 'string') {
+        throw new Error('Invalid user ID: ' + user.id);
     }
 
     user['housePoints'] = await query`
@@ -284,6 +284,30 @@ export async function addHousePointsToUser(query: queryFunc, user: any & { id: s
             housepoints.userId = users.id
             AND users.id = ${user['id']}
        ORDER BY created DESC
+    `;
+    
+    user['awards'] = await query`
+        SELECT
+            awards.id,
+            UNIX_TIMESTAMP(awards.awarded) as awarded,
+            awards.description,
+            
+            awardTypes.id as awardTypeId,
+            awardTypes.name as awardTypeName,
+            awardTypes.description as awardTypeDescription,
+            awardTypes.hpsRequired as awardRequirement,
+            
+            users.id as userId,
+            users.email as userEmail,
+            users.year as userYear
+            
+        FROM users, awards, awardTypes
+        
+        WHERE
+            awards.userId = users.id
+            AND awards.awardTypeId = awardTypes.id
+            AND users.id = ${user['id']}
+       ORDER BY awarded DESC
     `;
 
     // add the quick count stats

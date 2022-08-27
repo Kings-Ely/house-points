@@ -9,7 +9,7 @@ export const API_ROOT = 'https://josephcoppin.com/school/house-points/api',
     LS_RESERVOIR = 'hpnea_Reservoir',
     HOUSE_NAME = 'Osmond',
     svgCache = {},
-    SPINNER_STOP_DELAY = 500,
+    SPINNER_STOP_DELAY = 300,
     MAX_NOTIFICATIONS = 4,
     NOTIFICATION_SHOW_TIME = 5000;
 
@@ -57,7 +57,7 @@ const relativeTimeFormat = new Intl.RelativeTimeFormat('en', {
     numeric: 'auto',
 });
 
-import './components';
+import './components/';
 import {
     domIsLoaded,
     loadFooter,

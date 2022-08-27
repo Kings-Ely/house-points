@@ -9,7 +9,7 @@ import HousePoint from './HousePoint.js';
  * @param {() => Event} getEvent getter for event data
  * @param {boolean} showHeader
  */
-export default registerComponent('EventCard', ($el, id, getEvent, showHeader) => {
+export default registerComponent('EventCard', ($el, id, getEvent, showHeader=true, reloadCb=()=>{}) => {
     /** @type Event */
     let event;
 
@@ -171,7 +171,7 @@ export default registerComponent('EventCard', ($el, id, getEvent, showHeader) =>
         core.reloadDOM();
     }
 
-    async function hardReload() {
+    async function hardReload(doReload=true) {
         const newEvent = await getEvent();
         if (!newEvent) {
             await core.showError('Event not found');
@@ -179,7 +179,10 @@ export default registerComponent('EventCard', ($el, id, getEvent, showHeader) =>
         }
         event = newEvent;
         await render();
+        if (doReload) {
+            reloadCb();
+        }
     }
 
-    hardReload().then();
+    hardReload(false).then();
 });

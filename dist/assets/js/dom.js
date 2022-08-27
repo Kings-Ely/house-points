@@ -309,7 +309,6 @@ export function loadSettings () {
         FullPagePopup(document.body, `
             <button
                 aria-label="Switch theme"
-                id="switch-theme"
                 class="icon bordered"
                 pump.svg="\${themeButtonSVG}"
                 bind.click="switchTheme()"

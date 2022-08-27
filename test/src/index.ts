@@ -20,14 +20,14 @@ const flags = commandLineArgs([
         name: 'verbose',
         alias: 'v',
         type: Boolean,
-        defaultValue: false
+        defaultValue: false,
     },
     {
         name: 'deploy',
         alias: 'd',
         type: Boolean,
-        defaultValue: false
-    }
+        defaultValue: false,
+    },
 ]);
 
 export type API = (path: string, body?: any) => Promise<any>;
@@ -54,7 +54,7 @@ async function api(path: string, body: Record<string, any> = {}): Promise<any> {
             let res = await api(`create/sessions/from-login`, {
                 email: adminEmail,
                 password: adminPassword,
-                session: ''
+                session: '',
             });
             if (res.error || !res.ok) {
                 throw c.red(res.error);
@@ -70,8 +70,8 @@ async function api(path: string, body: Record<string, any> = {}): Promise<any> {
         method: 'POST',
         body: JSON.stringify(body),
         headers: {
-            'Content-Type': 'application/json'
-        }
+            'Content-Type': 'application/json',
+        },
     }).catch(e => {
         // don't do anything fancy with fetch errors, just log them
         console.log(c.red`Error in API request`);
@@ -97,17 +97,17 @@ export async function deploy(): Promise<void> {
     return await new Promise<void>((resolve, reject) => {
         let invoked = false;
 
-        let process = childProcess.fork('./bin/upload.js');
+        let fork = childProcess.fork('./bin/upload.js', ['-m']);
 
         // listen for errors as they may prevent the exit event from firing
-        process.on('error', err => {
+        fork.on('error', err => {
             if (invoked) return;
             invoked = true;
             reject(err);
         });
 
         // execute the callback once the process has finished running
-        process.on('exit', code => {
+        fork.on('exit', code => {
             if (invoked) return;
             invoked = true;
             if (code !== 0) {
@@ -131,13 +131,17 @@ export async function deploy(): Promise<void> {
 
     const testRes = await Test.testAll(api, flags);
     console.log(testRes.str());
-    
+
     // stop the server process by sending it a 'kill signal'
     const killServerRes = await api(`delete/server`);
     if (killServerRes.ok) {
-        console.log(c.green(`Server Killed, finished testing in ${timeSinceStart()}ms`));
+        console.log(
+            c.green(`Server Killed, finished testing in ${timeSinceStart()}ms`)
+        );
     } else {
-        console.log(c.red(`Server not killed: ${JSON.stringify(killServerRes)}`));
+        console.log(
+            c.red(`Server not killed: ${JSON.stringify(killServerRes)}`)
+        );
     }
 
     if (testRes.failed === 0 && flags.deploy) {

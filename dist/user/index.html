@@ -84,29 +84,36 @@
         </a>
     </section>
 
-    <section hidden="!user.year">
+    <section hidden="!user.year" style="text-align: center">
+        <h2 pump="user.accepted"> House Points</h2>
         <p>
-            <b>${core.escapeHTML(theUsersInfo['accepted'])}</b> accepted,
-            <b>${core.escapeHTML(theUsersInfo['pending'])}</b> pending and
-            <b>${core.escapeHTML(theUsersInfo['rejected'])}</b> rejected house points.
+            <b pump="user.pending"></b> pending and
+            <b pump="user.rejected"></b> rejected house points.
         </p>
-    </section>
-
-    <section
-        hidden="!((user.email === theUser.email || user.admin) && theUser.student)"
-    >
-        <label>
-            <textarea id="hp-reason"
+    
+        <div
+            hidden="!((user.email === theUser.email || user.admin) && theUser.student)"
+        >
+            <label>
+            <textarea
+                id="hp-reason"
                 placeholder="House Point Requests (separate multiple by new line)"
-                rows="2"></textarea>
-        </label>
-        <button
-            id="submit-hp"
-            class="icon"
-            svg="plus.svg"
-            aria-label="submit house point"
-            data-label="Request House Points"
-        ></button>
+                rows="2"
+            ></textarea>
+            </label>
+            <button
+                id="submit-hp"
+                class="icon"
+                svg="plus.svg"
+                aria-label="submit house point"
+                data-label="Request House Points"
+            ></button>
+        </div>
+        
+        <h2>Awards (<span pump="user.awards.length" pump-to="replace">loading...</span>)</h2>
+        <div foreach="award in user.awards">
+            <div pump="award.name"></div>
+        </div>
     </section>
 
     <section id="hps"></section>

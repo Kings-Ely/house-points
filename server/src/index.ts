@@ -18,7 +18,7 @@ export interface IFlags {
 export const flags = {
     logLevel: LogLvl.INFO,
     dbLogLevel: LogLvl.WARN,
-    port: 4464,
+    port: 0,
     ...commandLineArgs([
         {
             name: 'logLevel',
@@ -116,7 +116,7 @@ function startServer() {
         server.close(async () => {
             log.log`Server stopped, stopping process...`;
             await log.close();
-            process.exit(0);
+            process.exit(1);
         });
     });
 }

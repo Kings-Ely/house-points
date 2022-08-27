@@ -124,7 +124,7 @@ main {
 
 section {
     border-bottom: 1px solid var(--border);
-    padding-bottom: 50px;
+    padding-bottom: 20px;
 }
 
 .bordered {
@@ -268,7 +268,7 @@ h1 {
 
 h2 {
     margin: 20px;
-    padding-top: 50px;
+    padding-top: 20px;
     font-size: 25px;
     color: var(--text-light);
 }
@@ -306,8 +306,8 @@ h3 {
 
 .settings-button {
     position: fixed;
-    bottom: 10%;
-    right: 8px;
+    bottom: 15px;
+    right: 15px;
     width: 50px;
     height: 50px;
     border-radius: 50%;
