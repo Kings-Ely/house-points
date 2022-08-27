@@ -235,14 +235,17 @@ export function GETParamRaw(name) {
  */
 export const navigate = async url => {
     await waitForReady();
-
+    
+    console.trace(ROOT_PATH, url, ROOT_PATH + url);
+    
     if (url[0] === '/') {
         url = ROOT_PATH + url;
     }
 
+    console.log('NAVIGATING TO', url);
     window.location.assign(url);
     // never resolve promise as just wait for the page to load
-    await new Promise(() => {});
+    return await new Promise(() => {});
 };
 
 /**

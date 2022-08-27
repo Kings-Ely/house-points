@@ -2,6 +2,7 @@
 import * as core from './main.js';
 import { eraseCookie } from './cookies.js';
 import { api } from './backendAPI.js';
+import { genRandomString } from "./main.js";
 
 /**
  * Caches the user info
@@ -120,8 +121,7 @@ export async function logout() {
  */
 export async function logoutAction() {
     await eraseCookie(core.COOKIE_SESSION);
-    await core.setTheme();
-    await core.navigate(core.ROOT_PATH);
+    await core.navigate('/');
 }
 
 /**
@@ -178,6 +178,5 @@ export async function signInAs(id, email) {
  * @returns {string}
  */
 export function genPassword() {
-    return 'changeme';
-    //return genRandomString(15);
+    return genRandomString(15);
 }

@@ -22,7 +22,7 @@ const $password = document.getElementById('password'),
     const user = await core.api(`get/users`, { sessionId: s });
 
     if (!user.ok) {
-        await core.navigate(`../?error=auth`);
+        await core.navigate(`/?error=auth`);
         return;
     }
     
