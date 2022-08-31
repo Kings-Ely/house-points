@@ -4,6 +4,7 @@ import HousePoint from '../assets/js/components/HousePoint.js';
 const $hps = document.getElementById('hps');
 const $hpReasonInp = document.getElementById('hp-reason');
 
+/** @type {User|null} */
 let theUsersInfo = null;
 let me = false;
 

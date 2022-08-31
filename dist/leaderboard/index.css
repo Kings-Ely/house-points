@@ -13,16 +13,18 @@ main {
 }
 
 .podium-student {
+    display: block;
     font-weight: bold;
     color: var(--border);
     border-radius: 10px 10px 0 0;
-    align-items: flex-start;
-    justify-content: center;
+    text-align: center;
     margin: 5px;
     padding: 0;
     transition: 500ms;
     border: 3px solid var(--border);
     border-bottom: none;
+    width: 80%;
+    height: 0;
 }
 
 #podium {
@@ -37,11 +39,9 @@ main {
     height: 100%;
     width: 12vw;
     display: flex;
-    justify-content: center;
-}
-
-#show-year {
-    width: 40px;
+    justify-content: end;
+    align-items: center;
+    flex-direction: column;
 }
 
 #split {
@@ -62,6 +62,6 @@ main {
 }
 
 .podium-place {
-    font-size: 30px;
-    margin: 10px;
+    font-size: 26px;
+    margin: 8px;
 }

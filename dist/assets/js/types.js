@@ -8,6 +8,10 @@
  *  @typedef {($el: El, id: number, ...args: *) => *} ComponentDefinition
  */
 
+/**
+ * @typedef {{}} Award
+ */
+
 /** @typedef {{
  * 		id?: string,
  * 		email: string,
@@ -16,6 +20,9 @@
  * 		rejected: number,
  * 		pending: number,
  * 		housePoints: HP[],
+ * 	    awards: Award[],
+ * 	    student: boolean,
+ * 	    admin: boolean,
  * }} User
  */
 

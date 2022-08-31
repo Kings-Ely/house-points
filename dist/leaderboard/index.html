@@ -23,7 +23,6 @@
                 <label>
                     Only show for
                     <select
-                        id="show-year"
                         aria-label="what years to show"
                         bind="showYears"
                         bind-persist
@@ -35,33 +34,39 @@
                         <option value="12">12</option>
                         <option value="13">13</option>
                         <option value="12,13">6th Form</option>
+                        <option value="9,10,11">Senior Scl</option>
                     </select>
                 </label>
             </div>
-            <div id="podium" foreach="i in [1, 0, 2]">
-                <div>
-                    <p pump="students[i].email.split('@')[0]"></p>
+            <button bind.click="console.log(showYears)">clickme</button>
+            <div
+                id="podium"
+                pour.students="students.filter(s => showYears.includes(s.year.toString()))"
+                foreach="i in [1, 0, 2]"
+            >
+                <email- args="students[i]"></email->
+                <div
+                    class="student podium-student"
+                    pump.style="
+                        height: ${i === 0 ? 100 :
+                            Math.max((students[i].accepted / students[0].accepted) * 100, 25)}%;
+                        "
+                >
+                    <p
+                        class="podium-place"
+                        pump.style="color: ${['gold','silver','#CD7F32'][i]}"
+                        pump="['1st', '2nd', '3rd'][i]"
+                    ></p>
                     <div
-                        class="student podium-student"
-                        pump.style="height: ${['80','60','40'][i]}%"
-                    >
-                        <p
-                            class="podium-place"
-                            pump.style="color: ${['gold','silver','#CD7F32'][i]}"
-                            pump="['1st', '2nd', '3rd'][i]"
-                        ></p>
-                        <div
-                            pump="students[i].accepted"
-                            style="font-size: 1.5em"
-                        ></div>
-                    </div>
+                        pump="students[i].accepted"
+                        style="font-size: 1.3em"
+                    ></div>
                 </div>
             </div>
 
             <div
                 id="leaderboard"
-                foreach="student in students.slice(3)"
-                each.hidden="!showYears.includes(parseInt(student.year))"
+                foreach="student in students.filter(s => showYears.includes(s.year.toString())).slice(3)"
             >
                 <div class="student">
                     <email- args="student"></email->

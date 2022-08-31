@@ -2,7 +2,6 @@ import mysql from 'mysql2';
 import c from 'chalk';
 
 import log from './log';
-import { flags } from './index';
 
 export type queryRes =
     | mysql.RowDataPacket[]
@@ -16,7 +15,7 @@ export type queryFunc = <Res extends queryRes = mysql.RowDataPacket[]>(
     ...params: any[]
 ) => Promise<Res>;
 
-export default function (dbConfig?: mysql.ConnectionOptions): queryFunc {
+export default function connect (dbConfig?: mysql.ConnectionOptions): queryFunc {
     // define defaults from .env file
     const config: mysql.ConnectionOptions = {
         host: process.env.DB_HOST,

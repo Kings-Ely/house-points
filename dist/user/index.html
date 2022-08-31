@@ -109,10 +109,14 @@
             ></button>
         </div>
         
-        <h2>Awards (<span pump="user.awards.length" pump-to="replace">loading...</span>)</h2>
-        <div foreach="award in user.awards">
-            <div pump="award.name"></div>
+        <div hidden="!user.awards.length">
+            <h2>Awards (<span pump="user.awards.length" pump-to="replace">loading...</span>)</h2>
+            <div foreach="award in user.awards">
+                <div pump="award.awardTypeName"> (<span pump="award.awardRequirement"></span>)</div>
+                <div pump="award.description"></div>
+            </div>
         </div>
+
     </section>
 
     <section id="hps"></section>

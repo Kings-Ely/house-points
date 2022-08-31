@@ -121,6 +121,10 @@ export async function logout() {
  */
 export async function logoutAction() {
     await eraseCookie(core.COOKIE_SESSION);
+    core.reservoir.set({
+        'user': null,
+        'signedIn': false
+    },true);
     await core.navigate('/');
 }
 
@@ -178,5 +182,6 @@ export async function signInAs(id, email) {
  * @returns {string}
  */
 export function genPassword() {
-    return genRandomString(15);
+    return 'changeme';
+    //return genRandomString(15);
 }

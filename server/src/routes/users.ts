@@ -272,16 +272,20 @@ route('get/users/leaderboard', async ({ query, body }) => {
     if (!(await isLoggedIn(body, query))) return AUTH_ERR;
 
     let data = await query`
-        SELECT 
+        SELECT
+            id,
             email,
-            year,
-            id
+            admin,
+            student,
+            year
         FROM users
         WHERE student = true
         ORDER BY year DESC, email
     `;
-
-    data.forEach((u: any) => addHousePointsToUser(query, u));
+    
+    for (let i = 0; i < data.length; i++) {
+        await addHousePointsToUser(query, data[i]);
+    }
 
     if (!(await isAdmin(body, query))) {
         // remove id from each user

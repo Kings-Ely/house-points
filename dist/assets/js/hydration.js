@@ -42,7 +42,10 @@ class Reservoir {
         }
 
         this.#lsData = lsData;
-        this.#data = { ...this.#lsData };
+        this.#data = {
+            ...this.#data,
+            ...this.#lsData
+        };
 
         if (hydrate) {
             this.hydrate();
@@ -81,7 +84,7 @@ class Reservoir {
         } else {
             throw 'Invalid key type - cannot add to reservoir';
         }
-
+        
         if (areChanges) {
             if (persist) {
                 this.saveToLocalStorage();
@@ -117,7 +120,9 @@ class Reservoir {
         while (parent) {
             for (let attr of attrsStartWith(parent, 'pour.')) {
                 const key = attr.split('.', 2)[1];
-                parameters[key] = JSON.parse(parent.getAttribute(attr));
+                const value = this.execute(parent.getAttribute(attr), $el.parentElement);
+                if (value === this.executeError) continue;
+                parameters[key] = value;
             }
             parent = parent.parentElement;
         }
@@ -153,6 +158,10 @@ class Reservoir {
         let dry = $el.getAttribute('dry') ?? $el.innerHTML;
         let value = this.execute(key, $el);
         if (value === this.executeError) return;
+        
+        if (typeof value === 'object') {
+            value = JSON.stringify(value);
+        }
 
         if (!$el.hasAttribute('pump-dirty')) {
             value = escapeHTML(value);
@@ -200,19 +209,23 @@ class Reservoir {
         if (!('value' in $el)) {
             throw 'Cannot bind to element without value attribute';
         }
-
+    
         const key = $el.getAttribute('bind');
         const persist = $el.hasAttribute('bind-persist');
-
+    
         if (!$el.getAttribute('bound')) {
             $el.addEventListener('change', () => {
                 reservoir.set(key, $el.value, persist);
             });
         }
-
+    
         $el.setAttribute('bound', 'true');
-
-        reservoir.set(key, $el.value);
+    
+        if (this.has(key)) {
+            $el.value = this.get(key);
+        } else {
+            this.set(key, $el.value);
+        }
     }
 
     #bindListener($el, name) {
