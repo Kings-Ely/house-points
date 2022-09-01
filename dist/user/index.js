@@ -33,6 +33,8 @@ async function reloadUserInfoFromEmail() {
     const email = core.GETParam('email');
 
     theUsersInfo = await core.api(`get/users`, { email });
+    
+    console.log(theUsersInfo);
 
     core.reservoir.set('theUser', theUsersInfo);
 }

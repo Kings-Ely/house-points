@@ -8,7 +8,9 @@ import HousePoint from './HousePoint.js';
  * @param {() => User} getEvent getter for event data
  * @param {boolean} admin should be admin options be shown
  */
-export default registerComponent('UserCard', ($el, id, getUser, includeTitle=true) => {
+export default registerComponent(
+    'UserCard',
+($el, id, getUser, includeTitle=true) => {
     /** @type User */
     let user;
 
@@ -38,11 +40,26 @@ export default registerComponent('UserCard', ($el, id, getUser, includeTitle=tru
 				</a>
 			</h2>
 			<div>
+			    <div>
+			        ${user.awards.map(award => `
+			            <span
+			                class="bordered"
+			                style="padding: 4px; margin: 2px"
+			                data-label="${core.getRelativeTime(award.awarded*1000)}"
+			            >
+			                ${award.awardTypeName}
+			                (${award.awardRequirement})
+                       </span>
+			        `).join('')}
+                </div>
 				<h3>
 					${core.escapeHTML(user['accepted'])} House Points Awarded
 				</h3>
 				${admin ? `
-					<p>(${core.escapeHTML(user.pending)} pending, ${core.escapeHTML(user.rejected)} rejected)</p>
+					<p>
+					    (${core.escapeHTML(user.pending)} pending,
+                         ${core.escapeHTML(user.rejected)} rejected)
+                    </p>
 				` : ``}
 				<div class="user-card-housepoints">
 					${user['housePoints']

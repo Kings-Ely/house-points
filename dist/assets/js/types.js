@@ -9,7 +9,18 @@
  */
 
 /**
- * @typedef {{}} Award
+ * @typedef {{
+ *     id: string,
+ *     awarded: number,
+ *     description: string,
+ *     awardTypeId: string,
+ *     awardTypeDescription: string,
+ *     awardTypeName: string,
+ *     awardRequirement: number,
+ *     userId: string,
+ *     userEmail: string,
+ *     userYear: number
+ * }} Award
  */
 
 /** @typedef {{
