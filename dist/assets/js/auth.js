@@ -2,7 +2,6 @@
 import * as core from './main.js';
 import { eraseCookie } from './cookies.js';
 import { api } from './backendAPI.js';
-import { genRandomString } from "./main.js";
 
 /**
  * Caches the user info
@@ -17,14 +16,6 @@ export async function handleUserInfo(info) {
     }
     state.userInfoJSON = info;
     state.userInfoIsLoaded = true;
-
-    core.reservoir.set(
-        {
-            user: state.userInfoJSON,
-            signedIn: state.isSignedIn,
-        },
-        true
-    );
 
     for (const cb of state.userInfoCallbacks) {
         cb(info);

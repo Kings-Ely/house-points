@@ -1,6 +1,8 @@
-import { escapeHTML, loadSVG, reloadDOM } from "./main.js";
-
 // for debugging
+import { reloadDOM } from "./dom.js";
+import { loadSVG } from "./svg.js";
+import { escapeHTML } from "./main.js";
+
 window.reservoirErrors = [];
 
 /**
@@ -24,36 +26,52 @@ class Reservoir {
     #lsData = {};
     localStorageKey = 'reservoir';
     executeError = Symbol('__reservoirExecuteError');
+    #loaded = false;
+    /** @type Function[] */
+    #loadedCBs = [];
 
     loadFromLocalStorage(hydrate = true) {
-        const lsDataRaw = localStorage.getItem(this.localStorageKey);
-        let lsData;
-
-        try {
-            lsData = JSON.parse(lsDataRaw);
-        } catch (E) {
-            console.error('Error parsing reservoir data from local storage');
-            lsData = {};
-        }
-
-        if (typeof lsData !== 'object' || Array.isArray(lsData) || lsData === null) {
-            console.error('Error parsing reservoir data from local storage - must be object');
-            lsData = {};
-        }
-
-        this.#lsData = lsData;
+        this.#lsData = this.#getFromLS();
         this.#data = {
             ...this.#data,
             ...this.#lsData
         };
-
+        
         if (hydrate) {
             this.hydrate();
         }
+        this.#loaded = true;
+        for (let cb of this.#loadedCBs) {
+            cb();
+        }
+    }
+    
+    waitForLoaded (cb) {
+        if (this.#loaded) return void cb();
+        this.#loadedCBs.push(cb);
     }
 
     saveToLocalStorage() {
-        localStorage.setItem(this.localStorageKey, JSON.stringify(this.#lsData));
+        this.waitForLoaded(() => {
+            localStorage.setItem(this.localStorageKey, JSON.stringify(this.#lsData));
+        });
+    }
+    
+    setFromObj (obj, persist=false) {
+        let areChanges = false;
+        for (const k in obj) {
+            areChanges ||= this.#data[k] !== obj[k];
+            this.#data[k] = obj[k];
+        
+            if (persist) {
+                this.#lsData[k] = obj[k];
+            }
+        }
+    
+        if (areChanges) {
+            this.saveToLocalStorage();
+            reloadDOM();
+        }
     }
 
     /**
@@ -62,20 +80,14 @@ class Reservoir {
      * @param {boolean} [persist=false]
      */
     set(key, item, persist = false) {
-        let areChanges = false;
-
         if (typeof key === 'object') {
-            persist = !!item;
-
-            for (const k in key) {
-                areChanges ||= this.#data[k] !== key[k];
-                this.#data[k] = key[k];
-
-                if (persist) {
-                    this.#lsData[k] = key[k];
-                }
-            }
-        } else if (typeof key === 'string') {
+            this.setFromObj(key, !!item);
+            return;
+        }
+    
+        let areChanges = false;
+        
+        if (typeof key === 'string') {
             areChanges ||= this.#data[key] !== item;
             this.#data[key] = item;
             if (persist === true) {
@@ -151,6 +163,64 @@ class Reservoir {
     has(key) {
         return this.get(key) !== undefined;
     }
+    
+    /**
+     * @param {HTMLElement|Document|Body} $el
+     */
+    hydrate($el = document) {
+        //const start = performance.now();
+        
+        if ($el?.hasAttribute?.('hidden') || $el?.hasAttribute?.('hidden-dry')) {
+            if (!this.#hydrateIf($el)) {
+                return;
+            }
+        }
+        
+        if ($el?.getAttribute?.('aria-hidden') === 'true') {
+            return;
+        }
+        
+        if ($el?.hasAttribute?.('waterproof')) {
+            return;
+        }
+        
+        if ($el?.hasAttribute?.('bind')) {
+            this.#bind($el);
+        }
+        
+        if ($el?.hasAttribute?.('pump')) {
+            this.#hydrateDry($el);
+        }
+        
+        for (let attr of $el?.getAttributeNames?.() || []) {
+            if (attr.startsWith('pump.')) {
+                this.#hydrateAttribute($el, attr);
+            } else if (attr.startsWith('bind.')) {
+                this.#bindListener($el, attr.split('.', 2)[1]);
+            }
+        }
+        
+        if ($el?.hasAttribute?.('foreach')) {
+            this.#hydrateFor($el);
+        }
+        
+        if ($el?.hasAttribute?.('args') && 'reloadComponent' in $el) {
+            $el.reloadComponent();
+        }
+        
+        if ($el?.hasAttribute?.('svg')) {
+            loadSVG($el).then();
+        }
+        
+        for (const child of $el.children) {
+            // don't await, because we don't want to block the page load
+            reloadDOM(child);
+        }
+        
+        if ($el === document) {
+            //console.trace('Hydrated document in ' + (performance.now() - start) + 'ms');
+        }
+    }
 
     #hydrateDry($el) {
         const key = $el.getAttribute('pump');
@@ -194,15 +264,16 @@ class Reservoir {
         }
 
         const value = this.execute(key, $el);
+        const isShown = !value && value !== this.executeError;
 
-        if (!value && value !== this.executeError) {
+        if (isShown) {
             $el.removeAttribute('aria-hidden');
             $el.removeAttribute('hidden');
         } else {
             $el.setAttribute('aria-hidden', 'true');
             $el.setAttribute('hidden', '');
         }
-        return !value && value !== this.executeError;
+        return isShown;
     }
 
     #bind($el) {
@@ -212,10 +283,12 @@ class Reservoir {
     
         const key = $el.getAttribute('bind');
         const persist = $el.hasAttribute('bind-persist');
+        
+        const self = this;
     
         if (!$el.getAttribute('bound')) {
             $el.addEventListener('change', () => {
-                reservoir.set(key, $el.value, persist);
+                self.set(key, $el.value, persist);
             });
         }
     
@@ -310,63 +383,26 @@ class Reservoir {
             $el.setAttribute('foreach-dry', dry);
         }
     }
-
+    
     /**
-     * @param {HTMLElement|Document|Body} $el
+     * @returns {Record<string, *>}
      */
-    hydrate($el = document) {
-        //const start = performance.now();
-
-        if ($el?.hasAttribute?.('hidden') || $el?.hasAttribute?.('hidden-dry')) {
-            if (!this.#hydrateIf($el)) {
-                return;
-            }
-        }
-
-        if ($el?.getAttribute?.('aria-hidden') === 'true') {
-            return;
-        }
-
-        if ($el?.hasAttribute?.('waterproof')) {
-            return;
-        }
-
-        if ($el?.hasAttribute?.('bind')) {
-            this.#bind($el);
-        }
-
-        if ($el?.hasAttribute?.('pump')) {
-            this.#hydrateDry($el);
-        }
-
-        for (let attr of $el?.getAttributeNames?.() || []) {
-            if (attr.startsWith('pump.')) {
-                this.#hydrateAttribute($el, attr);
-            } else if (attr.startsWith('bind.')) {
-                this.#bindListener($el, attr.split('.', 2)[1]);
-            }
-        }
-
-        if ($el?.hasAttribute?.('foreach')) {
-            this.#hydrateFor($el);
-        }
-
-        if ($el?.hasAttribute?.('args') && 'reloadComponent' in $el) {
-            $el.reloadComponent();
+    #getFromLS () {
+        const lsDataRaw = localStorage.getItem(this.localStorageKey);
+        let lsData;
+        
+        try {
+            lsData = JSON.parse(lsDataRaw);
+        } catch (E) {
+            console.error('Error parsing reservoir data from local storage');
+            lsData = {};
         }
         
-        if ($el?.hasAttribute?.('svg')) {
-            loadSVG($el).then();
+        if (typeof lsData !== 'object' || Array.isArray(lsData) || lsData === null) {
+            console.error('Error parsing reservoir data from local storage - must be object');
+            lsData = {};
         }
-
-        for (const child of $el.children) {
-            // don't await, because we don't want to block the page load
-            reloadDOM(child);
-        }
-
-        if ($el === document) {
-            //console.trace('Hydrated document in ' + (performance.now() - start) + 'ms');
-        }
+        return lsData;
     }
 }
 

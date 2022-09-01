@@ -21,7 +21,7 @@ export default registerComponent('UserCard', ($el, id, getUser, includeTitle=tru
     };
 
     async function render() {
-        const admin = core.isAdmin();
+        const admin = await core.isAdmin();
 
         userCard.innerHTML = `
 			<h2 hidden="${!includeTitle}">
@@ -41,7 +41,9 @@ export default registerComponent('UserCard', ($el, id, getUser, includeTitle=tru
 				<h3>
 					${core.escapeHTML(user['accepted'])} House Points Awarded
 				</h3>
-				<p>(${core.escapeHTML(user.pending)} pending, ${core.escapeHTML(user.rejected)} rejected)</p>
+				${admin ? `
+					<p>(${core.escapeHTML(user.pending)} pending, ${core.escapeHTML(user.rejected)} rejected)</p>
+				` : ``}
 				<div class="user-card-housepoints">
 					${user['housePoints']
                         .map((point, i) =>

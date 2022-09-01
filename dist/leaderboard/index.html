@@ -28,17 +28,16 @@
                         bind-persist
                     >
                         <option value="9,10,11,12,13">All</option>
-                        <option value="9">9</option>
-                        <option value="10">10</option>
-                        <option value="11">11</option>
-                        <option value="12">12</option>
-                        <option value="13">13</option>
+                        <option value="9">Y9</option>
+                        <option value="10">Y10</option>
+                        <option value="11">Y11</option>
+                        <option value="12">Y12</option>
+                        <option value="13">Y13</option>
                         <option value="12,13">6th Form</option>
-                        <option value="9,10,11">Senior Scl</option>
+                        <option value="9,10,11">Senior School</option>
                     </select>
                 </label>
             </div>
-            <button bind.click="console.log(showYears)">clickme</button>
             <div
                 id="podium"
                 pour.students="students.filter(s => showYears.includes(s.year.toString()))"
@@ -48,8 +47,15 @@
                 <div
                     class="student podium-student"
                     pump.style="
-                        height: ${i === 0 ? 100 :
-                            Math.max((students[i].accepted / students[0].accepted) * 100, 25)}%;
+                        height: ${(() => {
+                            if (students.length < 1) {
+                                return 0;
+                            }
+                            if (i === 0) {
+                                return 100;
+                            }
+                           return Math.max((students[i].accepted / students[0].accepted) * 100, 25);
+                        })()}%
                         "
                 >
                     <p
@@ -72,6 +78,13 @@
                     <email- args="student"></email->
                     <div pump="student.accepted"></div>
                 </div>
+            </div>
+            
+            <div
+                hidden="students.filter(s => showYears.includes(s.year.toString())).length > 0"
+                style="text-align: center; padding-top: 30px; color: var(--text-light)"
+            >
+                No students match that filter
             </div>
         </div>
         <div>

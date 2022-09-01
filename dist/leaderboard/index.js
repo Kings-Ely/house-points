@@ -7,7 +7,6 @@ window.userPopup = core.userPopup;
 
     const { year } = await core.userInfo();
     
-    console.log(core.reservoir.get('showYears'));
     if (!core.reservoir.has('showYears')) {
         if (year) {
             core.reservoir.set('showYears', year.toString(), true);

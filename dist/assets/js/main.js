@@ -141,6 +141,8 @@ export async function init(
         {
             houseName: HOUSE_NAME,
             rootPath,
+            user: state.userInfoJSON,
+            signedIn: state.isSignedIn,
         },
         true
     );

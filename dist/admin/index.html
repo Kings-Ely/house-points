@@ -6,8 +6,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="robots" content="noindex">
-
-    <script type="module" src="../assets/js/main.js"></script>
+    
     <script type="module" src="index.js" defer></script>
 
     <link rel="stylesheet" href="../assets/css/main.css">
@@ -59,6 +58,9 @@
             Pending House Points
             (<span pump="pending.length" pump-to="replace">loading...</span>)
         </h2>
+        <p style="color: var(--text-light)">
+            This is a list of house point requests that students have made.
+        </p>
         <div foreach="hp in pending.slice(0, 5)">
             <house-point
                 args="hp, main, {
@@ -92,11 +94,8 @@
             Waiting for Award
             (<span pump="usersWaitingForAward.length" pump-to="replace">loading...</span>)
         </h2>
-        <p
-            hidden="usersWaitingForAward.length < 1"
-            style="color: var(--text-light)"
-        >
-            This list is automated list of students who are eligible for an award.
+        <p style="color: var(--text-light)">
+            This is an automated list of students who are eligible for an award.
         </p>
         <div
             foreach="data in usersWaitingForAward.slice(0, showCountUsersWaitingForAward)"

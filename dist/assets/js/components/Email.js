@@ -1,4 +1,4 @@
-'use strict';
+ 'use strict';
 import { registerComponent } from '../dom.js';
 import * as core from '../main.js';
 

@@ -312,6 +312,11 @@ h3 {
     }
 }
 
+.ct-label {
+    color: var(--text) !important;
+    fill: var(--text) !important;
+}
+
 /* Settings Button */
 
 .settings-button {
