@@ -33,7 +33,7 @@ route('create/award-types', async ({ query, body }) => {
     const { name = '', required = -1, description = '' } = body;
 
     if (!name) return 'Missing parameter name';
-    if (!Number.isInteger(required) || required < 0) {
+    if (!Number.isInteger(required) || typeof required !== 'number' || required < 0) {
         return 'Invalid house point requirement';
     }
 
@@ -96,7 +96,7 @@ route('update/award-types/hps-required', async ({ query, body }) => {
     const { awardTypeId: id = '', quantity = -1 } = body;
 
     if (!id) return 'Missing parameter id';
-    if (!Number.isInteger(quantity) || quantity < 0) {
+    if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 0) {
         return 'Invalid house point requirement';
     }
 
@@ -124,7 +124,9 @@ route('update/award-types/description', async ({ query, body }) => {
     const { awardTypeId: id = '', description = '' } = body;
 
     if (!id) return 'Missing parameter id';
-    if (!description) return 'Missing parameter description';
+    if (!description && description !== '') {
+        return 'Missing parameter description';
+    }
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE awardTypes
@@ -160,4 +162,9 @@ route('delete/award-types', async ({ query, body }) => {
             status: 406,
             error: `No Award Types to delete with that Id`
         };
+    
+    await query`
+        DELETE FROM awards
+        WHERE awardTypeId = ${id}
+    `;
 });

@@ -63,14 +63,14 @@ route('create/server/logs', async ({ body }) => {
         message = JSON.stringify(message);
     }
 
-    if (!Number.isInteger(logLevel)) {
+    if (typeof logLevel !== 'number' || !Number.isInteger(logLevel)) {
         return { error: 'logLevel must be an integer' };
     }
     if (logLevel < 0 || logLevel > 4) {
         return { error: 'logLevel is invalid' };
     }
 
-    log.output(logLevel, message);
+    log.output(logLevel, message as string);
 });
 
 /**
@@ -84,7 +84,7 @@ route('get/server/performance', async ({ query, body }) => {
 
     const start = now();
 
-    const n = parseInt(body?.iterations || '100');
+    const n = parseInt(body?.iterations as string || '100');
     if (!n) return 'Invalid iterations';
     // easy way to DOS server with big numbers...
     if (n > 1000) return 'Iterations too big';

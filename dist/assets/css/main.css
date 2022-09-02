@@ -376,6 +376,10 @@ nav {
     justify-content: space-between;
     align-items: center;
 }
+#nav-left > *,
+#nav-right > *{
+    padding: 0 5px;
+}
 
 #home-link {
     display: flex;

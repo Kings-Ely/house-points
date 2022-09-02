@@ -294,20 +294,17 @@ $addStudentButton.addEventListener('click', () => {
             return;
         }
 
-        if (userYear === 0) {
-            if (
-                !confirm(
-                    'Are you sure you want this to be an non-student, admin account? If not, please provide a year.'
-                )
-            ) {
-                return;
-            }
+        if (
+            userYear === 0 &&
+            !confirm('Are you sure you want this to be an non-student account? If not, please provide a year.')
+        ) {
+            return;
         }
 
         const res = await core.api(`create/users`, {
             password: core.genPassword(),
             email: $emailInp.value,
-            year: $yearInp.value
+            year: userYear
         });
 
         if (res.ok) {

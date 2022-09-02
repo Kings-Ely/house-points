@@ -176,14 +176,6 @@ export async function loadNav() {
     const user = await core.userInfo();
 
     if (!user) return;
-
-    if (user['admin']) {
-        $adminLink.style.display = 'block';
-        $adminLink.setAttribute('aria-hidden', 'false');
-        $adminLink.onclick = () => {
-            core.navigate(`/admin`);
-        };
-    }
 }
 
 /**

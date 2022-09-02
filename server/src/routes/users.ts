@@ -22,7 +22,11 @@ import {
  * @param sessionId
  */
 route('get/users', async ({ query, body }) => {
-    const { userId = '', email = '', sessionId = '' } = body;
+    if (!await isLoggedIn(body, query)) return AUTH_ERR;
+    
+    const { userId = '', email = '', sessionId = '', session } = body;
+    
+    if (typeof session !== 'string') return AUTH_ERR;
 
     if (sessionId) {
         if (userId) return `Invalid body: cannot specify both 'session' and 'id'`;
@@ -85,7 +89,7 @@ route('get/users', async ({ query, body }) => {
 
         // censor the data if they don't have access
         if (!(await isAdmin(body, query))) {
-            const id = await idFromSession(query, body.session);
+            const id = await idFromSession(query, session);
             if (id !== user.id) {
                 delete user.id;
 
@@ -165,10 +169,10 @@ route('get/users/batch-info', async ({ query, body }) => {
 
     const { userIds: ids } = body;
 
-    if (!ids?.length)
+    if (!(ids as any)?.length)
         return {
             status: 406,
-            error: 'No Ids'
+            error: `Invalid 'userIds' parameter`
         };
 
     const data = await query`
@@ -318,14 +322,14 @@ route('create/users', async ({ query, body }) => {
 
     const { email = '', year = 9, password = '' } = body;
 
-    if (!Number.isInteger(year)) {
+    if (!Number.isInteger(year) || typeof year !== 'number') {
         return `Year is not a number`;
     }
     if ((year < 9 || year > 13) && year !== 0) {
         return `Year '${year}' is not between 9 and 13`;
     }
 
-    if (!emailValidator.validate(email || '')) {
+    if (typeof email !== 'string' || !emailValidator.validate(email || '')) {
         return `Invalid email`;
     }
 
@@ -336,6 +340,7 @@ route('create/users', async ({ query, body }) => {
         return `User with that email already exists`;
     }
 
+    if (typeof password !== 'string') return `Invalid password`;
     const validPasswordRes = validPassword(password);
     if (typeof validPasswordRes === 'string') {
         return validPasswordRes;
@@ -372,12 +377,16 @@ route('create/users', async ({ query, body }) => {
 route('update/users/admin', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { userId = '', admin = false } = body;
-
-    const mySession = body.session;
+    const { userId = '', admin = false, session: mySession } = body;
+    
     if (!mySession) return 'No session Id found';
+    if (typeof mySession !== 'string') {
+        return 'Session Id is not a string';
+    }
 
-    if (!admin) return 'Must specify admin in body';
+    if (typeof admin !== 'boolean') {
+        return 'Must specify admin in body';
+    }
 
     if ((await idFromSession(query, mySession)) === userId)
         return {
@@ -411,7 +420,7 @@ route('update/users/year', async ({ query, body }) => {
 
     const { userId: user = '', by: yearChange } = body;
 
-    if (!Number.isInteger(yearChange)) {
+    if (!Number.isInteger(yearChange) || typeof yearChange !== 'number') {
         return `Year change is not an integer`;
     }
     if (Math.abs(yearChange) > 2) {
@@ -463,6 +472,9 @@ route('update/users/year', async ({ query, body }) => {
 route('update/users/password', async ({ query, body }) => {
     const { sessionId = '', newPassword = '' } = body;
 
+    if (typeof sessionId !== 'string') {
+        return 'Session Id is not a string';
+    }
     const userId = await idFromSession(query, sessionId);
 
     if (!userId)
@@ -470,7 +482,10 @@ route('update/users/password', async ({ query, body }) => {
             status: 401,
             error: 'Invalid session Id'
         };
-
+    
+    if (typeof newPassword !== 'string'){
+        return 'Password must be a string';
+    }
     const validPasswordRes = validPassword(newPassword);
     if (typeof validPasswordRes === 'string') {
         return validPasswordRes;
@@ -509,9 +524,12 @@ route('update/users/password', async ({ query, body }) => {
 route('delete/users', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { userId } = body;
+    const { userId, session } = body;
 
-    if ((await idFromSession(query, body.session)) === userId)
+    if (typeof session !== 'string') {
+        return 'Session Id is not a string';
+    }
+    if ((await idFromSession(query, session)) === userId)
         return {
             status: 403,
             error: 'You cannot delete your own account'
@@ -519,6 +537,10 @@ route('delete/users', async ({ query, body }) => {
 
     await query`
         DELETE FROM housepoints
+        WHERE userId = ${userId}
+    `;
+    await query`
+        DELETE FROM awards
         WHERE userId = ${userId}
     `;
 

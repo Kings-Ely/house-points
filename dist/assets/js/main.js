@@ -133,7 +133,11 @@ export async function init(
         await navigate(`/?error=auth&cb=${encodeURIComponent(location.href)}`);
         return;
     }
-
+    
+    const backsToRoot = (rootPath.match(/\.\./g) || []).length;
+    const path = location.pathname;
+    const pathFromRoot = '/' +  path.split('/').slice(-backsToRoot-1, -1).join('/');
+    
     // after made sure that the user has the right permissions,
     // load the rest of the page
     reservoir.loadFromLocalStorage(false);
@@ -143,6 +147,8 @@ export async function init(
             rootPath,
             user: state.userInfoJSON,
             signedIn: state.isSignedIn,
+            path: pathFromRoot,
+            url: location.href
         },
         true
     );

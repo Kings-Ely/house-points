@@ -15,6 +15,7 @@ import type mysql from 'mysql2';
 route('get/sessions/auth-level', async ({ query, body }) => {
     const { sessionId = '' } = body;
 
+    if (typeof sessionId !== 'string') return 'Invalid session Id';
     return {
         level: await authLvl(sessionId, query)
     };
@@ -56,14 +57,13 @@ route('get/sessions/active', async ({ query, body }) => {
  */
 route('create/sessions/from-login', async ({ query, body }) => {
     // password in plaintext
-    const { email = '', password = '', expires: expiresRaw = '86400' } = body;
+    const { email = '', password = '', expires = 86400 } = body;
 
     if (!email || !password) {
         return 'Missing email or password';
     }
 
-    const expires = parseInt(expiresRaw);
-    if (isNaN(expires)) {
+    if (typeof expires !== 'number' || !Number.isInteger(expires)) {
         return 'Invalid expires parameter';
     }
     if (expires > 86400 * 365) {
@@ -116,13 +116,12 @@ route('create/sessions/from-login', async ({ query, body }) => {
 route('create/sessions/from-user-id', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { userId = '', expires: expiresRaw = '86400' } = body;
+    const { userId = '', expires = 86400 } = body;
 
     if (!userId) {
         return 'UserId not specified';
     }
-    const expires = parseInt(expiresRaw);
-    if (isNaN(expires)) {
+    if (typeof expires !== 'number' || !Number.isInteger(expires)) {
         return 'Invalid expires parameter';
     }
     if (expires > 86400 * 365) {
@@ -158,8 +157,8 @@ route('create/sessions/from-user-id', async ({ query, body }) => {
 route('create/sessions/for-forgotten-password', async ({ query, body }) => {
     const { email = '' } = body;
 
-    if (!email) {
-        return 'Email not specified';
+    if (!email || typeof email !== 'string') {
+        return 'Invalid email';
     }
     if (!emailValidator.validate(email)) {
         return 'Invalid email';

@@ -89,15 +89,15 @@ route('create/events', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
     const { name = '', time = Math.ceil(Date.now() / 1000), description = '' } = body;
-
-    if (name.length < 3) {
+    
+    if (typeof name !== 'string' || name.length < 3) {
         return `Event name must be more than 3 characters, got '${name}'`;
     }
 
     if (!Number.isInteger(time)) {
         return 'Timestamp must be an integer (UNIX timestamp)';
     }
-    if (time < 1) {
+    if (typeof time !== 'number' || !Number.isInteger(time) || time < 1) {
         return 'Timestamp must be at least 1';
     }
 

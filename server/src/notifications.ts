@@ -159,7 +159,7 @@ export async function housePointRequestAcceptedOrRejected(
     query: queryFunc,
     userId: string,
     hpReason: string,
-    rejectMessage = ''
+    rejectMessage: any = ''
 ) {
     const title = `Your House Point Request has been ${rejectMessage ? 'Rejected' : 'Accepted'}`;
     return await sendEmailToUser(
@@ -168,9 +168,8 @@ export async function housePointRequestAcceptedOrRejected(
         title,
         `
         <h3>
-            Your house point request for '${hpReason}' has been ${
-            rejectMessage ? 'rejected.' : 'accepted!'
-        }
+            Your house point request for '${hpReason}' has been
+            ${rejectMessage ? 'rejected.' : 'accepted!'}
         </h3>
         <p>
             <a href="${process.env.SITE_ROOT}/user">

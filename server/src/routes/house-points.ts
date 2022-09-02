@@ -29,10 +29,10 @@ route('get/house-points', async ({ query, body }) => {
 
     let { housePointId = '', userId = '', yearGroup = 0, status = '', from = 0, to = 0 } = body;
 
-    if (!Number.isInteger(yearGroup) || yearGroup > 13 || yearGroup < 9) {
+    if (typeof yearGroup !== 'number' || !Number.isInteger(yearGroup) || yearGroup > 13 || yearGroup < 9) {
         if (yearGroup !== 0) return 'Invalid year group';
     }
-    if (!['Accepted', 'Pending', 'Rejected'].includes(status) && status !== '') {
+    if (!['Accepted', 'Pending', 'Rejected'].includes(status as string) && status !== '') {
         return 'Invalid status';
     }
     if (!Number.isInteger(from)) {
@@ -118,11 +118,15 @@ route('create/house-points/give', async ({ query, body }) => {
     if (!student) return `Student with Id '${userId}' not found`;
     if (!student['student']) return 'Can only give house points to students';
 
-    if (!Number.isInteger(quantity) || quantity < 1) {
+    if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 1) {
         return 'Quantity must be an integer greater than 0';
     }
     if (quantity > MAX_HOUSE_POINTS) {
         return `Quantity must be at most ${MAX_HOUSE_POINTS}`;
+    }
+    
+    if (typeof userId !== 'string' || !userId) {
+        return 'Invalid userId';
     }
 
     if (eventId) {
@@ -184,7 +188,7 @@ route('create/house-points/request', async ({ query, body }) => {
 
     const { userId = '', description = '', event = '', quantity = 1 } = body;
 
-    if (!Number.isInteger(quantity) || quantity < 1) {
+    if (typeof quantity !=='number' || !Number.isInteger(quantity) || quantity < 1) {
         return 'Quantity must be an integer greater than 0';
     }
     if (quantity > MAX_HOUSE_POINTS) {
@@ -317,7 +321,7 @@ route('update/house-points/quantity', async ({ query, body }) => {
 
     const { housePointId: id = '', quantity = -1 } = body;
 
-    if (!Number.isInteger(quantity) || quantity < 1) {
+    if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 1) {
         return 'Quantity must be an integer greater than 0';
     }
     if (quantity > MAX_HOUSE_POINTS) {
@@ -373,7 +377,7 @@ route('update/house-points/created', async ({ query, body }) => {
 
     const { housePointId: id = '', timestamp = -1 } = body;
 
-    if (!Number.isInteger(timestamp) || timestamp < 1) {
+    if (typeof timestamp !== 'number' || !Number.isInteger(timestamp) || timestamp < 1) {
         return 'Quantity must be an valid UNIX timestamp';
     }
     if (!id) return 'No house point Id provided';

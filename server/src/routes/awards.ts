@@ -22,7 +22,7 @@ route('get/awards', async ({ query, body }) => {
 
     let { awardId = '', userId = '', yearGroup = 0, from = 0, to = 0 } = body;
 
-    if (!Number.isInteger(yearGroup) || yearGroup > 13 || yearGroup < 9) {
+    if (typeof yearGroup !== 'number' || !Number.isInteger(yearGroup) || yearGroup > 13 || yearGroup < 9) {
         if (yearGroup !== 0) return 'Invalid year group';
     }
     if (!Number.isInteger(from)) {
