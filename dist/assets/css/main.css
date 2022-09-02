@@ -24,7 +24,7 @@ body:not([data-theme]) {
 
     --nav-height: 70px;
 
-    --nav-border-bottom: var(--accent);
+    --nav-border-bottom: #076207;
 
     --text: #ffffff;
     --nav-colour: #494949;
@@ -43,6 +43,7 @@ body:not([data-theme]) {
     --bg: #eeeeee;
     --bg-accent: white;
     --accent: #15cb15;
+    --nav-border-bottom: #15cb15;
 
     --text-warning: red;
 
@@ -139,6 +140,12 @@ section:last-child {
 hr {
     border: none;
     border-top: 1px solid var(--border);
+}
+
+@media only screen and (max-aspect-ratio: 6/5) {
+    .hide-mobile {
+        display: none !important;
+    }
 }
 
 /* -------------------------------------------------- INPUT ---------------------------------------------------- */
@@ -354,10 +361,10 @@ nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0;
+    padding: 0 5px;
     background: var(--nav-colour);
     height: var(--nav-height);
-    width: 100%;
+    width: calc(100% - 10px);
     border-bottom: 2px solid var(--nav-border-bottom);
 }
 

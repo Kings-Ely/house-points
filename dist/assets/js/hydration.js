@@ -287,9 +287,15 @@ class Reservoir {
         const self = this;
     
         if (!$el.getAttribute('bound')) {
-            $el.addEventListener('change', () => {
+            
+            function update() {
                 self.set(key, $el.value, persist);
-            });
+    
+            }
+            $el.addEventListener('change', update);
+            $el.addEventListener('keyup', update);
+            $el.addEventListener('keydown', update);
+            $el.addEventListener('click', update);
         }
     
         $el.setAttribute('bound', 'true');

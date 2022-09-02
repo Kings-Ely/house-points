@@ -1,7 +1,6 @@
 import * as core from '../assets/js/main.js';
 import HousePoint from '../assets/js/components/HousePoint.js';
 
-const $hps = document.getElementById('hps');
 const $hpReasonInp = document.getElementById('hp-reason');
 
 /** @type {User|null} */
@@ -21,6 +20,11 @@ window.eventPopup = core.eventPopup;
     await reloadUserInfoFromEmail();
 
     me = (await core.userInfo())['email'] === core.GETParam('email');
+    
+    core.reservoir.set({
+        'reloadHousePoints': reloadHousePoints,
+        me
+    });
 
     if (theUsersInfo.student) {
         await reloadHousePoints();
@@ -33,8 +37,6 @@ async function reloadUserInfoFromEmail() {
     const email = core.GETParam('email');
 
     theUsersInfo = await core.api(`get/users`, { email });
-    
-    console.log(theUsersInfo);
 
     core.reservoir.set('theUser', theUsersInfo);
 }
@@ -42,6 +44,8 @@ async function reloadUserInfoFromEmail() {
 async function housePoints() {
     const { housePoints: hps, accepted } = theUsersInfo;
     const admin = await core.isAdmin();
+    
+    return;
 
     $hps.innerHTML = `
         <h2>House Points (${core.escapeHTML(accepted)})</h2>
@@ -97,6 +101,7 @@ async function reloadHousePoints() {
 
 document.getElementById('submit-hp').onclick = async () => {
     if (!$hpReasonInp.value) return;
+    if (!confirm('Are you sure you want to submit?')) return;
 
     for (let reason of $hpReasonInp.value.split('\n')) {
         if (!reason) continue;

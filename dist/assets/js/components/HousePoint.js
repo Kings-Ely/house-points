@@ -28,13 +28,12 @@ import { escapeHTML } from "../main.js";
  */
 export default registerComponent(
     'HousePoint',
-    (
+    async (
         $el,
         id,
         hp,
         reload,
         {
-            admin = false,
             showBorderBottom = false,
             showEmail = true,
             showReason = true,
@@ -53,7 +52,9 @@ export default registerComponent(
     ) => {
         let acceptedHTML;
         let icon = '';
-
+    
+        const admin = await core.isAdmin();
+    
         if (!admin) {
             reasonEditable = false;
             pointsEditable = false;
@@ -221,9 +222,7 @@ export default registerComponent(
 			`
                     : ''
             }
-			${
-                showDateTime
-                    ? `
+			${showDateTime ? `
 	            <div class="house-point-date-time">
 	            	
 	                ${
@@ -253,6 +252,7 @@ export default registerComponent(
 		                    svg="${icon}"
 			                data-label="${core.escapeHTML(hp['status'])}"
 			                class="icon medium icon-info-only"
+			                style="--offset-x: -10px"
 		                ></span>
 		            ` : ''}
 	            </div>
@@ -264,6 +264,7 @@ export default registerComponent(
 						onclick="_HousePoint${id}__deleteHousePoint()"
 						svg="bin.svg"
 						class="icon small"
+						style="--offset-x: -10px"
 					></button>
 				</div>
 			` : ''}
@@ -276,6 +277,7 @@ export default registerComponent(
 		                    aria-label="Reject"
 		                    svg="red-cross.svg"
 		                    data-label="Reject"
+		                    style="--offset-x: -10px"
 		                ></button>
 		                <button
 		                    onclick="_HousePoint${id}__accept()"
@@ -283,6 +285,7 @@ export default registerComponent(
 		                    svg="accent-tick.svg"
 		                    aria-label="Accept"
 		                    data-label="Accept"
+		                    style="--offset-x: -10px"
 		                ></button>
                 	` : ''}
                 </div>

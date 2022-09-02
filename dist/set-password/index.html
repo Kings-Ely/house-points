@@ -6,8 +6,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="robots" content="noindex">
-
-    <script type="module" src="../assets/js/main.js"></script>
+    
     <script type="module" src="./index.js" defer></script>
 
     <link rel="stylesheet" href="../assets/css/main.css">
@@ -16,17 +15,14 @@
 <body>
 <nav></nav>
 <main class="flex-center">
-    <div if="theUser" class="bordered">
+    <div
+        hidden="!theUser"
+        class="bordered"
+        style="text-align: center; padding: 10px"
+    >
         <h1 style="padding-bottom: 20px">
-            Set password for &nbsp;
-            '<span id="email" pump="user.email.split('@')[0]">
-                <span
-                    pump="user.email.split('@')[1]"
-                    pump-to="end"
-                    style="color: var(--text-v-light)">
-			        @
-		        </span>
-            </span>'
+            Set password for
+            <email- args="theUser, { fontSize: '1.5em' }"></email->
         </h1>
         <p>
             Your password is hashed before being stored for security.<br>
@@ -55,8 +51,9 @@
         <br>
         <button
             id="submit"
-            class="icon big-link"
+            class="big-link"
             svg="play.svg"
+            style="width: calc(100% - 20px); margin: 20px 10px 10px 10px"
         >Change Password</button>
     </div>
 </main>

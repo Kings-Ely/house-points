@@ -241,7 +241,7 @@ svg {
     position: absolute;
     opacity: 0;
     border-radius: 5px;
-    padding: 6px;
+    padding: 4px;
     color: var(--label-text);
     background: var(--label-bg);
     text-align: center;

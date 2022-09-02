@@ -1,7 +1,7 @@
 import * as core from './main.js';
 import reservoir from './hydration.js';
 import { getComponentId } from './componentIdx.js';
-import FullPagePopup from "./components/FullPagePopup.js";
+import FullPagePopup from './components/FullPagePopup.js';
 
 /**
  * Kind of ew way of doing it. But it works.
@@ -98,7 +98,9 @@ export async function showError(message) {
 
     setTimeout(() => {
         errorMessage.remove();
-        state.visibleNotifications = state.visibleNotifications.filter(id => id !== myErrId);
+        state.visibleNotifications = state.visibleNotifications.filter(
+            id => id !== myErrId
+        );
     }, core.NOTIFICATION_SHOW_TIME);
 }
 
@@ -137,7 +139,9 @@ export async function waitForReady() {
  * @returns {Promise<void>}
  */
 export async function loadFooter() {
-    const footerHTMLRes = await fetch(`${core.ROOT_PATH}/assets/html/footer.html`);
+    const footerHTMLRes = await fetch(
+        `${core.ROOT_PATH}/assets/html/footer.html`
+    );
     state.$footer.innerHTML = await footerHTMLRes.text();
 }
 
@@ -161,7 +165,11 @@ export async function loadNav() {
     const $center = document.querySelector('#nav-center');
     $center.innerHTML = `
         <div>
-            ${core.escapeHTML(core.HOUSE_NAME)} House Points - ${core.escapeHTML(document.title)}
+            <span class="hide-mobile">
+                ${core.escapeHTML(core.HOUSE_NAME)}
+                House Points -
+            </span>
+            <b>${core.escapeHTML(document.title)}</b>
         </div>
     `;
 
@@ -210,7 +218,8 @@ export function scrollToTop() {
  */
 export function updateTheme() {
     const theme =
-        getTheme() || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        getTheme() ||
+        (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     document.body.setAttribute('data-theme', theme);
 }
 
@@ -271,7 +280,9 @@ export function registerComponent(name, cb) {
             if (args === core.reservoir.executeError) return;
 
             if (!Array.isArray(args)) {
-                throw `args for '${name}' must be an array: ${JSON.stringify(args)}`;
+                throw `args for '${name}' must be an array: ${JSON.stringify(
+                    args
+                )}`;
             }
 
             addComponentToDOM(this, ...args);
@@ -280,7 +291,9 @@ export function registerComponent(name, cb) {
     }
 
     // abide by naming requirements for custom elements
-    let componentName = name.replace(/([a-z0–9])([A-Z])/g, '$1-$2').toLowerCase();
+    let componentName = name
+        .replace(/([a-z0–9])([A-Z])/g, '$1-$2')
+        .toLowerCase();
     if (!componentName.includes('-')) {
         componentName += '-';
     }
@@ -290,32 +303,37 @@ export function registerComponent(name, cb) {
     return addComponentToDOM;
 }
 
-export function loadSettings () {
+export function loadSettings() {
     const settingsButton = document.createElement('div');
     settingsButton.classList.add('settings-button');
     settingsButton.classList.add('icon');
     settingsButton.setAttribute('svg', 'settings.svg');
-    
+
     core.reservoir.set({
         switchTheme: () => {
             core.setTheme(core.getInverseTheme());
-            const svg = getTheme() === 'light' ? 'light-theme.svg' : 'dark-theme.svg';
+            const svg =
+                getTheme() === 'light' ? 'light-theme.svg' : 'dark-theme.svg';
             core.reservoir.set('themeButtonSVG', svg);
         },
         themeButtonSVG: 'light-theme.svg',
     });
-    
+
     settingsButton.onclick = () => {
-        FullPagePopup(document.body, `
+        FullPagePopup(
+            document.body,
+            `
             <button
                 aria-label="Switch theme"
                 class="icon bordered"
                 pump.svg="\${themeButtonSVG}"
                 bind.click="switchTheme()"
             ></button>
-        `, 'Settings');
+        `,
+            'Settings'
+        );
     };
-    
+
     document.body.appendChild(settingsButton);
     reloadDOM(settingsButton);
 }
