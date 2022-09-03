@@ -9,29 +9,31 @@ import InputWithDropdown from './InputWithDropdown.js';
  * @param {El} $el
  * @param {string} [placeholder='Email'] placeholder text for the input field
  * @param {boolean} [allowNonStudents=false] filters on 'student' property of  users
+ * @param {(value: string) => void} [onDropDownClick=()=>{}] callback for when a dropdown item is clicked
  * @returns {HTMLElement} the HTMLInputElement
  */
-export default registerComponent(
-    'StudentEmailInputWithIntellisense',
-    ($el, id, placeholder = 'Email', allowNonStudents = false) => {
-        let data;
+export default registerComponent('StudentEmailInputWithIntellisense', (
+    $el, id, placeholder = 'Email', allowNonStudents = false, onDropDownClick= ()=>{}
+) => {
+    let data;
 
-        return InputWithDropdown(
-            $el,
-            placeholder,
-            async () => {
-                data = (await core.api(`get/users`)).data;
-                return data.map(user => user.email);
-            },
-            (item, search) => {
-                if (!item.toLowerCase().includes(search.toLowerCase())) {
-                    return false;
-                }
-                if (allowNonStudents) {
-                    return true;
-                }
-                return data.find(u => u.email === item)?.student === 1;
+    return InputWithDropdown(
+        $el,
+        placeholder,
+        async () => {
+            data = (await core.api(`get/users`)).data;
+            return data.map(user => user.email);
+        },
+        (item, search) => {
+            if (!item.toLowerCase().includes(search.toLowerCase())) {
+                return false;
             }
-        );
-    }
-);
+            if (allowNonStudents) {
+                return true;
+            }
+            return data.find(u => u.email === item)?.student === 1;
+        },
+        10,
+        onDropDownClick
+    );
+});

@@ -103,7 +103,6 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
     const hide = FullPagePopup(
         $el,
         `
-		<h1>Add Event</h1>
 		<div>
 			<label>
 				<input
@@ -111,6 +110,7 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
 					id="add-event-name"
 					placeholder="Event Name"
 					aria-label="name"
+					style="width: calc(90% - 196px)"
 				>
 			</label>
 			<label>
@@ -129,15 +129,17 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
 			</label>
 			<div>
 				<h2>Students in Event</h2>
-				<label id="add-event-student-inp"></label>
-				<label>
-					<button
-						onclick="_AddEventPopup__addStudentToEvent()"
-						class="icon"
-						svg="plus.svg"
-						aria-label="add student"
-					></button>
-				</label>
+				<div class="flex-center">
+				    <label id="add-event-student-inp"></label>
+                    <label>
+                        <button
+                            onclick="_AddEventPopup__addStudentToEvent()"
+                            class="icon"
+                            svg="plus.svg"
+                            aria-label="add student"
+                        ></button>
+                    </label>
+                </div>
 				<div id="add-event-students"></div>
 			</div>
 		</div>
@@ -149,10 +151,15 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
 				Create Event
 			</button>
 		</div>
-	`
-    );
+	`, 'Create Event');
 
     document.getElementById(`add-event-submit`).onclick = async () => {
+        if ($addEventAddStudent.value) {
+            if (!confirm(`'${$addEventAddStudent.value}' is not in the event. Continue anyway?`)) {
+                return;
+            }
+        }
+        
         if ($nameInp.value.length < 3) {
             await core.showError('Event name is too short');
             return;
@@ -218,7 +225,17 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
     $descInp = document.querySelector('#add-event-description');
     $dateInp = document.querySelector('#add-event-date');
     $addEventAddStudentsHTML = document.querySelector('#add-event-students');
-    $addEventAddStudent = StudentEmailInputWithIntellisense('#add-event-student-inp');
+    $addEventAddStudent = StudentEmailInputWithIntellisense(
+        '#add-event-student-inp',
+        `Student's Email`,
+        false,
+        _AddEventPopup__addStudentToEvent,
+    );
+    $addEventAddStudent.addEventListener('keydown', async e => {
+        if (e.key === 'Enter') {
+            await _AddEventPopup__addStudentToEvent();
+        }
+    });
 
     $dateInp.valueAsDate = new Date();
 

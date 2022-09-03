@@ -7,7 +7,7 @@ import * as core from '../main.js';
  *
  * @param {El} $el
  * @param {string} content
- * @param {boolean} showHeader
+ * @param {string} title
  */
 export default registerComponent('FullPagePopup', ($el, id, content, title = ' ') => {
     const $p = document.createElement('div');

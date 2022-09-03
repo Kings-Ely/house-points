@@ -9,10 +9,20 @@ import * as core from '../main.js';
  * @param {El} $el
  * @param {() => Promise<T[]>} getData
  * @param {(item: T, inputValue: string) => boolean} filter
+ * @param {(item: T) => void} [onDropDownClick=()=>{}]
+ * @return {HTMLInputElement}
  */
 export default registerComponent(
     'InputWithDropdown',
-    ($el, id, placeholder, getData, filter, maxDropdownItems = 10) => {
+    (
+        $el,
+        id,
+        placeholder,
+        getData,
+        filter,
+        maxDropdownItems = 10,
+        onDropDownClick = () => {}
+    ) => {
         let data;
 
         getData().then(d => (data = d));
@@ -41,6 +51,7 @@ export default registerComponent(
 
         window[`_InputWithDropdown${id}__setValue`] = value => {
             $input.value = value;
+            onDropDownClick(value);
         };
 
         addEventListener('click', evt => {
