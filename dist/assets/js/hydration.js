@@ -69,7 +69,24 @@ class Reservoir {
         }
     
         if (areChanges) {
-            this.saveToLocalStorage();
+            if (persist) this.saveToLocalStorage();
+            reloadDOM();
+        }
+    }
+    
+    setDefaults (obj, persist=false) {
+        let areChanges = false;
+        for (const k in obj) {
+            areChanges ||= this.#data[k] !== obj[k];
+            this.#data[k] ??= obj[k];
+            
+            if (persist) {
+                this.#lsData[k] = this.#data[k];
+            }
+        }
+    
+        if (areChanges) {
+            if (persist) this.saveToLocalStorage();
             reloadDOM();
         }
     }
@@ -153,6 +170,8 @@ class Reservoir {
         } catch (e) {
             if (e instanceof ReferenceError || e instanceof TypeError) {
                 reservoirErrors.push([key, e]);
+            } else if (e.toString() === 'SyntaxError: Arg string terminates parameters early') {
+                console.error(`Error executing '${key}': ${e}`, envVarNames, envVarValues);
             } else {
                 console.error(`Error executing '${key}': ${e}`);
             }

@@ -386,11 +386,6 @@ svg {
 
 /* AddEventPopup */
 
-#add-event-description {
-    width: 90%;
-    box-sizing: border-box;
-}
-
 #add-event-submit {
     border: 1px solid var(--border);
     width: 90%;
@@ -591,4 +586,12 @@ svg {
 
 .house-point.large > * {
     padding: 10px;
+}
+
+/* ------------------------------ add-event-multi-entry ----------------------------------- */
+
+.add-event-multi-entry .user {
+    display: grid;
+    grid-template-columns: 1fr 50px 1fr;
+    grid-gap: 5px;
 }

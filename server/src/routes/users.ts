@@ -345,19 +345,18 @@ route('create/users', async ({ query, body }) => {
     if (typeof validPasswordRes === 'string') {
         return validPasswordRes;
     }
-
-    const admin = year === 0 ? 1 : 0;
+    
     const student = year === 0 ? 0 : 1;
 
-    const [passHash, salt] = passwordHash(password);
+    const [ passHash, salt ] = passwordHash(password);
 
     const userId = await generateUUId();
 
     await query`
         INSERT INTO users
-            (id,          email,    password,        salt,    year,    admin,    student)
+            (  id,        email,    password,    salt,    year,    admin,    student)
         VALUES
-            (${userId}, ${email}, ${passHash}, ${salt}, ${year}, ${admin}, ${student})
+            (${userId}, ${email}, ${passHash}, ${salt}, ${year}, ${false}, ${student})
     `;
 
     return { status: 201, userId };

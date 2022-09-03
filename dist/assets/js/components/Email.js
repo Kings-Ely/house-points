@@ -7,7 +7,9 @@ import * as core from '../main.js';
  * @param {User} user
  * @returns {HTMLElement} the HTMLInputElement
  */
-export default registerComponent('Email', ($el, id, user, { fontsize = 'inherit' } = {}) => {
+export default registerComponent('Email', (
+    $el, id, user, { align='center', fontsize = 'inherit' } = {}
+) => {
     if (!user) return;
 
     const email = user.email ?? user.userEmail;
@@ -31,7 +33,7 @@ export default registerComponent('Email', ($el, id, user, { fontsize = 'inherit'
         <button
             data-label="View ${core.escapeHTML(email)}"
             onclick="_Email${id}__onclick()"
-            style="font-size: ${fontsize}"
+            style="font-size: ${fontsize}; text-align: ${align};"
         >
             ${core.escapeHTML(email.split('@')[0])}
             (${year > 0 ? `Y${core.escapeHTML(year)}` : 'Admin'})

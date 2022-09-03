@@ -73,7 +73,7 @@ export default registerComponent(
 
         $el.innerHTML = `
 		<div class="selectable-list" id="selectable-list-${id}">
-			<h2>${core.escapeHTML(name)}</h2>
+			<h2>${name}</h2>
 			<div class="with-all-menu">
 				<div>
 					<span class="select-all-outline">

@@ -1,6 +1,7 @@
 import * as core from '../assets/js/main.js';
 import AddEventPopup from '../assets/js/components/AddEventPopup.js';
 import SelectableList from '../assets/js/components/SelectableList.js';
+import AddEventMultipleEntryPopup from "../assets/js/components/AddEventMultipleEntryPopup.js";
 
 const selected = [];
 
@@ -19,15 +20,12 @@ window.showAllEvents = showAllEvents;
 })();
 
 async function showAllEvents() {
-    if (await core.isAdmin()) {
-        core.show('#add-event-button', 'flex');
-    }
 
     const { data: items } = await core.api(`get/events`);
 
     if (await core.isAdmin()) {
         SelectableList('#events', {
-            name: 'Events',
+            name: '<span svg="event.svg" class="icon icon-info-only"> Events</span>',
             items,
             searchKey: 'name',
             uniqueKey: 'id',
@@ -118,3 +116,8 @@ async function deleteEvents() {
 document.getElementById('add-event-button').addEventListener('click', () => {
     AddEventPopup(document.body, showAllEvents);
 });
+
+document.getElementById('add-event-button-multi-entry').addEventListener('click', () => {
+    AddEventMultipleEntryPopup(document.body, showAllEvents);
+});
+

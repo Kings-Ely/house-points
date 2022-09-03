@@ -210,6 +210,7 @@ textarea {
     background-color: var(--accent);
     height: fit-content;
     width: fit-content;
+    border: none;
     padding: 10px;
     display: grid;
     /* assumed one svg icon and then text */
@@ -224,6 +225,15 @@ textarea {
 
 .big-link:hover svg {
     fill: var(--accent);
+}
+
+.big-link.secondary {
+    background-color: transparent;
+    border: 1px solid var(--border);
+}
+
+.big-link.secondary:hover {
+    border-color: var(--accent);
 }
 
 input,

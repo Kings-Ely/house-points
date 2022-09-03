@@ -6,9 +6,6 @@ import FullPagePopup from './FullPagePopup.js';
 import { escapeHTML } from "../main.js";
 
 /**
- * The popup showing 'allow' and 'reject' options for cookies.
- * Only allowed one in DOM at a time, so no need for unique namespace.
- *
  * @param {El} $el
  * @param {() => *} reload
  */
@@ -143,7 +140,7 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
 				<div id="add-event-students"></div>
 			</div>
 		</div>
-		<div style="text-align: center; width: 100%; margin: 20px 0;">
+		<div style="text-align: center; width: 100%; margin: 20px 0">
 			<button
 				id="add-event-submit"
 				aria-label="add event"
