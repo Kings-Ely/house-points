@@ -434,9 +434,6 @@ route('update/users/year', async ({ query, body }) => {
     if (!Number.isInteger(yearChange) || typeof yearChange !== 'number') {
         return `Year change is not an integer`;
     }
-    if (Math.abs(yearChange) > 2) {
-        return `Can't change year by more than 2 at once, trying to change by ${yearChange}`;
-    }
 
     const currentYear = await query`
         SELECT year 
@@ -448,10 +445,6 @@ route('update/users/year', async ({ query, body }) => {
             status: 406,
             error: 'User not found'
         };
-    const year = currentYear[0].year;
-    if (year === 0) {
-        return `Cannot change year of user from '0'`;
-    }
 
     const newYear = currentYear[0].year + yearChange;
 

@@ -573,14 +573,6 @@ Test.test(`Users | Updating year`, async api => {
     if (res['year'] !== 10) {
         return `6: ${JSON.stringify(res)}`;
     }
-    res = await api(`update/users/year`, {
-        session: sessionId1,
-        userId: userId2,
-        by: 3
-    });
-    if (res.ok || res.status !== 400) {
-        return `7: ${JSON.stringify(res)}`;
-    }
 
     await api(`delete/users`, { userId: userId2 });
     await api(`delete/users`, { userId: userId1 });
