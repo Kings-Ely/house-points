@@ -62,10 +62,27 @@ export default registerComponent('AddEventMultipleEntryPopup', async (
                 </label>
             </div>
             <div>
-                <div
-                    style="display: block; overflow-y: scroll; max-height: 40vh"
-                    foreach="user in AddEventMultipleEntryPopup_users"
-                >
+            <div style="display: block; overflow-y: scroll; max-height: 40vh">
+                <div class="user">
+                    <div></div>
+                    <div>
+                         <input
+                            type="number"
+                            pump.value="0"
+                            min="0"
+                            bind.change="
+                                (AddEventMultipleEntryPopup_users.map(({ id }) => {
+                                    AddEventMultipleEntryPopup_quantities[id] = $el.value;
+                                })),
+                                this.saveToLocalStorage(),
+                                this.hydrate()
+                            "
+                            style="width: 45px"
+                         >
+                    </div>
+                    <div></div>
+                </div>
+                <div foreach="user in AddEventMultipleEntryPopup_users">
                     <div class="user">
                         <email- args="user, { align: 'left' }"></email->
                         <div>
