@@ -18,6 +18,8 @@ export const AUTH_ERR: Readonly<{
     status: 401
 });
 
+export const DEFAULT_EMAIL_DOMAIN = 'kingsely.org';
+
 /**
  * Limits the length of a string by cutting it and adding '...'
  * to the end if it's too long

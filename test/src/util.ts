@@ -18,7 +18,8 @@ export interface IGenerateUserRes {
 }
 
 /**
- * Just throws error if something goes wrong, doesn't bother to return an erroneous response
+ * Just throws error if something goes wrong, doesn't bother to return an erroneous response.
+ * If year is 0 then it makes them an admin.
  */
 export async function generateUser(api: API, year = 10): Promise<IGenerateUserRes> {
     const email = `${randomFromAlph()}@example.com`;
@@ -28,7 +29,8 @@ export async function generateUser(api: API, year = 10): Promise<IGenerateUserRe
     let res = await api(`create/users`, {
         email,
         password,
-        year
+        year,
+        admin: year === 0
     });
     if (res.ok !== true || (res.status !== 200 && res.status !== 201)) {
         throw `create/users/email/password failed: ${JSON.stringify(res)}`;
@@ -36,7 +38,7 @@ export async function generateUser(api: API, year = 10): Promise<IGenerateUserRe
 
     res = await api(`create/sessions/from-login`, {
         email,
-        password
+        password,
     });
     if (
         res.ok !== true ||

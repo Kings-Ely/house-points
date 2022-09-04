@@ -49,10 +49,10 @@ if (count($queryRes) === 0) {
 }
 
 if (strlen(`docker ps | grep $containerName`) < 2) {
-    `cd $serverPath; npm run start`;
+    exec("cd $serverPath; npm run start");
     echo 1;
 } else {
-	`cd $serverPath; npm run restart`;
+	exec("cd $serverPath; npm run restart");
 	echo 1;
 }
 

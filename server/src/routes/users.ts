@@ -5,14 +5,14 @@ import route from '../';
 
 import {
     addHousePointsToUser,
-    AUTH_ERR,
+    AUTH_ERR, DEFAULT_EMAIL_DOMAIN,
     generateUUId,
     idFromSession,
     isAdmin,
     isLoggedIn,
     passwordHash,
     validPassword
-} from '../util';
+} from "../util";
 
 /**
  * @admin
@@ -320,7 +320,7 @@ route('get/users/leaderboard', async ({ query, body }) => {
 route('create/users', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { email = '', year = 9, password = '' } = body;
+    let { email = '', year = 9, password = '', admin=false } = body;
 
     if (!Number.isInteger(year) || typeof year !== 'number') {
         return `Year is not a number`;
@@ -328,8 +328,20 @@ route('create/users', async ({ query, body }) => {
     if ((year < 9 || year > 13) && year !== 0) {
         return `Year '${year}' is not between 9 and 13`;
     }
+    
+    if (typeof admin !== 'boolean') {
+        return `'Admin' is not a boolean`;
+    }
+    
+    if (typeof email !== 'string') {
+        return `Invalid email`;
+    }
+    
+    if (!email.includes('@')) {
+        email = email + '@' + DEFAULT_EMAIL_DOMAIN;
+    }
 
-    if (typeof email !== 'string' || !emailValidator.validate(email || '')) {
+    if (!emailValidator.validate(email as string)) {
         return `Invalid email`;
     }
 
@@ -356,7 +368,7 @@ route('create/users', async ({ query, body }) => {
         INSERT INTO users
             (  id,        email,    password,    salt,    year,    admin,    student)
         VALUES
-            (${userId}, ${email}, ${passHash}, ${salt}, ${year}, ${false}, ${student})
+            (${userId}, ${email}, ${passHash}, ${salt}, ${year}, ${admin}, ${student})
     `;
 
     return { status: 201, userId };
