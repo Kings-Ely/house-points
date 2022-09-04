@@ -2,6 +2,7 @@
 import * as core from '../main.js';
 import { registerComponent } from '../dom.js';
 import FullPagePopup from './FullPagePopup.js';
+import { formatTimeStampForInput } from "../main.js";
 
 /**
  * @param {El} $el
@@ -19,7 +20,7 @@ export default registerComponent('AddEventMultipleEntryPopup', async (
         AddEventMultipleEntryPopup_descriptions: {},
         AddEventMultipleEntryPopup_name: '',
         AddEventMultipleEntryPopup_description: '',
-        AddEventMultipleEntryPopup_date: core.formatTimeStampForInput(Date.now()),
+        AddEventMultipleEntryPopup_date: formatTimeStampForInput(Date.now()/1000),
     }, true);
     
     core.reservoir.set({
@@ -36,6 +37,7 @@ export default registerComponent('AddEventMultipleEntryPopup', async (
                     <input
                         type="text"
                         bind="AddEventMultipleEntryPopup_name"
+                        bind-persist
                         placeholder="Event Name"
                         aria-label="name"
                         style="width: calc(90% - 196px)"
@@ -45,12 +47,14 @@ export default registerComponent('AddEventMultipleEntryPopup', async (
                     <input
                         type="date"
                         bind="AddEventMultipleEntryPopup_date"
+                        bind-persist
                         aria-label="event date"
                     >
                 </label>
                 <label>
                     <textarea
                         bind="AddEventMultipleEntryPopup_description"
+                        bind-persist
                         placeholder="Description"
                         aria-label="description"
                         style="width: 90%; box-sizing: border-box"
@@ -132,7 +136,7 @@ export default registerComponent('AddEventMultipleEntryPopup', async (
         }
         
         // offset by an hour
-        const time = new Date(date).getTime() + 60 * 60 + 1;
+        const time = new Date(date).getTime()/1000 + 60 * 60 + 1;
         
         // event before the year 2000 is not allowed
         if (time <= 946684800) {
@@ -146,12 +150,29 @@ export default registerComponent('AddEventMultipleEntryPopup', async (
             description,
         });
     
+        const quantities = core.reservoir.get(`AddEventMultipleEntryPopup_quantities`);
+        const descriptions = core.reservoir.get(`AddEventMultipleEntryPopup_descriptions`);
+    
+        for (const user of users) {
+            const quantity = parseInt(quantities[user.id]);
+            const description = descriptions[user.id];
+            
+            if (!quantity) continue;
+            
+            await core.api(`create/house-points/give`, {
+                eventId,
+                userId: user.id,
+                quantity,
+                description,
+            });
+        }
+    
         core.reservoir.set({
             AddEventMultipleEntryPopup_quantities: {},
             AddEventMultipleEntryPopup_descriptions: {},
             AddEventMultipleEntryPopup_name: '',
             AddEventMultipleEntryPopup_description: '',
-            AddEventMultipleEntryPopup_date: new Date(),
+            AddEventMultipleEntryPopup_date: formatTimeStampForInput(Date.now()/1000),
         }, true);
         
         hide();

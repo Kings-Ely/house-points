@@ -6,7 +6,6 @@ import { escapeHTML } from "./main.js";
 window.reservoirErrors = [];
 
 /**
- *
  * @param {HTMLElement} $el
  * @param {string} start
  * @returns {string[]}
@@ -58,6 +57,7 @@ class Reservoir {
     }
     
     setFromObj (obj, persist=false) {
+        // only update the DOM if there are changes to the state
         let areChanges = false;
         for (const k in obj) {
             areChanges ||= this.#data[k] !== obj[k];
