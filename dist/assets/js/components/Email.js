@@ -3,6 +3,10 @@ import { registerComponent } from '../dom.js';
 import * as core from '../main.js';
 
 /**
+ * User email.
+ * Shows first part of email (before '@') and the users year in brackets next to it.
+ * On hover, shows the full email.
+ * On click, shows a user popup card.
  * @param {El} $el
  * @param {User} user
  * @returns {HTMLElement} the HTMLInputElement

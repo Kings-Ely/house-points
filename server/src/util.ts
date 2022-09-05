@@ -81,7 +81,9 @@ export function removeColour(str: string): string {
  * (relative to '/server'. or more specifically, the directory containing the server JS file)
  */
 export function loadEnv(filePath = '.env'): void {
-    const contents = fs.readFileSync(path.join(path.resolve(__dirname), filePath), 'utf8');
+    // file path relative to this file
+    filePath = path.join(path.resolve(__dirname), filePath);
+    const contents = fs.readFileSync(filePath, 'utf8');
 
     process.env = {
         ...process.env,
@@ -89,7 +91,7 @@ export function loadEnv(filePath = '.env'): void {
     };
 }
 
-// DB query helpers
+// DB Query helpers
 
 /**
  * Gets the authorisation level of a user from their code
@@ -146,6 +148,11 @@ export async function generateUUId(): Promise<string> {
     return UUIdv4();
 }
 
+/**
+ * Hashes a password using 'sha256' and generates a salt for it.
+ * @param {string} password
+ * @returns {string[]}
+ */
 export function passwordHash(password: string) {
     const salt = crypto.randomBytes(16).toString('base64');
 
@@ -154,9 +161,14 @@ export function passwordHash(password: string) {
         .update(password + salt)
         .digest('hex');
 
-    return [passwordHash, salt];
+    return [ passwordHash, salt ];
 }
 
+/**
+ * Check that a password string provided meets certain security requirements.
+ * @param {string} password
+ * @returns {true | string}
+ */
 export function validPassword(password: string): true | string {
     if (!password) return 'No password';
     if (password.length < 5) return 'Password is too short, must be over 4 characters';
