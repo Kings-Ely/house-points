@@ -1,12 +1,3 @@
--- phpMyAdmin SQL Dump
--- version 4.9.7
--- https://www.phpmyadmin.net/
---
--- Host: localhost:3306
--- Generation Time: Aug 16, 2022 at 08:39 PM
--- Server version: 5.7.39
--- PHP Version: 7.4.30
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
 START TRANSACTION;
@@ -18,15 +9,7 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
---
--- Database: `josephcoppin_house_points`
---
-
 -- --------------------------------------------------------
-
---
--- Table structure for table `awards`
---
 
 CREATE TABLE `awards` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -38,10 +21,6 @@ CREATE TABLE `awards` (
 
 -- --------------------------------------------------------
 
---
--- Table structure for table `awardTypes`
---
-
 CREATE TABLE `awardTypes` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `name` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -51,10 +30,6 @@ CREATE TABLE `awardTypes` (
 
 -- --------------------------------------------------------
 
---
--- Table structure for table `events`
---
-
 CREATE TABLE `events` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `name` varchar(2048) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -63,10 +38,6 @@ CREATE TABLE `events` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
-
---
--- Table structure for table `housepoints`
---
 
 CREATE TABLE `housepoints` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -82,10 +53,6 @@ CREATE TABLE `housepoints` (
 
 -- --------------------------------------------------------
 
---
--- Table structure for table `logs`
---
-
 CREATE TABLE `logs` (
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `madeBy` text COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -93,10 +60,6 @@ CREATE TABLE `logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
-
---
--- Table structure for table `sessions`
---
 
 CREATE TABLE `sessions` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -108,10 +71,6 @@ CREATE TABLE `sessions` (
 
 -- --------------------------------------------------------
 
---
--- Table structure for table `users`
---
-
 CREATE TABLE `users` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(320) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '320 is max possible email length',
@@ -122,52 +81,20 @@ CREATE TABLE `users` (
   `student` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `users`
---
+-- Default admin user - password is 'password'
 
 INSERT INTO `users` (`id`, `email`, `password`, `salt`, `year`, `admin`, `student`) VALUES
 ('admin', 'admin@example.com', '6733b7ffeace4887c3b31258079c780d8db3018db9cbc05c500df3521f968df8', 'abc', 0, 1, 0);
 
---
--- Indexes for dumped tables
---
+-- Add Primary Keys
 
---
--- Indexes for table `awards`
---
-ALTER TABLE `awards`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `awards`      ADD PRIMARY KEY (`id`);
+ALTER TABLE `awardTypes`  ADD PRIMARY KEY (`id`);
+ALTER TABLE `events`      ADD PRIMARY KEY (`id`);
+ALTER TABLE `housepoints` ADD PRIMARY KEY (`id`);
+ALTER TABLE `sessions`    ADD PRIMARY KEY (`id`);
+ALTER TABLE `users`       ADD PRIMARY KEY (`id`);
 
---
--- Indexes for table `awardTypes`
---
-ALTER TABLE `awardTypes`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `events`
---
-ALTER TABLE `events`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `housepoints`
---
-ALTER TABLE `housepoints`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `sessions`
---
-ALTER TABLE `sessions`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
