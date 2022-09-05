@@ -55,25 +55,22 @@ async function showStudentsList() {
                 </span>
                 <div id="filters-dropdown">
                     <button onclick="toggleYearGroup(0)">
-                        Show ${
-                            !filters.years.includes(0) ? 'teachers and students' : 'only students'
-                        }
+                        Show ${!filters.years.includes(0) ?
+                                'teachers and students' :
+                                'only students'
+                            }
                     </button>
                     <br>
                     <button onclick="toggleAdmin()">
                         Show ${filters.admin ? 'non-admins too' : 'only admins'}
                     </button>
                     <hr>
-                    ${[9, 10, 11, 12, 13]
-                        .map(
-                            year => `
+                    ${[9, 10, 11, 12, 13].map(year => `
                         <button onclick="toggleYearGroup(${year})"> 
                             ${filters.years.includes(year) ? 'Hide' : 'Show'} 
                             Y${year}
                         </button>
-                    `
-                        )
-                        .join('')}
+                    `).join('')}
                 </div>
             </span>
             <button
@@ -154,15 +151,12 @@ async function showStudent(student) {
                 ${!isMe ? `data-label="Sign in as ${email}"` : ''}
             ></button>
             
-            ${
-                isMe
-                    ? `
+            ${isMe ? `
                 <span class="student-link">
                    <b>${email}</b>
                    (You${isStudent ? `, Y${year || ''}` : ''})
                 </span>
-            `
-                    : `
+            ` : `
                 <button 
                     onclick="userPopupFromId('${id}')" 
                     class="student-link"
@@ -172,25 +166,16 @@ async function showStudent(student) {
                     ${email}
                 </button>
                 
-                ${
-                    isStudent
-                        ? `
+                ${isStudent ? `
                     (Y${year || ''})
-                `
-                        : ''
-                }
-            `
-            }
+                ` : ''}
+            `}
         </div>
        
         <div class="flex-center">
-            ${
-                isStudent
-                    ? `
+            ${isStudent ? `
                 ${student['accepted']} House Points
-            `
-                    : ''
-            }
+            ` : ''}
         </div>
         
         <div class="flex-center" style="justify-content: right">

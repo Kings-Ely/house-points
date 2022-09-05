@@ -419,6 +419,14 @@ export function formatTimeStampForInput(seconds) {
 }
 
 /**
+ * Gets the current time in the format expected by a <input type="datetime-local"> element
+ * @returns {string}
+ */
+formatTimeStampForInput.prototype.now = () => {
+    return formatTimeStampForInput(Date.now() / 1000);
+}
+
+/**
  * Returns the string in HTML escaped form to prevent XSS attacks
  * and general horribleness
  * @param {*} unsafe

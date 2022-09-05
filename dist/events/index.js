@@ -41,22 +41,74 @@ async function showAllEvents() {
 					data-label="Delete"
 					class="icon"
 				></button>
+				<span class="filters-container">
+                    <span style="display: inline-block">
+                        <span
+                            class="filters-button bordered big-link"
+                            svg="filter.svg"
+                        >
+                            Filters
+                        </span>
+                    </span>
+                    <div class="filters-dropdown">
+                        From
+                        <input
+                            type="date"
+                            bind="filter_startDate"
+                            bind-persist
+                            onchange="showAllEvents()"
+                        >
+                        To
+                        <input
+                            type="date"
+                            bind="filter_endDate"
+                            bind-persist
+                            onchange="showAllEvents()"
+                        >
+                    </div>
+                </span>
 			`,
-            itemGenerator: eventHTML
+            itemGenerator: eventHTML,
+            filter: event => {
+                const eventDay = new Date(new Date(event.time*1000).toDateString());
+    
+    
+                const startDate = new Date(
+                    new Date(core.reservoir.get('filter_startDate')).toDateString()
+                );
+                const endDate = new Date(
+                    new Date(core.reservoir.get('filter_endDate')).toDateString()
+                );
+                
+                if (core.reservoir.has('filter_startDate')) {
+                    if (core.reservoir.has('filter_endDate')) {
+                        if (startDate > endDate) {
+                            core.showError('Start date cannot be after end date');
+                            return false;
+                        }
+                    }
+                    if (eventDay < startDate) {
+                        return false;
+                    }
+                }
+                if (core.reservoir.has('filter_endDate')) {
+                    if (eventDay > new Date(endDate)) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
         });
     } else {
         document.getElementById('events').innerHTML = `
 			<h2>Events</h2>
 			<div style="padding: 20px;">
-				${items
-                    .map(
-                        event => `
+				${items.map(event => `
 					<div class="flex-center" style="justify-content: space-between">
 						${eventHTML(event)}
 					</div>
-				`
-                    )
-                    .join('')}
+				`).join('')}
 			</div>
 		`;
     }
@@ -83,7 +135,7 @@ function eventHTML(event) {
 		</div>
 		<p 
 			class="flex-center"
-			style="justify-content: right"
+			style="justify-content: right; padding: 0; margin: 0;"
 			onclick="eventPopup('${event.id}', showAllEvents)"
 		>
 			${core.escapeHTML(core.limitStrLength(event.description))}
