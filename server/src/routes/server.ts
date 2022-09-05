@@ -74,6 +74,38 @@ route('create/server/logs', async ({ body }) => {
 });
 
 /**
+ * Makes a log
+ * @param message
+ * @param {int} [logLevel=2]
+ */
+route('get/server/logs', async ({ body, query }) => {
+    if (!await isAdmin(body, query)) return AUTH_ERR;
+    
+    const { limit = 100 } = body;
+    
+    if (typeof limit !== 'number' || !Number.isInteger(limit)) {
+        return 'limit must be an integer';
+    }
+    
+    if (limit < 0 || limit > 10_000) {
+        return 'limit is invalid';
+    }
+    
+    return {
+        data: await query`
+            SELECT
+                id,
+                UNIX_TIMESTAMP(time) AS time,
+                madeBy,
+                msg
+            FROM logs
+            ORDER BY time DESC
+            LIMIT ${limit}
+        `
+    }
+});
+
+/**
  * @account
  * Measures the performance of running 'n' simple SQL queries and
  * returns some stats on the timing data

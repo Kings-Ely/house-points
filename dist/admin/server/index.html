@@ -6,8 +6,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="robots" content="noindex">
-
-    <script type="module" src="../../assets/js/main.js"></script>
+    
     <script type="module" src="./index.js" defer></script>
 
     <link rel="stylesheet" href="../../assets/css/main.css">
@@ -46,6 +45,29 @@
         <p id="server-stats"></p>
     </section>
     <section id="sessions"></section>
+    <section>
+        <selectable-list args="{
+            name: 'Logs',
+            items: logs,
+            uniqueKey: 'id',
+            searchKey: ['msg', 'madeBy'],
+            searchBarHint: 'log',
+            titleBar: ``,
+            withAllMenu: ``,
+            itemGenerator: (log) => `
+                <p>
+                    <b>${log.madeBy}</b>
+                    <span data-label='${formatDate(log.time)}'>
+                        (${formatTime(log.time*1000)})
+                    </span>
+                </p>
+                <p>${log.msg}</p>
+            `,
+            gridTemplateColsCSS: '1fr 3fr',
+            selected: selectedLogs,
+            filter: () => true
+        }"></selectable-list>
+    </section>
 </main>
 <footer></footer>
 </body>

@@ -7,7 +7,7 @@ const $startServerButton = document.getElementById('start');
 const $killServerButton = document.getElementById('kill');
 const $restartServerButton = document.getElementById('restart');
 const selectedSessions = [];
-
+const selectedLogs = [];
 const stats = {};
 
 let lastPingOk;
@@ -24,6 +24,14 @@ async function refresh() {
     if (!(await serverStatusAndPing())) return;
     showServerStats();
     await activeSessions();
+    
+    const logs = await core.api(`get/server/logs`);
+    core.reservoir.set({
+        logs: logs.data,
+        selectedLogs,
+        formatTime: core.getRelativeTime,
+        formatDate: core.formatTimeStampForInput
+    });
 }
 
 function serverDown(message = 'Server is down!') {

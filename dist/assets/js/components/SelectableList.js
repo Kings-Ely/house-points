@@ -170,7 +170,7 @@ export default registerComponent(
 			`;
             }
 
-            core.reloadDOM();
+            core.reloadDOM($items);
         }
 
         window[`_SelectableList${id}__reloadItems`] = reload;

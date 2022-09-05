@@ -54,6 +54,7 @@ CREATE TABLE `housepoints` (
 -- --------------------------------------------------------
 
 CREATE TABLE `logs` (
+  `id` INT NOT NULL,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `madeBy` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `msg` text COLLATE utf8mb4_unicode_ci NOT NULL
@@ -103,6 +104,11 @@ ALTER TABLE `events`      ADD PRIMARY KEY (`id`);
 ALTER TABLE `housepoints` ADD PRIMARY KEY (`id`);
 ALTER TABLE `sessions`    ADD PRIMARY KEY (`id`);
 ALTER TABLE `users`       ADD PRIMARY KEY (`id`);
+ALTER TABLE `logs`        ADD PRIMARY KEY (`id`);
+
+-- AUTO_INCREMENT
+
+ALTER TABLE `logs` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=0;
 
 COMMIT;
 
