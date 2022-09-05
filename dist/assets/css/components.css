@@ -250,6 +250,7 @@ svg {
     background: var(--label-bg);
     transition: 200ms;
     top: 100%;
+    right: min(0px, 100vw);
 }
 
 [data-label]:hover::before {
