@@ -310,6 +310,7 @@ export async function addHousePointsToUser(query: queryFunc, user: any & { id: s
             awardTypes.name as awardTypeName,
             awardTypes.description as awardTypeDescription,
             awardTypes.hpsRequired as awardRequirement,
+            awardTypes.icon as icon,
             
             users.id as userId,
             users.email as userEmail,

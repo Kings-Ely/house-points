@@ -24,6 +24,8 @@ export default registerComponent(
 
     async function render() {
         const admin = await core.isAdmin();
+        
+        userCard.setAttribute('pour.user', JSON.stringify(user));
 
         userCard.innerHTML = `
 			<h2 hidden="${!includeTitle}">
@@ -40,17 +42,11 @@ export default registerComponent(
 				</a>
 			</h2>
 			<div>
-			    <div>
-			        ${user.awards.map(award => `
-			            <span
-			                class="bordered"
-			                style="padding: 4px; margin: 2px"
-			                data-label="${core.getRelativeTime(award.awarded*1000)}"
-			            >
-			                ${award.awardTypeName}
-			                (${award.awardRequirement})
-                       </span>
-			        `).join('')}
+			    <div
+			        foreach="award in user.awards"
+			        class="flex-wrap"
+			    >
+			        <award-type args="award"></award-type>
                 </div>
 				<h3>
 					${core.escapeHTML(user['accepted'])} House Points Awarded

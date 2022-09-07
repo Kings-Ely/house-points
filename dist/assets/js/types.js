@@ -11,6 +11,16 @@
 /**
  * @typedef {{
  *     id: string,
+ *     name: string,
+ *     icon: string,
+ *     hpsRequired: number,
+ *     description: string
+ * }} AwardType
+ */
+
+/**
+ * @typedef {{
+ *     id: string,
  *     awarded: number,
  *     description: string,
  *     awardTypeId: string,

@@ -72,49 +72,49 @@ export default registerComponent(
         };
 
         $el.innerHTML = `
-		<div class="selectable-list" id="selectable-list-${id}">
-			<h2>${name}</h2>
-			<div class="with-all-menu">
-				<div>
-					<span class="select-all-outline">
-						<span 
-							class="icon icon-info-only" 
-							svg="small-down-arrow.svg"
-						></span>
-						<button
-							onclick="_SelectableList${id}__selectAll(true)"
-							class="icon"
-							svg="unselected-checkbox.svg"
-						   data-label="Select All"
-							aria-label="select all"
-						></button>
-						
-						<button
-							onclick="_SelectableList${id}__selectAll(false)"
-							class="icon"
-							svg="unselect-checkbox.svg"
-						   data-label="Unselect All"
-							aria-label="unselect all"
-						></button>
-					</span>
-					${withAllMenu}
-				</div>
-				<div>
-					<label>
-						<input
-							placeholder="search for ${searchBarHint}..."
-							oninput="_SelectableList${id}__reloadItems()"
-							class="search"
-							autocomplete="off"
-							aria-label="search"
-						>
-					</label>
-				</div>
-			</div>
-			<div>${titleBar}</div>
-			<div class="items"></div>
-		</div>
-	`;
+            <div class="selectable-list" id="selectable-list-${id}">
+                <h2>${name}</h2>
+                <div class="with-all-menu">
+                    <div>
+                        <span class="select-all-outline">
+                            <span
+                                class="icon icon-info-only"
+                                svg="small-down-arrow.svg"
+                            ></span>
+                            <button
+                                onclick="_SelectableList${id}__selectAll(true)"
+                                class="icon"
+                                svg="unselected-checkbox.svg"
+                               data-label="Select All"
+                                aria-label="select all"
+                            ></button>
+                            
+                            <button
+                                onclick="_SelectableList${id}__selectAll(false)"
+                                class="icon"
+                                svg="unselect-checkbox.svg"
+                               data-label="Unselect All"
+                                aria-label="unselect all"
+                            ></button>
+                        </span>
+                        ${withAllMenu}
+                    </div>
+                    <div>
+                        <label>
+                            <input
+                                placeholder="search for ${searchBarHint}..."
+                                oninput="_SelectableList${id}__reloadItems()"
+                                class="search"
+                                autocomplete="off"
+                                aria-label="search"
+                            >
+                        </label>
+                    </div>
+                </div>
+                <div>${titleBar}</div>
+                <div class="items"></div>
+            </div>
+        `;
 
         const $items = document.querySelector(`#selectable-list-${id} .items`);
         const $search = document.querySelector(`#selectable-list-${id} .search`);
@@ -176,7 +176,11 @@ export default registerComponent(
         window[`_SelectableList${id}__reloadItems`] = reload;
 
         reload().then();
-
+    
+        core.reloadDOM($el.querySelector('.selectable-list'));
+    
         return { reload };
     }
 );
+
+

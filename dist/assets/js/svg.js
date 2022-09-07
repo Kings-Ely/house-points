@@ -25,6 +25,7 @@ export async function loadSVG($el) {
     // allow modules to finish loading... not a very nice solution :P
     await core.sleep(0);
     
+    
     const svgPath = $el.getAttribute('svg');
     if (!svgPath) {
         throw new Error('No SVG path specified');
@@ -34,7 +35,7 @@ export async function loadSVG($el) {
     
     // set before loading, so we don't load twice while waiting for the svg to load
     $el.setAttribute('svg-less-content', content);
-
+    
     const uri = core.ROOT_PATH + '/assets/img/' + svgPath;
 
     let svgContent = await getSVGFromURI(uri);

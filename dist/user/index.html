@@ -87,12 +87,7 @@
         <div hidden="!theUser.awards.length">
             <h2>Awards (<span pump="theUser.awards.length" pump-to="replace">loading...</span>)</h2>
             <div foreach="award in theUser.awards" style="display: flex; justify-content: center">
-                <span class="bordered" style="padding: 4px; margin: 10px;">
-                    <span pump="award.awardTypeName">
-                        (<span pump="award.awardRequirement"></span>)
-                    </span>
-                    <span pump="award.description"></span>
-                </span>
+                <award-type args="award"></award-type>
             </div>
         </div>
         

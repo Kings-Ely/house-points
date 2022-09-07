@@ -240,9 +240,7 @@ svg {
     content: attr(data-label);
     transform: scale(0);
     position: absolute;
-    display: inline-block;
     color: var(--label-text);
-    text-align: center;
     font-size: 15px;
     border-radius: 5px;
     pointer-events: none;

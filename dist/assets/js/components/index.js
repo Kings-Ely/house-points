@@ -8,6 +8,7 @@ import SelectableList from './SelectableList.js';
 import StudentEmailInputWithIntellisense from './StudentEmailInputWithIntellisense.js';
 import UserCard from './UserCard.js';
 import Email from './Email.js';
+import AwardType from './AwardType.js';
 
 export {
     AddEventPopup,
@@ -20,4 +21,5 @@ export {
     StudentEmailInputWithIntellisense,
     UserCard,
     Email,
+    AwardType,
 };

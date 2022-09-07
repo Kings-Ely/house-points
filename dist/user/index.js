@@ -22,7 +22,7 @@ window.eventPopup = core.eventPopup;
     me = (await core.userInfo())['email'] === core.GETParam('email');
     
     core.reservoir.set({
-        'reloadHousePoints': reloadHousePoints,
+        reloadHousePoints,
         me
     });
 
