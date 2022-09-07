@@ -45,7 +45,8 @@ route('get/awards', async ({ query, body }) => {
             awardTypes.id as awardTypeId,
             awardTypes.name as awardName,
             awardTypes.description as awardDescription,
-            awardTypes.hpsRequired as awardHpsRequired
+            awardTypes.hpsRequired as awardHpsRequired,
+            awardTypes.icon as icon
             
         FROM users, awards, awardTypes
         

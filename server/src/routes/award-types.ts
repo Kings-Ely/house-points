@@ -15,7 +15,8 @@ route('get/award-types', async ({ query, body }) => {
                 id,
                 name,
                 description,
-                hpsRequired
+                hpsRequired,
+                icon
             FROM awardTypes
         `
     };
@@ -44,12 +45,14 @@ route('create/award-types', async ({ query, body }) => {
             id,
             name,
             description,
-            hpsRequired
+            hpsRequired,
+            icon
         ) VALUES (
             ${id},
             ${name},
             ${description},
-            ${required}
+            ${required},
+            ${''}
         )
     `;
 
@@ -81,7 +84,33 @@ route('update/award-types/name', async ({ query, body }) => {
     if (queryRes.affectedRows === 0)
         return {
             status: 406,
-            error: `No Award Types to delete with that Id`
+            error: `No Award Types to update with that Id`
+        };
+});
+
+/**
+ * @admin
+ * @param awardTypeId
+ * @param newName
+ */
+route('update/award-types/icon', async ({ query, body }) => {
+    if (!(await isAdmin(body, query))) return AUTH_ERR;
+    
+    const { awardTypeId: id = '', icon = '' } = body;
+    
+    if (!id) return 'Missing parameter id';
+    if (!icon) return 'Missing parameter icon';
+    
+    const queryRes = await query<mysql.OkPacket>`
+        UPDATE awardTypes
+        SET icon = ${icon}
+        WHERE id = ${id}
+    `;
+    
+    if (queryRes.affectedRows === 0)
+        return {
+            status: 406,
+            error: `No Award Types to update with that Id`
         };
 });
 

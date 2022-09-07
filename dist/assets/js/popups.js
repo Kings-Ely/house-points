@@ -1,6 +1,5 @@
 import * as core from './main.js';
 import FullPagePopup from './components/FullPagePopup.js';
-import { inlineComponent } from './main.js';
 import EventCard from './components/EventCard.js';
 import UserCard from './components/UserCard.js';
 import { getComponentId } from "./componentIdx.js";
@@ -31,7 +30,7 @@ export async function eventPopup(eventId, reload = () => {}) {
     
     FullPagePopup(
         document.body,
-        inlineComponent(
+        core.inlineComponent(
             EventCard,
             async () => {
                 const events = await core.api(`get/events`, { eventId, });
@@ -64,7 +63,7 @@ export async function userPopupFromId(userId) {
     }
     FullPagePopup(
         document.body,
-        inlineComponent(
+        core.inlineComponent(
             UserCard,
             async () => {
                 return await core.api(`get/users`, { userId });
@@ -104,7 +103,7 @@ export async function userPopup(email) {
     }
     FullPagePopup(
         document.body,
-        inlineComponent(
+        core.inlineComponent(
             UserCard,
             async () => {
                 return await core.api(`get/users`, { email });

@@ -25,7 +25,8 @@ CREATE TABLE `awardTypes` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `name` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `hpsRequired` int(32) DEFAULT NULL
+  `hpsRequired` int(32) DEFAULT NULL,
+  `icon` text COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------

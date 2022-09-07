@@ -11,7 +11,8 @@ import * as core from '../../assets/js/main.js';
         awardTypeUpdateRequired,
         awardTypeDelete,
         newAwardType,
-        awardUpdateDesc
+        awardUpdateDesc,
+        updateAwardTypeIcon
     });
     
     refreshAwardTypes().then();
@@ -23,6 +24,15 @@ async function refreshAwardTypes() {
         .then(({ data }) => {
             core.reservoir.set('awardTypes', data);
         });
+}
+
+async function updateAwardTypeIcon (awardTypeId) {
+    const icon = prompt('Copy and Paste the SVG contents here:');
+    if (icon === null) return;
+    await core.api('update/award-types/icon', {
+        awardTypeId,
+        icon
+    })
 }
 
 async function awardTypeUpdateName(id, name) {

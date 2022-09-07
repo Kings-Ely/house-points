@@ -125,7 +125,8 @@ class Logger {
             this.output(LogLvl.INFO, 'START', new Date().toISOString());
         }
     }
-
+    
+    // Singleton instance of this class
     static instance: Logger = new Logger();
 }
 

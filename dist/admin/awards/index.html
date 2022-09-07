@@ -24,6 +24,14 @@
             each.style="display: inline-grid"
         >
             <div>
+                <span
+                    pump="awardtype?.icon || 'No Icon'"
+                    style="width: fit-content"
+                    class="icon"
+                    bind.click="updateAwardTypeIcon(awardtype.id)"
+                    data-label="Click to Change"
+                    pump-dirty
+                ></span>
                 <label>
                     <input
                         pump.value="${awardtype.name}"
@@ -51,6 +59,7 @@
                         bind.change="awardTypeUpdateDesc(awardtype.id, $el.value)"
                         class="editable-text"
                         data-label="Click to Edit"
+                        placeholder="Click to add description"
                     >
                 </label>
             </div>
