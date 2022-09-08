@@ -58,15 +58,11 @@ export default registerComponent(
                     </p>
 				` : ``}
 				<div class="user-card-housepoints">
-					${user['housePoints']
-                        .map((point, i) =>
+					${user['housePoints'].map((point, i) =>
                             core.inlineComponent(
                                 HousePoint,
                                 point,
-                                async () => {
-                                    user = await getUser();
-                                    await render();
-                                },
+                                hardReload,
                                 {
                                     admin,
                                     showBorderBottom: i !== user['housePoints'].length - 1,
@@ -84,12 +80,9 @@ export default registerComponent(
                                     dateEditable: false,
                                 }
                             )
-                        )
-                        .join('')}
+                        ).join('')}
 					
-					${
-                        admin
-                            ? `
+					${admin ? `
 						<div class="add-hp">
 							<input
 								placeholder="New house point description"
@@ -109,9 +102,7 @@ export default registerComponent(
 								class="icon small new-hp-create"
 							></button>
 						</div>
-					`
-                            : ''
-                    }
+					` : ''}
 				</div>
 			</div>
 		`;

@@ -85,7 +85,7 @@ export default registerComponent(
                                 onclick="_SelectableList${id}__selectAll(true)"
                                 class="icon"
                                 svg="unselected-checkbox.svg"
-                               data-label="Select All"
+                                data-label="Select All"
                                 aria-label="select all"
                             ></button>
                             
@@ -93,7 +93,7 @@ export default registerComponent(
                                 onclick="_SelectableList${id}__selectAll(false)"
                                 class="icon"
                                 svg="unselect-checkbox.svg"
-                               data-label="Unselect All"
+                                 data-label="Unselect All"
                                 aria-label="unselect all"
                             ></button>
                         </span>

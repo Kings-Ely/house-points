@@ -54,7 +54,8 @@
                             if (i === 0) {
                                 return 100;
                             }
-                           return Math.max((students[i].accepted / students[0].accepted) * 100, 25);
+                            const height = (students[i].accepted / students[0].accepted) * 100;
+                            return Math.max(height, 25);
                         })()}%
                         "
                 >

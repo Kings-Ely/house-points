@@ -197,11 +197,13 @@ function toggleYearGroup(age) {
     } else {
         filters.years.push(age);
     }
+    while (selected.length > 0) selected.pop();
     showStudentsList();
 }
 
 function toggleAdmin() {
     filters.admin = !filters.admin;
+    while (selected.length > 0) selected.pop();
     showStudentsList();
 }
 

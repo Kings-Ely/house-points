@@ -190,8 +190,14 @@ export function getRelativeTime(d1, d2) {
         console.error(`getRelativeTime: d1 '${d1}' is not a number`);
         return 'In the Past';
     }
-    d2 ||= Date.now();
+    const now = Date.now();
+    d2 ||= now;
     const elapsed = d1 - d2;
+    
+    if (elapsed > 1000*60*60*24*3 && d2 === now) {
+        const date = new Date(d1);
+        return `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()}`;
+    }
 
     // "Math.abs" accounts for both "past" & "future" scenarios
     for (const u in timeUnits) {

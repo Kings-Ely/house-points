@@ -6,7 +6,7 @@ import route from '../';
 import {
     addHousePointsToUser,
     AUTH_ERR, DEFAULT_EMAIL_DOMAIN,
-    generateUUId,
+    generateUUId, groupArr,
     idFromSession,
     isAdmin,
     isLoggedIn,
@@ -299,7 +299,19 @@ route('get/users/leaderboard', async ({ query, body }) => {
     }
 
     data = data.sort((a, b) => b['accepted'] - a['accepted']);
-
+    
+    const groupedData = groupArr(data, 'year');
+    
+    data = [];
+    
+    for (let year in groupedData) {
+        // only get the first 10 people in each year
+        data.push(...groupedData[year].slice(0, 10));
+    }
+    
+    // re-sort as grouping and ungrouping shuffles it
+    data = data.sort((a, b) => b['accepted'] - a['accepted']);
+    
     return { data };
 });
 

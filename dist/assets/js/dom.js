@@ -86,8 +86,8 @@ export async function showError(message) {
     let errorMessage = document.createElement('div');
     errorMessage.innerHTML = `
         ${message}
-        <span 
-        	onclick="this.parentElement.remove()" 
+        <span
+        	onclick="this.parentElement.remove()"
         	style="font-size: 18px"
         >&times;</span>
     `;

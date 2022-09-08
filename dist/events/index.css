@@ -25,8 +25,11 @@
 .filters-container:hover .filters-dropdown {
     display: block;
 }
+.filters-dropdown:has(:hover) {
+    display: block;
+}
 
-.filters-container:hover .filters-dropdown button {
+.filters-container .filters-dropdown button {
     font-size: medium;
     text-decoration: underline;
 }

@@ -63,6 +63,7 @@
 }
 
 .error {
+    pointer-events: all;
     height: fit-content;
     width: 50vw;
     min-width: 280px;

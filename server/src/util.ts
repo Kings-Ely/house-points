@@ -32,6 +32,19 @@ export function limitStr(str: string, maxLength = 50) {
 }
 
 /**
+ * @src https://stackoverflow.com/questions/14446511/most-efficient-method-to-groupby-on-an-array-of-objects
+ * @example
+ * groupArr(['one', 'two', 'three'], 'length');
+ * // => {"3": ["one", "two"], "5": ["three"]}
+ */
+export function groupArr <T>(arr: T[], key: string): Record<string, T[]> {
+    return arr.reduce(function(rv: any, x: any) {
+        (rv[x[key]] = rv[x[key]] || []).push(x);
+        return rv;
+    }, {});
+}
+
+/**
  * Reduces the parameters to a template string (tag) function into a single string
  */
 export function tagFuncParamsToString(msg: string | TemplateStringsArray, params: any[]): string {

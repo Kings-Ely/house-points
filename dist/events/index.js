@@ -8,6 +8,7 @@ const selected = [];
 window.eventPopup = core.eventPopup;
 window.deleteEvents = deleteEvents;
 window.showAllEvents = showAllEvents;
+window.refreshAfterFilterChange = refreshAfterFilterChange;
 
 (async () => {
     await core.init('..', true);
@@ -18,6 +19,11 @@ window.showAllEvents = showAllEvents;
         await eventPopup(core.GETParam('id'), showAllEvents);
     }
 })();
+
+function refreshAfterFilterChange () {
+    while (selected.length > 0) selected.pop();
+    showAllEvents();
+}
 
 async function showAllEvents() {
 
@@ -56,22 +62,28 @@ async function showAllEvents() {
                             type="date"
                             bind="filter_startDate"
                             bind-persist
-                            onchange="showAllEvents()"
                         >
+                        <br>
                         To
                         <input
                             type="date"
                             bind="filter_endDate"
                             bind-persist
-                            onchange="showAllEvents()"
                         >
+                        <div style="text-align: center">
+                            <button
+                                onclick="refreshAfterFilterChange()"
+                                class="bordered"
+                                style="margin: 4px;"
+                            >Apply</button>
+                        </div>
                     </div>
                 </span>
 			`,
             itemGenerator: eventHTML,
             filter: event => {
+                
                 const eventDay = new Date(new Date(event.time*1000).toDateString());
-    
     
                 const startDate = new Date(
                     new Date(core.reservoir.get('filter_startDate')).toDateString()
