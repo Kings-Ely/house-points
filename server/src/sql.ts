@@ -15,7 +15,7 @@ export type queryFunc = <Res extends queryRes = mysql.RowDataPacket[]>(
     ...params: any[]
 ) => Promise<Res>;
 
-export default function connect (dbConfig?: mysql.ConnectionOptions): queryFunc {
+export default function connect (dbConfig: mysql.ConnectionOptions = {}): queryFunc {
     // define defaults from .env file
     const config: mysql.ConnectionOptions = {
         host: process.env.DB_HOST,
@@ -23,7 +23,7 @@ export default function connect (dbConfig?: mysql.ConnectionOptions): queryFunc 
         password: process.env.DB_PASS,
         database: process.env.DB,
         port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
-        ...(dbConfig ?? {}),
+        ...dbConfig,
         decimalNumbers: true
     };
 

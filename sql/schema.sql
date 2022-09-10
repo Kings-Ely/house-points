@@ -14,7 +14,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `backups` (
 	`id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
 	`created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`name` varchar(256) COLLATE utf8mb4_unicode_ci DEFAULT NULL
+	`name` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -114,6 +114,7 @@ ALTER TABLE `housepoints` ADD PRIMARY KEY (`id`);
 ALTER TABLE `sessions`    ADD PRIMARY KEY (`id`);
 ALTER TABLE `users`       ADD PRIMARY KEY (`id`);
 ALTER TABLE `logs`        ADD PRIMARY KEY (`id`);
+ALTER TABLE `backups`     ADD PRIMARY KEY (`id`);
 
 -- AUTO_INCREMENT
 

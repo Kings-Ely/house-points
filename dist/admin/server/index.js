@@ -6,6 +6,7 @@ const $stats = document.getElementById('server-stats');
 const $startServerButton = document.getElementById('start');
 const $killServerButton = document.getElementById('kill');
 const $restartServerButton = document.getElementById('restart');
+const $backupServerButton = document.getElementById('backup');
 const selectedSessions = [];
 const selectedLogs = [];
 const stats = {};
@@ -243,4 +244,11 @@ $restartServerButton.onclick = async () => {
     await fetch(core.ROOT_PATH + '/api/start-server?session=' + core.getSession());
 
     location.reload();
+};
+
+$backupServerButton.onclick = async () => {
+    const { id } = await core.api(`create/backups`);
+    if (typeof id !== 'string') {
+        await core.showError('Failed to create backup');
+    }
 };

@@ -14,6 +14,7 @@ import './tests/events.spec';
 import './tests/house-points.spec';
 import './tests/award-types.spec';
 import './tests/awards.spec';
+import './tests/backups.spec';
 
 const flags = commandLineArgs([
     {

@@ -65,6 +65,7 @@ import './routes/events';
 import './routes/session';
 import './routes/award-types';
 import './routes/awards';
+import './routes/backups';
 
 function startServer() {
     let options = {};

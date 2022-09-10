@@ -12,6 +12,24 @@ export enum LogLvl {
     VERBOSE
 }
 
+/**
+ * Remove sensitive info from log messages
+ */
+export function filterForLogging (str: string) {
+    let toFilterOut: string[] = [
+        process.env.DB_HOST,
+        process.env.DB_USER,
+        process.env.DB_PASS,
+        process.env.DB,
+    ].filter((s): s is string => !!s);
+    
+    for (const search of toFilterOut) {
+        str = str.replace(search, '<REDACTED>');
+    }
+    
+    return str;
+}
+
 class Logger {
     private fileHandle?: fs.WriteStream;
     private path = '';
@@ -43,9 +61,9 @@ class Logger {
                 .join(' ');
 
         if (this.useConsole) {
-            console.log(message);
+            console.log(filterForLogging(message));
         } else {
-            fs.appendFileSync(this.path, message + '\n');
+            fs.appendFileSync(this.path, filterForLogging(message) + '\n');
         }
 
         if (this.dbLogLevel >= level) {
@@ -57,7 +75,7 @@ class Logger {
         if (!query) return;
         return await query<mysql.OkPacket>`
             INSERT INTO logs (msg, madeBy)
-            VALUES (${message}, ${from})
+            VALUES (${filterForLogging(message)}, ${from})
         `;
     }
 
