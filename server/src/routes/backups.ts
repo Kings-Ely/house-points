@@ -104,7 +104,6 @@ route('update/backups/name', async ({ query, body }) => {
 		status: 406,
 		error: `No backups to update with that id`
 	};
-
 });
 
 route('delete/backups', async ({ query, body }) => {
