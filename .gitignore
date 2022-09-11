@@ -1,3 +1,4 @@
+# IDE files
 .idea
 
 # generated files
@@ -5,17 +6,15 @@ node_modules
 *.min
 package-lock.json
 *.js.map
-
-# output files
 /server/*index.js
 /test/*index.js
 
 # secrets
-sshPass.txt
+sshPass.*.txt
 *.env
 /dist/api/secrets.php
 
-!server/structure.env
+!structure.env
 
 # data files
 *.csv

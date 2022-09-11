@@ -20,14 +20,12 @@ const flags = commandLineArgs([
     {
         name: 'verbose',
         alias: 'v',
-        type: Boolean,
-        defaultValue: false,
+        type: Boolean
     },
     {
         name: 'deploy',
         alias: 'd',
-        type: Boolean,
-        defaultValue: false,
+        type: String
     },
 ]);
 
@@ -94,11 +92,14 @@ async function api(path: string, body: Record<string, any> = {}): Promise<any> {
     return JSON.parse(resBody);
 }
 
-export async function deploy(): Promise<void> {
+export async function deploy(flags: commandLineArgs.CommandLineOptions): Promise<void> {
     return await new Promise<void>((resolve, reject) => {
         let invoked = false;
 
-        let fork = childProcess.fork('./bin/upload.js', ['-m']);
+        let fork = childProcess.fork(
+            './bin/upload.js',
+            ['-m', '-e', flags.deploy]
+        );
 
         // listen for errors as they may prevent the exit event from firing
         fork.on('error', err => {
@@ -147,7 +148,7 @@ export async function deploy(): Promise<void> {
 
     if (testRes.failed === 0 && flags.deploy) {
         console.log('All tests passed, Deploying...');
-        deploy().then(() => {
+        deploy(flags).then(() => {
             console.log(c.green('Finished in ' + timeSinceStart() + 'ms'));
         });
     }

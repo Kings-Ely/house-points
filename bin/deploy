@@ -2,6 +2,13 @@
 
 start=`date +%s`
 
+die () {
+    echo >&2 "$@"
+    exit 1
+}
+
+[ "$#" -eq 1 ] || die "1 argument required, $# provided"
+
 (
   cd server || exit;
   webpack;
@@ -12,7 +19,7 @@ start=`date +%s`
   webpack;
 )
 
-node --enable-source-maps test -v --deploy
+node --enable-source-maps test -v --deploy "${@: -1}"
 
 end=`date +%s.%N`
 

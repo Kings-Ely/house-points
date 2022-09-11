@@ -3,7 +3,7 @@ import mysql from 'mysql2';
 import fs from 'fs';
 import log from "../log";
 import { AUTH_ERR, generateUUId, isAdmin } from "../util";
-import mysqldump from 'mysqldump';
+import mysqldump, { ConnectionOptions } from "mysqldump";
 
 route('get/backups', async ({ query, body }) => {
 	if (!await isAdmin(body, query)) return AUTH_ERR;
@@ -46,20 +46,22 @@ route('create/backups', async ({ query, body }) => {
 	
 	const id = await generateUUId();
 	const name = `${Math.round(Date.now() / 1000)}-${id}`;
-	const dumpFileName = `./backups/${name}.dump.sql.gz`
+	const dumpFileName = `./backups/${name}.dump.sql`;
+	
+	const connection: ConnectionOptions = {
+		host: process.env.DB_HOST,
+		user: process.env.DB_USER || '',
+		password: process.env.DB_PASS || '',
+		database: process.env.DB || '',
+		port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
+	};
 	
 	await mysqldump({
-		connection: {
-			host: process.env.DB_HOST,
-			user: process.env.DB_USER || '',
-			password: process.env.DB_PASS || '',
-			database: process.env.DB || '',
-			port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
-		},
-		dumpToFile: dumpFileName,
-		compressFile: true
+		connection,
+		dumpToFile: dumpFileName
+	}).catch(e => {
+		log.error(`Error in mysqldump (making backup): ${e}`);
 	});
-	
 	await query`
 		INSERT INTO backups
 			(id, name)

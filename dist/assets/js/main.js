@@ -2,7 +2,7 @@
 // Utility script imported by all pages
 
 // Global constants and variables
-export const API_ROOT = 'https://josephcoppin.com/school/house-points/api',
+export const
     COOKIE_SESSION = 'hpnea_SessionId',
     COOKIE_ALLOW_COOKIES_KEY = 'hpnea_AllowedCookies',
     LS_THEME = 'hpnea_Theme',
@@ -14,7 +14,9 @@ export const API_ROOT = 'https://josephcoppin.com/school/house-points/api',
     NOTIFICATION_SHOW_TIME = 5000;
 
 // should be const but is set once at the start of the script
-export let ROOT_PATH = '';
+export let
+    ROOT_PATH = '',
+    API_ROOT = 'https://josephcoppin.com/school/house-points/api';
 
 export const state = {
     $nav: null,
@@ -57,7 +59,7 @@ const relativeTimeFormat = new Intl.RelativeTimeFormat('en', {
     numeric: 'auto',
 });
 
-import './components/';
+import './components/index.js';
 import {
     domIsLoaded,
     loadFooter,
@@ -105,6 +107,7 @@ export async function init(
     const start = performance.now();
 
     ROOT_PATH = rootPath;
+    API_ROOT = `${rootPath}/api`;
 
     if (!noApiTest) {
         await testApiCon();
@@ -249,8 +252,6 @@ export function GETParamRaw(name) {
  */
 export const navigate = async url => {
     await waitForReady();
-    
-    console.trace(ROOT_PATH, url, ROOT_PATH + url);
     
     if (url[0] === '/') {
         url = ROOT_PATH + url;

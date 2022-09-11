@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import { minify } from 'minify';
 import tryToCatch from 'try-to-catch';
 import commandLineArgs from 'command-line-args';
+import * as dotenv from 'dotenv';
 import p from 'path';
 
 export const flags = {
@@ -14,6 +15,7 @@ export const flags = {
     noBack: false,
     noFront: false,
     minify: false,
+    env: 'dev',
     ...commandLineArgs([
         {
             name: 'verbose',
@@ -23,15 +25,11 @@ export const flags = {
         { name: 'noBack', type: Boolean },
         { name: 'noFront', type: Boolean },
         { name: 'minify', type: Boolean, alias: 'm' },
+        { name: 'env', type: String, alias: 'e' },
     ]),
 };
 
 $.verbose = flags.verbose;
-
-const REMOTE_ADDRESS = 'josephcoppin@josephcoppin.com';
-const REMOTE_FRONTEND_PATH = '/public_html/school/house-points';
-const REMOTE_BACKEND_PATH = '/hpsnea-server';
-const LOCAL_PATH = '/home/joseph/dev/house-points/dist';
 
 const MINIFY_OPTIONS = {
     html: {
@@ -61,19 +59,18 @@ const MINIFY_OPTIONS = {
 };
 
 async function upload(localPath, remotePath, args = '') {
-    return await $`sshpass -f './sshPass.txt' rsync ${args.split(
-        ' '
-    )} ${localPath} ${REMOTE_ADDRESS}:~${remotePath}`;
+    return await $`sshpass -f '${process.env.SSH_PASS_FILE}' rsync ${args.split(
+        ' ')} ${localPath} ${process.env.REMOTE_ADDRESS}:~${remotePath}`;
 }
 
 async function uploadFrontendMinified(dir = '') {
     
-    console.log(c.yellow(p.join(LOCAL_PATH, dir)));
+    console.log(c.yellow(p.join(process.env.LOCAL_PATH, dir)));
 
-    const paths = fs.readdirSync(p.join(LOCAL_PATH, dir));
+    const paths = fs.readdirSync(p.join(process.env.LOCAL_PATH, dir));
 
     for (const path of paths) {
-        const filePath = p.join(LOCAL_PATH, dir, path);
+        const filePath = p.join(process.env.LOCAL_PATH, dir, path);
         if (fs.statSync(filePath).isDirectory()) {
             await uploadFrontendMinified(p.join(dir, path));
             continue;
@@ -95,7 +92,7 @@ async function uploadFrontendMinified(dir = '') {
             }
             const minPath = filePath + '.min';
             fs.writeFileSync(minPath, data);
-            await upload(minPath, p.join(REMOTE_FRONTEND_PATH, dir, path));
+            await upload(minPath, p.join(process.env.REMOTE_FRONTEND_PATH, dir, path));
             setTimeout(() => fs.rmSync(minPath), 1000);
         }
     }
@@ -106,23 +103,23 @@ async function uploadFrontend() {
 
     console.log(c.green('Uploading frontend...'));
 
-    const paths = fs.readdirSync(LOCAL_PATH);
+    const paths = fs.readdirSync(process.env.LOCAL_PATH);
 
     for (const path of paths) {
         // skip hidden files and directories
         if (path[0] === '.') continue;
 
-        console.log(c.yellow(p.join(LOCAL_PATH, path)));
+        console.log(c.yellow(p.join(process.env.LOCAL_PATH, path)));
 
-        if (fs.statSync(p.join(LOCAL_PATH, path)).isDirectory()) {
+        if (fs.statSync(p.join(process.env.LOCAL_PATH, path)).isDirectory()) {
             await upload(
-                p.join(LOCAL_PATH, path),
-                REMOTE_FRONTEND_PATH,
+                p.join(process.env.LOCAL_PATH, path),
+                process.env.REMOTE_FRONTEND_PATH,
                 "-r --exclude='*.env'"
             );
             continue;
         }
-        await upload(p.join(LOCAL_PATH, path), REMOTE_FRONTEND_PATH);
+        await upload(p.join(process.env.LOCAL_PATH, path), process.env.REMOTE_FRONTEND_PATH);
     }
 }
 
@@ -134,16 +131,16 @@ async function uploadBackend() {
     const paths = {
         './server/index.js': '/index.js',
         './server/index.js.map': '/index.js.map',
-        './server/staging.Dockerfile': '/Dockerfile',
         './server/package.json': '/package.json',
-        './server/prod.env': '/.env',
+        [`./server/${flags.env}.env`]: '/.env',
+        [`./server/${flags.env}.Dockerfile`]: '/Dockerfile',
     };
 
     await Promise.all(
         Object.keys(paths).map(async path => {
             if (fs.existsSync(path)) {
                 console.log(c.yellow(path));
-                await upload(path, REMOTE_BACKEND_PATH + paths[path]);
+                await upload(path, process.env.REMOTE_BACKEND_PATH + paths[path]);
             }
         })
     );
@@ -151,6 +148,10 @@ async function uploadBackend() {
 
 (async () => {
     const start = now();
+    
+    dotenv.config({ path: `./${flags.env}.env` });
+
+    console.log(c.green('Uploading to ' + process.env.REMOTE_ADDRESS));
     
     if (!flags.noFront) {
         if (!flags.minify) {
