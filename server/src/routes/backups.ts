@@ -45,8 +45,7 @@ route('create/backups', async ({ query, body }) => {
 	}
 	
 	const id = await generateUUId();
-	const name = `${Math.round(Date.now() / 1000)}-${id}`;
-	const dumpFileName = `./backups/${name}.dump.sql`;
+	const dumpFileName = `./backups/${id}.dump.sql`;
 	
 	const connection: ConnectionOptions = {
 		host: process.env.DB_HOST,
@@ -66,10 +65,10 @@ route('create/backups', async ({ query, body }) => {
 		INSERT INTO backups
 			(id, name)
 		VALUES
-            (${id}, ${name})
+            (${id}, ${id})
 	`;
 	
-	return { name, id };
+	return { name: id, id };
 });
 
 route('update/backups/restore-from', async ({ query, body }) => {
@@ -110,6 +109,8 @@ route('delete/backups', async ({ query, body }) => {
 	if (!await isAdmin(body, query)) return AUTH_ERR;
 	
 	const { backupId } = body;
+	
+	
 	
 	
 });

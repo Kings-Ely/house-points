@@ -107,7 +107,7 @@ export async function init(
     const start = performance.now();
 
     ROOT_PATH = rootPath;
-    API_ROOT = `${rootPath}/api`;
+    //API_ROOT = `${rootPath}/api`;
 
     if (!noApiTest) {
         await testApiCon();
