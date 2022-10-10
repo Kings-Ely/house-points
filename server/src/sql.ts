@@ -4,7 +4,7 @@ import c from 'chalk';
 import log from './log';
 
 export type queryRes =
-    | mysql.RowDataPacket[]
+      mysql.RowDataPacket[]
     | mysql.RowDataPacket[][]
     | mysql.OkPacket
     | mysql.OkPacket[]
@@ -15,7 +15,7 @@ export type queryFunc = <Res extends queryRes = mysql.RowDataPacket[]>(
     ...params: any[]
 ) => Promise<Res>;
 
-export default function connect (dbConfig: mysql.ConnectionOptions = {}): queryFunc {
+export default function connect (dbConfig: mysql.ConnectionOptions = {}): [() => mysql.Connection, queryFunc] {
     // define defaults from .env file
     const config: mysql.ConnectionOptions = {
         host: process.env.DB_HOST,
@@ -34,12 +34,14 @@ export default function connect (dbConfig: mysql.ConnectionOptions = {}): queryF
     // as the server will periodically disconnect from the database,
     // we need to reconnect when the connection is lost
     function handleDisconnect() {
+        log.warn(`Attempting to reconnect to SQL server...`);
+        
         con = mysql.createConnection(config);
 
         con.connect(err => {
             if (err) {
                 log.error`error when connecting to db: ${JSON.stringify(err)}`;
-                setTimeout(handleDisconnect, 500);
+                setTimeout(handleDisconnect, 200);
             }
 
             log.log(c.green(`Connected to SQL server`));
@@ -59,9 +61,10 @@ export default function connect (dbConfig: mysql.ConnectionOptions = {}): queryF
     handleDisconnect();
 
     // returns query function
-    return (queryParts: TemplateStringsArray, ...params: any[]): Promise<any> => {
+    return [() => con, (queryParts: TemplateStringsArray, ...params: any[]): Promise<any> => {
         return new Promise((resolve, fail) => {
             if (!hasConnectedSQL) {
+                log.error('Cannot run SQL query before connecting to SQL server');
                 fail('SQL server not connected');
             }
 
@@ -80,8 +83,10 @@ export default function connect (dbConfig: mysql.ConnectionOptions = {}): queryF
             log.verbose`QUERY: ${con.escape(query)} ${JSON.stringify(params)}`;
 
             // if it's an array, add all the elements of the array in place as params
+            // Flatten 2D arrays
             for (let i = 0; i < params.length; i++) {
                 if (Array.isArray(params[i])) {
+                    // insert the contents of the sub array into the array at it's index
                     params.splice(i, 1, ...params[i]);
                 }
             }
@@ -94,5 +99,5 @@ export default function connect (dbConfig: mysql.ConnectionOptions = {}): queryF
                 resolve(result);
             });
         });
-    };
+    }];
 }

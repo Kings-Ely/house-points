@@ -101,7 +101,7 @@ route('create/events', async ({ query, body }) => {
         return 'Timestamp must be at least 1';
     }
 
-    const id = await generateUUId();
+    const id = await generateUUId('event');
 
     await query`
         INSERT INTO events (id, name, time, description)

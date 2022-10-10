@@ -1,10 +1,10 @@
 <?php
 
 const PORT = 4464;
-const HOST = 'https://127.0.0.1';
+const HOST = 'http://127.0.0.1';
 
 /* For debugging:
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+//mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 ini_set('display_errors', true);
 error_reporting(E_ALL);
 //*/
@@ -26,7 +26,9 @@ if (count($uri_parts) == 2) {
 	die(json_encode(array('error' => "Invalid API request format, must have '?' followed by API route")));
 }
 
+
 $url = HOST.':'.PORT.'/'.$api_uri;
+
 
 $ch = curl_init();
 
@@ -52,8 +54,8 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
 // Dangerous but as only localhost requests should be fine
-curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+// curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+// curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
 $response = curl_exec($ch);
 

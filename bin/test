@@ -11,3 +11,5 @@
 )
 
 node --enable-source-maps test
+
+bin/kill-server

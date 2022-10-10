@@ -15,23 +15,9 @@
 <body>
 <nav></nav>
 <main>
-    <section>
-        <p style="font-size: 2em; text-align: center;">
-            <email- args="theUser, { fontsize: '50px' }"></email->
-        </p>
-        <div class="flex-wrap" hidden="!me">
-            <a class="big-link" href="../set-password" svg="key.svg">
-                Change Password
-            </a>
-            <button
-                aria-label="logout"
-                svg="logout.svg"
-                onclick="logout()"
-                class="big-link"
-            >Log Out</button>
-        </div>
-    </section>
-
+    <h2>
+        <email- args="theUser, { fontsize: '1.5em' }"></email->
+    </h2>
     <section hidden="!user.admin" class="flex-wrap">
         <a
             href="../admin/"
@@ -133,6 +119,20 @@
                 dateEditable: !me,
                 large: true
             }"></house-point>
+        </div>
+    </section>
+    
+    <section>
+        <div class="flex-wrap" hidden="!me">
+            <a class="big-link" href="../set-password" svg="key.svg">
+                Change Password
+            </a>
+            <button
+                aria-label="logout"
+                svg="logout.svg"
+                onclick="logout()"
+                class="big-link"
+            >Log Out</button>
         </div>
     </section>
 </main>

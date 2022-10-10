@@ -152,7 +152,7 @@ route('create/house-points/give', async ({ query, body }) => {
         }
     }
 
-    const id = await generateUUId();
+    const id = await generateUUId('housepoint');
 
     await query`
         INSERT INTO housepoints (id, userId, quantity, eventId, description, status, completed)
@@ -221,7 +221,7 @@ route('create/house-points/request', async ({ query, body }) => {
         }
     }
 
-    const id = await generateUUId();
+    const id = await generateUUId('housepoint');
 
     await query`
         INSERT INTO housepoints (id, userId, quantity, eventId, description, status)

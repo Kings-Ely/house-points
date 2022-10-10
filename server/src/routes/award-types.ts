@@ -38,7 +38,7 @@ route('create/award-types', async ({ query, body }) => {
         return 'Invalid house point requirement';
     }
 
-    const id = await generateUUId();
+    const id = await generateUUId('awardType');
 
     await query`
         INSERT INTO awardTypes (

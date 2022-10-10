@@ -129,7 +129,7 @@ route('create/awards', async ({ query, body }) => {
         return `Student already has that award`;
     }
 
-    const id = await generateUUId();
+    const id = await generateUUId('award');
 
     await query`
         INSERT INTO awards (id, userId, awardTypeId, description)

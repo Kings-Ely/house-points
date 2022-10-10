@@ -13,6 +13,7 @@ export default registerComponent('CookieCard', $el => {
     window._CookiePopup__allowedCookies = async value => {
         core.hide($el);
         if (!value) {
+            await core.setCookie(core.COOKIE_ALLOW_COOKIES_KEY, '', 1/24);
             return;
         }
         await core.setCookie(core.COOKIE_ALLOW_COOKIES_KEY, '1', 365);

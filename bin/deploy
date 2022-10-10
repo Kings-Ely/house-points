@@ -21,6 +21,8 @@ die () {
 
 node --enable-source-maps test -v --deploy "${@: -1}"
 
+bin/kill-server
+
 end=`date +%s.%N`
 
 runtime=$( echo "$end - $start" | bc -l )

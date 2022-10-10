@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if (( $# != 1 )); then
+    sudo kill -9 $(sudo lsof -t -i:4464) > /dev/null 2>&1;
+    echo "Killed on port 4464";
+else
+    sudo kill -9 $(sudo lsof -t -i:"$1") > /dev/null 2>&1;
+    echo "Killed on port $1";
+fi

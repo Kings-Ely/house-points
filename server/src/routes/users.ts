@@ -374,7 +374,7 @@ route('create/users', async ({ query, body }) => {
 
     const [ passHash, salt ] = passwordHash(password);
 
-    const userId = await generateUUId();
+    const userId = await generateUUId('user');
 
     await query`
         INSERT INTO users

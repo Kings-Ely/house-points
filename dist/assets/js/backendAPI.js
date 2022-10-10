@@ -118,6 +118,7 @@ export async function api(path, body = null) {
 
     // fetch
     // include '/' in request as otherwise you get redirected, which takes more time
+    console.log('req to ', `${core.API_ROOT}/?${path}`);
     const res = await fetch(`${core.API_ROOT}/?${path}`, {
         method: 'POST',
         mode: 'cors',

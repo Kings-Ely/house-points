@@ -1,7 +1,8 @@
 import fs from 'fs';
 import c from 'chalk';
+import { queryFunc } from "./sql";
 import { removeColour, tagFuncParamsToString } from './util';
-import { IFlags, query } from './index';
+import { IFlags } from './index';
 import mysql from 'mysql2';
 
 export enum LogLvl {
@@ -35,13 +36,14 @@ class Logger {
     private path = '';
     private level: LogLvl = 3;
     private dbLogLevel: LogLvl = 2;
+    private dbQuery: queryFunc | undefined;
     private useConsole = true;
     private active = true;
 
     /**
      * Outputs a message to the console and/or file
      */
-    output(level: LogLvl, type: string, ...messages: any[]): void {
+    public output(level: LogLvl, type: string, ...messages: any[]): void {
         if (!this.active) {
             return;
         }
@@ -72,8 +74,8 @@ class Logger {
     }
 
     private async logToDB(message: string, from = 'server'): Promise<mysql.OkPacket | undefined> {
-        if (!query) return;
-        return await query<mysql.OkPacket>`
+        if (!this.dbQuery) return;
+        return await this.dbQuery<mysql.OkPacket>`
             INSERT INTO logs (msg, madeBy)
             VALUES (${filterForLogging(message)}, ${from})
         `;
@@ -82,48 +84,42 @@ class Logger {
     /**
      * Logs a message but only if the 'verbose' flag is set
      */
-    verbose(msg: string | TemplateStringsArray, ...params: any[]) {
+    public verbose(msg: string | TemplateStringsArray, ...params: any[]) {
         this.output(LogLvl.VERBOSE, c.grey`VERB`, tagFuncParamsToString(msg, params));
     }
 
     /**
      * Logs a message
      */
-    log(msg: string | TemplateStringsArray, ...params: any[]) {
-        const message = tagFuncParamsToString(msg, params);
-
-        if (this.dbLogLevel >= LogLvl.INFO) {
-            this.logToDB(message).then();
-        }
-
-        this.output(LogLvl.INFO, c.grey`INFO`, message);
+    public log(msg: string | TemplateStringsArray, ...params: any[]) {
+        this.output(LogLvl.INFO, c.grey`INFO`, tagFuncParamsToString(msg, params));
     }
 
     /**
      * Logs a warning
      */
-    warn(msg: string | TemplateStringsArray, ...params: any[]) {
+    public warn(msg: string | TemplateStringsArray, ...params: any[]) {
         this.output(LogLvl.WARN, c.yellow`WARN`, tagFuncParamsToString(msg, params));
     }
 
     /**
      * Logs an error
      */
-    error(msg: string | TemplateStringsArray, ...params: any[]) {
+    public error(msg: string | TemplateStringsArray, ...params: any[]) {
         this.output(LogLvl.ERROR, c.red`ERR`, tagFuncParamsToString(msg, params));
     }
 
     /**
      * Closes any active file handles
      */
-    async close(): Promise<unknown> {
+    public async close(): Promise<unknown> {
         this.active = false;
         return new Promise(resolve => {
             this.fileHandle?.close?.(resolve);
         });
     }
 
-    setLogOptions(options: IFlags) {
+    public setLogOptions(options: IFlags) {
         this.level = options.logLevel;
         this.level = options.dbLogLevel;
         this.useConsole = !options.logTo;
@@ -142,6 +138,10 @@ class Logger {
 
             this.output(LogLvl.INFO, 'START', new Date().toISOString());
         }
+    }
+    
+    public setupQuery(query: queryFunc) {
+        this.dbQuery = query;
     }
     
     // Singleton instance of this class

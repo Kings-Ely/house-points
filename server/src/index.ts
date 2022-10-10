@@ -1,9 +1,7 @@
-import https from 'https';
 import http, { IncomingMessage, ServerResponse } from 'http';
-import fs from 'fs';
 import commandLineArgs from 'command-line-args';
 import c from 'chalk';
-import connectSQL, { queryFunc } from './sql';
+import connectSQL  from './sql';
 import log, { LogLvl, setupLogger } from './log';
 import { loadEnv } from './util';
 import requestHandler, { Handler } from './requestHandler';
@@ -20,20 +18,10 @@ export const flags = {
     dbLogLevel: LogLvl.WARN,
     port: 0,
     ...commandLineArgs([
-        {
-            name: 'logLevel',
-            type: Number,
-        },
-        {
-            name: 'dbLogLevel',
-            type: Number,
-        },
+        { name: 'logLevel', type: Number },
+        { name: 'dbLogLevel', type: Number },
         { name: 'logTo', type: String },
-        {
-            name: 'port',
-            alias: 'p',
-            type: Number,
-        },
+        { name: 'port', alias: 'p', type: Number },
     ]),
 };
 
@@ -41,11 +29,6 @@ export const flags = {
  * Handlers for the api routes
  */
 const handlers: Record<string, Handler> = {};
-
-/**
- * Queries the database. Must check if query is available before calling.
- */
-export let query: queryFunc | null;
 
 /**
  * Define a route that the server will respond to.
@@ -68,13 +51,12 @@ import './routes/awards';
 import './routes/backups';
 
 function startServer() {
+    
+    const [ dbCon, query ] = connectSQL();
+    
+    log.setupQuery(query);
+    
     let options = {};
-    if (process.env.PROD === '1') {
-        options = {
-            key: fs.readFileSync('./privatekey.pem'),
-            cert: fs.readFileSync('./certificate.pem'),
-        };
-    }
 
     let port: number | string | undefined = process.env.PORT;
 
@@ -87,7 +69,7 @@ function startServer() {
         return;
     }
 
-    let server: http.Server | https.Server;
+    let server: http.Server;
 
     async function handle(req: IncomingMessage, res: ServerResponse) {
         if (!query) {
@@ -100,19 +82,13 @@ function startServer() {
                 })
             );
         }
-        await requestHandler(req, res, query, handlers);
+        await requestHandler(req, res, query, dbCon, handlers);
     }
 
-    if (process.env.PROD !== '1') {
-        server = http.createServer(options, handle).listen(port, () => {
-            log.log(c.green(`Dev server started on port ${port}`));
-        });
-    } else {
-        server = https.createServer(options, handle).listen(port, () => {
-            log.log(c.green(`Production server started on port ${port}`));
-        });
-    }
-
+    server = http.createServer(options, handle).listen(port, () => {
+        log.log(c.green(`Dev server started on port ${port}`));
+    });
+    
     process.on('SIGTERM', () => {
         server.close(async () => {
             log.log`Server stopped, stopping process...`;
@@ -122,14 +98,9 @@ function startServer() {
     });
 }
 
-function connectToMySQL() {
-    log.log`Connecting to SQL server...`;
-    query = connectSQL();
-}
 
 (async () => {
     loadEnv();
     setupLogger(flags as IFlags);
-    connectToMySQL();
     startServer();
 })();

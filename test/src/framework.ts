@@ -41,9 +41,9 @@ export class TestResult {
 }
 
 export default class Test {
-    private readonly test;
-    private readonly id;
-    public readonly batteryName;
+    private readonly test: testExecutor;
+    private readonly id: string | number;
+    public readonly batteryName: string;
 
     public constructor(test: testExecutor, id: string | number = 'test', batteryName = '') {
         this.id = id;
@@ -52,7 +52,10 @@ export default class Test {
     }
 
     public run(api: API, code: CommandLineOptions): Promise<string | boolean | Error> {
-        return this.test(api, code);
+        return this.test(api, code)
+            .catch((e) => {
+                return `Error in test: ${e}`;
+            });
     }
 
     public static currentId = 0;

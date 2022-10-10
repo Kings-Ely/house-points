@@ -358,7 +358,7 @@ h3 {
 
 
 footer {
-    height: 200px;
+    min-height: 200px;
     background: var(--bg-accent);
     padding: 0;
     margin: 0;
@@ -366,6 +366,30 @@ footer {
     justify-content: center;
     align-items: center;
     text-align: center;
+}
+
+footer > div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-height: 100%;
+    justify-content: space-between;
+}
+
+footer > div > div:last-child {
+    border-left: 1px solid var(--border);
+    padding: 20px;
+    margin: 10px 10px 10px 0;
+}
+
+@media only screen and (max-aspect-ratio: 6/5) {
+    footer > div {
+        display: block;
+    }
+
+    footer > div > div:last-child {
+        border: none;
+        border-top: 1px solid var(--border);
+    }
 }
 
 nav {

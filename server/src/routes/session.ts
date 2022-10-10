@@ -91,7 +91,7 @@ route('create/sessions/from-login', async ({ query, body }) => {
         return 'Invalid email or password';
     }
 
-    const sessionId = await generateUUId();
+    const sessionId = await generateUUId('session');
 
     await query`
         INSERT INTO sessions (id, userId, expires)
@@ -138,7 +138,7 @@ route('create/sessions/from-user-id', async ({ query, body }) => {
     `;
     if (!res.length) return 'Invalid userId';
 
-    const sessionId = await generateUUId();
+    const sessionId = await generateUUId('session');
 
     await query`
         INSERT INTO sessions (id, userId, expires)
@@ -176,7 +176,7 @@ route('create/sessions/for-forgotten-password', async ({ query, body }) => {
         return 'Invalid email';
     }
     const userId = res[0]?.id;
-    const sessionId = await generateUUId();
+    const sessionId = await generateUUId('session');
 
     await query`
         INSERT INTO sessions (id, userId, expires)

@@ -1,4 +1,5 @@
 import { IncomingMessage, ServerResponse } from 'http';
+import mysql from "mysql2";
 import log from './log';
 import now from 'performance-now';
 import type { queryFunc } from './sql';
@@ -9,6 +10,7 @@ export interface IHandlerArgs {
     req: IncomingMessage;
     body: Record<string, unknown>;
     query: queryFunc;
+    dbCon: () => mysql.Connection,
 }
 
 export type Handler = (
@@ -54,6 +56,7 @@ export default async function (
     req: IncomingMessage,
     res: ServerResponse,
     query: queryFunc,
+    dbCon: () => mysql.Connection,
     routes: Record<string, Handler>
 ) {
     log.verbose`Incoming: ${req.method} ${req.url}`;
@@ -107,14 +110,12 @@ export default async function (
         });
 
         if (typeof body === 'string' || !body) {
-            res.writeHead(400);
-            res.end(
-                JSON.stringify({
-                    ok: false,
-                    status: 500,
-                    error: body
-                })
-            );
+            res.writeHead(500);
+            res.end(JSON.stringify({
+                ok: false,
+                status: 500,
+                error: body
+            }));
             return;
         }
 
@@ -123,7 +124,8 @@ export default async function (
             res,
             req,
             url: req.url || '',
-            query
+            query,
+            dbCon
         };
 
         apiRes = await handler(args).catch(e => {

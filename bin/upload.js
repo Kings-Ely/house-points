@@ -59,8 +59,10 @@ const MINIFY_OPTIONS = {
 };
 
 async function upload(localPath, remotePath, args = '') {
+    console.log(`sshpass -f '${process.env.SSH_PASS_FILE}' rsync ${args.split(
+        ' ')} ${localPath} ${process.env.REMOTE_ADDRESS}:${remotePath}`);
     return await $`sshpass -f '${process.env.SSH_PASS_FILE}' rsync ${args.split(
-        ' ')} ${localPath} ${process.env.REMOTE_ADDRESS}:~${remotePath}`;
+        ' ')} ${localPath} ${process.env.REMOTE_ADDRESS}:${remotePath}`;
 }
 
 async function uploadFrontendMinified(dir = '') {
@@ -153,6 +155,8 @@ async function uploadBackend() {
 
     console.log(c.green('Uploading to ' + process.env.REMOTE_ADDRESS));
     
+    await uploadBackend();
+    
     if (!flags.noFront) {
         if (!flags.minify) {
             await uploadFrontend();
@@ -161,8 +165,6 @@ async function uploadBackend() {
             await uploadFrontendMinified();
         }
     }
-
-    await uploadBackend();
 
     const duration = (now() - start) / 1000;
     console.log(c.green(`Finished Uploading in ${duration.toFixed(3)}s`));

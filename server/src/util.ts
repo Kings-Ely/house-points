@@ -46,6 +46,8 @@ export function groupArr <T>(arr: T[], key: string): Record<string, T[]> {
 
 /**
  * Reduces the parameters to a template string (tag) function into a single string
+ * @example
+ * t`1 ${2} 3` => t('1 2 3')
  */
 export function tagFuncParamsToString(msg: string | TemplateStringsArray, params: any[]): string {
     if (typeof msg === 'string') {
@@ -157,8 +159,8 @@ export function decodeParam(param: string): string {
  * Generate a random UUId using UUId v4 generator.
  * Does not check for collisions at the moment, but should be fine.
  */
-export async function generateUUId(): Promise<string> {
-    return UUIdv4();
+export async function generateUUId(type: string): Promise<string> {
+    return `hp-${type}-${UUIdv4()}`;
 }
 
 /**
@@ -191,7 +193,7 @@ export function validPassword(password: string): true | string {
 }
 
 /**
- * Gets the userId from a session Id
+ * Gets the userId from a session id
  */
 export async function idFromSession(query: queryFunc, sessionId: string): Promise<string> {
     const res = await query`
@@ -208,14 +210,14 @@ export async function idFromSession(query: queryFunc, sessionId: string): Promis
 }
 
 /**
- * Gets the user Id from a body object
+ * Gets the user id from a body object
  */
 export async function userId(body: any, query: queryFunc) {
     return idFromSession(query, body?.session || '');
 }
 
 /**
- * Gets the user details from a user Id
+ * Gets the user details from a user id
  */
 export async function userFromId(
     query: queryFunc,

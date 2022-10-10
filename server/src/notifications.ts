@@ -7,18 +7,8 @@ let transporter: mailer.Transporter | undefined;
 
 function setUpTransporter() {
     transporter = mailer.createTransport({
-        service: 'gmail',
-        auth: {
-            type: 'OAuth2',
-            user: process.env.GMAIL_USER,
-            clientId: process.env.GMAIL_CLIENT_Id,
-            clientSecret: process.env.GMAIL_CLIENT_SECRET,
-            refreshToken: process.env.GMAIL_REFRESH_TOKEN
-        }
+        sendmail: true
     });
-
-    log.log`Set up Gmail mailer`;
-    log.log`Gmail user: ${process.env.GMAIL_USER}`;
 }
 
 async function mail({
@@ -37,13 +27,13 @@ async function mail({
     }>;
 }): Promise<true | string> {
     if (process.env.ALLOW_MAIL !== '1') {
-        log.warn`Cannot send emails because ALLOW_MAIL is not set`;
+        log.warn`Cannot send emails because ALLOW_MAIL is set to '${process.env.ALLOW_MAIL}' (${typeof process.env.ALLOW_MAIL})`;
         log.log`Tried to send email to ${to} '${subject}' with html: ${limitStr(html)}`;
         return true;
     }
 
     if (process.env.REROUTE_MAIL) {
-        html = `<p>This email was rerouted from '${to}' (REROUTE_MAIL is set)</p>` + html;
+        html = `<p>This email was rerouted from '${to}' (env.REROUTE_MAIL is set)</p>` + html;
         to = process.env.REROUTE_MAIL;
     }
 
@@ -66,9 +56,11 @@ async function mail({
     `;
 
     return await new Promise((resolve, reject) => {
+        
+        log.error('sending email to', to);
         transporter?.sendMail(
             {
-                from: process.env.GMAIL_USER,
+                from: process.env.MAIL_FROM,
                 to,
                 subject,
                 html: html + emailFooter,
@@ -85,7 +77,7 @@ async function mail({
                     log.warn`Sent email to ${to} failed: ${JSON.stringify(info)}`;
                     return;
                 }
-                log.log`Sent email to ${to}`;
+                log.error`Sent email to ${to}`;
                 resolve(true);
             }
         );
