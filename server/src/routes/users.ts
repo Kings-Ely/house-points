@@ -24,7 +24,7 @@ import {
 route('get/users', async ({ query, body }) => {
     if (!await isLoggedIn(body, query)) return AUTH_ERR;
     
-    const { userId = '', email = '', sessionId = '', session } = body;
+    const { userId = <unknown>'', email = <unknown>'', sessionId = <unknown>'', session } = body;
     
     if (typeof session !== 'string') return AUTH_ERR;
 

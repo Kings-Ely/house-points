@@ -59,7 +59,6 @@ export default async function (
     dbCon: () => mysql.Connection,
     routes: Record<string, Handler>
 ) {
-    log.verbose`Incoming: ${req.method} ${req.url}`;
     const start = now();
 
     // set response headers
@@ -181,5 +180,5 @@ export default async function (
 
     let time = now() - start;
 
-    log.verbose`[${req.method}] ${time.toPrecision(2)}ms '${req.url}' => '${strResponse}'`;
+    log.verbose`[${req.method}] '${req.url}' (${time.toPrecision(2)}ms) => ${strResponse}`;
 }

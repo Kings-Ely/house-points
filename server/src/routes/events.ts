@@ -21,7 +21,7 @@ import mysql from 'mysql2';
 route('get/events', async ({ query, body }) => {
     if (!(await isLoggedIn(body, query))) return AUTH_ERR;
 
-    let { eventId = '', userId = '', from = 0, to = 0 } = body;
+    let { eventId = <unknown>'', userId = <unknown>'', from = <unknown>0, to = <unknown>0 } = body;
 
     let data = await query`
         SELECT
@@ -88,7 +88,7 @@ route('get/events', async ({ query, body }) => {
 route('create/events', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { name = '', time = Math.ceil(Date.now() / 1000), description = '' } = body;
+    const { name = <unknown>'', time = <unknown>Math.ceil(Date.now() / 1000), description = <unknown>'' } = body;
     
     if (typeof name !== 'string' || name.length < 3) {
         return `Event name must be more than 3 characters, got '${name}'`;
@@ -125,7 +125,7 @@ route('create/events', async ({ query, body }) => {
 route('update/events/name', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { eventId = '', name = '' } = body;
+    const { eventId = <unknown>'', name = <unknown>'' } = body;
 
     if (!eventId) return 'EventId is not in body of request';
     if (!name) return 'Event must have name';
@@ -151,7 +151,7 @@ route('update/events/name', async ({ query, body }) => {
 route('update/events/description', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { eventId = '', description = '' } = body;
+    const { eventId = <unknown>'', description = <unknown>'' } = body;
 
     if (!eventId) return 'EventId is not in body of request';
 
@@ -176,7 +176,7 @@ route('update/events/description', async ({ query, body }) => {
 route('update/events/time', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { eventId = '', time = Math.ceil(Date.now() / 1000) } = body;
+    const { eventId = <unknown>'', time = <unknown>Math.ceil(Date.now() / 1000) } = body;
 
     if (!eventId) return 'EventId is not in body of request';
     if (!Number.isInteger(time)) {
@@ -204,7 +204,7 @@ route('update/events/time', async ({ query, body }) => {
 route('delete/events', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { eventId = '', deleteHps = true } = body;
+    const { eventId = <unknown>'', deleteHps = <unknown>true } = body;
     if (!eventId) return 'EventId is not in body of request';
 
     if (deleteHps) {

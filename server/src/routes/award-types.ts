@@ -31,7 +31,7 @@ route('get/award-types', async ({ query, body }) => {
 route('create/award-types', async ({ query, body }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
 
-    const { name = '', required = -1, description = '' } = body;
+    const { name = <unknown>'', required = <unknown>-1, description = <unknown>'' } = body;
 
     if (!name) return 'Missing parameter name';
     if (!Number.isInteger(required) || typeof required !== 'number' || required < 0) {
@@ -122,7 +122,7 @@ route('update/award-types/icon', async ({ query, body }) => {
 route('update/award-types/hps-required', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { awardTypeId: id = '', quantity = -1 } = body;
+    const { awardTypeId: id = <unknown>'', quantity = <unknown>-1 } = body;
 
     if (!id) return 'Missing parameter id';
     if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 0) {
@@ -150,7 +150,7 @@ route('update/award-types/hps-required', async ({ query, body }) => {
 route('update/award-types/description', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { awardTypeId: id = '', description = '' } = body;
+    const { awardTypeId: id = <unknown>'', description = <unknown>'' } = body;
 
     if (!id) return 'Missing parameter id';
     if (!description && description !== '') {

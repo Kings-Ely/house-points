@@ -19,7 +19,7 @@ die () {
   webpack;
 )
 
-node --enable-source-maps test -v --deploy "${@: -1}"
+node --enable-source-maps test --deploy "${@: -1}"
 
 bin/kill-server
 

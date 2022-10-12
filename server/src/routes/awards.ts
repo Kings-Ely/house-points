@@ -20,7 +20,7 @@ import mysql from 'mysql2';
 route('get/awards', async ({ query, body }) => {
     if (!(await isLoggedIn(body, query))) return AUTH_ERR;
 
-    let { awardId = '', userId = '', yearGroup = 0, from = 0, to = 0 } = body;
+    let { awardId = <unknown>'', userId = <unknown>'', yearGroup = <unknown>0, from = <unknown>0, to = <unknown>0 } = body;
 
     if (typeof yearGroup !== 'number' || !Number.isInteger(yearGroup) || yearGroup > 13 || yearGroup < 9) {
         if (yearGroup !== 0) return 'Invalid year group';
@@ -95,7 +95,7 @@ route('get/awards', async ({ query, body }) => {
 route('create/awards', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { userId, description = '', awardTypeId } = body;
+    const { userId, description = <unknown>'', awardTypeId } = body;
 
     let student = await userFromId(query, userId);
     if (!student) return `Student with Id '${userId}' not found`;
@@ -154,7 +154,7 @@ route('create/awards', async ({ query, body }) => {
 route('update/awards/description', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { awardId: id = '', description = '' } = body;
+    const { awardId: id = <unknown>'', description = <unknown>'' } = body;
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE awards
@@ -177,7 +177,7 @@ route('update/awards/description', async ({ query, body }) => {
 route('delete/awards', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { awardId: id = '' } = body;
+    const { awardId: id = <unknown>'' } = body;
 
     const res = await query<mysql.OkPacket>`
         DELETE FROM awards

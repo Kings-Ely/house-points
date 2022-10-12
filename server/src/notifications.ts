@@ -1,7 +1,6 @@
 import mailer from 'nodemailer';
 import { queryFunc } from './sql';
 import log from './log';
-import { limitStr } from './util';
 
 let transporter: mailer.Transporter | undefined;
 
@@ -13,22 +12,16 @@ function setUpTransporter() {
 
 async function mail({
     to,
-    subject,
-    html,
-    attachments = []
+    subject = 'House Points',
+    html = ''
 }: {
     to: string;
-    subject: string;
-    html: string;
-    attachments?: Array<{
-        filename: string;
-        content: string;
-        contentType: string;
-    }>;
+    subject?: string;
+    html?: string;
 }): Promise<true | string> {
     if (process.env.ALLOW_MAIL !== '1') {
         log.warn`Cannot send emails because ALLOW_MAIL is set to '${process.env.ALLOW_MAIL}' (${typeof process.env.ALLOW_MAIL})`;
-        log.log`Tried to send email to ${to} '${subject}' with html: ${limitStr(html)}`;
+        log.log`Tried to send email to ${to} '${subject}'`;
         return true;
     }
 
@@ -41,8 +34,7 @@ async function mail({
         setUpTransporter();
     }
 
-    const emailFooter = `
-        <hr>
+    const emailFooter = `<hr>
         <p>
             <small>
                 This is an automated email from
@@ -57,14 +49,14 @@ async function mail({
 
     return await new Promise((resolve, reject) => {
         
-        log.error('sending email to', to);
+        log.log`Sending email to '${to}' from '${process.env.MAIL_FROM}': '${subject}'`;
+        
         transporter?.sendMail(
             {
                 from: process.env.MAIL_FROM,
                 to,
                 subject,
-                html: html + emailFooter,
-                attachments
+                html: html + emailFooter
             },
             (err, info) => {
                 if (err) {
@@ -77,7 +69,7 @@ async function mail({
                     log.warn`Sent email to ${to} failed: ${JSON.stringify(info)}`;
                     return;
                 }
-                log.error`Sent email to ${to}`;
+                log.verbose`Sent email successfully to ${to}`;
                 resolve(true);
             }
         );
@@ -108,6 +100,7 @@ export async function forgottenPasswordEmail(
     userId: string,
     newSessionId: string
 ): Promise<string | true> {
+    log.error`Sending forgotten password email to ${userId}`;
     return await sendEmailToUser(
         query,
         userId,

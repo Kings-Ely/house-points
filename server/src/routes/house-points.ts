@@ -27,7 +27,14 @@ const MAX_HOUSE_POINTS = 100;
 route('get/house-points', async ({ query, body }) => {
     if (!(await isLoggedIn(body, query))) return AUTH_ERR;
 
-    let { housePointId = '', userId = '', yearGroup = 0, status = '', from = 0, to = 0 } = body;
+    let {
+        housePointId = <unknown>'',
+        userId = <unknown>'',
+        yearGroup = <unknown>0,
+        status = <unknown>'',
+        from = <unknown>0,
+        to = <unknown>0
+    } = body;
 
     if (typeof yearGroup !== 'number' || !Number.isInteger(yearGroup) || yearGroup > 13 || yearGroup < 9) {
         if (yearGroup !== 0) return 'Invalid year group';
@@ -112,7 +119,12 @@ route('get/house-points', async ({ query, body }) => {
 route('create/house-points/give', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { userId = '', description = '', eventId = '', quantity = 1 } = body;
+    const {
+        userId = <unknown>'',
+        description = <unknown>'',
+        eventId = <unknown>'',
+        quantity = <unknown>1
+    } = body;
 
     let student = await userFromId(query, userId);
     if (!student) return `Student with Id '${userId}' not found`;
@@ -186,7 +198,12 @@ route('create/house-points/give', async ({ query, body }) => {
 route('create/house-points/request', async ({ query, body }) => {
     if (!(await isLoggedIn(body, query))) return AUTH_ERR;
 
-    const { userId = '', description = '', event = '', quantity = 1 } = body;
+    const {
+        userId = <unknown>'',
+        description = <unknown>'',
+        event = <unknown>'',
+        quantity = <unknown>1
+    } = body;
 
     if (typeof quantity !=='number' || !Number.isInteger(quantity) || quantity < 1) {
         return 'Quantity must be an integer greater than 0';
@@ -254,7 +271,7 @@ route('create/house-points/request', async ({ query, body }) => {
 route('update/house-points/accepted', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { housePointId: id = '', reject = '' } = body;
+    const { housePointId: id = <unknown>'', reject = <unknown>'' } = body;
 
     const hps = await query`
         SELECT
@@ -319,7 +336,7 @@ route('update/house-points/accepted', async ({ query, body }) => {
 route('update/house-points/quantity', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { housePointId: id = '', quantity = -1 } = body;
+    const { housePointId: id = <unknown>'', quantity = <unknown>-1 } = body;
 
     if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 1) {
         return 'Quantity must be an integer greater than 0';
@@ -351,7 +368,7 @@ route('update/house-points/quantity', async ({ query, body }) => {
 route('update/house-points/description', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { housePointId: id = '', description = '' } = body;
+    const { housePointId: id = <unknown>'', description = <unknown>'' } = body;
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE housepoints
@@ -375,7 +392,7 @@ route('update/house-points/description', async ({ query, body }) => {
 route('update/house-points/created', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { housePointId: id = '', timestamp = -1 } = body;
+    const { housePointId: id = <unknown>'', timestamp = <unknown>-1 } = body;
 
     if (typeof timestamp !== 'number' || !Number.isInteger(timestamp) || timestamp < 1) {
         return 'Quantity must be an valid UNIX timestamp';
@@ -401,7 +418,7 @@ route('update/house-points/created', async ({ query, body }) => {
  * @param housePointId
  */
 route('delete/house-points', async ({ query, body }) => {
-    const { housePointId: id = '' } = body;
+    const { housePointId: id = <unknown>'' } = body;
 
     // if we aren't an admin user, we can still delete it if
     // they own the house point

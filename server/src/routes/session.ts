@@ -1,6 +1,6 @@
 import route from '../index';
 import log from '../log';
-import { AUTH_ERR, authLvl, generateUUId, isAdmin } from '../util';
+import { AUTH_ERR, authLvl, DEFAULT_EMAIL_DOMAIN, generateUUId, isAdmin } from "../util";
 import emailValidator from 'email-validator';
 import * as notifications from '../notifications';
 import type mysql from 'mysql2';
@@ -13,7 +13,7 @@ import type mysql from 'mysql2';
  * @returns 0 for invalid/expired, >= 1 for logged in, 2 for admin user
  */
 route('get/sessions/auth-level', async ({ query, body }) => {
-    const { sessionId = '' } = body;
+    const { sessionId = <unknown>'' } = body;
 
     if (typeof sessionId !== 'string') return 'Invalid session Id';
     return {
@@ -57,9 +57,9 @@ route('get/sessions/active', async ({ query, body }) => {
  */
 route('create/sessions/from-login', async ({ query, body }) => {
     // password in plaintext
-    const { email = '', password = '', expires = 86400 } = body;
+    let { email = <unknown>'', password = <unknown>'', expires = <unknown>86400 } = body;
 
-    if (!email || !password) {
+    if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
         return 'Missing email or password';
     }
 
@@ -71,6 +71,10 @@ route('create/sessions/from-login', async ({ query, body }) => {
     }
     if (expires < 1) {
         return 'Session must not have already expired';
+    }
+    
+    if (email.indexOf('@') === -1) {
+        email += '@' + DEFAULT_EMAIL_DOMAIN;
     }
 
     // don't bother validating email here,
@@ -116,7 +120,7 @@ route('create/sessions/from-login', async ({ query, body }) => {
 route('create/sessions/from-user-id', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { userId = '', expires = 86400 } = body;
+    const { userId = <unknown>'', expires = <unknown>86400 } = body;
 
     if (!userId) {
         return 'UserId not specified';
@@ -155,7 +159,7 @@ route('create/sessions/from-user-id', async ({ query, body }) => {
  * @param email
  */
 route('create/sessions/for-forgotten-password', async ({ query, body }) => {
-    const { email = '' } = body;
+    const { email = <unknown>'' } = body;
 
     if (!email || typeof email !== 'string') {
         return 'Invalid email';
@@ -184,6 +188,8 @@ route('create/sessions/for-forgotten-password', async ({ query, body }) => {
     `;
 
     await notifications.forgottenPasswordEmail(query, userId, sessionId);
+    
+    return { };
 });
 
 /**
@@ -191,7 +197,7 @@ route('create/sessions/for-forgotten-password', async ({ query, body }) => {
  * @param sessionId
  */
 route('delete/sessions/with-id', async ({ query, body }) => {
-    const { sessionId = '' } = body;
+    const { sessionId = <unknown>'' } = body;
 
     if (!sessionId) return 'Session Id not specified';
 

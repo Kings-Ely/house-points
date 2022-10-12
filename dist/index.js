@@ -33,29 +33,23 @@ $email.addEventListener('keydown', async evt => {
 
 document.getElementById('forgotten-password').onclick = async () => {
     const email = core.reservoir.get('email');
-    console.log(1);
-    console.log(email);
     if (typeof email !== 'string' || email.length < 4) {
         await core.showError(`You need to enter a valid email first!`);
         return;
     }
-    console.log(1);
 
     if (!confirm(`Are you sure you want to reset the password for '${email}'?`)) {
         return;
     }
-    console.log(1);
 
     const res = await core.api(`create/sessions/for-forgotten-password`, {
         email
     });
-    console.log(1);
 
     if (!res.ok || res.error) {
         return;
     }
-    console.log(1);
-
+    
     FullPagePopup(
         document.body,
         `An email has been sent to '${core.escapeHTML(email)}' with a link to reset your password.`

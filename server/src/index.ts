@@ -34,6 +34,7 @@ const handlers: Record<string, Handler> = {};
  * Define a route that the server will respond to.
  */
 export default function route(path: string, handler: Handler) {
+    log.verbose(`Adding route: ${path}`);
     try {
         handlers[path] = handler;
     } catch (e) {
@@ -54,6 +55,8 @@ function startServer() {
     
     const [ dbCon, query ] = connectSQL();
     
+    log.verbose`Connected to database on server start ${typeof dbCon} ${typeof query}`;
+    
     log.setupQuery(query);
     
     let options = {};
@@ -72,6 +75,7 @@ function startServer() {
     let server: http.Server;
 
     async function handle(req: IncomingMessage, res: ServerResponse) {
+        log.verbose`Handling [${req.method}] ${req.url}`;
         if (!query) {
             log.error`No query function available`;
             res.statusCode = 503;
@@ -100,7 +104,10 @@ function startServer() {
 
 
 (async () => {
+    log.verbose`Loading ENV variables`;
     loadEnv();
+    log.verbose`Setting up logger`;
     setupLogger(flags as IFlags);
+    log.verbose`Starting server`;
     startServer();
 })();

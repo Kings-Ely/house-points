@@ -118,7 +118,6 @@ export async function api(path, body = null) {
 
     // fetch
     // include '/' in request as otherwise you get redirected, which takes more time
-    console.log('req to ', `${core.API_ROOT}/?${path}`);
     const res = await fetch(`${core.API_ROOT}/?${path}`, {
         method: 'POST',
         mode: 'cors',
@@ -126,7 +125,8 @@ export async function api(path, body = null) {
         redirect: 'follow',
         body: JSON.stringify(body),
     }).catch(async err => {
-        console.error(`Error with API request (${path}): `, err);
+        console.error(`Error with API request (${path})`);
+        console.error(err);
         stopSpinner(spinnerId);
         await core.showError('Something went wrong!');
     });
@@ -136,7 +136,7 @@ export async function api(path, body = null) {
         stopSpinner(spinnerId);
         return {};
     }
-
+    
     let asJSON = {};
     try {
         // this might fail if the response is not JSON
@@ -154,8 +154,8 @@ export async function api(path, body = null) {
         console.error('Error with API request: ', err);
         await core.showError('Something went wrong!');
     }
-
+    
     stopSpinner(spinnerId);
-
+    
     return asJSON;
 }

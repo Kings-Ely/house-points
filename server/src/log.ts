@@ -16,7 +16,7 @@ export enum LogLvl {
 /**
  * Remove sensitive info from log messages
  */
-export function filterForLogging (str: string) {
+export function filterForLogging (str: string): string {
     let toFilterOut: string[] = [
         process.env.DB_HOST,
         process.env.DB_USER,
@@ -34,7 +34,7 @@ export function filterForLogging (str: string) {
 class Logger {
     private fileHandle?: fs.WriteStream;
     private path = '';
-    private level: LogLvl = 3;
+    private level: LogLvl = LogLvl.VERBOSE;
     private dbLogLevel: LogLvl = 2;
     private dbQuery: queryFunc | undefined;
     private useConsole = true;
@@ -44,11 +44,7 @@ class Logger {
      * Outputs a message to the console and/or file
      */
     public output(level: LogLvl, type: string, ...messages: any[]): void {
-        if (!this.active) {
-            return;
-        }
-
-        if (this.level < level) {
+        if (!this.active || this.level < level) {
             return;
         }
 
@@ -121,7 +117,7 @@ class Logger {
 
     public setLogOptions(options: IFlags) {
         this.level = options.logLevel;
-        this.level = options.dbLogLevel;
+        this.dbLogLevel = options.dbLogLevel;
         this.useConsole = !options.logTo;
         this.path = options.logTo;
 

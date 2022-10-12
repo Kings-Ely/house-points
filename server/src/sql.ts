@@ -17,12 +17,13 @@ export type queryFunc = <Res extends queryRes = mysql.RowDataPacket[]>(
 
 export default function connect (dbConfig: mysql.ConnectionOptions = {}): [() => mysql.Connection, queryFunc] {
     // define defaults from .env file
+    const port = process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306;
     const config: mysql.ConnectionOptions = {
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
         password: process.env.DB_PASS,
         database: process.env.DB,
-        port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
+        port,
         ...dbConfig,
         decimalNumbers: true
     };
@@ -34,7 +35,7 @@ export default function connect (dbConfig: mysql.ConnectionOptions = {}): [() =>
     // as the server will periodically disconnect from the database,
     // we need to reconnect when the connection is lost
     function handleDisconnect() {
-        log.warn(`Attempting to reconnect to SQL server...`);
+        log.warn`Attempting to reconnect to SQL server on port ${port}...`;
         
         con = mysql.createConnection(config);
 
