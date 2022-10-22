@@ -1,0 +1,35 @@
+#!/bin/bash
+
+start=`date +%s`
+
+die () {
+    echo >&2 "$@"
+    exit 1
+}
+
+if [ "$#" -eq 0 ] || [ "$1" = "local" ] || [ "$1" = "dev" ]; then
+  mysql -u root << eof
+      DROP DATABASE IF EXISTS entropygames_dev;
+      CREATE DATABASE entropygames_dev
+eof
+
+  mysql -u root entropygames_dev < ./sql/schema.sql
+fi
+
+if [ "$1" = "test" ]; then
+  mysql -u root << eof
+      DROP DATABASE IF EXISTS egiotesting;
+      CREATE DATABASE egiotesting
+eof
+
+  mysql -u root egiotesting < ./sql/schema.sql
+fi
+
+[ "$#" -eq 1 ] || die "1 argument required, $# provided"
+
+
+end=$(date +%s)
+
+runtime=$( echo "$end - $start" | bc -l )
+
+echo "Migrated DB '$1' destructively in: $runtime s"

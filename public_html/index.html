@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title $="houseName" pump-clean> House Points</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="description" content="House Point Management">
+
+    <script type="module" src="./index.js" defer></script>
+
+    <link rel="stylesheet" href="./assets/css/main.css">
+    <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+<!-- note no nav here -->
+<main>
+    <div id="content" class="flex-center fill-screen">
+        <div class="label-container">
+            <label for="email">Email</label>
+        </div>
+        <input
+            type="email"
+            id="email"
+            autocomplete="email"
+            autofocus
+            aria-label="email"
+            @="email"
+        >
+        <br>
+        <div class="label-container">
+            <label for="password">Password</label>
+        </div>
+        <input
+            type="password"
+            id="password"
+            autocomplete="current-password"
+            aria-label="password"
+            @="password"
+        >
+        <button id="forgotten-password">
+            Forgotten Password?
+        </button>
+        <button
+            id="go"
+            class="icon"
+            type="submit"
+            svg="right-arrow.svg"
+            onclick="doLogIn()"
+        ></button>
+    </div>
+</main>
+<footer></footer>
+</body>
+</html>

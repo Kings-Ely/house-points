@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "entropy-hydrate": "^0.0.22"
+  }
+}

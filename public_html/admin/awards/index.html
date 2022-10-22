@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Award Types</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="robots" content="noindex">
+
+    <script type="module" src="../../assets/js/main.js"></script>
+    <script type="module" src="./index.js" defer></script>
+
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+<nav></nav>
+<main>
+    <section id="award-types">
+        <h2>Award Types</h2>
+        <div
+            foreach="awardtype in awardTypes"
+            each.class="item"
+            each.style="display: inline-grid"
+        >
+            <div>
+                <span
+                    $="awardtype?.icon || 'No Icon'"
+                    style="width: fit-content"
+                    class="icon"
+                    @click="updateAwardTypeIcon(awardtype.id)"
+                    data-label="Click to Change"
+                    pump-dirty
+                ></span>
+                <label>
+                    <input
+                        $value="${awardtype.name}"
+                        @change="awardTypeUpdateName(awardtype.id, $el.value)"
+                        class="editable-text"
+                        data-label="Click to Edit"
+                    >
+                </label>
+            </div>
+            <div>
+                <label>
+                    <input
+                        $value="${awardtype.hpsRequired}"
+                        @change="awardTypeUpdateRequired(awardtype.id, $el.value)"
+                        data-label="House Points Required"
+                        class="editable-text"
+                        type="number"
+                    >
+                </label>
+            </div>
+            <div>
+                <label>
+                    <input
+                        $value="${awardtype.description}"
+                        @change="awardTypeUpdateDesc(awardtype.id, $el.value)"
+                        class="editable-text"
+                        data-label="Click to Edit"
+                        placeholder="Click to add description"
+                    >
+                </label>
+            </div>
+            <div>
+                <button
+                    @click="awardTypeDelete(awardtype.id)"
+                    data-label="delete"
+                    svg="bin.svg"
+                    class="icon medium"
+                    aria-label="delete"
+                ></button>
+            </div>
+        </div>
+        
+        <div
+            style="justify-content: right; margin: 10px;"
+            class="vertical-flex-center"
+        >
+            <button
+                svg="plus.svg"
+                @click="newAwardType()"
+                class="icon medium"
+                aria-label="new"
+                data-label="New Award Type"
+            ></button>
+        </div>
+    </section>
+    <section class="awards">
+        <h2>
+            Awards
+            (<span $="awards.length" pump-to="replace">loading...</span>)
+        </h2>
+        <div
+            foreach="award in awards"
+            each.class="item"
+        >
+            <email- args="award"></email->
+            <p $="award.awardName"></p>
+            <div>
+                <label>
+                    <input
+                        $value="${award.description}"
+                        @change="awardUpdateDesc(award.id, $el.value)"
+                        class="editable-text"
+                        placeholder="Click to edit description"
+                    >
+                </label>
+            </div>
+            <div>
+                <button
+                    @click="awardDelete(award.id)"
+                    data-label="delete"
+                    svg="bin.svg"
+                    class="icon medium"
+                    aria-label="delete"
+                ></button>
+            </div>
+        </div>
+    </section>
+</main>
+<footer></footer>
+</body>
+</html>

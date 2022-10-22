@@ -59,22 +59,32 @@ const MINIFY_OPTIONS = {
 };
 
 async function upload(localPath, remotePath, args = '') {
-    console.log(`sshpass -f '${process.env.SSH_PASS_FILE}' rsync ${args.split(
-        ' ')} ${localPath} ${process.env.REMOTE_ADDRESS}:${remotePath}`);
     return await $`sshpass -f '${process.env.SSH_PASS_FILE}' rsync ${args.split(
         ' ')} ${localPath} ${process.env.REMOTE_ADDRESS}:${remotePath}`;
 }
 
-async function uploadFrontendMinified(dir = '') {
+async function uploadFrontendMinified(ignore, dir = '') {
     
     console.log(c.yellow(p.join(process.env.LOCAL_PATH, dir)));
 
     const paths = fs.readdirSync(p.join(process.env.LOCAL_PATH, dir));
 
-    for (const path of paths) {
+    pathsLoop: for (const path of paths) {
+
+        if (path[0] === '.') continue;
+
         const filePath = p.join(process.env.LOCAL_PATH, dir, path);
+
+        for (const ignorePath of ignore) {
+            if (filePath.includes(ignorePath)) {
+                console.log(`Ignoring ${filePath}`);
+                continue pathsLoop;
+            }
+        }
+
         if (fs.statSync(filePath).isDirectory()) {
-            await uploadFrontendMinified(p.join(dir, path));
+            await upload(filePath, p.join(process.env.REMOTE_FRONTEND_PATH, dir), '-r')
+                .then(() => uploadFrontendMinified(ignore, p.join(dir, path)));
             continue;
         }
 
@@ -94,13 +104,23 @@ async function uploadFrontendMinified(dir = '') {
             }
             const minPath = filePath + '.min';
             fs.writeFileSync(minPath, data);
-            await upload(minPath, p.join(process.env.REMOTE_FRONTEND_PATH, dir, path));
-            setTimeout(() => fs.rmSync(minPath), 1000);
+            await upload(minPath, p.join(process.env.REMOTE_FRONTEND_PATH, dir, path)).then(() => {
+                setTimeout(() => {
+                    try {
+                        fs.rmSync(minPath);
+                    } catch (e) {
+                        console.log(c.red(e));
+                    }
+                }, 1000);
+            });
+
+        } else {
+            await upload(filePath, p.join(process.env.REMOTE_FRONTEND_PATH, dir, path)).then();
         }
     }
 }
 
-async function uploadFrontend() {
+async function uploadFrontend(ignore) {
     if (flags.noFront) return;
 
     console.log(c.green('Uploading frontend...'));
@@ -133,7 +153,7 @@ async function uploadBackend() {
     const paths = {
         './server/index.js': '/index.js',
         './server/index.js.map': '/index.js.map',
-        './server/package.json': '/package.json',
+        [`./server/${flags.env}.package.json`]: '/package.json',
         [`./server/${flags.env}.env`]: '/.env',
         [`./server/${flags.env}.Dockerfile`]: '/Dockerfile',
     };
@@ -143,6 +163,8 @@ async function uploadBackend() {
             if (fs.existsSync(path)) {
                 console.log(c.yellow(path));
                 await upload(path, process.env.REMOTE_BACKEND_PATH + paths[path]);
+            } else {
+                console.log(c.red(path));
             }
         })
     );
@@ -153,16 +175,21 @@ async function uploadBackend() {
     
     dotenv.config({ path: `./${flags.env}.env` });
 
+    const ignorePaths = fs.readFileSync(`./deploy.${flags.env}.ignore`)
+        .toString('utf-8')
+        .split('\n')
+        .filter(Boolean);
+
     console.log(c.green('Uploading to ' + process.env.REMOTE_ADDRESS));
-    
+
     await uploadBackend();
     
     if (!flags.noFront) {
         if (!flags.minify) {
-            await uploadFrontend();
+            await uploadFrontend(ignorePaths);
         } else {
             console.log(c.green('Minifying and uploading frontend...'));
-            await uploadFrontendMinified();
+            await uploadFrontendMinified(ignorePaths);
         }
     }
 

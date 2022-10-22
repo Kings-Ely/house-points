@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Leaderboard</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+    <script type="module" src="index.js" defer></script>
+
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="./index.css">
+
+    <script src="../assets/lib/chartist/chartist.min.js"></script>
+    <link rel="stylesheet" href="../assets/lib/chartist/chartist.min.css">
+</head>
+<body>
+<nav></nav>
+<main>
+    <div id="split">
+        <div>
+            <div>
+                <label>
+                    Only show for
+                    <select
+                        aria-label="what years to show"
+                        @="showYears"
+                        bind-persist
+                    >
+                        <option value="9,10,11,12,13">All</option>
+                        <option value="9">Y9</option>
+                        <option value="10">Y10</option>
+                        <option value="11">Y11</option>
+                        <option value="12">Y12</option>
+                        <option value="13">Y13</option>
+                        <option value="12,13">6th Form</option>
+                        <option value="9,10,11">Senior School</option>
+                    </select>
+                </label>
+            </div>
+            <div
+                id="podium"
+                pour.students="students.filter(s => showYears.includes(s.year.toString()))"
+                foreach="i in [1, 0, 2]"
+            >
+                <email- args="students[i]"></email->
+                <div
+                    class="student podium-student"
+                    $style="
+                        height: ${(() => {
+                            if (students.length < 1) {
+                                return 0;
+                            }
+                            if (i === 0) {
+                                return 100;
+                            }
+                            const height = (students[i].accepted / students[0].accepted) * 100;
+                            return Math.max(height, 25);
+                        })()}%
+                        "
+                >
+                    <p
+                        class="podium-place"
+                        $style="color: ${['gold','silver','#CD7F32'][i]}"
+                        $="['1st', '2nd', '3rd'][i]"
+                    ></p>
+                    <div
+                        $="students[i].accepted"
+                        style="font-size: 1.3em"
+                    ></div>
+                </div>
+            </div>
+
+            <div
+                id="leaderboard"
+                foreach="student in students.filter(s => showYears.includes(s.year.toString())).slice(3)"
+            >
+                <div class="student">
+                    <email- args="student"></email->
+                    <div $="student.accepted"></div>
+                </div>
+            </div>
+            
+            <div
+                hidden="students.filter(s => showYears.includes(s.year.toString())).length > 0"
+                style="text-align: center; padding-top: 30px; color: var(--text-light)"
+            >
+                No students match that filter
+            </div>
+        </div>
+        <div>
+            <div id="year-group-comparison">
+                <div class="ct-chart"></div>
+            </div>
+        </div>
+    </div>
+</main>
+<footer></footer>
+</body>
+</html>

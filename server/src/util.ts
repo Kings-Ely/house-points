@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { v4 as UUIdv4 } from 'uuid';
+import log from "./log";
 
 import { queryFunc } from './sql';
 import crypto from 'crypto';
@@ -96,6 +97,7 @@ export function removeColour(str: string): string {
  * (relative to '/server'. or more specifically, the directory containing the server JS file)
  */
 export function loadEnv(filePath = '.env'): void {
+    log.log`Loading env from ${filePath}`;
     // file path relative to this file
     filePath = path.join(path.resolve(__dirname), filePath);
     const contents = fs.readFileSync(filePath, 'utf8');

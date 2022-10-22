@@ -11,16 +11,19 @@ export interface IFlags {
     dbLogLevel: number;
     logTo: string;
     port: number;
+    env: string;
 }
 
 export const flags = {
     logLevel: LogLvl.INFO,
     dbLogLevel: LogLvl.WARN,
     port: 0,
+    env: '.env',
     ...commandLineArgs([
         { name: 'logLevel', type: Number },
         { name: 'dbLogLevel', type: Number },
         { name: 'logTo', type: String },
+        { name: 'env', type: String },
         { name: 'port', alias: 'p', type: Number },
     ]),
 };
@@ -104,8 +107,10 @@ function startServer() {
 
 
 (async () => {
-    log.verbose`Loading ENV variables`;
-    loadEnv();
+    
+    console.log('Starting server...');
+    
+    loadEnv(flags.env);
     log.verbose`Setting up logger`;
     setupLogger(flags as IFlags);
     log.verbose`Starting server`;

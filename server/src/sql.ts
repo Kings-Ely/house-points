@@ -31,6 +31,8 @@ export default function connect (dbConfig: mysql.ConnectionOptions = {}): [() =>
     let con: mysql.Connection;
 
     let hasConnectedSQL = false;
+    
+    let queryQueue: (() => any)[] = [];
 
     // as the server will periodically disconnect from the database,
     // we need to reconnect when the connection is lost
@@ -47,6 +49,10 @@ export default function connect (dbConfig: mysql.ConnectionOptions = {}): [() =>
 
             log.log(c.green(`Connected to SQL server`));
             hasConnectedSQL = true;
+            
+            for (const q of queryQueue) {
+                q();
+            }
         });
 
         con.on('error', (err: any) => {
@@ -60,16 +66,14 @@ export default function connect (dbConfig: mysql.ConnectionOptions = {}): [() =>
     }
 
     handleDisconnect();
-
-    // returns query function
-    return [() => con, (queryParts: TemplateStringsArray, ...params: any[]): Promise<any> => {
+    
+    function query (queryParts: TemplateStringsArray, ...params: any[]): Promise<any> {
         return new Promise((resolve, fail) => {
             if (!hasConnectedSQL) {
-                log.error('Cannot run SQL query before connecting to SQL server');
-                fail('SQL server not connected');
+                queryQueue.push(() => (query(queryParts, ...params).then(resolve).catch(fail)));
             }
-
-            const query = queryParts.reduce((acc, cur, i) => {
+            
+            const queryStr = queryParts.reduce((acc, cur, i) => {
                 let str = acc + cur;
                 if (params[i] === undefined) {
                     return str;
@@ -81,8 +85,8 @@ export default function connect (dbConfig: mysql.ConnectionOptions = {}): [() =>
                 }
             }, '');
             
-            log.verbose`QUERY: ${con.escape(query)} ${JSON.stringify(params)}`;
-
+            log.verbose`QUERY: ${con.escape(queryStr)} ${JSON.stringify(params)}`;
+            
             // if it's an array, add all the elements of the array in place as params
             // Flatten 2D arrays
             for (let i = 0; i < params.length; i++) {
@@ -91,8 +95,8 @@ export default function connect (dbConfig: mysql.ConnectionOptions = {}): [() =>
                     params.splice(i, 1, ...params[i]);
                 }
             }
-
-            con.query(query, params, (err, result) => {
+            
+            con.query(queryStr, params, (err, result) => {
                 if (err) {
                     log.error(JSON.stringify(err));
                     fail(err);
@@ -100,5 +104,8 @@ export default function connect (dbConfig: mysql.ConnectionOptions = {}): [() =>
                 resolve(result);
             });
         });
-    }];
+    }
+
+    // returns query function
+    return [() => con, query];
 }

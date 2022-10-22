@@ -69,12 +69,14 @@ class Logger {
         }
     }
 
-    private async logToDB(message: string, from = 'server'): Promise<mysql.OkPacket | undefined> {
+    public async logToDB(message: string, from = 'server'): Promise<mysql.OkPacket | undefined | void> {
         if (!this.dbQuery) return;
         return await this.dbQuery<mysql.OkPacket>`
             INSERT INTO logs (msg, madeBy)
             VALUES (${filterForLogging(message)}, ${from})
-        `;
+        `.catch(e => {
+            console.error('Error logging to DB', e);
+        });
     }
 
     /**
