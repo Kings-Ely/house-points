@@ -185,7 +185,7 @@ export default registerComponent('AddEventPopup', ($el, id, reload) => {
         }
 
         // offset by an hour
-        const time = new Date($dateInp.value).getTime() + 60 * 60 + 1;
+        const time = new Date($dateInp.value).getTime()/1000 + 60 * 60 + 1;
 
         // event before the year 2000 is not allowed
         if (time <= 946684800) {

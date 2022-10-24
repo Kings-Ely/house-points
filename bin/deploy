@@ -21,7 +21,6 @@ bin/migrate test &
   webpack;
 ) & wait;
 
-
 node --enable-source-maps server --logTo=test.log --logLevel=4 --dbLogLevel=2 --env=test.env &
 (
     sleep .5;

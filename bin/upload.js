@@ -60,7 +60,7 @@ const MINIFY_OPTIONS = {
 
 async function upload(localPath, remotePath, args = '') {
     return await $`sshpass -f '${process.env.SSH_PASS_FILE}' rsync ${args.split(
-        ' ')} ${localPath} ${process.env.REMOTE_ADDRESS}:~${remotePath}`;
+        ' ')} ${localPath} ${process.env.REMOTE_ADDRESS}:${remotePath}`;
 }
 
 async function uploadFrontendMinified(ignore, dir = '') {
@@ -173,10 +173,13 @@ async function uploadBackend() {
     
     dotenv.config({ path: `./${flags.env}.env` });
 
-    const ignorePaths = fs.readFileSync(`./deploy.${flags.env}.ignore`)
-        .toString('utf-8')
-        .split('\n')
-        .filter(Boolean);
+    let ignorePaths = [];
+    if (fs.existsSync(`./deploy.${flags.env}.ignore`)) {
+        ignorePaths = fs.readFileSync(`./deploy.${flags.env}.ignore`)
+            .toString('utf-8')
+            .split('\n')
+            .filter(Boolean);
+    }
 
     console.log(c.green('Uploading to ' + process.env.REMOTE_ADDRESS));
 

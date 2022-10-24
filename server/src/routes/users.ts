@@ -507,7 +507,7 @@ route('update/users/password', async ({ query, body }) => {
         return validPasswordRes;
     }
 
-    const [passHash, salt] = passwordHash(newPassword);
+    const [ passHash, salt ] = passwordHash(newPassword);
 
     const queryRes = await query<mysql.OkPacket>`
         UPDATE users

@@ -3,8 +3,7 @@ import fetch from 'node-fetch';
 import commandLineArgs, { CommandLineOptions } from 'command-line-args';
 import childProcess from 'child_process';
 import now from 'performance-now';
-
-import setup from './setup';
+import { config } from "dotenv";
 import Test from './framework';
 
 import './tests/server.spec';
@@ -123,17 +122,17 @@ export async function deploy(flags: commandLineArgs.CommandLineOptions): Promise
 
 (async () => {
     let start = now();
-
+    
     const timeSinceStart = (): string => {
         const t = now() - start;
         return t.toFixed(2);
     };
-
-    await setup(flags);
-
+    
+    config({ path: './server/test.env' });
+    
     const testRes = await Test.testAll(api, flags);
     console.log(testRes.str());
-
+    
     // stop the server process by sending it a 'kill signal'
     const killServerRes = await api(`delete/server`);
     if (killServerRes.ok) {
@@ -145,11 +144,11 @@ export async function deploy(flags: commandLineArgs.CommandLineOptions): Promise
             c.red(`Server not killed: ${JSON.stringify(killServerRes)}`)
         );
     }
-
+    
     if (testRes.failed === 0 && flags.deploy) {
-        console.log('All tests passed, Deploying...');
+        console.log(c.green('All tests passed, Deploying...'));
         deploy(flags).then(() => {
-            console.log(c.green('Finished in ' + timeSinceStart() + 'ms'));
+            console.log(c.green('Finished test script in ' + timeSinceStart() + 'ms'));
         });
     }
 })();

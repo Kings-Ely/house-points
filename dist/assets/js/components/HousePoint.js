@@ -275,7 +275,7 @@ export default registerComponent(
 		                    onclick="_HousePoint${id}__reject()"
 		                    class="icon icon-hover-warning"
 		                    aria-label="Reject"
-		                    svg="red-cross.svg"
+		                    svg="cross.svg"
 		                    data-label="Reject"
 		                    style="--offset-x: -10px"
 		                ></button>
