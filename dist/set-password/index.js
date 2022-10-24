@@ -22,6 +22,7 @@ const $password = document.getElementById('password'),
     const user = await core.api(`get/users`, { sessionId: s });
 
     if (!user.ok) {
+        console.log(`Invalid user`, user);
         await core.navigate(`/?error=auth`);
         return;
     }
@@ -51,7 +52,7 @@ $submit.addEventListener('click', async () => {
 
     const res = await core.api(`update/users/password`, {
         sessionId: s,
-        password
+        newPassword: password
     });
 
     if (res.ok) {

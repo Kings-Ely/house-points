@@ -22,12 +22,9 @@ import {
  * @param sessionId
  */
 route('get/users', async ({ query, body }) => {
-    if (!await isLoggedIn(body, query)) return AUTH_ERR;
     
     const { userId = <unknown>'', email = <unknown>'', sessionId = <unknown>'', session } = body;
     
-    if (typeof session !== 'string') return AUTH_ERR;
-
     if (sessionId) {
         if (userId) return `Invalid body: cannot specify both 'session' and 'id'`;
         if (email) return `Invalid body: cannot specify both 'session' and 'email'`;
@@ -58,6 +55,9 @@ route('get/users', async ({ query, body }) => {
 
         return user;
     }
+    
+    if (typeof session !== 'string') return AUTH_ERR;
+    if (!await isLoggedIn(body, query)) return AUTH_ERR;
 
     if (email) {
         if (userId) return `Invalid body: cannot specify both 'email' and 'id'`;
@@ -332,7 +332,7 @@ route('get/users/leaderboard', async ({ query, body }) => {
 route('create/users', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    let { email = '', year = 9, password = '', admin=false } = body;
+    let { email = <unknown>'', year = <unknown>9, password = <unknown>'', admin = <unknown>false } = body;
 
     if (!Number.isInteger(year) || typeof year !== 'number') {
         return `Year is not a number`;
@@ -400,7 +400,7 @@ route('create/users', async ({ query, body }) => {
 route('update/users/admin', async ({ query, body }) => {
     if (!(await isAdmin(body, query))) return AUTH_ERR;
 
-    const { userId = '', admin = false, session: mySession } = body;
+    const { userId = '', admin = <unknown>false, session: mySession } = body;
     
     if (!mySession) return 'No session Id found';
     if (typeof mySession !== 'string') {
@@ -486,7 +486,7 @@ route('update/users/year', async ({ query, body }) => {
  * @param newPassword
  */
 route('update/users/password', async ({ query, body }) => {
-    const { sessionId = '', newPassword = '' } = body;
+    const { sessionId = <unknown>'', newPassword = <unknown>'' } = body;
 
     if (typeof sessionId !== 'string') {
         return 'Session Id is not a string';
