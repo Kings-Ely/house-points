@@ -24,28 +24,27 @@ import * as core from '../main.js';
  *     dateEditable: boolean
  * }} options
  */
-window.hydrate.Component(
-    'house-point',
-    async ({
-        $el,
-        id,
-        hp,
-        reload,
-        showBorderBottom = false,
-        showEmail = true,
-        showReason = true,
-        allowEventReason = true,
-        showNumPoints = true,
-        showDate = true,
-        showStatusHint = true,
-        showStatusIcon = true,
-        showDeleteButton = admin,
-        showPendingOptions = false,
-        reasonEditable = showReason && admin,
-        pointsEditable = showNumPoints && admin,
-        dateEditable = showDate && admin,
-        large = false,
+window.hydrate.Component('house-point', async ({
+    $el,
+    id,
+    hp,
+    reload,
+    showBorderBottom = false,
+    showEmail = true,
+    showReason = true,
+    allowEventReason = true,
+    showNumPoints = true,
+    showDate = true,
+    showStatusHint = true,
+    showStatusIcon = true,
+    showDeleteButton = true,
+    showPendingOptions = false,
+    reasonEditable = showReason,
+    pointsEditable = showNumPoints,
+    dateEditable = showDate,
+    large = false,
 }) => {
+    if (!hp) return;
     let acceptedHTML;
     let icon = '';
 

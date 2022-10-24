@@ -59,6 +59,8 @@ const MINIFY_OPTIONS = {
 };
 
 async function upload(localPath, remotePath, args = '') {
+    console.log(`sshpass -f '${process.env.SSH_PASS_FILE}' rsync ${args.split(
+        ' ')} ${localPath} ${process.env.REMOTE_ADDRESS}:${remotePath}`);
     return await $`sshpass -f '${process.env.SSH_PASS_FILE}' rsync ${args.split(
         ' ')} ${localPath} ${process.env.REMOTE_ADDRESS}:${remotePath}`;
 }
@@ -156,15 +158,16 @@ async function uploadBackend() {
         [`./server/${flags.env}.package.json`]: '/package.json',
         [`./server/${flags.env}.env`]: '/.env',
         [`./server/${flags.env}.Dockerfile`]: '/Dockerfile',
+        [`./server/mail.php`]: '/mail.php',
     };
 
     await Promise.all(
         Object.keys(paths).map(async path => {
             if (fs.existsSync(path)) {
-                console.log(c.yellow(path));
+                console.log('^ ', c.green(path));
                 await upload(path, process.env.REMOTE_BACKEND_PATH + paths[path]);
             } else {
-                console.log(c.red(path));
+                console.log('^ ', c.red(path));
             }
         })
     );
@@ -175,10 +178,13 @@ async function uploadBackend() {
     
     dotenv.config({ path: `./${flags.env}.env` });
 
-    const ignorePaths = fs.readFileSync(`./deploy.${flags.env}.ignore`)
-        .toString('utf-8')
-        .split('\n')
-        .filter(Boolean);
+    let ignorePaths = [];
+    if (fs.existsSync(`./deploy.${flags.env}.ignore`)) {
+        const ignorePaths = fs.readFileSync(`./deploy.${flags.env}.ignore`)
+            .toString('utf-8')
+            .split('\n')
+            .filter(Boolean);
+    }
 
     console.log(c.green('Uploading to ' + process.env.REMOTE_ADDRESS));
 

@@ -15,7 +15,7 @@ window.eventPopup = core.eventPopup;
         await core.navigate(`?email=${(await core.userInfo())['email']}`);
         return;
     }
-
+    
     await reloadUserInfoFromEmail();
 
     me = (await core.userInfo())['email'] === core.GETParam('email');
@@ -34,10 +34,9 @@ async function reloadUserInfoFromEmail() {
     const email = core.GETParam('email');
 
     theUsersInfo = await core.api(`get/users`, { email });
-
-    window.hydrate.set('theUser', theUsersInfo);
+    
+    window.hydrate.set({ theUser: theUsersInfo });
 }
-
 
 async function reloadHousePoints() {
     await reloadUserInfoFromEmail();

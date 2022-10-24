@@ -192,33 +192,32 @@ export function getInverseTheme() {
 }
 
 export function loadSettings() {
-    const settingsButton = document.createElement('div');
-    settingsButton.classList.add('settings-button');
-    settingsButton.classList.add('icon');
-    settingsButton.setAttribute('svg', 'settings.svg');
+    let settingsButton = document.querySelector('.settings-button');
+    if (!settingsButton) {
+        settingsButton = document.createElement('button');
+        settingsButton.classList.add('settings-button');
+        settingsButton.setAttribute('svg', 'settings.svg');
+    }
 
     window.hydrate.set({
-        switchTheme: () => {
-            core.setTheme(core.getInverseTheme());
-            const svg =
-                getTheme() === 'light' ? 'light-theme.svg' : 'dark-theme.svg';
-            window.hydrate.set('themeButtonSVG', svg);
-        },
         themeButtonSVG: 'light-theme.svg',
     });
 
     settingsButton.onclick = () => {
         const popup = document.createElement('full-page-popup');
         document.body.appendChild(popup);
-        popup.innerHTML = `
+        popup.innerHTML = window.hydrate.html`
             <button
                 class="icon bordered"
                 $svg="themeButtonSVG"
-                @click="switchTheme()"
+                @click="${() => {
+                    core.setTheme(core.getInverseTheme());
+                    const svg =
+                        getTheme() === 'light' ? 'light-theme.svg' : 'dark-theme.svg';
+                    window.hydrate.set('themeButtonSVG', svg);
+                }}()"
             ></button>
         `;
         popup.setAttribute('title', 'Settings');
     };
-
-    document.body.appendChild(settingsButton);
 }

@@ -9,6 +9,7 @@ import * as core from '../main.js';
 window.hydrate.Component('award-type', ({
     $el, id, award, fill = 'var(--text)'
 }) => {
+    if (!award) return;
     if (typeof award !== 'object') {
         console.error(`AwardType: award is not an object:`, award);
         return;
@@ -26,9 +27,9 @@ window.hydrate.Component('award-type', ({
     
     const label = `(${required})${awardedInfo}`;
     
-    $el.innerHTML = `
+    return window.hydrate.html`
         <span
-            data-label="${core.escapeHTML(label)}"
+            data-label="${label}"
             style="fill: ${fill} !important"
             class="bordered big-link secondary"
         >

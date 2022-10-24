@@ -19,27 +19,23 @@ window.hydrate.Component('user-email', ({
     const year = user.year ?? user.userYear;
 
     if (!email || typeof email !== 'string') {
-        console.error('Trying to show invalid user (email): ', user);
+        console.error('Trying to show invalid user (email): ', email, user, typeof user);
         return;
     }
 
     if (year !== 0 && (year > 13 || year < 9)) {
-        console.error('Trying to show invalid user (year): ', user);
+        console.error('Trying to show invalid user (year): ', year, user, typeof user);
         return;
     }
-
-    window[`_Email${id}__onclick`] = async () => {
-        await core.userPopup(email);
-    };
-
-    $el.innerHTML = `
+    
+    return window.hydrate.html`
         <button
-            data-label="View ${core.escapeHTML(email)}"
-            onclick="_Email${id}__onclick()"
+            data-label="View ${email}"
+            onclick="${() => core.userPopup(email)}()"
             style="font-size: ${fontsize}; text-align: ${align};"
         >
-            ${core.escapeHTML(email.split('@')[0])}
-            (${year > 0 ? `Y${core.escapeHTML(year)}` : 'Admin'})
+            ${email.split('@')[0]}
+            (${year > 0 ? `Y${year}` : 'Admin'})
         </button>
     `;
 });

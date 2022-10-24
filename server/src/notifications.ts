@@ -1,14 +1,15 @@
-import mailer from 'nodemailer';
+// import mailer from 'nodemailer';
 import { queryFunc } from './sql';
 import log from './log';
+import { spawn } from "child_process";
 
-let transporter: mailer.Transporter | undefined;
-
-function setUpTransporter() {
-    transporter = mailer.createTransport({
-        sendmail: true
-    });
-}
+// let transporter: mailer.Transporter | undefined;
+//
+// function setUpTransporter() {
+//     transporter = mailer.createTransport({
+//         sendmail: true
+//     });
+// }
 
 async function mail({
     to,
@@ -30,9 +31,9 @@ async function mail({
         to = process.env.REROUTE_MAIL;
     }
 
-    if (!transporter) {
-        setUpTransporter();
-    }
+    // if (!transporter) {
+    //     setUpTransporter();
+    // }
 
     const emailFooter = `<hr>
         <p>
@@ -46,34 +47,68 @@ async function mail({
             </small>
         </p>
     `;
-
-    return await new Promise((resolve, reject) => {
-        
-        log.log`Sending email to '${to}' from '${process.env.MAIL_FROM}': '${subject}'`;
-        
-        transporter?.sendMail(
-            {
-                from: process.env.MAIL_FROM,
-                to,
-                subject,
-                html: html + emailFooter
-            },
-            (err, info) => {
-                if (err) {
-                    log.error`Error sending email: ${JSON.stringify(err)}`;
-                    reject(`Error sending email: ${JSON.stringify(err)}`);
-                    return;
-                }
-                if (!info['accepted'].includes(to)) {
-                    reject(`Email failed to send`);
-                    log.warn`Sent email to ${to} failed: ${JSON.stringify(info)}`;
-                    return;
-                }
-                log.verbose`Sent email successfully to ${to}`;
-                resolve(true);
+    
+    return await new Promise(resolve => {
+        const ls = spawn("php", ["mail.php", to, subject, html + emailFooter]);
+        let startedError = false;
+    
+        ls.stdout.on("data", data => {
+            if (!startedError) {
+                console.log(`Error in sending mail to '${to}' (${subject})`);
+                startedError = true;
             }
-        );
+            log.error(`stdout: ${data}`);
+        });
+    
+        ls.stderr.on("data", data => {
+            if (!startedError) {
+                console.log(`Error in sending mail to '${to}' (${subject})`);
+                startedError = true;
+            }
+            log.error(`stderr: ${data}`);
+        });
+    
+        ls.on('error', (error) => {
+            if (!startedError) {
+                console.log(`Error in sending mail to '${to}' (${subject})`);
+                startedError = true;
+            }
+            log.error(`error: ${error.message}`);
+        });
+    
+        ls.on("close", code => {
+            log.verbose(`'mail' child process exited with code ${code}`);
+            resolve(true);
+        });
     });
+
+    // return await new Promise((resolve, reject) => {
+    //
+    //     log.log`Sending email to '${to}' from '${process.env.MAIL_FROM}': '${subject}'`;
+    //
+    //     transporter?.sendMail(
+    //         {
+    //             from: process.env.MAIL_FROM,
+    //             to,
+    //             subject,
+    //             html: html + emailFooter
+    //         },
+    //         (err, info) => {
+    //             if (err) {
+    //                 log.error`Error sending email: ${JSON.stringify(err)}`;
+    //                 reject(`Error sending email: ${JSON.stringify(err)}`);
+    //                 return;
+    //             }
+    //             if (!info['accepted'].includes(to)) {
+    //                 reject(`Email failed to send`);
+    //                 log.warn`Sent email to ${to} failed: ${JSON.stringify(info)}`;
+    //                 return;
+    //             }
+    //             log.verbose`Sent email successfully to ${to}`;
+    //             resolve(true);
+    //         }
+    //     );
+    // });
 }
 
 async function sendEmailToUser(query: queryFunc, userId: string, subject: string, html: string) {

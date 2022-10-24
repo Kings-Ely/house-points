@@ -20,7 +20,20 @@
         class="big-link"
         svg="plus.svg"
     >New User</button>
-    <section id="students"></section>
+    <selectable-list
+        name="Students"
+        $items="students"
+        unique-key='id'
+        search-key='email'
+        selected="selected"
+        with-all-menu="<students-list-menu></students-list-menu>"
+        $item-generator="showStudent"
+        grid-template-cols-css="50% 1fr 1fr"
+        $filter="item => {
+            return filters.years.includes(item.year) && (filters.admin ? item.admin : true);
+        }"
+    >
+    </selectable-list>
 </main>
 <footer></footer>
 </body>

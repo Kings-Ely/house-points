@@ -73,7 +73,7 @@
         <div hidden="!theUser.awards.length">
             <h2>Awards (<span $="theUser.awards.length" replace>loading...</span>)</h2>
             <div foreach="award in theUser.awards" style="display: flex; justify-content: center">
-                <award-type args="award"></award-type>
+                <award-type $award="award"></award-type>
             </div>
         </div>
         
@@ -105,19 +105,19 @@
         <div foreach="hp in theUser.housePoints">
             <house-point $hp="hp"
                         $reload="reloadHousePoints"
-                        $showBorderBottom="hp !== theUser.housePoints[theUser.housePoints.length - 1]"
-                        showEmail="0"
-                        showReason="1"
-                        showNumPoints="1"
-                        showDate="1"
-                        showRelativeTime="1"
-                        showStatusHint="1"
-                        showStatusIcon="1"
-                        $showDeleteButton="!me"
-                        $showPendingOptions="!me"
-                        $reasonEditable="!me"
-                        $pointsEditable="!me"
-                        $dateEditable="!me"
+                        $show-border-bottom="hp !== theUser.housePoints[theUser.housePoints.length - 1]"
+                        show-email="0"
+                        show-reason="1"
+                        show-num-points="1"
+                        show-date="1"
+                        show-relative-time="1"
+                        show-status-hint="1"
+                        show-status-icon="1"
+                        $show-delete-button="!me"
+                        $show-pending-options="!me"
+                        $reason-editable="!me"
+                        $points-editable="!me"
+                        $date-editable="!me"
                         large="true"
             ></house-point>
         </div>

@@ -1,6 +1,4 @@
 import * as core from '../../assets/js/main.js';
-import SelectableList from '../../assets/js/components/SelectableList.js';
-import fullPagePopup from '../../assets/js/components/FullPagePopup.js';
 
 const $addStudentButton = document.getElementById('add-student'),
     filters = {
@@ -19,6 +17,9 @@ window.uploadAddStudentsFile = uploadAddStudentsFile;
 window.toggleYearGroup = toggleYearGroup;
 window.toggleAdmin = toggleAdmin;
 window.userPopupFromId = core.userPopupFromId;
+window.showStudent = showStudent;
+window.filters = filters;
+window.showStudent = showStudent;
 
 (async () => {
     await core.init('../..', true, true);
@@ -31,86 +32,12 @@ window.userPopupFromId = core.userPopupFromId;
         'plus.svg',
         'unselected-checkbox.svg'
     );
-
-    await showStudentsList();
+    
+    await reloadStudents();
 })();
 
-async function showStudentsList() {
-    SelectableList('#students', {
-        name: 'Students',
-        items: (await core.api(`get/users`))['data'],
-        uniqueKey: 'id',
-        searchKey: 'email',
-        selected,
-        withAllMenu: `
-            <span id="filters-container">
-                <span style="display: inline-block">
-                    <span
-                        class="bordered big-link" 
-                        id="filters-button"
-                        svg="filter.svg"
-                    >
-                        Filters
-                    </span>
-                </span>
-                <div id="filters-dropdown">
-                    <button onclick="toggleYearGroup(0)">
-                        Show ${!filters.years.includes(0) ?
-                                'teachers and students' :
-                                'only students'
-                            }
-                    </button>
-                    <br>
-                    <button onclick="toggleAdmin()">
-                        Show ${filters.admin ? 'non-admins too' : 'only admins'}
-                    </button>
-                    <hr>
-                    ${[9, 10, 11, 12, 13].map(year => `
-                        <button onclick="toggleYearGroup(${year})"> 
-                            ${filters.years.includes(year) ? 'Hide' : 'Show'} 
-                            Y${year}
-                        </button>
-                    `).join('')}
-                </div>
-            </span>
-            <button
-                onclick="deleteSelected()"
-                class="icon"
-                aria-label="delete selected"
-                data-label="Delete"
-                svg="bin.svg"
-            ></button>
-            
-            <button
-                onclick="ageSelected(1)"
-                class="icon"
-                aria-label="move selected up a year"
-                data-label="Move Up 1 Year"
-                svg="circle-up-arrow.svg"
-            ></button>
-            
-            <button
-                onclick="ageSelected(-1)"
-                class="icon"
-                aria-label="move selected down a year"
-                data-label="Move Down 1 Year"
-                svg="circle-down-arrow.svg"
-            ></button>
-            
-            <button
-                onclick="giveHPToSelected()"
-                class="icon"
-                aria-label="give all selected a house point"
-                data-label="Give House Point"
-                svg="plus.svg"
-            ></button>
-        `,
-        itemGenerator: showStudent,
-        gridTemplateColsCSS: '50% 1fr 1fr',
-        filter: item => {
-            return filters.years.includes(item['year']) && (filters.admin ? item['admin'] : true);
-        }
-    });
+async function reloadStudents() {
+    window.hydrate.set('students', (await core.api(`get/users`)).data);
 }
 
 async function showStudent(student) {
@@ -198,13 +125,11 @@ function toggleYearGroup(age) {
         filters.years.push(age);
     }
     while (selected.length > 0) selected.pop();
-    showStudentsList();
 }
 
 function toggleAdmin() {
     filters.admin = !filters.admin;
     while (selected.length > 0) selected.pop();
-    showStudentsList();
 }
 
 $addStudentButton.addEventListener('click', () => {
@@ -297,11 +222,9 @@ $addStudentButton.addEventListener('click', () => {
         if (res.ok) {
             $emailInp.value = '';
             hide();
-            await showStudentsList();
+            await reloadStudents();
         }
     };
-
-    core.reloadDOM();
 });
 
 async function deleteUser(id, email) {
@@ -315,17 +238,13 @@ async function deleteUser(id, email) {
         selected.splice(selected.indexOf(id), 1);
     }
 
-    await showStudentsList();
+    await reloadStudents();
 }
 
 async function deleteSelected() {
-    if (
-        !confirm(
-            `Are you sure you want to delete ${selected.length} students and their house points? This is irreversible.`
-        )
-    ) {
-        return;
-    }
+    if (!confirm(
+        `Are you sure you want to delete ${selected.length} students and their house points? This is irreversible.`
+    )) return;
 
     // send API requests at the same time and wait for all to finish
     await Promise.all(
@@ -336,7 +255,7 @@ async function deleteSelected() {
 
     selected.splice(0, selected.length);
 
-    await showStudentsList();
+    await reloadStudents();
 }
 
 async function ageSelected(amount) {
@@ -355,7 +274,7 @@ async function ageSelected(amount) {
         })
     );
 
-    await showStudentsList();
+    await reloadStudents();
 }
 
 async function giveHPToSelected() {
@@ -373,7 +292,7 @@ async function giveHPToSelected() {
         })
     );
 
-    await showStudentsList();
+    await reloadStudents();
 }
 
 /**
@@ -392,7 +311,7 @@ async function revokeAdmin(userId, email) {
         admin: false
     });
 
-    await showStudentsList();
+    await reloadStudents();
 }
 
 /**
@@ -411,7 +330,7 @@ async function makeAdmin(userId, email) {
         admin: true
     });
 
-    await showStudentsList();
+    await reloadStudents();
 }
 
 async function uploadAddStudentsFile() {
@@ -434,30 +353,26 @@ async function uploadAddStudentsFile() {
         core.hide('#loading-bar');
         core.show('#drop-file-zone');
         document.getElementById('drop-file-zone').innerHTML = `
-                <p>
-                    Finished adding 
-                    ${csv.length}
-                    students with
-                    <span style="color: ${
-                        errors.length ? 'var(--text-warning)' : 'rgb(118,255,103)'
-                    }">
-                        ${core.escapeHTML(errors.length)}
-                    </span>
-                    errors.
+            <p>
+                Finished adding
+                ${csv.length}
+                students with
+                <span style="color: ${
+                    errors.length ? 'var(--text-warning)' : 'rgb(118,255,103)'
+                }">
+                    ${core.escapeHTML(errors.length)}
+                </span>
+                errors.
+            </p>
+            ${errors.length ? `
+                <br>Errors:<br>
+                <p style="color: var(--text-warning)">
+                    ${errors.join('<br>')}
                 </p>
-                ${
-                    errors.length
-                        ? `
-                    <br>Errors:<br>
-                    <p style="color: var(--text-warning)">
-                        ${errors.join('<br>')}
-                    </p>
-                `
-                        : ''
-                }
-            `;
+            ` : ''}
+        `;
 
-        showStudentsList();
+        reloadStudents();
     }
 
     // called at the end of each student being done
@@ -547,3 +462,67 @@ async function uploadAddStudentsFile() {
         });
     }
 }
+
+window.hydrate.Component('students-list-menu', ({ }) => window.hydrate.html`
+    <span id='filters-container'>
+        <span style='display: inline-block'>
+            <span
+                class='bordered big-link'
+                id='filters-button'
+                svg='filter.svg'
+            >
+                Filters
+            </span>
+        </span>
+        <div id='filters-dropdown'>
+            <button onclick='toggleYearGroup(0)'>
+                Show ${!filters.years.includes(0) ?
+                    'teachers and students' :
+                    'only students'
+                }
+            </button>
+            <br>
+            <button onclick='toggleAdmin()'>
+                Show ${filters.admin ? 'non-admins too' : 'only admins'}
+            </button>
+            <hr>
+            ${[9, 10, 11, 12, 13].map(year => `
+                <button onclick='toggleYearGroup(${year})'>
+                    ${filters.years.includes(year) ? 'Hide' : 'Show'}
+                    Y${year}
+                </button>
+            `).join('')}
+        </div>
+    </span>
+    <button
+        onclick='deleteSelected()'
+        class='icon'
+        aria-label='delete selected'
+        data-label='Delete'
+        svg='bin.svg'
+    ></button>
+    
+    <button
+        onclick='ageSelected(1)'
+        class='icon'
+        aria-label='move selected up a year'
+        data-label='Move Up 1 Year'
+        svg='circle-up-arrow.svg'
+    ></button>
+    
+    <button
+        onclick='ageSelected(-1)'
+        class='icon'
+        aria-label='move selected down a year'
+        data-label='Move Down 1 Year'
+        svg='circle-down-arrow.svg'
+    ></button>
+    
+    <button
+        onclick='giveHPToSelected()'
+        class='icon'
+        aria-label='give all selected a house point'
+        data-label='Give House Point'
+        svg='plus.svg'
+    ></button>
+`);

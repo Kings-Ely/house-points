@@ -144,17 +144,18 @@ export async function init(
     // after made sure that the user has the right permissions,
     // load the rest of the page
     window.hydrate.loadFromLocalStorage(false);
-    window.hydrate.set(
-        {
-            houseName: HOUSE_NAME,
-            rootPath,
-            user: state.userInfoJSON,
-            signedIn: state.isSignedIn,
-            path: pathFromRoot,
-            url: location.href
-        },
-        true
-    );
+    window.hydrate.set({
+        houseName: HOUSE_NAME,
+        user: state.userInfoJSON,
+        signedIn: state.isSignedIn,
+    }, true);
+    window.hydrate.set({
+        rootPath,
+        path: pathFromRoot,
+        url: location.href
+    });
+    
+    window.hydrate.init();
 
     await waitForReady();
 
