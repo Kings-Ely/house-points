@@ -107,7 +107,12 @@ export async function init(
     const start = performance.now();
 
     ROOT_PATH = rootPath;
-    API_ROOT = `${rootPath}/api`;
+    API_ROOT = `${rootPath}/api/?`;
+    
+    // if running on dev server, the API is always at this URL
+    if (location.hostname === 'localhost') {
+        API_ROOT = 'http://localhost:9080/';
+    }
 
     if (!noApiTest) {
         await testApiCon();

@@ -67,7 +67,7 @@ export async function rawAPI(path, body = {}) {
         body.session = core.getSession();
 
         try {
-            res = await fetch(`${core.API_ROOT}/?${path}`, {
+            res = await fetch(`${core.API_ROOT}${path}`, {
                 method: 'POST',
                 mode: 'cors',
                 cache: 'no-cache',
@@ -118,7 +118,7 @@ export async function api(path, body = null) {
 
     // fetch
     // include '/' in request as otherwise you get redirected, which takes more time
-    const res = await fetch(`${core.API_ROOT}/?${path}`, {
+    const res = await fetch(`${core.API_ROOT}${path}`, {
         method: 'POST',
         mode: 'cors',
         cache: 'no-cache',

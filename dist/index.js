@@ -31,6 +31,7 @@ $email.addEventListener('keydown', async evt => {
     }
 });
 
+/*
 document.getElementById('forgotten-password').onclick = async () => {
     const email = core.reservoir.get('email');
     if (typeof email !== 'string' || email.length < 4) {
@@ -55,6 +56,7 @@ document.getElementById('forgotten-password').onclick = async () => {
         `An email has been sent to '${core.escapeHTML(email)}' with a link to reset your password.`
     );
 };
+ */
 
 async function doLogIn() {
     const email = core.reservoir.get('email');

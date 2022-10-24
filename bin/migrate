@@ -1,0 +1,35 @@
+#!/bin/bash
+
+start=`date +%s`
+
+die () {
+    echo >&2 "$@"
+    exit 1
+}
+
+if [ "$#" -eq 0 ] || [ "$1" = "local" ] || [ "$1" = "dev" ]; then
+  mysql -u root << eof
+      DROP DATABASE IF EXISTS hpsnea_dev;
+      CREATE DATABASE hpsnea_dev
+eof
+
+  mysql -u root hpsnea_dev < ./sql/schema.sql
+fi
+
+if [ "$1" = "test" ]; then
+  mysql -u root << eof
+      DROP DATABASE IF EXISTS hpsnea;
+      CREATE DATABASE hpsnea
+eof
+
+  mysql -u root hpsnea < ./sql/schema.sql
+fi
+
+[ "$#" -eq 1 ] || die "1 argument required, $# provided"
+
+
+end=$(date +%s)
+
+runtime=$( echo "$end - $start" | bc -l )
+
+echo "Migrated DB '$1' destructively in: $runtime s"
