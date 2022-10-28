@@ -57,7 +57,7 @@ route('get/server/echo', async ({ body, query }) => {
  * @param {int} [logLevel=2]
  */
 route('create/server/logs', async ({ body }) => {
-    let { message, logLevel = 2 } = body;
+    let { message, logLevel = <unknown>2 } = body;
 
     if (typeof message !== 'string') {
         message = JSON.stringify(message);
@@ -81,7 +81,7 @@ route('create/server/logs', async ({ body }) => {
 route('get/server/logs', async ({ body, query }) => {
     if (!await isAdmin(body, query)) return AUTH_ERR;
     
-    const { limit = 100 } = body;
+    const { limit = <unknown>100 } = body;
     
     if (typeof limit !== 'number' || !Number.isInteger(limit)) {
         return 'limit must be an integer';
