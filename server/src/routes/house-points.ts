@@ -9,7 +9,6 @@ import {
     userId
 } from '../util';
 import mysql from 'mysql2';
-import * as notifications from '../notifications';
 
 const MAX_HOUSE_POINTS = 100;
 
@@ -179,8 +178,8 @@ route('create/house-points/give', async ({ query, body }) => {
         )
     `;
 
-    let notifyRes = await notifications.receivedHousePoint(query, userId, quantity);
-    if (notifyRes !== true) return notifyRes;
+    // let notifyRes = await notifications.receivedHousePoint(query, userId, quantity);
+    // if (notifyRes !== true) return notifyRes;
 
     return { status: 201, id };
 });
@@ -317,13 +316,13 @@ route('update/house-points/accepted', async ({ query, body }) => {
         `;
     }
 
-    let notifRes = await notifications.housePointRequestAcceptedOrRejected(
-        query,
-        hp['userId'],
-        hp['description'],
-        reject
-    );
-    if (notifRes !== true) return notifRes;
+    // let notifRes = await notifications.housePointRequestAcceptedOrRejected(
+    //     query,
+    //     hp['userId'],
+    //     hp['description'],
+    //     reject
+    // );
+    // if (notifRes !== true) return notifRes;
 });
 
 /**

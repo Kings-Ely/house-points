@@ -52,7 +52,7 @@ route('create/award-types', async ({ query, body }) => {
             ${name},
             ${description},
             ${required},
-            ${''}
+            ""
         )
     `;
 

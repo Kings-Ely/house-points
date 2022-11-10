@@ -2,7 +2,6 @@ import route from '../index';
 import log from '../log';
 import { AUTH_ERR, authLvl, DEFAULT_EMAIL_DOMAIN, generateUUId, isAdmin } from "../util";
 import emailValidator from 'email-validator';
-import * as notifications from '../notifications';
 import type mysql from 'mysql2';
 
 /**
@@ -187,7 +186,7 @@ route('create/sessions/for-forgotten-password', async ({ query, body }) => {
         VALUES (${sessionId}, ${userId}, ${60 * 60});
     `;
 
-    await notifications.forgottenPasswordEmail(query, userId, sessionId);
+    // await notifications.forgottenPasswordEmail(query, userId, sessionId);
     
     return { };
 });

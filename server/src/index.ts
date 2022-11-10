@@ -93,7 +93,7 @@ function startServer() {
     }
 
     server = http.createServer(options, handle).listen(port, () => {
-        log.log(c.green(`Dev server started on port ${port}`));
+        log.log(c.green(`HTTP server started on port ${port}`));
     });
     
     process.on('SIGTERM', () => {
@@ -111,6 +111,6 @@ function startServer() {
     loadEnv(flags.env);
     log.verbose`Setting up logger`;
     setupLogger(flags as IFlags);
-    log.verbose`Starting server`;
+    log.log`Starting server...`;
     startServer();
 })();

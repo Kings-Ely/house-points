@@ -14,7 +14,8 @@
         "clear-log-file": "> server.log",
         "start-local": "cd ..; npm run build-server; cd server; npm run start",
         "setup": "npm run stop; npm run clear-logs; npm run clear-log-file; npm run make-mount",
-        "make-mount": "docker volume create house-points-mount"
+        "make-mount": "docker volume create house-points-mount",
+        "prune": "npm run stop; docker rmi house-points-api; docker system prune"
     },
     "devDependencies": {
         "@types/command-line-args": "^5.2.0",

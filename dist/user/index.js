@@ -45,6 +45,7 @@ async function housePoints() {
     const { housePoints: hps, accepted } = theUsersInfo;
     const admin = await core.isAdmin();
     
+    // TODO um what
     return;
 
     $hps.innerHTML = `
