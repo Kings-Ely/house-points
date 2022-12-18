@@ -1,8 +1,4 @@
 import * as core from '../assets/js/main.js';
-import SelectableList from '../assets/js/components/SelectableList.js';
-import { inlineComponent, reloadDOM } from '../assets/js/main.js';
-import HousePoint from '../assets/js/components/HousePoint.js';
-
 
 const filters = {
         years: [0, 9, 10, 11, 12, 13],
@@ -24,79 +20,7 @@ window.eventPopup = core.eventPopup;
         'selected-checkbox.svg',
         'unselected-checkbox.svg'
     );
-
-    await showHousePointList();
 })();
-
-async function showHousePointList() {
-    const { data: hps } = await core.api(`get/house-points`);
-    const admin = await core.isAdmin();
-
-    SelectableList('#hps', {
-        name: `House Points (${hps.length})`,
-        items: hps,
-        uniqueKey: 'id',
-        searchKey: ['userEmail', 'description', 'eventName'],
-        searchBarHint: 'user/description',
-        selected,
-        withAllMenu: `
-            <span id="filters-container">
-                <span style="display: inline-block">
-                    <span
-                        class="bordered big-link" 
-                        id="filters-button"
-                        svg="filter.svg"
-                    >
-                        Filters
-                    </span>
-                </span>
-                <div id="filters-dropdown">
-                    ${[9, 10, 11, 12, 13]
-                        .map(
-                            year => `
-                        <button onclick="toggleYearGroup(${year})"> 
-                            ${filters.years.includes(year) ? 'Hide' : 'Show'} 
-                            Y${year}
-                        </button>
-                    `
-                        )
-                        .join('')}
-                </div>
-            </span>
-            <button
-                onclick="deleteSelected()"
-                class="icon"
-                aria-label="delete selected"
-                data-label="Delete"
-                svg="bin.svg"
-            ></button>
-        `,
-        itemGenerator: hp => inlineComponent(HousePoint, hp, showHousePointList, {
-            admin,
-            showBorderBottom: hp === hps[hps.length - 1],
-            showEmail: true,
-            showReason: true,
-            allowEventsReason: true,
-            showNumHousePoints: true,
-            showDate: true,
-            showStatusHint: true,
-            showStatusIcon: false,
-            showDeleteButton: true,
-            showPendingOptions: false,
-            reasonEditable: true,
-            pointsEditable: true,
-            dateEditable: true,
-        }),
-        gridTemplateColsCSS: '1fr',
-        filter: item => {
-            return (
-                filters.years.includes(item['userYear']) && (filters.admin ? item['admin'] : true)
-            );
-        }
-    });
-
-    reloadDOM();
-}
 
 // Filters
 function toggleYearGroup(age) {
@@ -105,7 +29,6 @@ function toggleYearGroup(age) {
     } else {
         filters.years.push(age);
     }
-    showHousePointList();
 }
 
 async function deleteSelected() {

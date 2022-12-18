@@ -1,5 +1,5 @@
 import Test from '../framework';
-import { alphabet, randomFromAlph } from '../util';
+import { ALPHABET, randomFromAlph } from '../util';
 
 Test.test('Self | user-auth code generator', async () => {
     // test 100 codes
@@ -8,7 +8,7 @@ Test.test('Self | user-auth code generator', async () => {
 
         let code = randomFromAlph(len);
         for (const char of code) {
-            if (!alphabet.includes(char)) {
+            if (!ALPHABET.includes(char)) {
                 return `Unexpected char in generated random code: '${char}' (${code})`;
             }
         }

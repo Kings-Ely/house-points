@@ -16,7 +16,66 @@
 <body>
 <nav></nav>
 <main>
-    <section id="hps"></section>
+    <selectable-list
+        $name="House Points (${hps.length})"
+        $items="hps"
+        uniqueKey="id"
+        $searchKey="['userEmail', 'description', 'eventName']"
+        searchBarHint='user/description'
+        selected
+        $itemGenerator="hp => `<show-house-point-list ${{
+                                                     admin,
+                                                     showBorderBottom: hp === hps[hps.length - 1],
+                                                     showEmail: true,
+                                                     showReason: true,
+                                                     allowEventsReason: true,
+                                                     showNumHousePoints: true,
+                                                     showDate: true,
+                                                     showStatusHint: true,
+                                                     showStatusIcon: false,
+                                                     showDeleteButton: true,
+                                                     showPendingOptions: false,
+                                                     reasonEditable: true,
+                                                     pointsEditable: true,
+                                                     dateEditable: true,
+                                                     }}></show-house-point-list>`"
+        gridTemplateColsCSS='1fr'
+        $filter="item => {
+            return (
+                filters.years.includes(item['userYear']) && (filters.admin ? item['admin'] : true)
+            );
+            }
+        ">
+        <span id="filters-container">
+            <span style="display: inline-block">
+                <span
+                    class="bordered big-link"
+                    id="filters-button"
+                    svg="filter.svg"
+                >
+                    Filters
+                </span>
+            </span>
+            <div
+                id="filters-dropdown"
+                $="[9, 10, 11, 12, 13].map(
+                    year => `
+                        <button onclick='toggleYearGroup(${year})'>
+                            ${filters.years.includes(year) ? 'Hide' : 'Show'}
+                            Y${year}
+                        </button>
+                    `).join('')"
+            >
+            </div>
+        </span>
+        <button
+            onclick="deleteSelected()"
+            class="icon"
+            aria-label="delete selected"
+            data-label="Delete"
+            svg="bin.svg"
+        ></button>
+    </selectable-list>
 </main>
 <footer></footer>
 </body>

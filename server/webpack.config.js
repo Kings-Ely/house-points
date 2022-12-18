@@ -7,7 +7,7 @@ module.exports = {
         path: path.resolve(__dirname)
     },
     mode: 'production',
-    // very important lol
+    // very important :D
     target: 'node',
     resolve: {
         extensions: ['.ts', '.js']

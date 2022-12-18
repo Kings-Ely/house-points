@@ -3,20 +3,27 @@ import fs from 'fs';
 import now from 'performance-now';
 import c from 'chalk';
 import { config } from 'dotenv';
-import type { CommandLineOptions } from 'command-line-args';
 import { exec } from 'child_process';
 
-async function startServer(_: CommandLineOptions): Promise<void> {
-    let t = now();
+/**
+ * Builds and starts the API on localhost ready to test
+ * @returns {Promise<void>}
+ */
+async function startServer(): Promise<void> {
+    let time = now();
 
     return new Promise((resolve, reject) => {
+        // runs these commands on the command line
+        // 'change directory' to the server directory
+        // 'webpack' to compile and bundle the server source code
         exec(`cd server; webpack`, (err, _, er) => {
             if (err) reject(err);
             if (er) reject(er);
 
-            console.log(c.green(`Built server in ${(now() - t).toPrecision(4)}ms`));
-            t = now();
+            console.log(c.green(`Built server in ${(now() - time).toPrecision(4)}ms`));
+            time = now();
 
+            // command to start the server running on localhost
             exec(
                 `node --enable-source-maps server --logTo=test.log --logLevel=4 --dbLogLevel=2`,
                 (err, _, er) => {
@@ -33,12 +40,16 @@ async function startServer(_: CommandLineOptions): Promise<void> {
     });
 }
 
-export default async function setup(flags: CommandLineOptions): Promise<void> {
+/**
+ * Runs all the setup required to run the tests, including
+ * starting the server and setting up the database
+ */
+export default async function setup(): Promise<void> {
     // setup environment variables
     config({ path: './server/.env' });
 
-    await startServer(flags);
-
+    await startServer();
+    
     let con = mysql.createConnection({
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
@@ -48,6 +59,7 @@ export default async function setup(flags: CommandLineOptions): Promise<void> {
     });
 
     return new Promise<void>((resolve, reject) => {
+        // clears the database
         con.query(
             `
 			DROP DATABASE ${process.env.DB};

@@ -129,7 +129,7 @@ export async function deploy(flags: commandLineArgs.CommandLineOptions): Promise
         return t.toFixed(2);
     };
 
-    await setup(flags);
+    await setup();
 
     const testRes = await Test.testAll(api, flags);
     console.log(testRes.str());

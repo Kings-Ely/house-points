@@ -15,6 +15,12 @@ export type queryFunc = <Res extends queryRes = mysql.RowDataPacket[]>(
     ...params: any[]
 ) => Promise<Res>;
 
+
+/**
+ * Creates a connection to the database
+ * And importantly keeps the connection alive
+ * if it goes down
+ */
 export default function connect (dbConfig: mysql.ConnectionOptions = {}): [() => mysql.Connection, queryFunc] {
     // define defaults from .env file
     const port = process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306;
@@ -32,6 +38,8 @@ export default function connect (dbConfig: mysql.ConnectionOptions = {}): [() =>
 
     let hasConnectedSQL = false;
     
+    // queue of functions which are waiting for the connection to be established
+    // this builds up when the connection drops and is cleared when the connection is re-established
     let queryQueue: (() => any)[] = [];
 
     // as the server will periodically disconnect from the database,
@@ -67,6 +75,14 @@ export default function connect (dbConfig: mysql.ConnectionOptions = {}): [() =>
 
     handleDisconnect();
     
+    /**
+     * Executes a query on the database
+     * Is a tagged template literal, so takes in a string with placeholders
+     * and an array of values to replace the placeholders with
+     *
+     * Prevents SQL injection by using placeholders rather than
+     * string concatenation, and escaping the values
+     */
     function query (queryParts: TemplateStringsArray, ...params: any[]): Promise<any> {
         return new Promise((resolve, fail) => {
             if (!hasConnectedSQL) {
@@ -106,6 +122,7 @@ export default function connect (dbConfig: mysql.ConnectionOptions = {}): [() =>
         });
     }
 
-    // returns query function
+    // returns function to get raw connection and
+    // query function in tuple
     return [() => con, query];
 }

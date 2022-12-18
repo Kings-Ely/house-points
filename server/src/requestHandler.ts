@@ -52,7 +52,7 @@ function getBody(req: IncomingMessage): Promise<Record<any, any> | string> {
     });
 }
 
-export default async function (
+export default async function handle(
     req: IncomingMessage,
     res: ServerResponse,
     query: queryFunc,

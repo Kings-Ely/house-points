@@ -2,11 +2,11 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { v4 as UUIdv4 } from 'uuid';
-import log from "./log";
-
-import { queryFunc } from './sql';
 import crypto from 'crypto';
+import log from "./log";
+import { queryFunc } from './sql';
 
+// CONSTANTS
 /**
  * Object to return from a route if incorrect credentials were provided.
  * Frozen (immutable) and constant.
@@ -20,6 +20,9 @@ export const AUTH_ERR: Readonly<{
 });
 
 export const DEFAULT_EMAIL_DOMAIN = 'kingsely.org';
+
+
+// FUNCTIONS
 
 /**
  * Limits the length of a string by cutting it and adding '...'

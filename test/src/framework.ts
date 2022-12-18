@@ -4,12 +4,19 @@ import { API, testExecutor } from './index';
 import { CommandLineOptions } from 'command-line-args';
 const now = performance.now;
 
+/**
+ * This class stores the data about a set of tests which have run
+ * and is used to generate the test report
+ */
 export class TestResult {
     public failed = 0;
     private passed = 0;
     private fails: [any, any][] = [];
     public time = 0;
-
+    
+    /**
+     * Registers a another test result
+     */
     public register(res: any, test = { batteryName: 'unknown' }): void {
         if (res === true) {
             this.passed++;

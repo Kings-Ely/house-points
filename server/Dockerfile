@@ -1,5 +1,4 @@
 FROM node:16 AS node
-FROM php:7.4-fpm
 
 WORKDIR /app
 

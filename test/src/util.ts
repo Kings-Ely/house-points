@@ -1,14 +1,7 @@
 import type { API } from './index';
 
-export const alphabet = 'abcdefghijklmnopqrstuvwxyz';
 
-export const randomFromAlph = (len = 5): string => {
-    let str = '';
-    for (let i = 0; i < len; i++) {
-        str += alphabet[Math.floor(Math.random() * alphabet.length)];
-    }
-    return str;
-};
+// TYPES
 
 export interface IGenerateUserRes {
     password: string;
@@ -16,6 +9,22 @@ export interface IGenerateUserRes {
     userId: string;
     email: string;
 }
+
+
+// CONSTANTS
+
+export const ALPHABET = 'abcdefghijklmnopqrstuvwxyz';
+
+
+// FUNCTIONS
+
+export const randomFromAlph = (len = 5): string => {
+    let str = '';
+    for (let i = 0; i < len; i++) {
+        str += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+    }
+    return str;
+};
 
 /**
  * Just throws error if something goes wrong, doesn't bother to return an erroneous response.
