@@ -1,16 +1,3 @@
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET AUTOCOMMIT = 0;
-START TRANSACTION;
-SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
--- --------------------------------------------------------
-
 CREATE TABLE `awards` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `userId` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -18,8 +5,6 @@ CREATE TABLE `awards` (
   `awarded` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `description` text COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
 
 CREATE TABLE `awardTypes` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -29,16 +14,12 @@ CREATE TABLE `awardTypes` (
   `icon` text COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
 CREATE TABLE `events` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
   `name` varchar(2048) COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` text COLLATE utf8mb4_unicode_ci,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
 
 CREATE TABLE `housepoints` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -52,16 +33,12 @@ CREATE TABLE `housepoints` (
   `rejectMessage` mediumtext COLLATE utf8mb4_unicode_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
 CREATE TABLE `logs` (
   `id` INT NOT NULL,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `madeBy` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `msg` text COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
 
 CREATE TABLE `sessions` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -70,8 +47,6 @@ CREATE TABLE `sessions` (
   `expires` int(128) NOT NULL DEFAULT '86400',
   `active` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
 
 CREATE TABLE `users` (
   `id` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -82,20 +57,6 @@ CREATE TABLE `users` (
   `admin` tinyint(1) NOT NULL DEFAULT '0',
   `student` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Default admin user - password is 'password'
-
-INSERT INTO `users`
-    (`id`, `email`, `password`, `salt`, `year`, `admin`, `student`) VALUES
-(
-     'admin',
-     'admin@example.com',
-     '6733b7ffeace4887c3b31258079c780d8db3018db9cbc05c500df3521f968df8',
-     'abc',
-     0,
-     1,
-     0
-);
 
 -- Add Primary Keys
 
@@ -110,9 +71,3 @@ ALTER TABLE `logs`        ADD PRIMARY KEY (`id`);
 -- AUTO_INCREMENT
 
 ALTER TABLE `logs` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=0;
-
-COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
