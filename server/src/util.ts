@@ -31,6 +31,33 @@ export function limitStr(str: string, maxLength = 50) {
     return str;
 }
 
+export function mergeSort<T>(arr: T[], compare: (a: T, b: T) => number): T[] {
+    function merge(left: T[], right: T[]) {
+        const result: T[] = [];
+        let leftIndex = 0;
+        let rightIndex = 0;
+        while (leftIndex < left.length && rightIndex < right.length) {
+            if (compare(left[leftIndex], right[rightIndex]) < 0) {
+                result.push(left[leftIndex]);
+                leftIndex++;
+            } else {
+                result.push(right[rightIndex]);
+                rightIndex++;
+            }
+        }
+        return result.concat(left.slice(leftIndex)).concat(right.slice(rightIndex));
+    }
+    
+    if (arr.length <= 1) {
+        return arr;
+    }
+    
+    const middle = Math.floor(arr.length / 2);
+    const left = arr.slice(0, middle);
+    const right = arr.slice(middle);
+    return merge(mergeSort(left, compare), mergeSort(right, compare));
+}
+
 /**
  * @src https://stackoverflow.com/questions/14446511/most-efficient-method-to-groupby-on-an-array-of-objects
  * @example
@@ -405,3 +432,5 @@ export async function addHousePointsToEvent(query: queryFunc, event: any & { id:
 
     // event passed by reference as it's an object so don't need to return anything
 }
+
+
