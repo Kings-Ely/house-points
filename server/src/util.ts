@@ -31,6 +31,9 @@ export function limitStr(str: string, maxLength = 50) {
     return str;
 }
 
+/**
+ * Returns the sorted array
+ */
 export function mergeSort<T>(arr: T[], compare: (a: T, b: T) => number): T[] {
     function merge(left: T[], right: T[]) {
         const result: T[] = [];
