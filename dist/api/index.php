@@ -1,18 +1,7 @@
 <?php
 
-
 const PORT = 4464;
 const HOST = 'http://127.0.0.1';
-
-
-//* For debugging:
-ini_set('display_errors', true);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-error_reporting(-1);
-ini_set('error_reporting', E_ALL);
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-//*/
 
 try {
 	$start = floor(microtime(true) * 1000);
@@ -57,10 +46,6 @@ try {
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
-	// Dangerous but as only localhost requests should be fine
-	// curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-	// curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
 	$response = curl_exec($ch);
 
 	if ($response === false)  {
@@ -77,7 +62,7 @@ try {
 
 	$headerArray = explode(PHP_EOL, $headers);
 
-	/* Process response headers. */
+	// Process response headers
 	foreach($headerArray as $header)
 	{
 		$colonPos = strpos($header, ':');
@@ -101,5 +86,6 @@ try {
 	echo $body;
 
 } catch (Exception $e) {
+	// return the error message
 	die(json_encode(array('error' => $e->getMessage(), 'status' => 502)));
 }

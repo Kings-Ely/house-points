@@ -31,33 +31,6 @@ $email.addEventListener('keydown', async evt => {
     }
 });
 
-/*
-document.getElementById('forgotten-password').onclick = async () => {
-    const email = core.reservoir.get('email');
-    if (typeof email !== 'string' || email.length < 4) {
-        await core.showError(`You need to enter a valid email first!`);
-        return;
-    }
-
-    if (!confirm(`Are you sure you want to reset the password for '${email}'?`)) {
-        return;
-    }
-
-    const res = await core.api(`create/sessions/for-forgotten-password`, {
-        email
-    });
-
-    if (!res.ok || res.error) {
-        return;
-    }
-    
-    FullPagePopup(
-        document.body,
-        `An email has been sent to '${core.escapeHTML(email)}' with a link to reset your password.`
-    );
-};
- */
-
 async function doLogIn() {
     const email = core.reservoir.get('email');
 
@@ -102,4 +75,3 @@ async function doLogIn() {
 
     await core.navigate(newPage);
 }
-export { getComponentId } from "./assets/js/componentIdx.js";

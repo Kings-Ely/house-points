@@ -1,5 +1,6 @@
 import now from 'performance-now';
-import fetch from 'node-fetch';
+import * as https from "https";
+import * as http from "http";
 
 /**
  * Results for Apache server:
@@ -18,19 +19,35 @@ import fetch from 'node-fetch';
 const N = process.argv[3] || 100;
 const rootPath = process.argv[2];
 
+https.globalAgent.maxSockets = N + 1;
+
 let results = [];
 
 async function getFromPath(path, i) {
-    let start = now();
-
-    await fetch(`${rootPath}/${path}`);
-
-    let time = now() - start;
-    results.push([time, i]);
+    return new Promise((resolve, reject) => {
+        let start = now();
+    
+        if (i === N-1)
+            console.log(`Last request started`);
+        else if (i === 0)
+            console.log(`First request started`);
+    
+        (rootPath.startsWith('https://') ? https : http).get(`${rootPath}/${path}`, () => {
+            if (i === N-1)
+                console.log(`Last request ended`);
+            else if (i === 0)
+                console.log(`First request ended`);
+    
+            let time = now() - start;
+            results.push([time, i]);
+            resolve();
+        });
+    });
 }
 
 async function run() {
-    await Promise.all(Array.from({ length: N }, (x, i) => i).map(i => getFromPath(``, i)));
+    await Promise.all(Array.from({ length: N },
+        (x, i) => i).map(i => getFromPath(``, i)));
 
     console.log(results.sort((a, b) => a[1] - b[1]));
 
