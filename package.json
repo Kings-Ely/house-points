@@ -1,6 +1,6 @@
 {
   "dependencies": {
     "entropy-hydrate": "^0.0.22",
-    "prettier": "^2.7.1"
+    "prettier": "^3.0.1"
   }
 }
